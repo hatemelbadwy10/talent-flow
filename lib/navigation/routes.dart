@@ -1,0 +1,67 @@
+class Routes {
+  static const app = "APP";
+  static const splash = "SPLASH";
+  static const onBoarding = "ON_BOARDING";
+  static const freeLancer = "FREE_LANCER";
+  static const navBar ="NAV_BAR";
+  static const login = "LOGIN";
+  static const allCategories = "ALL_CATEGORIES";
+  static const forgetPassword = "FORGET_PASSWORD";
+  static const verification = "VERIFICATION";
+  static const resetPassword = "RESET_PASSWORD";
+  static const register = "REGISTER_WITH_MAIL";
+  static const home = "HOME";
+  static const addOffer = "ADD_OFFER";
+  static const addProject = "ADD_PROJECT";
+  static const addYourProject ="ADD_YOUR_PROJECT";
+  static const verificationScreen = "VERIFICATION_SCREEN";
+  static const changePassword = "CHANGE_PASSWORD";
+  static const about = "about";
+  static const sendCodeScreen ="SEND_CODE_SCREEN";
+  static const profile = "PROFILE";
+  static const editProfile = "EDIT_PROFILE";
+  static const chats = "CHATS";
+  static const services = "CATEGORIES";
+  static const brands = "BRANDS";
+  static const news = "news";
+  static const newsDetails = "NEWS_DETAILS";
+  static const offers = "OFFERS";
+  static const checkOut = "CHECK_OUT";
+  static const contactWithUs = "CONTACT_WITH_US";
+  static const whoUs = "who_us";
+  static const terms = "TERMS";
+  static const privacy = "PRIVACY";
+  static const addMembershipRequest = "ADD_MEMBERSHIP_REQUEST";
+  static const addStudentMembershipRequest = "AD_STUDENT_MEMBERSHIP_REQUEST";
+  static const updateMembership = "UPDATE_MEMBERSHIP";
+  static const membershipRequest = "MEMBERSHIP_REQUEST";
+  static const addEducationalData = "ADD_EDUCATIONAL_DATA";
+  static const addExperienceData = "ADD_EXPERIENCE_DATA";
+  static const faqs = "FAQS";
+  static const String favorites = "Favorites";
+  static const settings = "SETTINGS";
+  static const notifications = "NOTIFICATIONS";
+  static const search = "SEARCH";
+  static const searchResult = "SEARCH_RESULT";
+  static const userProfile = "USER_PROFILE";
+  static const videoPreview = "VIDEO_PREVIEW";
+  static const chat = "CHAT";
+  static const pickLocation = "PICK_LOCATION";
+  static const requests = "REQUESTS";
+
+  static const requestDetails = "REQUEST_DETAILS";
+  static const payment = "PAYMENT";
+  static const courses = "COURSES";
+
+  static const myCourses = "MY_COURSES";
+  static const courseDetails = "COURSE_DETAILS";
+
+  static const associations = "ASSOCIATIONS";
+  static const myAssociations = "MY_ASSOCIATIONS";
+  static const associationDetails = "ASSOCIATION_DETAILS";
+  static const addAssociationRequest = "ADD_ASSOCIATION_REQUEST";
+
+  static const conferences = "CONFERENCES";
+  static const myConferences = "MY_CONFERENCES";
+  static const conferenceDetails = "CONFERENCE_DETAILS";
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "863499364117",
+    "project_id": "talent-flow-1a793",
+    "storage_bucket": "talent-flow-1a793.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:863499364117:android:d2245cd4f79d96d725ab1c",
+        "android_client_info": {
+          "package_name": "com.example.talent_flow"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIEtvgw41mm0Qq_43HOKBj5Ud_u1BmBRU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
