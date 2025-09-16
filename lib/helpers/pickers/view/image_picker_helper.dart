@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:talent_flow/app/core/app_core.dart';
@@ -77,23 +78,23 @@ abstract class ImagePickerHelper {
         builder: (_) {
           return CupertinoActionSheet(
             title: Text(
-              getTranslated("choose_your_image"),
+              "choose_your_image",
               style: const TextStyle(
                 fontSize: 16,
               ),
             ),
             actions: [
               CupertinoDialogAction(
-                  child: Text(getTranslated("gallery")),
+                  child: Text("gallery"),
                   onPressed: () =>
                       openGallery(onGet: onGet, fromOptions: true)),
               CupertinoDialogAction(
-                  child: Text(getTranslated("camera")),
+                  child: Text("camera"),
                   onPressed: () => openCamera(onGet: onGet, fromOptions: true)),
             ],
             cancelButton: CupertinoActionSheetAction(
               onPressed: () => CustomNavigator.pop(),
-              child: Text(getTranslated("cancel"),
+              child: Text(("cancel"),
                   style: const TextStyle(color: Colors.red)),
             ),
           );
@@ -112,7 +113,8 @@ abstract class ImagePickerHelper {
         onGet?.call(File(pngImage.path));
       }
     } catch (e) {
-      AppCore.showToast(ApiErrorHandler.getServerFailure(e));
+      log("e from images $e");
+      AppCore.showToast(e.toString());
     }
   }
 

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
-import 'package:talent_flow/app/core/svg_images.dart';
 import 'package:talent_flow/app/localization/language_constant.dart';
-import 'package:talent_flow/components/custom_images.dart';
 import '../app/core/styles.dart';
 import '../app/core/text_styles.dart';
 import '../components/shimmer/custom_shimmer.dart';
-import '../data/config/di.dart';
 
 class SectionTitle extends StatelessWidget {
   const SectionTitle({

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../app/core/styles.dart';
+import 'package:talent_flow/app/core/styles.dart';
 import '../bloc/portofilo_form_bloc.dart';
 import '../../../app/core/app_state.dart';
 import '../../../components/custom_text_form_field.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PortfolioUploadForm extends StatefulWidget {
   const PortfolioUploadForm({super.key});
@@ -14,13 +15,13 @@ class PortfolioUploadForm extends StatefulWidget {
 
 class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
   final List<TextEditingController> _titleControllers =
-      List.generate(3, (_) => TextEditingController());
+  List.generate(3, (_) => TextEditingController());
   final List<TextEditingController> _descriptionControllers =
-      List.generate(3, (_) => TextEditingController());
+  List.generate(3, (_) => TextEditingController());
   final List<TextEditingController> _featuresControllers =
-      List.generate(3, (_) => TextEditingController());
+  List.generate(3, (_) => TextEditingController());
   final List<TextEditingController> _linkControllers =
-      List.generate(3, (_) => TextEditingController());
+  List.generate(3, (_) => TextEditingController());
 
   @override
   void dispose() {
@@ -39,8 +40,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
       listener: (context, state) {
         if (state is Done && state.reload == true) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text("All portfolios submitted successfully!")),
+            SnackBar(content: Text("all_portfolios_submitted".tr())),
           );
         }
       },
@@ -50,7 +50,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
             return const Center(child: CircularProgressIndicator());
           }
           if (state is! Done || state.data is! PortfolioFormsState) {
-            return const Center(child: Text("Initializing form..."));
+            return Center(child: Text("initializing_form".tr()));
           }
 
           final formState = state.data as PortfolioFormsState;
@@ -70,75 +70,75 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
               _linkControllers[i].text = formData.clientLink;
             }
           }
-
-          return Directionality(
-            textDirection: TextDirection.rtl,
-            child: Column(
-              children: [
-                ...List.generate(
-                    3,
+          return Column(
+            children: [
+              ...List.generate(
+                3,
                     (index) => _buildCollapsibleFormCard(
-                        context: context,
-                        formIndex: index,
-                        formState: formState)),
-                const SizedBox(height: 24),
-                _buildTermsConfirmationCard(context, formState),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => context
-                        .read<PortfolioFormBloc>()
-                        .add(SubmitAllPortfolios()),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Styles.PRIMARY_COLOR,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                  context: context,
+                  formIndex: index,
+                  formState: formState,
+                ),
+              ),
+              const SizedBox(height: 24),
+              _buildTermsConfirmationCard(context, formState),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => context
+                      .read<PortfolioFormBloc>()
+                      .add(SubmitAllPortfolios()),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Styles.PRIMARY_COLOR,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text("أضف كل الاعمال",
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white)),
+                  ),
+                  child: Text(
+                    "submit_all_works".tr(),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),
     );
   }
 
-  // --- NEW WIDGET: The grey card for terms confirmation ---
   Widget _buildTermsConfirmationCard(
       BuildContext context, PortfolioFormsState formState) {
     final bloc = context.read<PortfolioFormBloc>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
       decoration: BoxDecoration(
-        color: const Color(0xFFFAFAFA), // The light grey background
+        color: const Color(0xFFFAFAFA),
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: Column(
         children: [
-          const Text(
-            'تأكيد الشروط',
-            style: TextStyle(
+          Text(
+            "confirm_terms".tr(),
+            style: const TextStyle(
                 fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black),
           ),
           const SizedBox(height: 16.0),
           _buildSingleCheckboxRow(
-            text: "جميع الاعمال من تنفيذى ولدى صلاحية لنشرها.",
+            text: "term_one".tr(),
             value: formState.termsOneAccepted,
             onChanged: (newValue) =>
                 bloc.add(UpdateSingleTerm(termIndex: 1, isAccepted: newValue!)),
           ),
           const SizedBox(height: 12.0),
           _buildSingleCheckboxRow(
-            text:
-                "أعلم انه سيتم ايقاف حسابى ان استخدمت اعمال تنتهك حقوق الاخرين.",
+            text: "term_two".tr(),
             value: formState.termsTwoAccepted,
             onChanged: (newValue) =>
                 bloc.add(UpdateSingleTerm(termIndex: 2, isAccepted: newValue!)),
@@ -150,40 +150,38 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
 
   Widget _buildSingleCheckboxRow(
       {required String text,
-      required bool value,
-      required ValueChanged<bool?> onChanged}) {
-    return InkWell(
-      onTap: () => () {},
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 16, color: Colors.black87),
-            ),
+        required bool value,
+        required ValueChanged<bool?> onChanged}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 16, color: Colors.black87),
           ),
-          SizedBox(
-            height: 24.0,
-            width: 24.0,
-            child: Checkbox(
-              value: value,
-              onChanged: onChanged,
-              activeColor: Styles.PRIMARY_COLOR,
-              side: BorderSide(color: Colors.grey.shade400, width: 2),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6)),
-            ),
+        ),
+        SizedBox(
+          height: 24.0,
+          width: 24.0,
+          child: Checkbox(
+            value: value,
+            onChanged: onChanged,
+            activeColor: Styles.PRIMARY_COLOR,
+            side: BorderSide(color: Colors.grey.shade400, width: 2),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6)),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildCollapsibleFormCard(
-      {required BuildContext context,
-      required int formIndex,
-      required PortfolioFormsState formState}) {
+  Widget _buildCollapsibleFormCard({
+    required BuildContext context,
+    required int formIndex,
+    required PortfolioFormsState formState,
+  }) {
     final bool isExpanded = formState.expandedFormIndex == formIndex;
     final bloc = context.read<PortfolioFormBloc>();
     return Container(
@@ -206,7 +204,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("العمل ${formIndex + 1} من 3",
+                Text("work_number".tr(args: ['${formIndex + 1}']),
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 16)),
                 Icon(isExpanded
@@ -235,20 +233,21 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomTextField(
-            label: "عنوان العمل",
-            hint: "اكتب هنا اسم العمل",
+            label: "work_title".tr(),
+            hint: "work_title_hint".tr(),
             controller: _titleControllers[formIndex],
             onChanged: (value) => bloc.add(UpdateFormField(
                 formIndex: formIndex, fieldName: 'title', value: value)),
           ),
           const SizedBox(height: 16.0),
           _buildFileUploadField(
-              label: "صورة مصغرة",
-              buttonText: "اضغط هنا للتحميل أو اسحب",
-              description: "SVG, PNG, JPG or GIF (max. 800x400px)"),
+            label: "thumbnail".tr(),
+            buttonText: "upload_here".tr(),
+            description: "thumbnail_desc".tr(),
+          ),
           CustomTextField(
-            label: "وصف العمل",
-            hint: "اكتب وصف للعمل.........",
+            label: "work_description".tr(),
+            hint: "work_description_hint".tr(),
             controller: _descriptionControllers[formIndex],
             maxLines: 4,
             onChanged: (value) => bloc.add(UpdateFormField(
@@ -256,8 +255,8 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
           ),
           const SizedBox(height: 16.0),
           CustomTextField(
-            label: "ميزات العمل",
-            hint: "أضف وصفا دقيقا يوضح ميزات العمل",
+            label: "work_features".tr(),
+            hint: "work_features_hint".tr(),
             controller: _featuresControllers[formIndex],
             maxLines: 3,
             onChanged: (value) => bloc.add(UpdateFormField(
@@ -265,19 +264,21 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
           ),
           const SizedBox(height: 16.0),
           _buildFileUploadField(
-              label: "صور وملفات العمل",
-              buttonText: "اضغط هنا للتحميل أو اسحب",
-              description: "أضف صور أو ملفات بحد أقصى 20 مرفق"),
+            label: "work_files".tr(),
+            buttonText: "upload_here".tr(),
+            description: "files_desc".tr(),
+          ),
           CustomTextField(
-            label: "رابط المعاينه",
-            hint: "ادخل الرابط هنا",
+            label: "preview_link".tr(),
+            hint: "preview_link_hint".tr(),
             controller: _linkControllers[formIndex],
             onChanged: (value) => bloc.add(UpdateFormField(
                 formIndex: formIndex, fieldName: 'clientLink', value: value)),
           ),
           const SizedBox(height: 16.0),
           _buildDropdownField(
-              label: "تاريخ الإنجاز", hintText: "اختر تاريخ الإنجاز"),
+              label: "completion_date".tr(),
+              hintText: "completion_date_hint".tr()),
         ],
       ),
     );
@@ -285,8 +286,8 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
 
   Widget _buildFileUploadField(
       {required String label,
-      required String buttonText,
-      required String description}) {
+        required String buttonText,
+        required String description}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -312,7 +313,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
                 const SizedBox(height: 4.0),
                 Text(description,
                     style:
-                        TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                    TextStyle(color: Colors.grey.shade500, fontSize: 12)),
               ],
             ),
           ),

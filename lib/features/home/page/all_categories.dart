@@ -1,74 +1,39 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-
-// You can replace these with your actual dimension/style imports
-// import 'package:talent_flow/app/core/dimensions.dart';
-// import 'package:talent_flow/app/core/styles.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talent_flow/app/core/app_storage_keys.dart';
+import 'package:talent_flow/navigation/custom_navigation.dart';
+import 'package:talent_flow/navigation/routes.dart';
+import '../../../app/core/app_event.dart';
+import '../../../app/core/app_state.dart';
+import '../../../data/config/di.dart';
+import '../bloc/home_bloc.dart';
+import '../model/home_model.dart';
+import '../repo/home_repo.dart';
 
 class ServiceCategoryView extends StatelessWidget {
-  const ServiceCategoryView({super.key});
-
-  // Data for the list items, extracted from the image
-  final List<Map<String, dynamic>> serviceCategories = const [
-    {
-      'icon': Icons.palette_outlined,
-      'title': 'التصميم الجرافيكي',
-      'subtitle': 'الشعار وهوية العلامة التجارية',
-    },
-    {
-      'icon': Icons.add,
-      'title': 'التسويق الرقمي',
-      'subtitle': 'التسويق عبر وسائل التواصل الاجتماعي وتحسين محركات البحث',
-    },
-    {
-      'icon': Icons.video_camera_back_outlined,
-      'title': 'الفيديو والرسوم المتحركة',
-      'subtitle': 'تحرير الفيديو وإعلانات الفيديو',
-    },
-    {
-      'icon': Icons.music_note_outlined,
-      'title': 'الموسيقى والصوت',
-      'subtitle': 'المنتجون والملحنون',
-    },
-    {
-      'icon': Icons.code_outlined,
-      'title': 'البرنامج والتكنولوجيا',
-      'subtitle': 'تطوير المواقع والتطبيقات',
-    },
-    {
-      'icon': Icons.camera_alt_outlined,
-      'title': 'تصوير المنتجات',
-      'subtitle': 'مصوري المنتجات',
-    },
-    {
-      'icon': Icons.settings_suggest_outlined,
-      'title': 'بناء خدمة الذكاء الاصطناعي',
-      'subtitle': 'قم ببناء تطبيق الذكاء الاصطناعي الخاص بك',
-    },
-    {
-      'icon': Icons.data_usage_outlined,
-      'title': 'بيانات',
-      'subtitle': 'علم البيانات والذكاء الاصطناعي',
-    },
-  ];
+  const ServiceCategoryView({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Using Directionality to ensure the layout is Right-to-Left (RTL)
-    return Directionality(
-      textDirection: TextDirection.rtl,
+    return BlocProvider(
+      create: (context) => HomeBloc(homeRepo: sl<HomeRepo>())..add(Click()),
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           surfaceTintColor: Colors.white,
           backgroundColor: Colors.white,
-
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: Colors.black, size: 20),
+            icon: const Icon(Icons.arrow_forward_ios,
+                color: Colors.black, size: 20),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text(
-            "فئة الخدمة",
-            style: TextStyle(
+          title: Text(
+            "service_category".tr(),
+            style: const TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
               fontSize: 18,
@@ -76,28 +41,40 @@ class ServiceCategoryView extends StatelessWidget {
           ),
           centerTitle: true,
         ),
-        body: ListView.separated(
-          itemCount: serviceCategories.length,
-          itemBuilder: (context, index) {
-            final category = serviceCategories[index];
-            return ServiceCategoryTile(
-              icon: category['icon'],
-              title: category['title'],
-              subtitle: category['subtitle'],
-              onTap: () {
-                // TODO: Add navigation logic for the selected category
-                print('${category['title']} tapped');
-              },
-            );
-          },
-          separatorBuilder: (context, index) {
-            return const Divider(
-              height: 1,
-              thickness: 1,
-              color: Color(0xFFF2F2F2),
-              endIndent: 20,
-              indent: 20,
-            );
+        body: BlocBuilder<HomeBloc, AppState>(
+          builder: (context, state) {
+            if (state is Loading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is Error) {
+              return const Center(child: Text('Error loading categories'));
+            } else if (state is Done) {
+              final category = state.list as List<Category>;
+              return ListView.builder(
+                itemCount: category.length,
+                itemBuilder: (context, index) {
+                  return ServiceCategoryTile(
+                      icon: category[index].icon!,
+                      title: category[index].name ?? "",
+                      subtitle: category[index].description ?? "",
+                      onTap: () {
+                        if (sl<SharedPreferences>()
+                                .getBool(AppStorageKey.isFreelancer) ??
+                            false) {
+                          CustomNavigator.push(Routes.ownerProjects,
+                              arguments: {
+                                "categoryId": category[index].id,
+                              });
+                        } else {
+                          CustomNavigator.push(Routes.freelancers, arguments: {
+                            "categoryId": category[index].id,
+                          });
+                        }
+                      });
+                },
+              );
+            } else {
+              return const Center(child: Text('No categories found'));
+            }
           },
         ),
       ),
@@ -107,7 +84,7 @@ class ServiceCategoryView extends StatelessWidget {
 
 /// A reusable widget for displaying a single service category item.
 class ServiceCategoryTile extends StatelessWidget {
-  final IconData icon;
+  final String icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -135,10 +112,8 @@ class ServiceCategoryTile extends StatelessWidget {
                 color: Colors.black.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(12.0),
               ),
-              child: Icon(
+              child: Image.network(
                 icon,
-                color: const Color(0xFF444444),
-                size: 24,
               ),
             ),
             const SizedBox(width: 16.0),

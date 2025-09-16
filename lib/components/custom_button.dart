@@ -4,7 +4,6 @@ import 'package:talent_flow/app/core/extensions.dart';
 import 'package:flutter/material.dart';
 import '../app/core/styles.dart';
 import '../app/core/text_styles.dart';
-import 'lottie_file.dart';
 
 class CustomButton extends StatelessWidget {
   final void Function()? onTap;

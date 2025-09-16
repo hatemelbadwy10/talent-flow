@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // <-- Import the package
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 
+import '../../../app/core/app_storage_keys.dart';
 import '../../../app/core/images.dart';
-import '../../../components/custom_app_bar.dart';
+import '../../../data/config/di.dart';
 import '../../../navigation/routes.dart';
 
 class Setting extends StatelessWidget {
@@ -19,21 +22,18 @@ class Setting extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Image.asset(
-          "assets/images/Talent Flow logo 1 1.png",
-          // <-- IMPORTANT: Replace this with the path to your logo asset.
-          height: 35, // You can adjust the height of your logo as needed.
+          Images.appLogo,
+          height: 35,
         ),
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Center(
               child: Text(
-                'الاعدادات',
-                style: TextStyle(
+                'settings_screen.title'.tr(), // <-- Translated
+                style: const TextStyle(
                   color: Colors.black,
-                  // Setting a color for the text.
                   fontSize: 16,
-                  // Slightly increased font size for better visibility.
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -44,18 +44,15 @@ class Setting extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-            ),
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: Column(
-                children: [
-                  _buildProfileCard(),
-                  const SizedBox(height: 24.0),
-                  _buildSettingsOptionsCard(),
-                ],
-              ),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+            child: Column(
+              children: [
+                _buildProfileCard(),
+                const SizedBox(height: 24.0),
+                _buildSettingsOptionsCard(context),
+                // Pass context for language switching
+              ],
             ),
           ),
         ),
@@ -79,29 +76,34 @@ class Setting extends StatelessWidget {
         ],
       ),
       child: Column(
-        // Aligns children to the end (right side in RTL).
-        crossAxisAlignment: CrossAxisAlignment.end,
+        // Use .start for proper LTR/RTL alignment
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               CircleAvatar(
                 radius: 30,
-                // TODO: Replace with your user's profile image.
-                backgroundImage: AssetImage(Images.appLogo),
+                backgroundImage: NetworkImage(sl<SharedPreferences>()
+                        .getString(AppStorageKey.userImage) ??
+                    Images.appLogo),
               ),
-              SizedBox(width: 16.0),
+              const SizedBox(width: 16.0),
               Column(
-                // Aligns text to the start (right side in RTL).
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "محمد عبد الرحمن",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    sl<SharedPreferences>().getString(AppStorageKey.userName) ??
+                        "user_example.name".tr(), // <-- Translated
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  SizedBox(height: 4.0),
+                  const SizedBox(height: 4.0),
                   Text(
-                    "muhmmedahmed3@",
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                    sl<SharedPreferences>()
+                            .getString(AppStorageKey.userEmail) ??
+                        "user_example.email".tr(),
+                    // <-- Translated
+                    style: const TextStyle(color: Colors.grey, fontSize: 14),
                   ),
                 ],
               ),
@@ -110,31 +112,35 @@ class Setting extends StatelessWidget {
           const SizedBox(height: 16.0),
           const Divider(height: 1, color: Color(0xFFEEEEEE)),
           const SizedBox(height: 8.0),
-          // These are the "Edit Profile" and "Upload Work" action buttons.
           _buildProfileOption(
-            icon: Icons.edit_outlined, text: "تعديل الملف الشخصي",onTap: (){
-              CustomNavigator.push(Routes.editProfile);
-          }),
+              icon: Icons.edit_outlined,
+              text: 'settings_screen.edit_profile'.tr(), // <-- Translated
+              onTap: () {
+                CustomNavigator.push(Routes.editProfile);
+              }),
           _buildProfileOption(
-              icon: Icons.file_upload_outlined, text: "رفع اعمال",onTap: (){
+              icon: Icons.file_upload_outlined,
+              text: 'settings_screen.upload_work'.tr(), // <-- Translated
+              onTap: () {
                 CustomNavigator.push(Routes.addYourProject);
-          }),
+              }),
         ],
       ),
     );
   }
 
-  Widget _buildProfileOption({required IconData icon, required String text,required VoidCallback onTap}) {
+  Widget _buildProfileOption(
+      {required IconData icon,
+      required String text,
+      required VoidCallback onTap}) {
     return InkWell(
-      onTap:onTap,
+      onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10.0),
         child: Row(
           children: [
             Icon(icon, color: Colors.grey.shade600, size: 22),
-            SizedBox(
-              width: 8.w,
-            ),
+            SizedBox(width: 8.w),
             Text(text, style: const TextStyle(fontSize: 15)),
           ],
         ),
@@ -142,7 +148,8 @@ class Setting extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsOptionsCard() {
+  /// Builds the main settings menu.
+  Widget _buildSettingsOptionsCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       decoration: BoxDecoration(
@@ -160,43 +167,57 @@ class Setting extends StatelessWidget {
         children: [
           _buildSettingsMenuItem(
               icon: Icons.info_outline,
-              text: "ايه هو تلنت فلو؟",
+              text: 'settings_screen.about_talent_flow'.tr(),
               onTap: () {
                 CustomNavigator.push(Routes.about);
               }),
           _buildSettingsMenuItem(
               icon: Icons.notifications_outlined,
-              text: "الإشعارات",
+              text: 'settings_screen.notifications'.tr(),
               onTap: () {
                 CustomNavigator.push(Routes.notifications);
               }),
           _buildSettingsMenuItem(
               icon: Icons.favorite_border,
-              text: "المفضلة",
+              text: 'settings_screen.favorites'.tr(),
               onTap: () {
                 CustomNavigator.push(Routes.favorites);
               }),
-          _buildSettingsMenuItem(icon: Icons.support_agent, text: "الدعم"),
           _buildSettingsMenuItem(
-              icon: Icons.list_alt_outlined, text: "الشروط والاحكام"    ,onTap:(){
+              icon: Icons.support_agent, text: 'settings_screen.support'.tr()),
+          _buildSettingsMenuItem(
+              icon: Icons.list_alt_outlined,
+              text: 'settings_screen.terms_and_conditions'.tr(),
+              onTap: () {
                 CustomNavigator.push(Routes.terms);
-          } ),
+              }),
           _buildSettingsMenuItem(
               icon: Icons.language_outlined,
-              text: "اللغة",
-              secondaryText: "English"),
+              text: 'settings_screen.language'.tr(),
+              secondaryText: 'settings_screen.current_language'.tr(),
+              onTap: () {
+                // This logic switches between English and Arabic
+                Locale currentLocale = context.locale;
+                if (currentLocale == const Locale('en')) {
+                  context.setLocale(const Locale('ar'));
+                } else {
+                  context.setLocale(const Locale('en'));
+                }
+              }),
           const SizedBox(height: 8.0),
           const Divider(height: 1, color: Color(0xFFEEEEEE)),
           const SizedBox(height: 8.0),
           _buildSettingsMenuItem(
-            icon: Icons.logout,
-            text: "تسجيل الخروج",
-            textColor: Colors.red,
-            iconColor: Colors.red,
-            onTap: () {
-              CustomNavigator.push(Routes.login, clean: true);
-            }
-          ),
+              icon: Icons.logout,
+              text: 'settings_screen.logout'.tr(),
+              textColor: Colors.red,
+              iconColor: Colors.red,
+              onTap: () {
+                CustomNavigator.push(Routes.login, clean: true);
+              }),
+          SizedBox(
+            height: 100.h,
+          )
         ],
       ),
     );

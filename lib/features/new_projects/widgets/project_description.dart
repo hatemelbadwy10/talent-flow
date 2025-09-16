@@ -1,93 +1,111 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // <-- 1. Import the package
 import 'package:talent_flow/app/core/dimensions.dart';
+import 'package:talent_flow/features/projects/model/single_project_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/core/styles.dart';
 
-
-
 class ProjectDescription extends StatelessWidget {
-  const ProjectDescription({super.key});
-
+  const ProjectDescription({super.key, this.singleProjectModel});
+  final SingleProjectModel? singleProjectModel;
 
   void _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
     if (!await launchUrl(uri)) {
-      // You can show a snackbar or toast here in case of failure
       debugPrint('Could not launch $url');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Container(
-        margin: const EdgeInsets.all(16.0),
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(color: Colors.grey.shade200),
+    final project = singleProjectModel;
 
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section 1: Title
-            const Text(
-              "تفاصيل المشروع",
-              style: TextStyle(
+    if (project == null) {
+      return const SizedBox.shrink(); // لو مفيش داتا
+    }
+
+    return Container(
+      margin: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 🔹 الوصف (description)
+          if (project.description != null && project.description!.isNotEmpty)
+            Text(
+              project.description!,
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18.0,
               ),
             ),
+
+          if (project.description != null && project.description!.isNotEmpty)
             const SizedBox(height: 16.0),
+
+          if (project.description != null && project.description!.isNotEmpty)
             const Divider(),
 
+          // 🔹 filesDescription + لينك
+          if (project.filesDescription != null &&
+              project.filesDescription.toString().isNotEmpty)
             RichText(
               textAlign: TextAlign.start,
               text: TextSpan(
                 style: TextStyle(
                   fontSize: 15,
                   color: Colors.grey.shade700,
-                  height: 1.7, // Line height for better readability
-                  fontFamily: 'IBMPlexSansArabic', // Ensure you have this font
+                  height: 1.7,
                 ),
                 children: <TextSpan>[
-                  const TextSpan(
-                      text:
-                      'قبل إن ترسل عرض مهم، التيم يتم تنفيذه على منصة الشركاء تبع سله لهم نظام وهو إن تدخل على موقعهم هنا'),
+                  TextSpan(text: project.filesDescription.toString()),
                   TextSpan(
-                    text: ' https://portal.salla.part...',
+                    text: 'project_description.link_text'.tr(),
                     style: const TextStyle(
                       color: Colors.blue,
                       decoration: TextDecoration.underline,
                     ),
-                    // Recognizer to make the link tappable
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         _launchURL('https://portal.salla.part');
                       },
                   ),
-                  const TextSpan(
-                    text:
-                    ' ويتم انشاء ثيم وربط على GitHub وتنزيل ملف برمجي لثيم افتراضي وبناء الثيم المطلوب للعمل عليه اعتقد انه يكون بالتعديل.\n اللي ماعنده فكره يدخل يعمل حساب ويتاكد من الوضع قبل ارسال عرض تفاصيل الثيم المطلوبه.\n وايضا ارفقت صور لطريقة بعض الافكار.',
-                  ),
+                  TextSpan(text: 'project_description.paragraph_part2'.tr()),
                 ],
               ),
             ),
+
+          if (project.filesDescription != null &&
+              project.filesDescription.toString().isNotEmpty)
             const SizedBox(height: 24.0),
 
-            // Section 3: Attachments
-            _buildAttachmentRow("IMG5342.jpeg", "500.4KB"),
-            const SizedBox(height: 8.0),
-            _buildAttachmentRow("IMG5342.jpeg", "500.4KB"),
-            const SizedBox(height: 8.0),
-            _buildAttachmentRow("IMG5342.jpeg", "500.4KB"),
-          ],
-        ),
+          // 🔹 المرفقات (files)
+          if (project.files.isNotEmpty)
+            ...project.files.map((fileUrl) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    fileUrl,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: 200,
+                    errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                  ),
+                ),
+              );
+            }).toList(),
+
+        ],
       ),
     );
   }
@@ -99,22 +117,19 @@ class ProjectDescription extends StatelessWidget {
         Container(
           height: 43,
           width: 43,
-          decoration: const BoxDecoration(
-            color: Styles.PRIMARY_COLOR
-          ),
-          child: const Center(
+          decoration: const BoxDecoration(color: Styles.PRIMARY_COLOR),
+          child: Center(
             child: Text(
-              'Jpeg',
-              style: TextStyle(
+              fileName.split('.').last.toUpperCase(), // 👈 الامتداد (JPEG, PDF...)
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
-                fontWeight: FontWeight.w500
-              )
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),
-        SizedBox(width:8.w),
-
+        SizedBox(width: 8.w),
         Text(
           fileName,
           style: const TextStyle(
@@ -122,12 +137,12 @@ class ProjectDescription extends StatelessWidget {
             fontSize: 14,
           ),
         ),
-        const SizedBox(width: 4.0),
-        Text(
-          '($fileSize)',
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-        ),
-
+        if (fileSize.isNotEmpty) const SizedBox(width: 4.0),
+        if (fileSize.isNotEmpty)
+          Text(
+            '($fileSize)',
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+          ),
       ],
     );
   }

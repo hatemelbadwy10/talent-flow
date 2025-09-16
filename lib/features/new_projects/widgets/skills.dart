@@ -1,170 +1,118 @@
+// widgets/skills_dropdown.dart
+import 'dart:developer';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../components/dynamic_drop_down_button.dart';
+import '../bloc/add_project_bloc.dart';
+import '../bloc/add_project_event.dart';
+import '../bloc/add_project_state.dart';
+import '../model/drop_down_model.dart';
+import 'section_label_widget.dart';
 
-/// A reusable form field for selecting a list of skills with type-ahead suggestions.
-///
-/// This widget displays a label, a list of selected skills as dismissible chips,
-/// an input field for finding new skills, and a helper text below.
-class SkillsSelectionField extends StatefulWidget {
-  // You can add more properties here to customize the widget further,
-  // such as an `onChanged` callback to get the list of selected skills.
-  const SkillsSelectionField({super.key});
+class SkillsDropdown extends StatelessWidget {
+  final Map<String, String> availableSkills;
 
-  @override
-  State<SkillsSelectionField> createState() => _SkillsSelectionFieldState();
-}
-
-class _SkillsSelectionFieldState extends State<SkillsSelectionField> {
-  // Controller for the text input field.
-  final TextEditingController _controller = TextEditingController();
-
-  // A list to hold the skills the user has selected.
-  final List<String> _selectedSkills = [
-    'فوتوشوب',
-    'لغة عربية',
-    'تصميم جرافيك',
-  ];
-
-  // A sample list of available skills for suggestions.
-  // In a real app, this would likely come from an API.
-  final List<String> _availableSkills = [
-    'فوتوشوب',
-    'تصميم جرافيك',
-    'لغة عربية',
-    'مونتاج',
-    'Flutter',
-    'Dart',
-    'Firebase',
-    'UI/UX Design',
-    'Laravel',
-    'PHP',
-    'JavaScript',
-  ];
-
-  /// Fetches skill suggestions based on the user's input.
-  Future<List<String>> _getSuggestions(String pattern) async {
-    if (pattern.isEmpty) {
-      return [];
-    }
-
-    // Filter the available skills to find matches that haven't already been selected.
-    return _availableSkills
-        .where((skill) =>
-    skill.toLowerCase().contains(pattern.toLowerCase()) &&
-        !_selectedSkills.contains(skill))
-        .toList();
-  }
+  const SkillsDropdown({
+    super.key,
+    required this.availableSkills,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Using Directionality to ensure proper layout for RTL languages.
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section 1: The label with a red asterisk.
-          RichText(
-            text: const TextSpan(
-              text: 'المهارات',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-                // Ensure you have the right font in your project
-                fontFamily: 'IBMPlexSansArabic',
-              ),
-              children: <TextSpan>[
-                TextSpan(
-                  text: ' *',
-                  style: TextStyle(color: Colors.red, fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8.0),
+    final items = availableSkills.entries
+        .map((entry) => DropdownItem(entry.value, value: int.parse(entry.key)))
+        .toList();
 
-          // Section 2: The input field container.
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionLabel(
+          text: 'add_project.skills'.tr(),
+          isRequired: true,
+        ),
+        const SizedBox(height: 8),
+        BlocBuilder<AddProjectBloc, AddProjectState>(
+          buildWhen: (previous, current) => previous.skills != current.skills,
+          builder: (context, state) {
+            // convert ids to names
+            final selectedSkillNames = state.skills
+                .map((id) => availableSkills[id.toString()] ?? '')
+                .where((name) => name.isNotEmpty)
+                .toList();
+
+            final dropdownName = selectedSkillNames.isNotEmpty
+                ? selectedSkillNames.join(', ')
+                : 'add_project.select_skill'.tr();
+
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
               children: [
-                // Display selected skills as chips in a Wrap layout.
+                // Dynamic multi-select dropdown
+                DynamicDropDownButton(
+                  items: items,
+                  name: dropdownName,
+                  selectedValue: null, // allow multiple
+                  onChange: (selectedItem) {
+                    if (selectedItem != null) {
+                      final updatedSkills = List<int>.from(state.skills);
+
+                      if (!updatedSkills.contains(selectedItem.value)) {
+                        updatedSkills.add(selectedItem.value);
+                      }
+
+                      // get names of updated skills
+                      final updatedSkillNames = updatedSkills
+                          .map((id) => availableSkills[id.toString()] ?? '')
+                          .where((name) => name.isNotEmpty)
+                          .toList();
+
+                      log("selected skills $updatedSkills, names $updatedSkillNames");
+
+                      context.read<AddProjectBloc>().add(
+                        UpdateSkills(
+                          skills: updatedSkills,
+                          skillNames: updatedSkillNames,
+                        ),
+                      );
+                    }
+                  },
+                ),
+
+                const SizedBox(height: 10),
+
+                // Show selected skills as Chips
                 Wrap(
-                  spacing: 8.0, // Horizontal gap between chips
-                  runSpacing: 4.0, // Vertical gap between chip lines
-                  children: _selectedSkills.map((skill) {
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: state.skills.map((id) {
+                    final skillName = availableSkills[id.toString()] ?? '';
                     return Chip(
-                      label: Text(skill, style: const TextStyle(color: Colors.black54)),
-                      backgroundColor: Colors.grey.shade200,
-                      deleteIconColor: Colors.grey.shade600,
+                      label: Text(skillName),
                       onDeleted: () {
-                        setState(() {
-                          _selectedSkills.remove(skill);
-                        });
+                        final updatedSkills =
+                        List<int>.from(state.skills)..remove(id);
+
+                        final updatedSkillNames = updatedSkills
+                            .map((id) => availableSkills[id.toString()] ?? '')
+                            .where((name) => name.isNotEmpty)
+                            .toList();
+
+                        context.read<AddProjectBloc>().add(
+                          UpdateSkills(
+                            skills: updatedSkills,
+                            skillNames: updatedSkillNames,
+                          ),
+                        );
                       },
                     );
                   }).toList(),
                 ),
-                // The TypeAhead field for entering new skills.
-                TypeAheadField<String>(
-                  controller: _controller,
-                  // Configure the appearance of the text field.
-                  builder: (context, controller, focusNode) => TextField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    autofocus: false,
-                    decoration: const InputDecoration(
-                      // Remove the border from the inner TextField.
-                      border: InputBorder.none,
-                      hintText: 'ابحث عن المهارات',
-                    ),
-                  ),
-                  // The function that provides suggestions.
-                  suggestionsCallback: _getSuggestions,
-                  // Defines how each suggestion item in the list is built.
-                  itemBuilder: (context, suggestion) {
-                    return ListTile(
-                      title: Text(suggestion),
-                    );
-                  },
-                  // What happens when a user taps a suggestion.
-                  onSelected: (suggestion) {
-                    setState(() {
-                      // Add the skill if it's not already in the list.
-                      if (!_selectedSkills.contains(suggestion)) {
-                        _selectedSkills.add(suggestion);
-                      }
-                      // Clear the text field for the next input.
-                      _controller.clear();
-                    });
-                  },
-                  // UI to show when no suggestions are found.
-                  emptyBuilder: (context) => const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'لا توجد مهارات مطابقة',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                ),
               ],
-            ),
-          ),
-          const SizedBox(height: 8.0),
-
-          // Section 3: The helper text below the field.
-          Text(
-            'حدد أهم المهارات المطلوبة لتنفيذ مشروعك.',
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-          ),
-        ],
-      ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

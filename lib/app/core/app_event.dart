@@ -2,7 +2,9 @@ abstract class AppEvent {
   Object? arguments;
   AppEvent({this.arguments});
 }
-
+class FreelancerProfile extends AppEvent {
+  FreelancerProfile({super.arguments});
+}
 class Follow extends AppEvent {
   Follow({super.arguments});
 }

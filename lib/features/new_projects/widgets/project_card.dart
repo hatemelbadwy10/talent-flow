@@ -1,19 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
-import 'package:talent_flow/app/core/dimensions.dart';
+import 'package:talent_flow/features/projects/model/my_projects_model.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
+import '../../../app/core/app_event.dart';
 import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart';
 import '../../../navigation/routes.dart';
+import 'package:easy_localization/easy_localization.dart';
 
-class ProjectCard extends StatelessWidget {
-  const ProjectCard({super.key});
+
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talent_flow/features/new_projects/bloc/new_projects_bloc.dart'; // Import your Bloc
+import '../../../app/core/app_state.dart'; // Import AppState for BlocListener
+
+class ProjectCard extends StatefulWidget {
+  final MyProjectsModel projectsModel;
+  const ProjectCard({super.key, required this.projectsModel});
+
+  @override
+  State<ProjectCard> createState() => _ProjectCardState();
+}
+
+class _ProjectCardState extends State<ProjectCard> {
+  late MyProjectsModel _currentProjectModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentProjectModel = widget.projectsModel;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
+    return BlocListener<NewProjectsBloc, AppState>(
+      listener: (context, state) {
+        if (state is Done && state.list == null) {
+          // Assuming a successful favorite toggle returns a 'Done' state
+          // and if 'list' is null, it's not a project list update
+          // You might refine this check based on your AppState implementation
+          setState(() {
+            _currentProjectModel = _currentProjectModel.copyWith(
+              isInFavorites: !(_currentProjectModel.isInFavorites ?? false),
+            );
+          });
+        }
+      },
       child: Container(
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
@@ -36,27 +69,31 @@ class ProjectCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(
+                Row(
                   children: [
                     CircleAvatar(
                       radius: 24,
                       backgroundImage: NetworkImage(
-                          'https://i.pravatar.cc/150?img=56'), // Placeholder image
+                        _currentProjectModel.owner?.image ??
+                            "https://via.placeholder.com/150",
+                      ),
                     ),
-                    SizedBox(width: 12.0),
+                    const SizedBox(width: 12.0),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "محمد عبد الرحمن",
-                          style: TextStyle(
+                          _currentProjectModel.owner?.name ??
+                              "project_card.user_name".tr(),
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
                         Text(
-                          "مصمم ويب",
-                          style: TextStyle(
+                          _currentProjectModel.owner?.jobTitle ??
+                              "project_card.user_job".tr(),
+                          style: const TextStyle(
                             color: Colors.grey,
                             fontSize: 14,
                           ),
@@ -66,9 +103,27 @@ class ProjectCard extends StatelessWidget {
                   ],
                 ),
                 IconButton(
-                  icon: const Icon(Icons.favorite_border, color: Colors.grey),
+                  icon: Icon(
+                    (_currentProjectModel.isInFavorites ?? false)
+                        ? Icons.favorite
+                        : Icons.favorite_border,
+                    color: (_currentProjectModel.isInFavorites ?? false)
+                        ? Colors.red
+                        : Colors.grey,
+                  ),
                   onPressed: () {
-                    // TODO: Handle favorite button tap
+                    if (_currentProjectModel.id != null) {
+                      // Optimistic update
+                      setState(() {
+                        _currentProjectModel = _currentProjectModel.copyWith(
+                          isInFavorites:
+                          !(_currentProjectModel.isInFavorites ?? false),
+                        );
+                      });
+                      context
+                          .read<NewProjectsBloc>()
+                          .add(Update(arguments: _currentProjectModel.id!));
+                    }
                   },
                 ),
               ],
@@ -78,26 +133,37 @@ class ProjectCard extends StatelessWidget {
             // Section 2: Metadata (Time, Views, Offers)
             Row(
               children: [
-                _buildMetaInfo(icon: Icons.access_time, text: "منذ 42 دقيقة"),
+                _buildMetaInfo(
+                  icon: Icons.access_time,
+                  text:
+                  _currentProjectModel.since ?? "project_card.posted_ago".tr(),
+                ),
                 const SizedBox(width: 16),
-                _buildMetaInfo(icon: Icons.visibility_outlined, text: "54"),
+                _buildMetaInfo(
+                  icon: Icons.visibility_outlined,
+                  text: _currentProjectModel.views?.toString() ?? "0",
+                ),
                 const SizedBox(width: 16),
-                _buildMetaInfo(icon: Icons.cases_outlined, text: "عرض واحد"),
+                _buildMetaInfo(
+                  icon: Icons.cases_outlined,
+                  text: _currentProjectModel.proposalsCount?.toString() ?? "0",
+                ),
               ],
             ),
             const SizedBox(height: 16.0),
 
             // Section 3: Project Description
-            const Text(
-              "المشروع عبارة عن تطبيق كرة قدم NATIVE ANDROID & IOS مربوط بـ LARAVEL BACKEND المطلوب لعمل SENIOR LEVEL التالي تعديل على طريقة الاشعارات حيث تم تغيير طريقة ارسال الاشعارات من جوجل فايز بيز........",
-              style: TextStyle(
+            Text(
+              _currentProjectModel.description ?? "",
+              style: const TextStyle(
                 fontSize: 15,
                 color: Color(0xFF444444),
-                height: 1.5, // Line height for better readability
+                height: 1.5,
               ),
               textAlign: TextAlign.start,
             ),
             const SizedBox(height: 16.0),
+
             Divider(
               height: 1,
               thickness: 2,
@@ -106,21 +172,23 @@ class ProjectCard extends StatelessWidget {
             const SizedBox(height: 16.0),
 
             SizedBox(
-              height: 40,
+              width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  CustomNavigator.push(sl<SharedPreferences>()
-                              .getBool(AppStorageKey.isFreelancer) ??
-                          false
-                      ? Routes.addProject
-                      : Routes.addOffer);
+                  CustomNavigator.push(
+                    sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                        false
+                        ? Routes.addOffer
+                        : Routes.addProject,
+                    arguments: {"id": _currentProjectModel.id},
+                  );
                 },
                 icon: const Icon(Icons.add, color: Colors.white),
                 label: Text(
                   sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                          false
-                      ? "مشروع مماثل"
-                      : "اضف عرضك",
+                      false
+                      ? "project_card.add_offer".tr()
+                      : "project_card.similar_project".tr(),
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.white,
@@ -128,8 +196,8 @@ class ProjectCard extends StatelessWidget {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Styles.PRIMARY_COLOR, // Teal color
-                  minimumSize: const Size(double.infinity, 50), // Full width
+                  backgroundColor: Styles.PRIMARY_COLOR,
+                  minimumSize: const Size(double.infinity, 45),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.0),
                   ),
@@ -153,6 +221,134 @@ class ProjectCard extends StatelessWidget {
           style: const TextStyle(color: Colors.grey, fontSize: 13),
         ),
       ],
+    );
+  }
+}
+extension MyProjectsModelExtension on MyProjectsModel {
+  MyProjectsModel copyWith({
+    int? id,
+    Owner? owner,
+    String? title,
+    String? description,
+    int? views,
+    String? since,
+    int? proposalsCount,
+    String? status,
+    int? isPaid,
+    Specialization? specialization,
+    bool? isInFavorites,
+  }) {
+    return MyProjectsModel(
+      id: id ?? this.id,
+      owner: owner ?? this.owner,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      views: views ?? this.views,
+      since: since ?? this.since,
+      proposalsCount: proposalsCount ?? this.proposalsCount,
+      status: status ?? this.status,
+      isPaid: isPaid ?? this.isPaid,
+      specialization: specialization ?? this.specialization,
+      isInFavorites: isInFavorites ?? this.isInFavorites,
+    );
+  }
+}
+
+class ProjectCardShimmer extends StatelessWidget {
+  const ProjectCardShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header (avatar + name + fav icon)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 14,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          width: 80,
+                          height: 12,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Container(
+                  width: 24,
+                  height: 24,
+                  color: Colors.white,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Meta info
+            Row(
+              children: List.generate(
+                3,
+                    (index) => Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Container(
+                    width: 60,
+                    height: 14,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Description lines
+            Container(width: double.infinity, height: 12, color: Colors.white),
+            const SizedBox(height: 8),
+            Container(width: double.infinity, height: 12, color: Colors.white),
+            const SizedBox(height: 8),
+            Container(width: 150, height: 12, color: Colors.white),
+            const SizedBox(height: 16),
+
+            // Button
+            Container(
+              width: double.infinity,
+              height: 45,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

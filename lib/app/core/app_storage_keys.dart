@@ -1,4 +1,3 @@
-import 'images.dart';
 
 abstract class AppStorageKey {
   static const String configVideo = "config_video";
@@ -8,6 +7,9 @@ abstract class AppStorageKey {
   static const String credentials = "credentials";
   static const String userData = "user_data";
   static const String userId = "user_id";
+  static const String userName = "user_name";
+  static const String userImage = "user_image";
+  static const String userEmail = "user_email";
   static const String isSubscribe = "is_subscribe";
   static String firstTimeOnApp = "first_time";
   static const String languageCode = "languageCode";

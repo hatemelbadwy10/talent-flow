@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/components/animated_widget.dart';
 import '../../../app/core/images.dart';
 
@@ -57,11 +58,13 @@ class AuthBase extends StatelessWidget {
 
           // Safe Scrollable Content
           SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Padding(
+              padding: EdgeInsetsGeometry.symmetric(
+                horizontal: 20.w,
+              ),
               child: ListAnimator(
-             data:   [
-                   SizedBox(height: screenHeight*.125),
+                data: [
+                  SizedBox(height: screenHeight * .125),
                   // Logo
                   Center(
                     child: Image.asset(
@@ -72,7 +75,6 @@ class AuthBase extends StatelessWidget {
                   ),
 
                   ...children,
-
                 ],
                 durationMilli: 300,
                 verticalOffset: 35,

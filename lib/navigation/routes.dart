@@ -8,9 +8,13 @@ class Routes {
   static const allCategories = "ALL_CATEGORIES";
   static const forgetPassword = "FORGET_PASSWORD";
   static const verification = "VERIFICATION";
+  static const singleProjectDetails = "PROJECT_DETAILS";
   static const resetPassword = "RESET_PASSWORD";
   static const register = "REGISTER_WITH_MAIL";
   static const home = "HOME";
+  static const freelancers = "FREE_LANCERS";
+  static const ownerProjects ="OWNER_PROJECTS";
+  static const freeLancerView = "FREE_LANCER_VIEW";
   static const addOffer = "ADD_OFFER";
   static const addProject = "ADD_PROJECT";
   static const addYourProject ="ADD_YOUR_PROJECT";

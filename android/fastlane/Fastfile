@@ -22,10 +22,9 @@ platform :android do
     sh "flutter build apk --release"
       firebase_app_distribution(
             app: "1:863499364117:android:d2245cd4f79d96d725ab1c",
-            firebase_cli_token: '1//035BPdjFMUTEFCgYIARAAGAMSNwF-L9Irr8CADdYnEXNhqj6EcyzfRX1Hs6mVUXLq5x5enaNPCPf43rt5rzZPzTAJOTns_PQBA-w',
             android_artifact_type: "APK",
             android_artifact_path: "../build/app/outputs/flutter-apk/app-release.apk",
-            testers: "ahmed.hady.dev@gmail.com",
+            testers: "maha4it@gmail.com",
             release_notes: "Testing something with GitHub Actions, trying to push directly from master branch",
       )
   end

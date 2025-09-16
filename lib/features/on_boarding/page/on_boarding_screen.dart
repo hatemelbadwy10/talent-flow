@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/features/on_boarding/widget/on_boarding_button.dart';
@@ -9,7 +10,7 @@ import '../../../app/core/images.dart';
 import '../bloc/on_boarding_bloc.dart';
 
 class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({super.key});
+  const OnboardingScreen({super.key,});
 
   @override
   Widget build(BuildContext context) {
@@ -30,23 +31,6 @@ class OnboardingView extends StatefulWidget {
 class _OnboardingViewState extends State<OnboardingView> {
   final PageController _pageController = PageController();
 
-  final List<Map<String, String>> _onboardingData = [
-    {
-      "title": "اشتغل على طريقك",
-      "description":
-      "سواء كنت مصمم، مطوّر، كاتب أو أي مجال ثاني – تلقى مشاريع تناسب مهاراتك وتشتغل عليها وأنت مرتاح.",
-    },
-    {
-      "title": "كن أفضل المستقلين",
-      "description":
-      "احتاجت تصميم، تطوير، كتابة أو أي خدمة؟ بتلقى فريلانسر جاهزين ينفذون مشروعك بكل احترافية.",
-    },
-    {
-      "title": "كل شيء في مكان واحد",
-      "description":
-      "من إرسال العروض، إدارة المشروع، للدفع الآمن – كل خطوات الشغل بينك وبين الطرف الثاني بشكل سلس وآمن.",
-    },
-  ];
 
   @override
   void dispose() {
@@ -56,83 +40,96 @@ class _OnboardingViewState extends State<OnboardingView> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: BlocListener<OnboardingBloc, AppState>(
-        listener: (context, state) {
-          if (state is Done && state.data is int) {
-            _pageController.animateToPage(
-              state.data,
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOut,
-            );
-          }
-        },
-        child: Scaffold(
-          body: Stack(
-            children: [
-              // 1. Background Image
-              Image.asset(
-                Images.onBoardingPhoto,
-                fit: BoxFit.cover,
-                height: double.infinity,
-                width: double.infinity,
-              ),
+    final List<Map<String, String>> onboardingData = [
+      {
+        "title": "onboarding.page1.title".tr(),
+        "description": "onboarding.page1.description".tr(),
+      },
+      {
+        "title": "onboarding.page2.title".tr(),
+        "description": "onboarding.page2.description".tr(),
+      },
+      {
+        "title": "onboarding.page3.title".tr(),
+        "description": "onboarding.page3.description".tr(),
+      },
+    ];
 
-              // 2. Corrected Gradient Overlay (Matches Figma)
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      const Color(0xFF0C7D81), // Solid teal at the bottom
-                      const Color(0xFF0C7D81).withOpacity(0.8), // Fades to semi-transparent
-                      Colors.white.withOpacity(0.0), // Fully transparent white at the top
-                    ],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    stops: const [0.4, 0.5, 1.0],
-                  ),
+    return BlocListener<OnboardingBloc, AppState>(
+      listener: (context, state) {
+        if (state is Done && state.data is int) {
+          _pageController.animateToPage(
+            state.data,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+          );
+        }
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // 1. Background Image
+            Image.asset(
+              Images.onBoardingPhoto,
+              fit: BoxFit.cover,
+              height: double.infinity,
+              width: double.infinity,
+            ),
+
+            // 2. Gradient Overlay
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF0C7D81),
+                    const Color(0xFF0C7D81).withOpacity(0.8),
+                    Colors.white.withOpacity(0.0),
+                  ],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  stops: const [0.4, 0.5, 1.0],
                 ),
               ),
+            ),
 
-              // 3. Your Page Content
-              Column(
-                children: [
-                  const Expanded(flex: 2, child: SizedBox()),
-                  Expanded(
-                    flex: 1,
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: _onboardingData.length,
-                      onPageChanged: (int page) {
-                        context
-                            .read<OnboardingBloc>()
-                            .add(Scroll(arguments: page));
-                      },
-                      itemBuilder: (context, index) {
-                        return PageContentWidget(
-                          title: _onboardingData[index]['title']!,
-                          description: _onboardingData[index]['description']!,
-                        );
-                      },
-                    ),
-                  ),
-                  BlocBuilder<OnboardingBloc, AppState>(
-                    builder: (context, state) {
-                      final currentPage = (state is Done && state.data is int)
-                          ? state.data as int
-                          : 0;
-                      return OnBoardingButton(
-                        currentPage: currentPage,
-                        onboardingData: _onboardingData,
+            // 3. Page Content
+            Column(
+              children: [
+                const Expanded(flex: 2, child: SizedBox()),
+                Expanded(
+                  flex: 1,
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: onboardingData.length,
+                    onPageChanged: (int page) {
+                      context
+                          .read<OnboardingBloc>()
+                          .add(Scroll(arguments: page));
+                    },
+                    itemBuilder: (context, index) {
+                      return PageContentWidget(
+                        // Get data from the new list
+                        title: onboardingData[index]['title']!,
+                        description: onboardingData[index]['description']!,
                       );
                     },
                   ),
-                  const SizedBox(height: 120),
-                ],
-              ),
-            ],
-          ),
+                ),
+                BlocBuilder<OnboardingBloc, AppState>(
+                  builder: (context, state) {
+                    final currentPage = (state is Done && state.data is int)
+                        ? state.data as int
+                        : 0;
+                    return OnBoardingButton(
+                      currentPage: currentPage,
+                      onboardingData: onboardingData,
+                    );
+                  },
+                ),
+                const SizedBox(height: 120),
+              ],
+            ),
+          ],
         ),
       ),
     );

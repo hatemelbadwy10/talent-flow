@@ -3,9 +3,21 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talent_flow/features/auth/pages/confirm_code/repo/confirm_code_repo.dart';
+import 'package:talent_flow/features/home/bloc/home_bloc.dart';
+import 'package:talent_flow/features/home/repo/home_repo.dart';
+import 'package:talent_flow/features/new_projects/repo/new_projects_repo.dart';
+import 'package:talent_flow/features/new_projects/repo/selection_option_repo.dart';
+import 'package:talent_flow/features/projects/repo/projects_repo.dart';
+import 'package:talent_flow/features/setting/repo/about_repo.dart';
+import 'package:talent_flow/features/setting/repo/terms_condation_repo.dart';
+import '../../features/auth/pages/change_password/repo/change_password_repo.dart';
+import '../../features/auth/pages/login/repo/login_repo.dart';
+import '../../features/auth/pages/register/repo/register_repo.dart';
+import '../../features/auth/pages/send_verification/send_verification_repo/send_verification_repo.dart';
+import '../../features/new_projects/bloc/add_project_bloc.dart';
+import '../../features/new_projects/repo/add_project_repo.dart';
 import '../../features/splash/repo/splash_repo.dart';
-import '../../helpers/delete_file/repo/delete_file_repo.dart';
-import '../../helpers/pickers/repo/picker_helper_repo.dart';
 import '../../helpers/social_media_login_helper.dart';
 import '../api/end_points.dart';
 import '../internet_connection/internet_connection.dart';
@@ -31,7 +43,14 @@ Future<void> init() async {
   // /// Repository
   // sl.registerLazySingleton(() => LocalizationRepo(sharedPreferences: sl(), dioClient: sl()));
   //
-  // sl.registerLazySingleton(() => SettingRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton(() => HomeRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerFactory(()=>HomeBloc(homeRepo: sl()));
+  sl.registerLazySingleton(()=>NewProjectsRepo(sharedPreferences:sl(), dioClient: sl()));
+  sl.registerLazySingleton(()=>TermsAndConditionRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton(()=>AboutRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton(()=>ProjectRepository( dioClient: sl(), sharedPreferences: sl()));
+  sl.registerLazySingleton(()=>SelectionOptionRepo( dioClient: sl(), sharedPreferences: sl()));
+
   //
   // sl.registerLazySingleton(() => DashboardRepo(sharedPreferences: sl(), dioClient: sl()));
   //
@@ -46,17 +65,18 @@ Future<void> init() async {
   //
   sl.registerLazySingleton(() => SplashRepo(sharedPreferences: sl(), dioClient: sl()));
   //
-  // sl.registerLazySingleton(() => UserRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton(() => ProjectsRepo(sharedPreferences: sl(), dioClient: sl()));
   //
-  // sl.registerLazySingleton(() => LoginRepo(sharedPreferences: sl(), dioClient: sl()));
+   sl.registerLazySingleton(() => LoginRepo(sharedPreferences: sl(), dioClient: sl()));
   //
-  // sl.registerLazySingleton(() => RegisterRepo(sharedPreferences: sl(), dioClient: sl()));
+   sl.registerLazySingleton(() => RegisterRepo(sharedPreferences: sl(), dioClient: sl()));
   //
-  // sl.registerLazySingleton(() => VerificationRepo(sharedPreferences: sl(), dioClient: sl()));
+   sl.registerLazySingleton(() => ConfirmCodeRepo(sharedPreferences: sl(), dioClient: sl()));
   //
-  // sl.registerLazySingleton(() => ForgetPasswordRepo(sharedPreferences: sl(), dioClient: sl()));
+   sl.registerLazySingleton(() => SendVerificationRepo(sharedPreferences: sl(), dioClient: sl()));
   //
-  // sl.registerLazySingleton(() => ResetPasswordRepo(sharedPreferences: sl(), dioClient: sl()));
+   sl.registerLazySingleton(() => ChangePasswordRepo(sharedPreferences: sl(), dioClient: sl()));
+   sl.registerFactory(()=>AddProjectBloc( repository: sl()));
   //
   // sl.registerLazySingleton(() => ChangePasswordRepo(sharedPreferences: sl(), dioClient: sl()));
   //

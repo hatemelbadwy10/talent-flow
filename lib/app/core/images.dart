@@ -22,6 +22,7 @@ class Images {
   static const String emptyImage = 'assets/images/empty_image.png';
   static const String coloredCoin = 'assets/images/colored_coin.png';
   static const String noInternet = 'assets/images/no_internet.png';
+  static const String emptyOrders = 'assets/images/empty_list.png';
   static const String emptyNotifications =
       'assets/images/empty_notifications.png';
   static const String emptyTransactions =

@@ -1,8 +1,5 @@
 import 'package:dio/dio.dart';
-import '../../app/core/app_event.dart';
-import '../../app/core/app_state.dart';
 import '../../app/localization/language_constant.dart';
-import '../config/di.dart';
 import 'failures.dart';
 
 class ApiErrorHandler {

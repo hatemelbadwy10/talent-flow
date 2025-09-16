@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../../../app/core/app_storage_keys.dart';
+import '../../../app/core/images.dart';
 import '../../../app/core/styles.dart';
 import '../../../components/custom_button.dart';
 import '../../../components/custom_text_form_field.dart';
+import '../../../data/config/di.dart';
 
 class EditProfileScreen extends StatelessWidget {
   const EditProfileScreen({super.key});
@@ -15,16 +20,16 @@ class EditProfileScreen extends StatelessWidget {
         surfaceTintColor: Colors.white,
         centerTitle: true,
         title: Image.asset(
-          "assets/images/Talent Flow logo 1 1.png",
+          Images.appLogo ?? "",
           height: 35,
         ),
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Center(
               child: Text(
-                'تعديل الحساب',
-                style: TextStyle(
+                "edit_profile.title".tr(),
+                style: const TextStyle(
                   color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -48,7 +53,6 @@ class EditProfileForm extends StatefulWidget {
 }
 
 class _EditProfileFormState extends State<EditProfileForm> {
-  // Controllers are managed inside the StatefulWidget.
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -58,13 +62,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
   final _confirmPasswordController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
-    // Dispose all controllers to prevent memory leaks.
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
@@ -77,62 +75,76 @@ class _EditProfileFormState extends State<EditProfileForm> {
 
   @override
   Widget build(BuildContext context) {
-    // The Directionality widget ensures the layout is Right-to-Left (RTL).
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
-        child: Column(
-          children: [
-            _buildProfileHeader(),
-            const SizedBox(height: 32),
-            _buildNameFields(),
-            _buildLabeledTextField("البريد الالكتروني",
-                "ادخل البريد الالكتروني الخاص بك", _emailController),
-            _buildDropdownField("التخصص", "اختر مجال عملك"),
-            _buildDropdownField("المسمى الوظيفي", "اختر المسمى الوظيفي"),
-            _buildLabeledTextField("نبذة تعريفية",
-                "اكتب وصف تعريفي عن نفسك ........", _bioController,
-                maxLines: 4),
-            _buildLabeledTextField(
-                "أضف سيرة ذاتية تعرف عن نفسك وتعليمك وخبراتك ومهاراتك",
-                "",
-                _detailedBioController,
-                maxLines: 4),
-            _buildDropdownField("المهارات", "اختر مهاراتك وتخصصاتك"),
-            _buildLabeledTextField("كلمة المرور الجديدة",
-                "ادخل كلمة المرور الخاص بك", _newPasswordController,
-                obscureText: true),
-            _buildLabeledTextField("تأكيد كلمة المرور",
-                "ادخل كلمة المرور الخاص بك", _confirmPasswordController,
-                obscureText: true),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: () {
-                  // TODO: Handle password change navigation or logic.
-                },
-                child: const Text("تغير كلمة المرور",
-                    style: TextStyle(color: Color(0xFF00C4A1))),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+      child: Column(
+        children: [
+          _buildProfileHeader(),
+          const SizedBox(height: 32),
+          _buildNameFields(),
+          _buildLabeledTextField(
+            "edit_profile.email".tr(),
+            sl<SharedPreferences>().getString(AppStorageKey.userEmail) ?? "edit_profile.email_hint".tr(),
+            _emailController,
+          ),
+          _buildDropdownField(
+            "edit_profile.specialization".tr(),
+            "edit_profile.specialization_hint".tr(),
+          ),
+          _buildDropdownField(
+            "edit_profile.job_title".tr(),
+            "edit_profile.job_title_hint".tr(),
+          ),
+          _buildLabeledTextField(
+            "edit_profile.bio".tr(),
+            "edit_profile.bio_hint".tr(),
+            _bioController,
+            maxLines: 4,
+          ),
+          _buildLabeledTextField(
+            "edit_profile.detailed_bio".tr(),
+            "",
+            _detailedBioController,
+            maxLines: 4,
+          ),
+          _buildDropdownField(
+            "edit_profile.skills".tr(),
+            "edit_profile.skills_hint".tr(),
+          ),
+          _buildLabeledTextField(
+            "edit_profile.new_password".tr(),
+            "edit_profile.password_hint".tr(),
+            _newPasswordController,
+            obscureText: true,
+          ),
+          _buildLabeledTextField(
+            "edit_profile.confirm_password".tr(),
+            "edit_profile.password_hint".tr(),
+            _confirmPasswordController,
+            obscureText: true,
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: () {},
+              child: Text(
+                "edit_profile.change_password".tr(),
+                style: const TextStyle(color: Color(0xFF00C4A1)),
               ),
             ),
-            const SizedBox(height: 24),
-            CustomButton(
-
-              onTap: () {
-                // TODO: Handle form submission.
-                print("Save button pressed!");
-                print("First Name: ${_firstNameController.text}");
-              },
-              text: 'حفظ',
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 24),
+          CustomButton(
+            onTap: () {
+              print("Save button pressed!");
+            },
+            text: "edit_profile.save".tr(),
+          ),
+        ],
       ),
     );
   }
 
-  /// Builds the top section with the profile picture and edit buttons.
   Widget _buildProfileHeader() {
     return Container(
       decoration: const BoxDecoration(
@@ -140,22 +152,19 @@ class _EditProfileFormState extends State<EditProfileForm> {
       ),
       child: Column(
         children: [
-          SizedBox(
-            height: 43.h,
-          ),
+          SizedBox(height: 43.h),
           Stack(
             clipBehavior: Clip.none,
             children: [
-              // --- THIS IS THE UPDATED PART ---
               Container(
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(12.0),
-                  image: const DecorationImage(
+                  image:  DecorationImage(
                     image: NetworkImage(
-                        'https://i.pravatar.cc/150?u=a042581f4e29026704d'),
+                        sl<SharedPreferences>().getString(AppStorageKey.userImage) ?? Images.appLogo),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -169,8 +178,11 @@ class _EditProfileFormState extends State<EditProfileForm> {
                     shape: BoxShape.circle,
                   ),
                   padding: const EdgeInsets.all(6.0),
-                  child: const Icon(Icons.edit,
-                      color: Styles.PRIMARY_COLOR, size: 20),
+                  child: const Icon(
+                    Icons.edit,
+                    color: Styles.PRIMARY_COLOR,
+                    size: 20,
+                  ),
                 ),
               )
             ],
@@ -201,21 +213,30 @@ class _EditProfileFormState extends State<EditProfileForm> {
       children: [
         Expanded(
           child: _buildLabeledTextField(
-              "الاسم", "اكتب اسمك", _firstNameController),
+            "edit_profile.first_name".tr(),
+            sl<SharedPreferences>().getString(AppStorageKey.userName) ?? "edit_profile.first_name_hint".tr(),
+            _firstNameController,
+          ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: _buildLabeledTextField(
-              "الاسم العائلة", "اكتب اسم العائلة", _lastNameController),
+            "edit_profile.last_name".tr(),
+            "edit_profile.last_name_hint".tr(),
+            _lastNameController,
+          ),
         ),
       ],
     );
   }
 
-  /// A reusable helper for a label + your CustomTextField.
   Widget _buildLabeledTextField(
-      String label, String hint, TextEditingController controller,
-      {int maxLines = 1, bool obscureText = false}) {
+      String label,
+      String hint,
+      TextEditingController controller, {
+        int maxLines = 1,
+        bool obscureText = false,
+      }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
@@ -248,7 +269,6 @@ class _EditProfileFormState extends State<EditProfileForm> {
     );
   }
 
-  /// A reusable helper for a styled dropdown-like field.
   Widget _buildDropdownField(String label, String hintText) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -272,7 +292,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
           const SizedBox(height: 8.0),
           Container(
             padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+            const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
             decoration: BoxDecoration(
               color: const Color(0xFFF7F7F7),
               borderRadius: BorderRadius.circular(8.0),

@@ -1,40 +1,91 @@
-import 'package:flutter/material.dart';
-import 'package:talent_flow/features/home/widgets/service_widget.dart';
+import 'dart:developer';
 
+import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talent_flow/app/core/app_storage_keys.dart';
+import 'package:talent_flow/features/home/widgets/service_widget.dart';
+import 'package:talent_flow/navigation/custom_navigation.dart';
+import 'package:talent_flow/navigation/routes.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../components/grid_list_animator.dart';
+import '../../../data/config/di.dart';
+import '../model/home_model.dart';
 
 class ServiceCategoriesGrid extends StatelessWidget {
-  const ServiceCategoriesGrid({super.key});
+  final List<Category> serviceData;
 
-  // --- 1. DEFINE YOUR DATA ---
-  // Make sure the SVG paths in 'icon' match your actual asset files.
-  final List<Map<String, String>> serviceData = const [
-    {'icon': 'assets/svgs/code.svg', 'label': 'التصميم الجرافيكي'},
-    {'icon': 'assets/svgs/code.svg', 'label': 'التسويق الرقمي'},
-    {'icon': 'assets/svgs/code.svg', 'label': 'الفيديو والرسوم المتحركة'},
-    {'icon': 'assets/svgs/code.svg', 'label': 'البرنامج والتكنولوجيا'},
-    {'icon': 'assets/svgs/code.svg', 'label': 'الوسيقى والصوت'},
-    {'icon': 'assets/svgs/code.svg', 'label': 'تصوير للمنتجات'},
-    {'icon': 'assets/svgs/code.svg', 'label': 'تصميم واجهة وتجربة المستخدم'},
-    {'icon': 'assets/svgs/code.svg', 'label': 'بناء خدمات الذكاء الاصطناعي'},
-  ];
+  const ServiceCategoriesGrid({super.key, required this.serviceData});
 
   @override
   Widget build(BuildContext context) {
-    // --- 2. BUILD THE UI ---
+    if (serviceData.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return GridListAnimatorWidget(
-      columnCount: 4, // As per your design
-      aspectRatio: .50, // You can adjust this for perfect spacing
-      padding: const EdgeInsets.all( 2),
-      // --- 3. DYNAMICALLY CREATE WIDGETS FROM DATA ---
+      columnCount: 4,
+      aspectRatio: .50,
+      padding: const EdgeInsets.all(2),
       items: serviceData.map((data) {
-        // For each item in the data list...
-        return ServiceWidget(
-          // ...create a ServiceWidget with its specific data
-          iconPath: data['icon']!,
-          label: data['label']!,
+        return GestureDetector(
+          onTap: () {
+            log("sl ${sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer)} ");
+            if (sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                true) {
+              CustomNavigator.push(Routes.ownerProjects,arguments: {"from_category": true,"categoryId": data.id});
+            } else {
+              CustomNavigator.push(Routes.freelancers,
+                  arguments: {"from_category": true,"categoryId": data.id}); // Adjust route as needed
+            }
+          },
+          child: ServiceWidget(
+            iconPath: data.icon ?? 'assets/svgs/default_icon.svg',
+            // Use actual icon
+            label:
+                data.name?.tr() ?? 'N/A'.tr(), // Use actual name and translate
+          ),
         );
-      }).toList(), // Convert the result into a List<Widget>
+      }).toList(),
+    );
+  }
+}
+
+// Shimmer version for Service Categories Grid
+class ServiceCategoriesGridShimmer extends StatelessWidget {
+  const ServiceCategoriesGridShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: GridListAnimatorWidget(
+        columnCount: 4,
+        aspectRatio: .50,
+        padding: const EdgeInsets.all(2),
+        items: List.generate(
+            8,
+            (index) => // Generate 8 shimmer items
+                Column(
+                  children: [
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: 60,
+                      height: 10,
+                      color: Colors.white,
+                    ),
+                  ],
+                )).toList(),
+      ),
     );
   }
 }

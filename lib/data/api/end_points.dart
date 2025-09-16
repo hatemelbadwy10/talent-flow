@@ -3,21 +3,22 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class EndPoints {
   static const bool isProductionEnv = false;
   static String domain ="";
-  static String baseUrl =  "";
+  static String baseUrl =  "https://talentflowa.com/";
   static String apiKey ="";
   static String googleMapsBaseUrl =  "";
   static const String generalTopic = isProductionEnv ? 'talent_flow' : 't_talent_flow';
   static specificTopic(id) => isProductionEnv ? '$id' : 't_$id';
 
   ///Auth
-  static const String socialMediaAuth = 'social-login';
-  static const String forgetPassword = 'forgot-password';
+  static const String socialMediaAuth = 'api/auth/social/login';
+  static const String forgetPassword = 'api/auth/forgot-password';
   static const String resetPassword = 'reset-password';
-  static const String changePassword = 'change-password';
-  static const String register = 'register';
-  static const String logIn = 'login';
+  static const String changePassword = 'api/auth/reset-password';
+  static const String register = 'api/auth/register';
+  static const String logIn = 'api/auth/login';
   static const String resend = 'resend-code';
-  static const String verifyOtp = 'verify-code';
+  static const String verifyRegister = "api/auth/verify-otp?register";
+  static const String verifyOtp = 'api/auth/verify-otp';
   static const String deleteAccount = 'delete-account';
   static const String reactivateAccount = 'reactivate-account';
   static const String setLang = 'set-lang';
@@ -27,7 +28,11 @@ class EndPoints {
   static const String profile = 'profile';
 
   ///Home
-  static const String banners = 'banners';
+  static const String home = 'api/pages/home?top_limit=5&cat_limit=8';
+  static const String categories = 'api/categories';
+  static const String subCategories = 'api/categories/';
+  static const String freelancers = 'api/freelancers';
+  static const String freelancerDetails = 'api/freelancers/';
 
   ///Offers
   static const String offers = 'offers';
@@ -105,8 +110,8 @@ class EndPoints {
   static const String associationStatistics = 'important-numbers';
   static const String faqs = 'faqs';
   static const String privacyPolicy = 'privacy-policy';
-  static const String termsConditions = 'conditions';
-  static const String aboutUs = 'about-us';
+  static const String termsConditions = 'api/pages/terms';
+  static const String aboutUs = 'api/pages/about';
   static const String associationObjectives = 'goals';
   static const String whoUs = 'who-us';
   static const String contactUs = 'contact-us';
@@ -123,9 +128,12 @@ class EndPoints {
   static const String bloodTypes = 'blood-types';
   static const String qualificationTypes = 'qualification-types';
 
-  ///Share
-  static shareRoute(route, id) => "$baseUrl$route/?id=$id";
-
+  ///Projects
+static const String projects = 'api/projects';
+static const String addProject ='api/projects';
+static const String singleProject = '/api/projects/';
+static const String addOffer ="api/projects/proposals";
+static const String selectionOption ="api/select-options";
   ///Upload File Service
   static const String uploadFileService = 'store_attachment';
   static deleteFile(id) => 'delete-file/$id';

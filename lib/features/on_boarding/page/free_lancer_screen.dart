@@ -1,22 +1,23 @@
+import 'dart:developer';
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
-
 import '../../../app/core/images.dart';
-import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart';
 import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
 
 class UserTypeSelectionScreen extends StatelessWidget {
-  const UserTypeSelectionScreen({super.key});
+  const UserTypeSelectionScreen({super.key,this.arguments});
+  final Map<String,dynamic>? arguments;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // 📷 الخلفية (الصورة)
           Image.asset(
             Images.onBoardingPhoto,
             fit: BoxFit.cover,
@@ -27,20 +28,19 @@ class UserTypeSelectionScreen extends StatelessWidget {
 
           Container(
             width: double.infinity,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF0C7D81),
-                  Colors.transparent, // <-- THIS IS THE ONLY CHANGE
+                  Color(0xFF0C7D81),
+                  Colors.transparent,
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: const [0.0, 0.6],
+                stops: [0.0, 0.6],
               ),
             ),
           ),
 
-          // 🏳️ الحاوية البيضاء في الأسفل
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -60,30 +60,41 @@ class UserTypeSelectionScreen extends StatelessWidget {
             bottom: MediaQuery.of(context).size.height * 0.2,
             left: 24,
             right: 24,
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildChoiceCard(
-                    iconPath: Images.jopSearcher,
-                    text: 'ابحث عن خدمة، ابحث\nعن اشخاص موهوبين\nللعمل معهم',
-                    onTap: () {
-                      sl<SharedPreferences>().setBool(AppStorageKey.isFreelancer, true);
-                      CustomNavigator.push(Routes.login);
-                    },
-                  ),
-                  const SizedBox(width: 16),
-                  _buildChoiceCard(
-                    iconPath: Images.penIcon,
-                    text: '                                                 فريلانسر أود أن أعرض\nخدماتي',
-                    onTap: () {
-                      sl<SharedPreferences>().setBool(AppStorageKey.isFreelancer, false);
-                      CustomNavigator.push(Routes.login);
-                    },
-                  ),
-                ],
-              ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildChoiceCard(
+                  iconPath: Images.jopSearcher,
+                  text: 'user_selection.find_service_card'.tr(),
+                  onTap: () {
+                    sl<SharedPreferences>().setBool(AppStorageKey.isFreelancer, true);
+                    log('arguments?["from_login"]${arguments?["from_login"]}');
+                    if(arguments?["from_login"] == true){
+                      CustomNavigator.push(Routes.register);
+                    }
+                    else{
+                      CustomNavigator.push(Routes.login,clean: true);
+                    }
+
+                  },
+                ),
+                const SizedBox(width: 16),
+                _buildChoiceCard(
+                  iconPath: Images.penIcon,
+                  text: 'user_selection.freelancer_card'.tr(),
+                  onTap: () {
+
+                    sl<SharedPreferences>().setBool(AppStorageKey.isFreelancer, false);
+                    log('arguments?["from_login"]${arguments?["from_login"]}');
+                    if(arguments?["from_login"] == true){
+                    CustomNavigator.push(Routes.register);
+                  }
+                    else{
+                      CustomNavigator.push(Routes.login,clean: true);
+                    }
+    }
+                ),
+              ],
             ),
           ),
         ],
@@ -100,6 +111,7 @@ class UserTypeSelectionScreen extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
+          height: 180,
           padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -123,7 +135,6 @@ class UserTypeSelectionScreen extends StatelessWidget {
                 style: const TextStyle(
                   color: Color(0xFF333333),
                   fontSize: 14,
-                  height: 1.5,
                 ),
               ),
             ],

@@ -27,9 +27,8 @@ class ServiceWidget extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.all(21),
-              child: SvgPicture.asset(
+              child: Image.network(
                 iconPath,
-                colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
               ),
             ),
           ),

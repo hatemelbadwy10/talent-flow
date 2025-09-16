@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
@@ -40,12 +41,13 @@ class OnBoardingButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8)),
             ),
             child: Text(
-              currentPage < onboardingData.length - 1 ? 'التالي' : 'ابدأ الآن',
+              currentPage < onboardingData.length - 1 ? 'next'.tr() : 'start'.tr(),
               style: const TextStyle(
                   color: Color(0xFF0C7D81),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'Cairo'),
+
+              ),
             ),
           ),
         ],

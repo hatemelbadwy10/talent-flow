@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:talent_flow/components/animated_widget.dart';
 import 'package:talent_flow/features/new_projects/widgets/project_card.dart';
@@ -16,13 +17,13 @@ class Favourite extends StatelessWidget {
           height: 35,
         ),
 
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Center(
               child: Text(
-                'المفضلة',
-                style: TextStyle(
+                'favourite'.tr(),
+                style: const TextStyle(
                   color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -42,11 +43,11 @@ class Favourite extends StatelessWidget {
         padding: EdgeInsets.all(16.0),
         child: ListAnimator(
           data: [
-            ProjectCard(),
-            SizedBox(height: 16),
-            ProjectCard(),
-            SizedBox(height: 16),
-            ProjectCard(),
+            // ProjectCard(),
+            // SizedBox(height: 16),
+            // ProjectCard(),
+            // SizedBox(height: 16),
+            // ProjectCard(),
           ],
         ),
       ),

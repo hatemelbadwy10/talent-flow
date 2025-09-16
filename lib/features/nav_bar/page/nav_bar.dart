@@ -4,17 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/features/new_projects/page/new_project.dart';
-import 'package:talent_flow/features/payment/page/payment_page.dart';
 import 'package:talent_flow/features/projects/page/my_projects.dart';
 import 'package:talent_flow/features/setting/page/setting.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';
 import '../../../app/core/app_storage_keys.dart';
 import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart';
+import '../../home/bloc/home_bloc.dart';
 import '../../home/page/home_view.dart';
+import '../../home/repo/home_repo.dart';
+import '../../new_projects/page/new_project.dart';
 import '../bloc/nav_bar_bloc.dart';
 
 class NavBar extends StatelessWidget {
@@ -22,19 +24,19 @@ class NavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Determine the user's status inside the build method.
-    // This assumes `isFreelancer` is a boolean key. Note the corrected syntax for `sl`.
-    final bool isFreelancer = sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
+    final currentLocale = context.locale;
 
-    // 2. Define all your navigation items dynamically.
-    // These are now regular local variables, not static.
+    final bool isFreelancer =
+        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
+
     final List<Widget> widgetOptions = [
       const Setting(),
       const OwnerProjects(),
-      const HomeView(),
+      BlocProvider(
+        create: (context) => HomeBloc( homeRepo:  sl<HomeRepo>(),)..add(Click()),
+        child: HomeView(),
+      ),
       const NewProject(),
-      // Use a collection 'if' to conditionally add the PaymentPage.
-      if (isFreelancer) const PaymentPage(),
     ];
 
     final List<IconData> unselectedIcons = [
@@ -42,7 +44,6 @@ class NavBar extends StatelessWidget {
       IconsaxPlusLinear.briefcase,
       IconsaxPlusLinear.home_2,
       IconsaxPlusLinear.add_square,
-      if (isFreelancer) IconsaxPlusLinear.wallet_3,
     ];
 
     final List<IconData> selectedIcons = [
@@ -50,30 +51,26 @@ class NavBar extends StatelessWidget {
       IconsaxPlusBold.briefcase,
       IconsaxPlusBold.home_2,
       IconsaxPlusBold.add_square,
-      if (isFreelancer) IconsaxPlusBold.wallet_3,
     ];
 
     final List<String> labels = [
-      "الأعدادات",
-      "إعمالي",
-      "الرئيسية",
-      "مشاريع جديدة",
-      if (isFreelancer) "الدفع",
+      "nav.settings",
+      "nav.my_projects",
+      "nav.home",
+      "nav.new_projects",
     ];
 
     return BlocProvider(
       create: (context) => NavBarBloc(),
       child: BlocBuilder<NavBarBloc, AppState>(
         builder: (context, state) {
-          int selectedIndex = 2; // Default index
+          int selectedIndex = 2;
           if (state is Done) {
             selectedIndex = state.data;
           }
 
-          // Safety check: Prevent a RangeError if the number of tabs changes
-          // and the previously selected index is now out of bounds.
           if (selectedIndex >= widgetOptions.length) {
-            selectedIndex = 2; // Reset to a safe default (e.g., home)
+            selectedIndex = 2;
           }
 
           return Material(
@@ -87,7 +84,6 @@ class NavBar extends StatelessWidget {
                     backgroundColor: Colors.transparent,
                     color: Styles.PRIMARY_COLOR,
                     buttonBackgroundColor: Colors.transparent,
-                    // 3. Use the dynamic length of your lists instead of a fixed number.
                     items: List.generate(labels.length, (index) {
                       final isSelected = index == selectedIndex;
                       Widget iconWidget;
@@ -125,7 +121,7 @@ class NavBar extends StatelessWidget {
                       }
                       return CurvedNavigationBarItem(
                         child: iconWidget,
-                        label: labels[index],
+                        label: labels[index].tr(),
                         labelStyle: const TextStyle(
                           color: Colors.white,
                           fontSize: 10,

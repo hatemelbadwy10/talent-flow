@@ -1,3 +1,366 @@
 {
+  "next": "التالي",
+  "start": "ابدأ الآن",
+  "talent_flow_core": "مكان واحد يضم الفريلانسر والباحثين عن تنفيذ خدماتهم",
 
+  "onboarding": {
+    "page1": {
+      "title": "اشتغل على طريقتك",
+      "description": "سواء كنت مصمم، مطوّر، كاتب أو أي مجال ثاني – بتلقى مشاريع تناسب مهاراتك وتشتغل عليها براحتك."
+    },
+    "page2": {
+      "title": "كن من أفضل المستقلين",
+      "description": "تحتاج تصميم، تطوير، كتابة أو أي خدمة؟ بتلقى فريلانسر جاهزين ينفذون مشروعك بكل احترافية."
+    },
+    "page3": {
+      "title": "كل شيء في مكان واحد",
+      "description": "من إرسال العروض، إدارة المشروع، للدفع الآمن – كل خطوات الشغل بينك وبين العميل بشكل سلس وآمن."
+    },
+    "nextButton": "التالي",
+    "startButton": "ابدأ"
+  },
+
+  "user_selection": {
+    "find_service_card": "ابحث عن خدمة\nاكتشف أشخاص موهوبين للعمل معهم",
+    "freelancer_card": "فريلانسر\nأرغب بعرض خدماتي"
+  },
+
+  "login": {
+    "title": "تسجيل الدخول",
+    "email": "البريد الإلكتروني",
+    "email_hint": "ادخل البريد الإلكتروني الخاص بك",
+    "email_error_required": "البريد الإلكتروني مطلوب",
+    "email_error_invalid": "الرجاء إدخال بريد إلكتروني صحيح",
+    "invalid_credentials": "بيانات الدخول غير صحيحة",
+    "password": "كلمة المرور",
+    "password_hint": "ادخل كلمة المرور الخاصة بك",
+    "password_error_required": "كلمة المرور مطلوبة",
+    "password_error_short": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+
+    "forgot_password": "نسيت كلمة المرور؟",
+    "or_login_with": "أو تسجيل الدخول عبر",
+
+    "login_google": "تسجيل الدخول بواسطة جوجل",
+    "login_facebook": "تسجيل الدخول بواسطة فيسبوك",
+    "login_apple": "تسجيل الدخول بواسطة آبل",
+
+    "no_account": "لا تملك حساب؟ ",
+    "register": "تسجيل جديد"
+  },
+
+  "register": {
+    "title": "إنشاء حساب جديد",
+    "first_name": "الاسم",
+    "enter_first_name": "ادخل اسمك",
+    "last_name": "اسم العائلة",
+    "enter_last_name": "ادخل اسم العائلة",
+    "email": "البريد الإلكتروني",
+    "enter_email": "ادخل بريدك الإلكتروني",
+    "password": "كلمة المرور",
+    "enter_password": "ادخل كلمة المرور الخاصة بك",
+    "field_required": "هذا الحقل مطلوب",
+    "register_button": "تسجيل",
+    "or_register_with": "أو التسجيل عبر",
+    "register_google": "التسجيل بواسطة جوجل",
+    "register_facebook": "التسجيل بواسطة فيسبوك",
+    "register_apple": "التسجيل بواسطة آبل",
+    "already_have_account": "لديك حساب بالفعل؟ ",
+    "login": "تسجيل الدخول",
+    "register_as_user": "التسجيل كطالب خدمة",
+    "register_as_freelancer": "التسجيل كمستقل"
+  },
+  "change_password": {
+    "title": "تغيير كلمة المرور",
+    "new_password": "كلمة المرور الجديدة",
+    "enter_new_password": "ادخل كلمة المرور الجديدة",
+    "confirm_password": "تأكيد كلمة المرور",
+    "reenter_password": "اعد كتابة كلمة المرور",
+    "error_required": "هذا الحقل مطلوب",
+    "error_short": "كلمة المرور قصيرة جداً",
+    "error_not_match": "كلمات المرور غير متطابقة",
+    "confirm_change": "تأكيد التغيير"
+  },
+  "send_verification": {
+    "title": "ارسل بياناتك لتأكيد الحساب",
+    "email": "البريد الإلكتروني",
+    "enter_email": "ادخل البريد الإلكتروني الخاص بك",
+    "whatsapp": "رقم الواتساب",
+    "enter_whatsapp": "ادخل رقم الواتساب الخاص بك",
+    "error_required": "هذا الحقل مطلوب",
+    "error_invalid_email": "الرجاء إدخال بريد إلكتروني صحيح",
+    "error_invalid_phone": "الرجاء إدخال رقم هاتف صحيح",
+    "send": "إرسال"
+  },
+  "confirm_code": {
+    "title": "كود تأكيد الحساب",
+    "enter_code": "ادخل الكود",
+    "send": "إرسال",
+    "error_incomplete": "الكود يجب أن يكون 6 أرقام"
+  },
+  "nav": {
+    "settings": "الإعدادات",
+    "my_projects": "إعمالي",
+    "home": "الرئيسية",
+    "new_projects": "مشاريع جديدة",
+    "payment": "الدفع"
+  },
+  "home": {
+    "search_service": "ابحث عن خدمة",
+    "view_all": "مشاهدة الكل",
+    "service_category": "فئة الخدمة",
+    "whats_new": "ما الجديد على تلنت فلو؟",
+    "welcome": "مرحبا بك",
+    "freelancers": "المستقلون",
+    "entrepreneurs": "عرضو الخدمات",
+    "view_profile": "عرض الملف الشخصي",
+    "view_company_profile": "عرض الملف الشخصي للشركة",
+    "services": {
+      "graphic_design": "التصميم الجرافيكي",
+      "digital_marketing": "التسويق الرقمي",
+      "video_animation": "الفيديو والرسوم المتحركة",
+      "software_tech": "البرمجة والتكنولوجيا",
+      "music_sound": "الموسيقى والصوت",
+      "product_photography": "تصوير المنتجات",
+      "uiux_design": "تصميم واجهة وتجربة المستخدم",
+      "ai_services": "بناء خدمات الذكاء الاصطناعي"
+    }
+  },
+  "freelancers": {
+    "title": "البحث عن المستقلين",
+    "search_freelancer": "البحث عن المستقلين",
+    "search_here": "ابحث هنا",
+    "category": "التخصص",
+    "job_title": "المسمى الوظيفي",
+    "enter_job_title": "أدخل المسمى الوظيفي",
+    "contact_me": "تواصل معي"
+  },
+  "project_card": {
+    "user_name": "محمد عبد الرحمن",
+    "user_job": "مصمم ويب",
+    "posted_time": "منذ 42 دقيقة",
+    "views": "{0} مشاهدة",
+    "offers": "{0} عرض",
+    "description": "المشروع عبارة عن تطبيق كرة قدم NATIVE ANDROID & IOS مربوط بـ LARAVEL BACKEND المطلوب لعمل SENIOR LEVEL التالي تعديل على طريقة الاشعارات حيث تم تغيير طريقة ارسال الاشعارات من جوجل فايز بيز........",
+    "similar_project": "مشروع مماثل",
+    "add_offer": "أضف عرضك"
+  },
+  "new_project": {
+    "title": "مشاريع جديدة"
+  },
+"add_project": {
+  "add_project": "إضافة مشروع",
+  "project_title": "عنوان المشروع",
+  "project_title_hint": "مثال: تصميم شعار لشركة تقنية",
+  "field_required": "الحقل مطلوب",
+  "title_helper": "أدرج عنوانا موجزا يصف مشروعك بشكل دقيق.",
+  "project_description": "وصف المشروع",
+  "reset": "إعادة تعيين",
+  "project_description_hint": "ادخل وصف المشروع هنا...",
+  "description_helper": "أدخل وصفاً مفصلاً لمشروعك وأرفق أمثلة لما تريد إن أمكن.",
+  "skills": "المهارات",
+  "budget": "الميزانية المتوقعة",
+  "select_budget": "اختر الميزانية",
+  "budget_validation": "الرجاء اختيار الميزانية",
+  "budget_helper": "اختر ميزانية مناسبة لتحصل على عروض جيدة.",
+  "duration": "المدة المتوقعة للتسليم",
+  "select_duration": "اختر المدة",
+  "duration_validation": "الرجاء اختيار المدة",
+  "attachments": "ملفات توضيحية",
+  "upload_text": "اضغط هنا للتحميل",
+  "upload_or_drag": " أو اسحب",
+  "upload_helper": "أضف صورة جذابة معبرة عن العمل.",
+  "file_formats": "SVG, PNG, JPG أو GIF (بحد أقصى 800x400px)",
+  "advanced_settings": "إعدادات متقدمة",
+  "project_questions": "أسئلة المشروع",
+  "question_hint": "اكتب هنا اسم العمل",
+  "mandatory_question": "سؤال إجباري",
+  "delete": "حذف",
+  "questions_helper": "أضف الأسئلة التي تود أن يجيب عنها المستقلين أثناء تقديم عروضهم.",
+  "add_question": "إضافة سؤال جديد",
+  "question_text": "  سؤال",
+  "submit_project": "أضف المشروع الآن",
+  "specialization": "التخصص",
+  "select_specialization": "اختر التخصص",
+  "specialization_validation": "الرجاء اختيار التخصص",
+  "select_skill": "اختر المهارة",
+  "budget_hint": "$250 - $500",
+  "duration_hint": " المده",
+  "files_description_hint": "اوصف الملف",
+  "choose_from_gallery": "اختر من المعرض",
+  "take_photo": "اختر صورة",
+  "required_to_be_received": "مطلوب استلامه",
+  "similar_projects": "مشاريع مشابهة",
+  "mandatory_question_hint":"سؤال يجب ان يجيب عنه المستقلين",
+  "cancel": "الغاء",
+  "add": "اضافة",
+  "similar_projects_hint": " مشاريع مشابهة",
+  "budget_options": ["$250 - $500", "$500 - $1000", "$1000 - $2500"],
+  "duration_options": ["أقل من أسبوع", "أسبوع - أسبوعين", "أسبوعين - شهر", "أكثر من شهر"]
+},
+  "submit_offer_title": "تقدم للمشروع",
+  "submit_button": "ارسال",
+
+  "project_card_offer": {
+    "title": "بطاقة المشروع",
+    "posted_ago": "منذ {value}",
+    "minutes": "دقيقة",
+    "status": "حالة المشروع",
+    "budget": "الميزانية",
+    "duration": "مدة التنفيذ",
+    "duration_value": "{count} يوماً",
+    "skills": "المهارات",
+    "registration_date": "تاريخ التسجيل",
+    "hiring_rate": "معدل التوظيف",
+    "open_projects": "المشاريع المفتوحة",
+    "projects_in_progress": "مشاريع قيد التنفيذ",
+    "ongoing_communications": "التواصلات الجارية",
+    "status_open": "مفتوح"
+  },
+  "skills_example": {
+    "photoshop": "فوتوشوب"
+  },
+  "user_example": {
+    "name": "راشد حمدان",
+    "role": "مسوق رقمي"
+  },
+
+  "project_description": {
+    "title": "تفاصيل المشروع",
+    "paragraph_part1": "قبل إن ترسل عرض مهم، التيم يتم تنفيذه على منصة الشركاء تبع سله لهم نظام وهو إن تدخل على موقعهم هنا",
+    "link_text": " https://portal.salla.part...",
+    "paragraph_part2": " ويتم انشاء ثيم وربط على GitHub وتنزيل ملف برمجي لثيم افتراضي وبناء الثيم المطلوب للعمل عليه اعتقد انه يكون بالتعديل.\n اللي ماعنده فكره يدخل يعمل حساب ويتاكد من الوضع قبل ارسال عرض تفاصيل الثيم المطلوبه.\n وايضا ارفقت صور لطريقة بعض الافكار.",
+    "attachment_type_jpeg": "Jpeg"
+  },
+  "add_offer": {
+    "title": "تقدم للمشروع",
+    "hint": "اكتب هنا"
+  },
+  "settings_screen": {
+    "title": "الاعدادات",
+    "edit_profile": "تعديل الملف الشخصي",
+    "upload_work": "رفع اعمال",
+    "about_talent_flow": "ما هو تالنت فلو؟",
+    "notifications": "الإشعارات",
+    "favorites": "المفضلة",
+    "support": "الدعم",
+    "terms_and_conditions": "الشروط والاحكام",
+    "language": "اللغة",
+    "current_language": "English",
+    "logout": "تسجيل الخروج"
+  },
+  "terms_screen": {
+    "appbar_title": "الشروط والاحكام",
+    "page_title": "الشروط والاحكام",
+    "section1_title": "1. التسجيل واستخدام الحساب",
+    "section1_point1": "يجب أن يكون المستخدم فوق 18 عامًا.",
+    "section1_point2": "يجب إدخال معلومات صحيحة وكاملة عند إنشاء الحساب.",
+    "section1_point3": "لا يسمح بامتلاك أكثر من حساب واحد إلا بموافقة إدارية.",
+    "section2_title": "2. طبيعة الخدمة",
+    "section2_point1": "تلنت فلو هي وسيط بين أصحاب المشاريع والمستقلين ولا تضمن نجاح المشروع أو جودة العمل، بل توفر أدوات لإدارة العلاقة بين الطرفين.",
+    "section2_point2": "يتحمل كل طرف مسؤولية التحقق من الطرف الآخر قبل البدء.",
+    "section3_title": "3. الدفع والعمولات",
+    "section3_point1": "يتم الاتفاق على قيمة المشروع بين المستقل وصاحب العمل.",
+    "section3_point2": "تقتطع المنصة عمولة (٪) تحددها الإدارة مثل 10% مثلاً من كل عملية ناجحة.",
+    "section4_title": "4. سلوك ممنوع",
+    "section4_point1": "يُمنع نشر محتوى مخالف للقوانين أو مسيء.",
+    "section4_point2": "يُمنع التواصل خارج المنصة بشأن المشاريع بهدف التهرب من العمولة."
+  },
+  "about_talent_flow": {
+    "title": "ما هو تالنت فلو",
+    "question": "ما هو تالنت فلو ؟",
+    "paragraph1_part1": "منصة تلنت فلو ",
+    "talentflow": "(TalentFlow)",
+    "paragraph1_part2": " هي منصة للعمل الحر (فريلانس) ، وتركز على ربط أصحاب المشاريع مع المحترفين المستقلين في مجالات متعددة مثل التصميم، التطوير، التسويق، وكتابة المحتوى.",
+    "paragraph2": "تهدف تلنت فلو إلى تسهيل عملية التوظيف المؤقت أو الجزئي من خلال توفير مساحة آمنة لإدارة المشاريع، التواصل بين الأطراف، وضمان الدفع مقابل العمل المنجز بجودة واحترافية."
+  },
+  "add_projects": {
+    "notifications": "الاشعارات",
+    "title": "أضف معرض أعمالك",
+    "description": "أضف أفضل 3 أعمال حديثة تظهر بها خبرتك في مجال عملك. سيراجع فريق تلنت فلو الأعمال قبل قبول طلب الانضمام.",
+    "rule1": "أضف أعمال نفذتها بنفسك وليست منقولة أو منسوخة.",
+    "rule2": "تأكد أن الأعمال مميزة وذات جودة عالية.",
+    "rule3": "اكتب عنوان واضح ووصف دقيق يوضح ميزات العمل.",
+    "rule4": "لا ترسل أعمال فارغة أو مكررة."
+  },
+  "all_portfolios_submitted": "تم إرسال جميع الأعمال بنجاح!",
+  "initializing_form": "جارٍ تهيئة النموذج...",
+  "submit_all_works": "أضف كل الأعمال",
+  "confirm_terms": "تأكيد الشروط",
+  "term_one": "جميع الأعمال من تنفيذي ولدي صلاحية لنشرها.",
+  "term_two": "أعلم أنه سيتم إيقاف حسابي إذا استخدمت أعمال تنتهك حقوق الآخرين.",
+  "work_number": "العمل {0} من 3",
+  "work_title": "عنوان العمل",
+  "work_title_hint": "اكتب هنا اسم العمل",
+  "thumbnail": "صورة مصغرة",
+  "upload_here": "اضغط هنا للتحميل أو اسحب",
+  "thumbnail_desc": "SVG, PNG, JPG أو GIF (بحد أقصى 800x400px)",
+  "work_description": "وصف العمل",
+  "work_description_hint": "اكتب وصفاً للعمل...",
+  "work_features": "ميزات العمل",
+  "work_features_hint": "أضف وصفاً دقيقاً يوضح ميزات العمل",
+  "work_files": "صور وملفات العمل",
+  "files_desc": "أضف صور أو ملفات بحد أقصى 20 مرفق",
+  "preview_link": "رابط المعاينة",
+  "preview_link_hint": "ادخل الرابط هنا",
+  "completion_date": "تاريخ الإنجاز",
+  "completion_date_hint": "اختر تاريخ الإنجاز",
+  "favorite": "مفضله",
+  "notifications": "الاشعارات",
+  "all": "الكل",
+  "projects": "الأعمال",
+  "payments": "المدفوعات",
+  "freeLancer": "الفريلانسر",
+  "edit_profile": {
+    "title": "Edit Profile",
+    "first_name": "First Name",
+    "first_name_hint": "Enter your first name",
+    "last_name": "Last Name",
+    "last_name_hint": "Enter your last name",
+    "email": "Email",
+    "email_hint": "Enter your email",
+    "specialization": "Specialization",
+    "specialization_hint": "Choose your field",
+    "job_title": "Job Title",
+    "job_title_hint": "Choose your job title",
+    "bio": "Bio",
+    "bio_hint": "Write a short description about yourself...",
+    "detailed_bio": "Add a detailed biography about yourself, education, experiences and skills",
+    "skills": "Skills",
+    "skills_hint": "Choose your skills and specialties",
+    "new_password": "New Password",
+    "confirm_password": "Confirm Password",
+    "password_hint": "Enter your password",
+    "change_password": "Change Password",
+    "save": "Save"
+  },
+  "project_status": {
+    "completed": "مكتملة",
+    "draft": "مسودة",
+    "rejected": "مرفوضة",
+    "canceled": "ملغاة",
+    "open": "مفتوحة",
+    "in_progress": "قيد التنفيذ",
+    "under_review": "قيد المراجعة"
+  },
+  "project_portfolio": {
+    "default_title": "موقع لإدارة مستشفى بداخلها عيادات",
+    "likes": "إعجابات",
+    "views": "مشاهدات"
+  },
+  "owner_projects": {
+    "my_projects": "مشاريعي",
+    "project_number": "مشروع رقم {0}"
+  },
+  "payment": {
+    "title": "الدفع",
+    "choose_method": "اختر طريقة الدفع",
+    "next": "التالي",
+    "bank_transfer": "الدفع عن طريق الحوالة المالية",
+    "bank_account": "الدفع عن طريق الحساب البنكي",
+    "visa_card": "الدفع عن طريق الفيزا كارت",
+    "paypal": "الدفع عن طريق الباي بال",
+    "e_wallet": "الدفع عبر المحفظة الالكترونية"
+  },
+  "project_details": "تفاصيل المشروع",
+  "pay_for_project": "ادفع للمشروع"
 }

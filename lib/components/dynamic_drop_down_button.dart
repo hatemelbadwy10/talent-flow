@@ -20,6 +20,7 @@ class DynamicDropDownButton extends StatefulWidget {
   final void Function()? onTap;
   final String? Function(Object?)? validation;
   final bool? isInitial;
+  final int? selectedValue;
 
   const DynamicDropDownButton({
     required this.items,
@@ -35,6 +36,7 @@ class DynamicDropDownButton extends StatefulWidget {
     this.onTap,
     this.isInitial = false,
     this.iconSize = 22,
+    this.selectedValue, // Add this
     Key? key,
   }) : super(key: key);
 

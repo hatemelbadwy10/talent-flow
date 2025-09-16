@@ -55,8 +55,10 @@ class SocialMediaLoginHelper {
       model.printData();
       return Right(model);
     } on FirebaseAuthException catch (error) {
+      dev.log("=====> ${error.code}");
       return left(ServerFailure(error.message ?? ""));
     } catch (error) {
+      dev.log("=====> ${error}");
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }

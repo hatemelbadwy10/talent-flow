@@ -139,137 +139,126 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
-    // Using Directionality to ensure proper RTL layout for Arabic
-    return Directionality(
-      textDirection: widget.textDirection ?? TextDirection.ltr,
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 8.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            if (widget.label != null) ...[
-              RichText(
-                textDirection: TextDirection.rtl,
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: widget.label ?? "",
-                      style: AppTextStyles.w600.copyWith(
-                        fontSize: 14,
-                        color: Styles.HEADER,
-                      ),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.label != null) ...[
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: widget.label ?? "",
+                    style: AppTextStyles.w600.copyWith(
+                      fontSize: 14,
+                      color: Styles.HEADER,
                     ),
-                    if (widget.validate != null)
-                      const WidgetSpan(
-                        child: Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: Text(
-                            " *",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Styles.ERORR_COLOR,
-                            ),
-                          ),
+                  ),
+                  if (widget.validate != null)
+                    const WidgetSpan(
+                      child: Text(
+                        " *",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Styles.ERORR_COLOR,
                         ),
                       ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 8.h),
-            ],
-
-            // This container creates the background and border
-            Container(
-              width: widget.width ?? context.width,
-              decoration: BoxDecoration(
-                // **CHANGE**: The background is now always white
-                  color: Styles.WHITE_COLOR,
-                  border: Border.all(
-                    color: activationBorderColor(), // Uses our updated color logic
-                  ),
-                  borderRadius: BorderRadius.circular(12.w)),
-              child: TextFormField(
-                // --- All your existing logic is preserved ---
-                autofillHints: widget.autofillHints,
-                focusNode: widget.focusNode,
-                onFieldSubmitted: (v) {
-                  widget.onSubmit?.call(v);
-                  setState(() => _isFocus = false);
-                  if (widget.nextFocus != null) {
-                    FocusScope.of(context).requestFocus(widget.nextFocus);
-                  } else {
-                    FocusManager.instance.primaryFocus?.unfocus();
-                  }
-                },
-                initialValue: widget.initialValue,
-                textInputAction: widget.keyboardAction,
-                onTap: widget.onTap,
-                onTapOutside: (v) {
-                  widget.onTapOutside?.call(v);
-                  setState(() => _isFocus = false);
-                  FocusManager.instance.primaryFocus?.unfocus();
-                },
-                autofocus: widget.autoFocus ?? false,
-                maxLength: widget.maxLength,
-                readOnly: widget.readOnly,
-                obscureText: widget.isPassword ? _isHidden : widget.obscureText,
-                obscuringCharacter: "*",
-                controller: widget.controller,
-                maxLines: widget.maxLines,
-                minLines: widget.minLines,
-                validator: (v) {
-                  setState(() => error = widget.validate?.call(v));
-                  return widget.validate?.call(v);
-                },
-                keyboardType: widget.inputType,
-                onChanged: widget.onChanged,
-                inputFormatters: widget.formattedType,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  overflow: TextOverflow.ellipsis,
-                  color: Styles.HEADER,
-                ),
-                scrollPadding:
-                EdgeInsets.only(bottom: context.bottom),
-
-                // **CHANGE**: Align hint and input text to the right for Arabic
-                textAlign: TextAlign.right,
-
-                // --- Decoration for the text field itself ---
-                decoration: InputDecoration(
-                  // These borders must be none so the container's border is visible
-                  disabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  border: InputBorder.none,
-                  errorStyle: const TextStyle(height: 0, fontSize: 0),
-
-                  // Hint text styling
-                  hintText: widget.hint,
-                  hintStyle: AppTextStyles.w600.copyWith(
-                    color: Styles.HINT_COLOR,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                  ),
-
-                  // Your password toggle icon logic is preserved perfectly
-                  suffixIcon: widget.isPassword
-                      ? IconButton(
-                    onPressed: _visibility,
-                    icon: _isHidden
-                        ? customImageIconSVG(imageName: SvgImages.hiddenEyeIcon)
-                        : customImageIconSVG(imageName: SvgImages.eyeIcon, color: Styles.PRIMARY_COLOR),
-                  )
-                      : null,
-                  contentPadding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
-                ),
+                    ),
+                ],
               ),
             ),
-            if (error != null) CustomErrorWidget(error: error),
+            SizedBox(height: 8.h),
           ],
-        ),
+
+          // This container creates the background and border
+          Container(
+            width: widget.width ?? context.width,
+            decoration: BoxDecoration(
+              // **CHANGE**: The background is now always white
+                color: Styles.WHITE_COLOR,
+                border: Border.all(
+                  color: activationBorderColor(), // Uses our updated color logic
+                ),
+                borderRadius: BorderRadius.circular(12.w)),
+            child: TextFormField(
+              // --- All your existing logic is preserved ---
+              autofillHints: widget.autofillHints,
+              focusNode: widget.focusNode,
+              onFieldSubmitted: (v) {
+                widget.onSubmit?.call(v);
+                setState(() => _isFocus = false);
+                if (widget.nextFocus != null) {
+                  FocusScope.of(context).requestFocus(widget.nextFocus);
+                } else {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                }
+              },
+              initialValue: widget.initialValue,
+              textInputAction: widget.keyboardAction,
+              onTap: widget.onTap,
+              onTapOutside: (v) {
+                widget.onTapOutside?.call(v);
+                setState(() => _isFocus = false);
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              autofocus: widget.autoFocus ?? false,
+              maxLength: widget.maxLength,
+              readOnly: widget.readOnly,
+              obscureText: widget.isPassword ? _isHidden : widget.obscureText,
+              obscuringCharacter: "*",
+              controller: widget.controller,
+              maxLines: widget.maxLines,
+              minLines: widget.minLines,
+              validator: (v) {
+                setState(() => error = widget.validate?.call(v));
+                return widget.validate?.call(v);
+              },
+              keyboardType: widget.inputType,
+              onChanged: widget.onChanged,
+              inputFormatters: widget.formattedType,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                overflow: TextOverflow.ellipsis,
+                color: Styles.HEADER,
+              ),
+              scrollPadding:
+              EdgeInsets.only(bottom: context.bottom),
+
+              textAlign: TextAlign.start,
+
+              decoration: InputDecoration(
+                disabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                border: InputBorder.none,
+                errorStyle: const TextStyle(height: 0, fontSize: 0),
+
+                // Hint text styling
+                hintText: widget.hint,
+                hintStyle: AppTextStyles.w600.copyWith(
+                  color: Styles.HINT_COLOR,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+
+                // Your password toggle icon logic is preserved perfectly
+                suffixIcon: widget.isPassword
+                    ? IconButton(
+                  onPressed: _visibility,
+                  icon: _isHidden
+                      ? customImageIconSVG(imageName: SvgImages.hiddenEyeIcon)
+                      : customImageIconSVG(imageName: SvgImages.eyeIcon, color: Styles.PRIMARY_COLOR),
+                )
+                    : null,
+                contentPadding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
+              ),
+            ),
+          ),
+          if (error != null) CustomErrorWidget(error: error),
+        ],
       ),
     );
   }

@@ -8,7 +8,6 @@ import '../app/core/svg_images.dart';
 import '../components/custom_images.dart';
 import '../components/custom_network_image.dart';
 import '../components/image_pop_up_viewer.dart';
-import '../data/config/di.dart';
 import '../helpers/pickers/view/image_picker_helper.dart';
 import '../main_blocs/user_bloc.dart';
 

@@ -1,17 +1,13 @@
 import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
-import 'package:geolocator/geolocator.dart';
 import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
-import '../../../helpers/permissions.dart';
-import '../../../main_blocs/user_bloc.dart';
 import '../repo/splash_repo.dart';
 
 class SplashBloc extends Bloc<AppEvent, AppState> {
