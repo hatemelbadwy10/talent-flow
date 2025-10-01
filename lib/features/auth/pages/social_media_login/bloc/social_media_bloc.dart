@@ -47,6 +47,7 @@ class SocialMediaBloc extends Bloc<AppEvent, AppState> {
         emit(Done());
       });
     } catch (e) {
+      print(e.toString());
       AppCore.showSnackBar(
         notification: AppNotification(
           message: e.toString(),

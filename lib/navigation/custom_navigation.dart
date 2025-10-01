@@ -7,6 +7,7 @@ import 'package:talent_flow/features/new_projects/page/add_project.dart';
 import 'package:talent_flow/features/payment/page/payment_page.dart';
 import 'package:talent_flow/features/projects/bloc/my_projects_bloc.dart';
 import 'package:talent_flow/features/projects/page/single_project_view.dart';
+import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
 import 'package:talent_flow/features/setting/page/add_projects.dart';
 import 'package:talent_flow/features/setting/page/favourite.dart';
 import 'package:talent_flow/features/setting/page/notification.dart';
@@ -18,6 +19,7 @@ import '../features/auth/pages/login/login.dart';
 import '../features/auth/pages/send_verification/send_verification.dart';
 import '../features/home/page/all_categories.dart';
 import '../features/home/page/all_freelancers_view.dart';
+import '../features/home/page/entrepreneur_profile.dart';
 import '../features/home/page/freelancer_profile.dart';
 import '../features/home/page/home_view.dart';
 import '../features/nav_bar/page/nav_bar.dart';
@@ -49,7 +51,7 @@ abstract class CustomNavigator {
         return _pageRoute(const OnboardingScreen());
       case Routes.freeLancer:
         return _pageRoute(UserTypeSelectionScreen(
-          arguments: settings.arguments as Map<String, dynamic>,
+          arguments: settings.arguments as Map<String, dynamic>?,
         ));
       case Routes.navBar:
         return _pageRoute(const NavBar());
@@ -65,6 +67,7 @@ abstract class CustomNavigator {
         return _pageRoute(ChangePasswordScreen(
           arguments: settings.arguments as Map<String, dynamic>,
         ));
+
       case Routes.verificationScreen:
         return _pageRoute(const SendVerificationScreen());
       case Routes.singleProjectDetails:
@@ -100,9 +103,14 @@ abstract class CustomNavigator {
         );
       case Routes.ownerProjects:
         return _pageRoute(BlocProvider(
-          create: (context) => MyProjectsBloc(sl())..add(Add()),
-          child: OwnerProjects(arguments: settings.arguments as Map<String, dynamic>?,),
+          create: (context) =>
+          MyProjectsBloc(sl())
+            ..add(Add()),
+          child: OwnerProjects(
+            arguments: settings.arguments as Map<String, dynamic>?,),
         ));
+      case Routes.entrepreneur:
+        return _pageRoute(const EntrepreneurProfile());
       case Routes.freeLancerView:
         return _pageRoute(FreelancerProfileView(
           arguments: settings.arguments as Map<String, dynamic>,));
@@ -138,12 +146,15 @@ abstract class CustomNavigator {
     //   return _pageRoute(const MyProfile());
     //
     // case Routes.dashboard:
-    //   return _pageRoute(DashBoard(
+    //   return _pageRotute(DashBoard(
     //     index: settings.arguments as int?,
     //   ));
     //
       case Routes.notifications:
-        return _pageRoute(const Notification());
+        return _pageRoute(BlocProvider(
+          create: (context) => NotificationBloc(sl()),
+          child: const Notification(),
+        ));
     //
     // case Routes.services:
     //   return _pageRoute(const ServicesPage());

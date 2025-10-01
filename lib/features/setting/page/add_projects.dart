@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 
+import '../../../data/config/di.dart';
 import '../bloc/portofilo_form_bloc.dart';
 import '../widgets/protofilo_form.dart';
 
@@ -45,7 +46,7 @@ class AddYourProjects extends StatelessWidget {
               children: [
                 const PortfolioInfoCard(),
                 BlocProvider(
-                  create: (context) => PortfolioFormBloc(),
+                  create: (context) => PortfolioFormBloc(sl()),
                   child: const PortfolioUploadForm(),
                 )
               ],

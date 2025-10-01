@@ -32,17 +32,18 @@ class AnimatedWidgets extends StatelessWidget {
   }
 }
 
+
 class ListAnimator extends StatefulWidget {
   final List<Widget>? data;
   final int? durationMilli;
   final double? verticalOffset;
   final double? horizontalOffset;
   final ScrollController? controller;
-  final direction;
+  final Axis? direction;
   final bool addPadding;
   final bool reverse;
   final bool scroll;
-  final customPadding;
+  final EdgeInsets? customPadding;
   final Stream<int>? scrollControllerStream;
 
   const ListAnimator({
@@ -68,36 +69,46 @@ class _ListAnimatorState extends State<ListAnimator> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<int>(
-        stream: widget.scrollControllerStream,
-        builder: (context, snapshot) {
-          // if(snapshot.hasData){
-          //   autoScroll.scrollToIndex(snapshot.data ,preferPosition: AutoScrollPosition.middle );
-          // }
-          return AnimationLimiter(
-            child: SingleChildScrollView(
-              controller: widget.controller,
-              padding: widget.customPadding ??
-                  EdgeInsets.only(top: widget.addPadding ? 0 : 0),
-              physics: widget.scroll
-                  ? const BouncingScrollPhysics(
-                      parent: AlwaysScrollableScrollPhysics())
-                  : const NeverScrollableScrollPhysics(),
-              reverse: widget.reverse,
-              scrollDirection: widget.direction ?? Axis.vertical,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: List.generate(widget.data!.length, (index) {
-                  return AnimationConfiguration.staggeredList(
-                      position: index,
-                      duration:
-                          Duration(milliseconds: widget.durationMilli ?? 400),
-                      child: SlideAnimation(
-                          verticalOffset: widget.verticalOffset ?? 1.0,
-                          child: FadeInAnimation(child: widget.data![index])));
-                }),
-              ),
+      stream: widget.scrollControllerStream,
+      builder: (context, snapshot) {
+        return AnimationLimiter(
+          child: SingleChildScrollView(
+            controller: widget.controller,
+            padding: widget.customPadding ??
+                EdgeInsets.only(top: widget.addPadding ? 8 : 0),
+            physics: widget.scroll
+                ? const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            )
+                : const NeverScrollableScrollPhysics(),
+            reverse: widget.reverse,
+            scrollDirection: widget.direction ?? Axis.vertical,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: List.generate(widget.data?.length ?? 0, (index) {
+                final offset =
+                (index % 2 == 0 ? (widget.horizontalOffset ?? 50.0) : -(widget.horizontalOffset ?? 50.0));
+
+                return AnimationConfiguration.staggeredList(
+                  position: index,
+                  duration: Duration(milliseconds: widget.durationMilli ?? 500),
+                  child: SlideAnimation(
+                    verticalOffset: widget.verticalOffset ?? 30.0,
+                    horizontalOffset: offset,
+                    child: FadeInAnimation(
+                      child: ScaleAnimation(
+                        scale: 0.9,
+                        curve: Curves.easeOutBack,
+                        child: widget.data![index],
+                      ),
+                    ),
+                  ),
+                );
+              }),
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
+import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 import '../../../app/core/app_event.dart';
@@ -23,24 +24,7 @@ class ServiceCategoryView extends StatelessWidget {
       create: (context) => HomeBloc(homeRepo: sl<HomeRepo>())..add(Click()),
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          surfaceTintColor: Colors.white,
-          backgroundColor: Colors.white,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios,
-                color: Colors.black, size: 20),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: Text(
-            "service_category".tr(),
-            style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          centerTitle: true,
-        ),
+        appBar: CustomAppBar(title: 'categories'.tr()),
         body: BlocBuilder<HomeBloc, AppState>(
           builder: (context, state) {
             if (state is Loading) {
@@ -62,6 +46,7 @@ class ServiceCategoryView extends StatelessWidget {
                             false) {
                           CustomNavigator.push(Routes.ownerProjects,
                               arguments: {
+                                "categoryName": category[index].name,
                                 "categoryId": category[index].id,
                               });
                         } else {

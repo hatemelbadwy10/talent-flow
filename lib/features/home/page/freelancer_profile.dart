@@ -1,226 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
-import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/features/home/bloc/home_bloc.dart';
+import 'package:talent_flow/features/new_projects/widgets/skills_section.dart';
+import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';
+import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart';
-import '../../../navigation/custom_navigation.dart';
-import '../../../navigation/routes.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../../projects/model/my_projects_model.dart';
+import '../../projects/widgets/my_projects_card.dart';
 import '../model/freelancer_profile_model.dart';
 
 class FreelancerProfileView extends StatelessWidget {
-final Map<String, dynamic> arguments;
+  final Map<String, dynamic> arguments;
   const FreelancerProfileView({super.key, required this.arguments});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => HomeBloc(homeRepo: sl())..add(
-        FreelancerProfile(arguments: arguments["freelancerId"]),
-      ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("الملف الشخصي"),
-          backgroundColor: Styles.PRIMARY_COLOR,
-          foregroundColor: Colors.white,
-          elevation: 0,
+      create: (_) => HomeBloc(homeRepo: sl())
+        ..add(
+          FreelancerProfile(arguments: arguments["freelancerId"]),
         ),
+      child: Scaffold(
+        backgroundColor: Styles.BACKGROUND_COLOR,
+        appBar: CustomAppBar(title: "freelancer_profile".tr()),
         body: BlocBuilder<HomeBloc, AppState>(
           builder: (context, state) {
             if (state is Loading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
+              );
             } else if (state is Error) {
-              return const Center(child: Text("فشل تحميل الملف الشخصي"));
+              return Center(child: Text("profile.load_failed".tr()));
             } else if (state is Done) {
               final model = state.model as FreelancerProfileModel;
 
               return DefaultTabController(
-                length: 2,
-                child: NestedScrollView(
-                  headerSliverBuilder: (context, _) => [
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.w),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // ✅ Profile Header
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 45,
-                                  backgroundImage: model.image != null
-                                      ? NetworkImage(model.image!)
-                                      : const AssetImage("assets/images/avatar.png")
-                                  as ImageProvider,
-                                ),
-                                SizedBox(width: 16.w),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      if (model.name != null)
-                                        Text(
-                                          model.name!,
-                                          style: const TextStyle(
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold,
-                                            color: Styles.PRIMARY_COLOR,
-                                          ),
-                                        ),
-                                      if (model.jobTitle != null)
-                                        Text(
-                                          model.jobTitle!,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      if (model.statistics?.rating != null)
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.star,
-                                                color: Colors.amber, size: 20),
-                                            SizedBox(width: 4.w),
-                                            Text(
-                                              "${model.statistics!.rating}/5",
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ],
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 20.h),
-
-                            // ✅ About Me
-                            if (model.bio != null && model.bio!.isNotEmpty)
-                              Card(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                                elevation: 2,
-                                child: Padding(
-                                  padding: EdgeInsets.all(16.w),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("نبذة عني",
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold)),
-                                      SizedBox(height: 8.h),
-                                      Text(model.bio!,
-                                          style: const TextStyle(
-                                              fontSize: 14, height: 1.5)),
-                                    ],
-                                  ),
-                                ),
-                              ),
-
-                            SizedBox(height: 16.h),
-
-                            // ✅ Skills
-                            if (model.skills.isNotEmpty)
-                              Card(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                                elevation: 2,
-                                child: Padding(
-                                  padding: EdgeInsets.all(16.w),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("المهارات",
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold)),
-                                      SizedBox(height: 12.h),
-                                      Wrap(
-                                        spacing: 8,
-                                        runSpacing: 8,
-                                        children: model.skills
-                                            .map((s) => Chip(
-                                          label: Text(s),
-                                          backgroundColor: Styles
-                                              .PRIMARY_COLOR
-                                              .withOpacity(0.1),
-                                          labelStyle: const TextStyle(
-                                              color:
-                                              Styles.PRIMARY_COLOR,
-                                              fontWeight:
-                                              FontWeight.w500),
-                                        ))
-                                            .toList(),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                          ],
+                length: 3,
+                child: Column(
+                  children: [
+                    // Header Section
+                    Container(
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE8F4F8),
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20),
                         ),
+                      ),
+                      padding: EdgeInsets.all(24.w),
+                      child: _FreelancerHeader(model: model),
+                    ),
+
+                    // TabBar
+                    Container(
+                      color: Colors.white,
+                      child: TabBar(
+                        isScrollable: true,
+                        labelColor: Styles.PRIMARY_COLOR,
+                        unselectedLabelColor: Styles.SUBTITLE,
+                        indicatorColor: Styles.PRIMARY_COLOR,
+                        labelStyle: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        tabs: [
+                          Tab(text: "bio".tr()),
+                          Tab(text: "reviews".tr()),
+                          Tab(text: "works".tr()),
+                        ],
                       ),
                     ),
-                    SliverPersistentHeader(
-                      delegate: _SliverAppBarDelegate(
-                        const TabBar(
-                          tabs: [
-                            Tab(text: "الأعمال"),
-                            Tab(text: "التقييمات"),
-                          ],
-                          labelColor: Styles.PRIMARY_COLOR,
-                          unselectedLabelColor: Colors.grey,
-                          indicatorColor: Styles.PRIMARY_COLOR,
-                        ),
+
+                    // TabBarView
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          _BioTab(model: model),
+                          _ReviewsTab(model: model),
+                          _WorksTab(model: model),
+                        ],
                       ),
-                      pinned: true,
                     ),
                   ],
-                  body: TabBarView(
-                    children: [
-                      // ✅ Works Tab
-                      model.works.isNotEmpty
-                          ? GridView.builder(
-                        padding: EdgeInsets.all(16.w),
-                        gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 0.8,
-                        ),
-                        itemCount: model.works.length,
-                        itemBuilder: (context, index) {
-                          final work = model.works[index];
-                          return GestureDetector  (
-                              onTap: (){
-                                CustomNavigator.push(Routes.singleProjectDetails,arguments: {"id": work.id});
-                              },
-                              child: _ProjectCard(work: work));
-                        },
-                      )
-                          : const Center(child: Text("لا توجد أعمال")),
-
-                      // ✅ Reviews Tab
-                      model.reviews.isNotEmpty
-                          ? ListView.builder(
-                        padding: EdgeInsets.all(16.w),
-                        itemCount: model.reviews.length,
-                        itemBuilder: (context, index) {
-                          final review = model.reviews[index];
-                          return _FeedbackCard(feedback: review);
-                        },
-                      )
-                          : const Center(child: Text("لا توجد تقييمات")),
-                    ],
-                  ),
                 ),
               );
             }
@@ -232,57 +98,98 @@ final Map<String, dynamic> arguments;
   }
 }
 
-// SliverAppBarDelegate
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
-
-  final TabBar _tabBar;
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height;
-  @override
-  double get maxExtent => _tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(color: Colors.white, child: _tabBar);
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) => false;
-}
-
-// Project Card
-class _ProjectCard extends StatelessWidget {
-  final Work work;
-
-  const _ProjectCard({required this.work});
+class _FreelancerHeader extends StatelessWidget {
+  final FreelancerProfileModel model;
+  const _FreelancerHeader({required this.model});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => CustomNavigator.push(Routes.singleProjectDetails,arguments: {"id": work.id}),
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 3,
-        child: Column(
+    return Column(
+      children: [
+        // Profile Image
+        CircleAvatar(
+          radius: 50.w,
+          backgroundColor: Styles.PRIMARY_COLOR.withOpacity(0.1),
+          backgroundImage: model.image != null ? NetworkImage(model.image!) : null,
+          child: model.image == null
+              ? Icon(Icons.person, size: 50.w, color: Styles.PRIMARY_COLOR)
+              : null,
+        ),
+
+        SizedBox(height: 16.h),
+
+        // Name and Online Status
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: work.image != null
-                  ? Image.network(work.image!, fit: BoxFit.cover, width: double.infinity)
-                  : const Icon(Icons.image_not_supported, size: 50),
-            ),
-            Padding(
-              padding: EdgeInsets.all(8.w),
-              child: Text(
-                work.title ?? "بدون عنوان",
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style:
-                const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            Text(model.name ?? "no_name".tr()),
+            SizedBox(width: 8.w),
+            Container(
+              width: 12.w,
+              height: 12.h,
+              decoration: const BoxDecoration(
+                color: Colors.green,
+                shape: BoxShape.circle,
               ),
             ),
+          ],
+        ),
+
+        SizedBox(height: 8.h),
+
+        // Job Title
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.work_outline, color: Styles.PRIMARY_COLOR, size: 16),
+            SizedBox(width: 8.w),
+            Text(model.jobTitle ?? "no_job_title".tr()),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// Bio Tab
+class _BioTab extends StatelessWidget {
+  final FreelancerProfileModel model;
+  const _BioTab({required this.model});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16.w),
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          color: Colors.grey.shade200,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (model.bio != null && model.bio!.isNotEmpty) ...[
+              Text("bio".tr()),
+              Divider(color: Colors.grey.shade400, thickness: .5),
+              SizedBox(height: 12.h),
+              Text(model.bio!),
+              SizedBox(height: 24.h),
+            ],
+
+            Divider(color: Colors.grey.shade400, thickness: .5),
+
+            if (model.skills.isNotEmpty) ...[
+              SkillsSection(skills: model.skills),
+            ],
+
+            if ((model.bio == null || model.bio!.isEmpty) && model.skills.isEmpty)
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 50.h),
+                  child: Text("no_info_available".tr()),
+                ),
+              ),
           ],
         ),
       ),
@@ -290,48 +197,78 @@ class _ProjectCard extends StatelessWidget {
   }
 }
 
-// Feedback Card
-class _FeedbackCard extends StatelessWidget {
-  final dynamic feedback;
-
-  const _FeedbackCard({required this.feedback});
+// Reviews Tab
+class _ReviewsTab extends StatelessWidget {
+  final FreelancerProfileModel model;
+  const _ReviewsTab({required this.model});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.only(bottom: 12.h),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (feedback["rating"] != null)
-              Row(
-                children: [
-                  const Icon(Icons.star, color: Colors.amber, size: 20),
-                  SizedBox(width: 4.w),
-                  Text("${feedback["rating"]}/5",
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 14)),
-                ],
-              ),
-            if (feedback["comment"] != null)
-              Padding(
-                padding: EdgeInsets.only(top: 8.h),
-                child: Text(feedback["comment"]),
-              ),
-            if (feedback["date"] != null)
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  feedback["date"],
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ),
-          ],
+    if (model.reviews.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 50.h),
+          child: Text("no_reviews".tr()),
         ),
+      );
+    }
+
+    return ListView.builder(
+      padding: EdgeInsets.all(16.w),
+      itemCount: model.reviews.length,
+      itemBuilder: (context, index) {
+        return Container(
+          margin: EdgeInsets.only(bottom: 16.h),
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            color: Styles.PRIMARY_COLOR,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Styles.BORDER_COLOR),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("user_review".tr()),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// Works Tab
+class _WorksTab extends StatelessWidget {
+  final FreelancerProfileModel model;
+  const _WorksTab({required this.model});
+
+  @override
+  Widget build(BuildContext context) {
+    if (model.works.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 50.h),
+          child: Text("no_works".tr()),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16.w),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 2,
+          mainAxisSpacing: 2,
+          childAspectRatio: 200/320,
+        ),
+        itemCount: model.works.length,
+        itemBuilder: (context, index) {
+          final work = model.works[index];
+          return ProjectPortfolioCard(projectsModel: MyProjectsModel(id: work.id,  title: work.title, description: work.description, views: work.views,  status: work.status, isInFavorites:false));
+        },
       ),
     );
   }

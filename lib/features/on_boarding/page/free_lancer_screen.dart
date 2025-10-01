@@ -67,7 +67,7 @@ class UserTypeSelectionScreen extends StatelessWidget {
                   iconPath: Images.jopSearcher,
                   text: 'user_selection.find_service_card'.tr(),
                   onTap: () {
-                    sl<SharedPreferences>().setBool(AppStorageKey.isFreelancer, true);
+                    sl<SharedPreferences>().setBool(AppStorageKey.isFreelancer, false);
                     log('arguments?["from_login"]${arguments?["from_login"]}');
                     if(arguments?["from_login"] == true){
                       CustomNavigator.push(Routes.register);
@@ -84,7 +84,7 @@ class UserTypeSelectionScreen extends StatelessWidget {
                   text: 'user_selection.freelancer_card'.tr(),
                   onTap: () {
 
-                    sl<SharedPreferences>().setBool(AppStorageKey.isFreelancer, false);
+                    sl<SharedPreferences>().setBool(AppStorageKey.isFreelancer, true);
                     log('arguments?["from_login"]${arguments?["from_login"]}');
                     if(arguments?["from_login"] == true){
                     CustomNavigator.push(Routes.register);

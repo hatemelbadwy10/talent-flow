@@ -78,7 +78,7 @@ class ApiErrorHandler {
         return ServerFailure(getTranslated("something_went_wrong"));
       }
     } else {
-      return ServerFailure(getTranslated("something_went_wrong"));
+      return ServerFailure("something_went_wrong");
     }
   }
 }

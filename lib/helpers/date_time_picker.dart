@@ -139,7 +139,7 @@ class _DateTimePickerState extends State<DateTimePicker> {
                   horizontal: Dimensions.PADDING_SIZE_DEFAULT.w,
                   vertical: Dimensions.paddingSizeExtraSmall.h),
               child: CustomButton(
-                text: getTranslated('confirm'),
+                text: 'confirm',
                 onTap: () {
                   if (date != null) {
                     widget.valueChanged!(date!);

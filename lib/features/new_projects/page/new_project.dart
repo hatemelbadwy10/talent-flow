@@ -10,6 +10,8 @@ import '../../../app/core/app_state.dart';
 import '../../../app/core/app_storage_keys.dart';
 import '../../../data/config/di.dart';
 import '../../projects/model/my_projects_model.dart';
+import '../../projects/widgets/projects_shimmer.dart';
+import '../../setting/widgets/setting_app_bar.dart';
 import '../bloc/new_projects_bloc.dart';
 import '../widgets/project_card.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -24,27 +26,30 @@ class NewProject extends StatelessWidget {
       NewProjectsBloc(sl<NewProjectsRepo>())..add(Add()), // يبدأ يجيب البيانات
       child: Scaffold(
         backgroundColor: Colors.grey.shade200,
-        appBar: AppBar(
-          centerTitle: true,
-          surfaceTintColor: Colors.white,
-          backgroundColor: Colors.white,
-          title: Text(
-            'new_project.title'.tr(),
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-          ),
-          leading: sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false
-              ? null:IconButton(
-            icon: const Icon(
-              Icons.add,
-              color: Colors.black,
-              size: 20,
-            ),
-            onPressed: () {
-              CustomNavigator.push(Routes.addProject);
-            },
-          ),
-        ),
-        body: Padding(
+        appBar: CustomAppBar(
+          title: 'new_project.title'.tr(),
+          showBackButton: false,
+          actions: [
+            if (!(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false))
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: CircleAvatar(
+                  radius: 18, // حجم الدائرة
+                  backgroundColor: Colors.white, // خلفية الدائرة
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.add,
+                      color: Colors.black,
+                      size: 22, // حجم الأيقونة
+                    ),
+                    onPressed: () {
+                      CustomNavigator.push(Routes.addProject);
+                    },
+                  ),
+                ),
+              ),
+          ],
+        ),        body: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16.0),
           child: BlocBuilder<NewProjectsBloc, AppState>(
             builder: (context, state) {

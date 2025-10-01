@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -11,6 +14,7 @@ import '../../../../../app/core/styles.dart';
 import '../../../../../data/error/failures.dart';
 import '../../../../../navigation/custom_navigation.dart';
 import '../../../../../navigation/routes.dart';
+import '../../login/bloc/login_bloc.dart';
 import '../repo/register_repo.dart';
 
 class RegisterBloc extends Bloc<AppEvent, AppState> {
@@ -41,7 +45,6 @@ class RegisterBloc extends Bloc<AppEvent, AppState> {
 
             CustomNavigator.push(
               Routes.sendCodeScreen,
-              clean: true,
               arguments: {
                 "email": email,
                 "isRegister": true,
@@ -61,5 +64,47 @@ class RegisterBloc extends Bloc<AppEvent, AppState> {
         emit(Error());
       }
     });
+    on<SocialLoginClick>((event, emit) async {
+      try {
+        emit(Loading());
+
+        final response = await repo.socialLogin(
+          provider: event.provider,
+          token: event.token,
+        );
+
+        response.fold(
+              (fail) {
+            AppCore.showSnackBar(
+              notification: AppNotification(
+                message: fail.error ?? 'حدث خطأ ما',
+                isFloating: true,
+                backgroundColor: Styles.IN_ACTIVE,
+                borderColor: Colors.transparent,
+              ),
+            );
+            emit(Error());
+          },
+              (success) async {
+            final responseData = success.data;
+            CustomNavigator.push(Routes.sendCodeScreen, arguments: {
+              "email": responseData["email"],
+            });
+            emit(Done());
+          },
+        );
+      } catch (e) {
+        log("Exception in SocialLoginClick: $e");
+        AppCore.showSnackBar(
+          notification: AppNotification(
+            message: e.toString(),
+            backgroundColor: Styles.IN_ACTIVE,
+            borderColor: Styles.RED_COLOR,
+          ),
+        );
+        emit(Error());
+      }
+    });
+
   }
 }

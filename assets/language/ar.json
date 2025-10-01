@@ -78,7 +78,8 @@
     "error_required": "هذا الحقل مطلوب",
     "error_short": "كلمة المرور قصيرة جداً",
     "error_not_match": "كلمات المرور غير متطابقة",
-    "confirm_change": "تأكيد التغيير"
+    "confirm_change": "تأكيد التغيير",
+    "success": "تم تغيير كلمة المرور بنجاح"
   },
   "send_verification": {
     "title": "ارسل بياناتك لتأكيد الحساب",
@@ -114,6 +115,7 @@
     "entrepreneurs": "عرضو الخدمات",
     "view_profile": "عرض الملف الشخصي",
     "view_company_profile": "عرض الملف الشخصي للشركة",
+    "partners": "شريكاء",
     "services": {
       "graphic_design": "التصميم الجرافيكي",
       "digital_marketing": "التسويق الرقمي",
@@ -127,6 +129,7 @@
   },
   "freelancers": {
     "title": "البحث عن المستقلين",
+    "filters": "التصفيات",
     "search_freelancer": "البحث عن المستقلين",
     "search_here": "ابحث هنا",
     "category": "التخصص",
@@ -142,7 +145,8 @@
     "offers": "{0} عرض",
     "description": "المشروع عبارة عن تطبيق كرة قدم NATIVE ANDROID & IOS مربوط بـ LARAVEL BACKEND المطلوب لعمل SENIOR LEVEL التالي تعديل على طريقة الاشعارات حيث تم تغيير طريقة ارسال الاشعارات من جوجل فايز بيز........",
     "similar_project": "مشروع مماثل",
-    "add_offer": "أضف عرضك"
+    "add_offer": "أضف عرضك",
+    "read_project": "قراءة بيانات المشروع"
   },
   "new_project": {
     "title": "مشاريع جديدة"
@@ -305,35 +309,53 @@
   "completion_date": "تاريخ الإنجاز",
   "completion_date_hint": "اختر تاريخ الإنجاز",
   "favorite": "مفضله",
+  "no_favourite_projects": "لا يوجد اعمال مفضلة",
   "notifications": "الاشعارات",
   "all": "الكل",
   "projects": "الأعمال",
   "payments": "المدفوعات",
   "freeLancer": "الفريلانسر",
-  "edit_profile": {
-    "title": "Edit Profile",
-    "first_name": "First Name",
-    "first_name_hint": "Enter your first name",
-    "last_name": "Last Name",
-    "last_name_hint": "Enter your last name",
-    "email": "Email",
-    "email_hint": "Enter your email",
-    "specialization": "Specialization",
-    "specialization_hint": "Choose your field",
-    "job_title": "Job Title",
-    "job_title_hint": "Choose your job title",
-    "bio": "Bio",
-    "bio_hint": "Write a short description about yourself...",
-    "detailed_bio": "Add a detailed biography about yourself, education, experiences and skills",
-    "skills": "Skills",
-    "skills_hint": "Choose your skills and specialties",
-    "new_password": "New Password",
-    "confirm_password": "Confirm Password",
-    "password_hint": "Enter your password",
-    "change_password": "Change Password",
-    "save": "Save"
+  "profile": {
+    "title": "الملف الشخصي",
+    "load_failed": "فشل تحميل الملف الشخصي",
+    "about_me": "نبذة عني",
+    "skills": "المهارات",
+    "works": "الأعمال",
+    "reviews": "التقييمات",
+    "no_works": "لا توجد أعمال",
+    "no_reviews": "لا توجد تقييمات",
+    "contact_me": "اتصل بي"
   },
-  "project_status": {
+  "edit_profile": {
+    "title": "تعديل الحساب",
+    "first_name": "الاسم",
+    "first_name_hint": "اكتب اسمك",
+    "last_name": "اسم العائلة",
+    "last_name_hint": "اكتب اسم العائلة",
+    "email": "البريد الالكتروني",
+    "email_hint": "ادخل البريد الالكتروني الخاص بك",
+    "specialization": "التخصص",
+    "specialization_hint": "اختر مجال عملك",
+    "job_title": "المسمى الوظيفي",
+    "job_title_hint": "اختر المسمى الوظيفي",
+    "bio": "نبذة تعريفية",
+    "bio_hint": "اكتب وصف تعريفي عن نفسك .......",
+    "detailed_bio": "أضف سيرة ذاتية تعرف عن نفسك وتعليمك وخبراتك ومهاراتك",
+    "skills": "المهارات",
+    "select_skills": "اختر المهارات",
+    "select": "اختر تخصصك",
+    "cancel": "الغاء",
+    "skills_hint": "اختر مهاراتك وتخصصاتك",
+    "new_password": "كلمة المرور الجديدة",
+    "confirm_password": "تأكيد كلمة المرور",
+    "password_hint": "ادخل كلمة المرور الخاص بك",
+    "change_password": "تغيير كلمة المرور",
+    "save": "حفظ",
+    "phone": "رقم الهاتف",
+    "phone_hint": "ادخل رقم الهاتف"
+
+
+  },  "project_status": {
     "completed": "مكتملة",
     "draft": "مسودة",
     "rejected": "مرفوضة",
@@ -361,6 +383,61 @@
     "paypal": "الدفع عن طريق الباي بال",
     "e_wallet": "الدفع عبر المحفظة الالكترونية"
   },
+
+  "help": {
+    "title": "الدعم الفني",
+    "subtitle": "أخبرنا مشكلتك وسنرد عليك قريباً",
+    "first_name": "الاسم الأول",
+    "last_name": "اسم العائلة",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "message": "الرسالة",
+    "cancel": "إلغاء",
+    "send": "إرسال"
+  },
+  "service_category": "تصنيف الخدمة",
+  "paste": "لصق",
+  "invalid_credentials": "بيانات الدخول غير صحيحة",
+  "take_a_photo": "استخراج صورة",
+  "choose_from_gallery": "اختر من المعرض",
   "project_details": "تفاصيل المشروع",
-  "pay_for_project": "ادفع للمشروع"
+  "pay_for_project": "ادفع للمشروع",
+  "terms_and_conditions": "الشروط والاحكام",
+  "about": "عن تالنت فلو",
+  "projectData": "بيانات المشروع",
+
+  "dialog": {
+    "title": "اكتب رسالتك",
+    "hint": "ادخل الرسالة هنا...",
+    "cancel": "إلغاء",
+    "send": "إرسال"
+  },
+  "freelancers2": "المستقلون",
+  "filter": "الفلترة",
+  "clear_all": "مسح الكل",
+  "specialization": "التخصص",
+  "all_categories": "جميع التخصصات",
+  "apply_filter": "تطبيق الفلتر",
+  "loading_failed": "فشل تحميل التصنيفات",
+  "retry": "إعادة المحاولة",
+  "no_categories": "لا توجد تصنيفات متاحة",
+  "filter_applied": "التخصص: {category}",
+  "freelancers_failed": "فشل تحميل البيانات",
+  "check_connection": "تأكد من الاتصال بالإنترنت وحاول مرة أخرى",
+  "no_freelancers": "لا يوجد مستقلون",
+  "no_freelancers_in_category": "لا يوجد مستقلون في هذا التخصص حالياً",
+  "no_freelancers_general": "لا يوجد مستقلون متاحون حالياً",
+  "no_name": "بدون اسم",
+  "freelancer_profile": "الملف الشخصي للمستقل",
+  "profile.load_failed": "فشل تحميل الملف الشخصي",
+  "bio": "السيرة الذاتية",
+  "reviews": "التقييمات",
+  "works": "معرض الأعمال",
+  "no_job_title": "بدون مسمى وظيفي",
+  "no_info_available": "لا توجد معلومات متاحة",
+  "no_reviews": "لا توجد تقييمات متاحة",
+  "no_works": "لا توجد أعمال متاحة",
+  "user_review": "تقييم المستخدم"
+
+
 }

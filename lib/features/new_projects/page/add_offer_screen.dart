@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart'; // <-- 1. Import the package
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/features/new_projects/widgets/add_offer_widget.dart';
 import 'package:talent_flow/features/new_projects/widgets/project_description.dart';
@@ -26,7 +28,7 @@ class AddOfferScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          title: Text('submit_offer_title'.tr()),
+          title: Text(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? true? 'submit_offer_title'.tr(): 'projectData'.tr()),
           centerTitle: true,
           surfaceTintColor: Colors.white,
         ),
@@ -41,7 +43,8 @@ class AddOfferScreen extends StatelessWidget {
                     children: [
                        ProjectDetailsCard(singleProjectModel: state.model as SingleProjectModel,),
                        ProjectDescription(singleProjectModel: state.model as SingleProjectModel,),
-                       AddOfferWidget(id:argument?['id'],),
+                       sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? true?
+                       AddOfferWidget(id:argument?['id'],):SizedBox(),
                       const SizedBox(
                         height: 16,
                       ),

@@ -12,7 +12,20 @@
           "package_name": "com.example.talent_flow"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "863499364117-ritlg0i8mev051eijcg0s7cvknqjlclh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.talent_flow",
+            "certificate_hash": "622ff4ec58f0f90f2d221d2e46aea7078b6be38b"
+          }
+        },
+        {
+          "client_id": "863499364117-kbsidnp8fr2b105j1j54hbilp8nchdju.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDIEtvgw41mm0Qq_43HOKBj5Ud_u1BmBRU"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "863499364117-kbsidnp8fr2b105j1j54hbilp8nchdju.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "863499364117-k5dgaljtamqj089emnk7igrrpj6sr78d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.talentFlow"
+              }
+            }
+          ]
         }
       }
     }

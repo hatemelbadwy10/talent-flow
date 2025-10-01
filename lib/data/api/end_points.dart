@@ -22,9 +22,10 @@ class EndPoints {
   static const String deleteAccount = 'delete-account';
   static const String reactivateAccount = 'reactivate-account';
   static const String setLang = 'set-lang';
+  static const String socialLogin = 'api/auth/social/login';
 
   ///User Profile
-  static const String editProfile = 'update-profile';
+  static const String editProfile = 'api/profile/edit-profile';
   static const String profile = 'profile';
 
   ///Home
@@ -37,6 +38,7 @@ class EndPoints {
   ///Offers
   static const String offers = 'offers';
   static offerDetails(id) => 'offers/$id';
+  static const paymentMethods = 'api/payment-methods';
 
   ///News
   static const String news = 'our-news';
@@ -98,14 +100,13 @@ class EndPoints {
   static const String uploadFile = 'upload-file';
 
   ///Notification
-  static const String notifications = 'notifications';
+  static const String notifications = 'api/profile/notifications?type=';
   static const String markAsRead = 'mark-as-read';
   static readNotification(id) => 'notifications/$id';
   static deleteNotification(id) => 'notifications/$id';
 
   ///Check Out
   static checkOutOrder(id) => 'check-out/$id';
-
   ///Setting
   static const String associationStatistics = 'important-numbers';
   static const String faqs = 'faqs';
@@ -115,6 +116,7 @@ class EndPoints {
   static const String associationObjectives = 'goals';
   static const String whoUs = 'who-us';
   static const String contactUs = 'contact-us';
+  static const String help = 'api/support-tickets';
 
   ///Selectors
   static const String countries = 'countries';
@@ -134,10 +136,11 @@ static const String addProject ='api/projects';
 static const String singleProject = '/api/projects/';
 static const String addOffer ="api/projects/proposals";
 static const String selectionOption ="api/select-options";
+static const String addWorks = "api/profile/add-works";
   ///Upload File Service
   static const String uploadFileService = 'store_attachment';
   static deleteFile(id) => 'delete-file/$id';
-
+static const String logout = 'api/auth/logout';
   /// maps
   static const String geoCodeUrl = '/maps/api/geocode/';
   static const String autoComplete = '/maps/api/place/autocomplete/';

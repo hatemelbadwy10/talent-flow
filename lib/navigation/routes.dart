@@ -14,6 +14,7 @@ class Routes {
   static const home = "HOME";
   static const freelancers = "FREE_LANCERS";
   static const ownerProjects ="OWNER_PROJECTS";
+  static const entrepreneur = "ENTREPRENEUR";
   static const freeLancerView = "FREE_LANCER_VIEW";
   static const addOffer = "ADD_OFFER";
   static const addProject = "ADD_PROJECT";

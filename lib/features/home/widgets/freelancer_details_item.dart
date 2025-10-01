@@ -9,6 +9,7 @@ class FreelancerListDetailItem extends StatelessWidget {
   final double rating;
   final String description;
   final String? imageUrl;
+  final String? phoneNumber;
 
   const FreelancerListDetailItem({
     super.key,
@@ -17,105 +18,103 @@ class FreelancerListDetailItem extends StatelessWidget {
     required this.rating,
     required this.description,
     this.imageUrl,
+    this.phoneNumber,
   });
+
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.only(bottom: 16.h),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Styles.PRIMARY_COLOR.withOpacity(0.2),
-                  backgroundImage: imageUrl != null ? NetworkImage(imageUrl!) : null,
-                  child: imageUrl == null
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center, // Align items vertically in the middle
+            children: [
+              // Profile image
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Styles.PRIMARY_COLOR, width: 2), // Example border color
+                ),
+                child: CircleAvatar(
+                  radius: 30, // Adjusted radius for a slightly smaller look
+                  backgroundColor: Colors.grey.shade200,
+                  backgroundImage: imageUrl != null && Uri.parse(imageUrl!).isAbsolute
+                      ? NetworkImage(imageUrl!)
+                      : null,
+                  child: imageUrl == null || !Uri.parse(imageUrl!).isAbsolute
                       ? const Icon(Icons.person, size: 30, color: Styles.PRIMARY_COLOR)
                       : null,
                 ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(width: 12.w),
+              // Name, Title, and Rating
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17, // Slightly smaller font
+                        color: Colors.black87,
                       ),
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[700],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Row(
-                        children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 16),
-                          SizedBox(width: 4.w),
-                          Text(
-                            rating.toStringAsFixed(1),
-                            style: TextStyle(fontSize: 13, color: Colors.grey[700]),
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            "(0)", // Placeholder for number of reviews
-                            style: TextStyle(fontSize: 13, color: Colors.grey[500]),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                // "Contact Me" Button
-                SizedBox(
-                  height: 35.h,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      print('Contact $name tapped!');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Styles.PRIMARY_COLOR,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 12.w),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    child: Text(
-                      "freelancers.contact_me".tr(), // "Contact Me"
-                      style: const TextStyle(fontSize: 13),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 13, // Slightly smaller font
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        const Icon(Icons.star, color: Colors.amber, size: 18),
+                        SizedBox(width: 4.w),
+                        Text(
+                          rating.toStringAsFixed(1), // Display rating with one decimal
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              description,
-              style: TextStyle(fontSize: 13, color: Colors.grey[800]),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+          SizedBox(height: 14.h),
+          // Description
+          Text(
+            description,
+            style: TextStyle(fontSize: 14, color: Colors.grey[800]),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

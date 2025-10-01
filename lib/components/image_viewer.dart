@@ -3,6 +3,8 @@ import 'package:talent_flow/components/custom_app_bar.dart';
 import 'package:talent_flow/components/custom_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../features/setting/widgets/setting_app_bar.dart';
+
 class ImageViewer extends StatelessWidget {
   const ImageViewer({
     Key? key,
@@ -16,7 +18,7 @@ class ImageViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(),
+      appBar: const CustomAppBar(title: '',),
       body: isFromInternet
           ? Center(
               child: CustomNetworkImage.containerNewWorkImage(

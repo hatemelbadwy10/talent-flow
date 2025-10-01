@@ -1,5 +1,4 @@
-import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
@@ -79,7 +78,7 @@ class NewProjectsBloc extends Bloc<AppEvent, AppState> {
             }, // You might want a specific error state for favorite
             (response) {
               AppCore.showSnackBar(notification: AppNotification(
-                message: "added_to_favorites".tr(),
+                message: response.data['message'],
                 backgroundColor: Styles.ACTIVE,
                 borderColor: Styles.ACTIVE,
               ));

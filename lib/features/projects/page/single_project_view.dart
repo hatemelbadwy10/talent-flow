@@ -13,6 +13,7 @@ import '../../new_projects/widgets/project_description.dart';
 import '../../new_projects/widgets/project_details_card.dart';
 import '../bloc/my_projects_bloc.dart';
 import '../model/single_project_model.dart';
+import '../widgets/single_project_shimmer.dart';
 
 class SingleProjectView extends StatelessWidget {
   final Map<String, dynamic> arguments;
@@ -37,7 +38,7 @@ class SingleProjectView extends StatelessWidget {
         body: BlocBuilder<MyProjectsBloc, AppState>(
           builder: (context, state) {
             if (state is Loading) {
-              return const Center(child: CircularProgressIndicator());
+              return const SingleProjectViewShimmer();
             } else if (state is Error) {
               return const Center(child: Text("فشل تحميل المشروع"));
             } else if (state is Done && state.model is SingleProjectModel) {
@@ -62,7 +63,7 @@ class SingleProjectView extends StatelessWidget {
           },
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: _buildPaymentButton(context),
+        floatingActionButton:isFreelancer? null: _buildPaymentButton(context),
       ),
     );
   }

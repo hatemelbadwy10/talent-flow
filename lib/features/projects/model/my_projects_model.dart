@@ -1,18 +1,18 @@
-import 'package:talent_flow/data/config/mapper.dart'; // Assuming SingleMapper is defined here
+import 'package:talent_flow/data/config/mapper.dart';
 
 class MyProjectsModel extends SingleMapper {
   MyProjectsModel({
     required this.id,
-    required this.owner,
+     this.owner,
     required this.title,
     required this.description,
     required this.views,
-    required this.since,
-    required this.proposalsCount,
-    required this.status, // Added
-    required this.isPaid, // Added
-    required this.specialization, // Added
-    required this.isInFavorites,
+     this.since,
+     this.proposalsCount,
+    required this.status,
+     this.isPaid,
+     this.specialization,
+     this.isInFavorites,
   });
 
   final int? id;
@@ -22,9 +22,9 @@ class MyProjectsModel extends SingleMapper {
   final int? views;
   final String? since;
   final int? proposalsCount;
-  final String? status; // Added
-  final int? isPaid; // Added
-  final Specialization? specialization; // Added
+  final String? status;
+  final int? isPaid;
+  final Specialization? specialization;
   final bool? isInFavorites;
 
   factory MyProjectsModel.fromJson(Map<String, dynamic> json) {
@@ -33,15 +33,26 @@ class MyProjectsModel extends SingleMapper {
       owner: json["owner"] == null ? null : Owner.fromJson(json["owner"]),
       title: json["title"],
       description: json["description"],
-      views: json["views"],
-      since: json["since"],
-      proposalsCount: json["proposals_count"],
-      status: json["status"], // Added
-      isPaid: json["is_paid"], // Added
+      views: json["views"] ?? 0,
+      since: json["since"] ?? "",
+
+      // 🔹 Handle both "proposals_count" and "likes"
+      proposalsCount: json["proposals_count"] ?? json["likes"] ?? 0,
+
+      status: json["status"],
+      isPaid: json["is_paid"] ?? 0,
+
+      // 🔹 If specialization is missing, fallback to using image/title
       specialization: json["specialization"] == null
-          ? null
-          : Specialization.fromJson(json["specialization"]), // Added
-      isInFavorites: json["is_in_favorites"],
+          ? (json["image"] != null
+          ? Specialization(
+        name: json["specialization_name"] ?? "", // optional
+        image: json["image"],
+      )
+          : null)
+          : Specialization.fromJson(json["specialization"]),
+
+      isInFavorites: json["is_in_favorites"] ?? false,
     );
   }
 
@@ -106,7 +117,6 @@ class Owner extends SingleMapper {
   }
 }
 
-// New Model for Specialization
 class Specialization extends SingleMapper {
   Specialization({
     required this.name,

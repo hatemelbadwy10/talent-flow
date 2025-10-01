@@ -18,8 +18,12 @@ import 'package:talent_flow/app/core/text_styles.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/auth/widgets/auth_base.dart';
 
+import '../../../../app/core/app_core.dart';
 import '../../../../app/core/app_event.dart';
+import '../../../../app/core/app_notification.dart';
 import '../../../../app/core/app_state.dart';
+import '../social_media_login/bloc/social_media_bloc.dart';
+import '../social_media_login/repo/social_media_repo.dart';
 import 'bloc/login_bloc.dart';
 
 class Login extends StatelessWidget {
@@ -27,8 +31,15 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => LoginBloc(repo: sl<LoginRepo>()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => LoginBloc(repo: sl<LoginRepo>()),
+        ),
+        BlocProvider(
+          create: (_) => SocialMediaBloc(repo: sl<SocialMediaRepo>()),
+        ),
+      ],
       child: const LoginView(),
     );
   }
@@ -45,7 +56,6 @@ class _LoginViewState extends State<LoginView> {
   static final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool rememberMe = false;
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +66,6 @@ class _LoginViewState extends State<LoginView> {
             key: ValueKey(context.locale.languageCode),
             children: _buildLoginContent(context),
           ),
-
-          /// Language Toggle
           SafeArea(
             child: Align(
               alignment: AlignmentDirectional.topEnd,
@@ -134,7 +142,7 @@ class _LoginViewState extends State<LoginView> {
 
       SizedBox(height: 12.h),
 
-      /// ✅ BlocBuilder حولين الزرار بس
+      /// ✅ BlocBuilder حول زرار Login فقط
       BlocBuilder<LoginBloc, AppState>(
         builder: (context, state) {
           return CustomButton(
@@ -165,39 +173,84 @@ class _LoginViewState extends State<LoginView> {
       Row(
         children: [
           const Expanded(child: Divider(height: 1, color: Colors.grey, thickness: 0.5, endIndent: 10)),
-          Text('login.or_login_with'.tr(), style: AppTextStyles.w500.copyWith(color: Colors.grey)),
+          Text('login.or_login_with'.tr(),
+              style: AppTextStyles.w500.copyWith(color: Colors.grey)),
           const Expanded(child: Divider(height: 1, color: Colors.grey, thickness: 0.5, indent: 10)),
         ],
       ),
 
       SizedBox(height: 16.h),
 
-      /// Social Buttons
-      CustomButton(
-        text: "login.login_google".tr(),
-        backgroundColor: Colors.white,
-        textColor: Colors.black,
-        lIconWidget: SvgPicture.asset("assets/svgs/google.svg"),
-        onTap: () async => await SocialMediaLoginHelper().googleLogin(),
+      /// ✅ BlocBuilder للسوشيال لوجين
+      BlocBuilder<SocialMediaBloc, AppState>(
+        builder: (context, state) {
+          return Column(
+            children: [
+              CustomButton(
+                text: "login.login_google".tr(),
+                backgroundColor: Colors.white,
+                textColor: Colors.black,
+                isLoading: state is Loading,
+                lIconWidget: SvgPicture.asset("assets/svgs/google.svg"),
+                onTap: () async {
+                  final result = await SocialMediaLoginHelper().googleLogin();
+                  result.fold(
+                        (failure) {
+                      AppCore.showSnackBar(
+                        notification: AppNotification(
+                          message: failure.error,
+                          backgroundColor: Styles.IN_ACTIVE,
+                        ),
+                      );
+                    },
+                        (socialModel) {
+                      context.read<SocialMediaBloc>().add(
+                        Click(arguments:SocialMediaProvider.google),
+                      );
+                    },
+                  );
+                },
+              ),
+              SizedBox(height: 16.h),
+              CustomButton(
+                text: "login.login_facebook".tr(),
+                backgroundColor: Colors.white,
+                textColor: Colors.black,
+                lIconWidget: SvgPicture.asset("assets/svgs/facebook.svg"),
+                onTap: () async {
+                  final result = await SocialMediaLoginHelper().facebookLogin();
+                  result.fold(
+                        (failure) {
+                      AppCore.showSnackBar(
+                        notification: AppNotification(
+                          message: failure.error,
+                          backgroundColor: Styles.IN_ACTIVE,
+                        ),
+                      );
+                    },
+                        (socialModel) {
+                      context.read<SocialMediaBloc>().add(
+                        Click(arguments:SocialMediaProvider.facebook),
+                      );
+                    },
+                  );                },
+              ),
+              if (Platform.isIOS) ...[
+                SizedBox(height: 16.h),
+                CustomButton(
+                  text: "login.login_apple".tr(),
+                  backgroundColor: Colors.white,
+                  textColor: Colors.black,
+                  lIconWidget: SvgPicture.asset("assets/svgs/apple.svg"),
+                  onTap: () {
+                    // TODO: add apple handler
+                  },
+                ),
+              ],
+            ],
+          );
+        },
       ),
-      SizedBox(height: 16.h),
-      CustomButton(
-        text: "login.login_facebook".tr(),
-        backgroundColor: Colors.white,
-        textColor: Colors.black,
-        lIconWidget: SvgPicture.asset("assets/svgs/facebook.svg"),
-        onTap: () {},
-      ),
-      if (Platform.isIOS) ...[
-        SizedBox(height: 16.h),
-        CustomButton(
-          text: "login.login_apple".tr(),
-          backgroundColor: Colors.white,
-          textColor: Colors.black,
-          lIconWidget: SvgPicture.asset("assets/svgs/apple.svg"),
-          onTap: () {},
-        ),
-      ],
 
       SizedBox(height: 16.h),
 
@@ -221,7 +274,8 @@ class _LoginViewState extends State<LoginView> {
                 ),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
-                    CustomNavigator.push(Routes.freeLancer, arguments: {"from_login": true});
+                    CustomNavigator.push(Routes.freeLancer,
+                        arguments: {"from_login": true});
                   },
               ),
             ],

@@ -6,6 +6,7 @@ import 'package:talent_flow/components/custom_app_bar.dart';
 import 'package:video_player/video_player.dart';
 
 import '../app/core/styles.dart';
+import '../features/setting/widgets/setting_app_bar.dart';
 
 class VideoPreviewPage extends StatefulWidget {
   final Map data;

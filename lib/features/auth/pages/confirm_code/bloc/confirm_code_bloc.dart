@@ -28,18 +28,19 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
         /// البيانات جاية من الـ arguments (من الـ UI)
         final Map<String, dynamic> data = event.arguments as Map<String, dynamic>;
         dev.log('data $data');
+        log("data${data['isRegister']}");
+        log("data${data['isFromLogin']}");
         final bool isRegister = data['isRegister'] ?? false;
+        final bool isFromLogin = data['isFromLogin'] ?? false;
         final String email = data['identifier'] ?? '';
 
-
         Either<ServerFailure, Response> response;
-
-        // Choose the appropriate verification method based on isRegister flag
-        if (isRegister) {
-          // For registration verification
+          log("isRegister $isRegister - isFromLogin $isFromLogin");
+        // اختيار طريقة التأكيد بناءً على حالة المستخدم
+        if (isRegister || isFromLogin) {
+          log("data${data}");
           response = await confirmCodeRepo.verifyFromRegister(data);
         } else {
-          // For forget password verification
           response = await confirmCodeRepo.verifyForgetPassword(data);
         }
 
@@ -56,12 +57,27 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
             emit(Error());
           },
               (success) {
-                log('isRegister $isRegister');
+            log('isRegister $isRegister - isFromLogin $isFromLogin');
+
             if (isRegister) {
+              /// من الريجستر → يروح للهوم
               confirmCodeRepo.saveUserData(success.data);
               confirmCodeRepo.saveCredentials(data);
               CustomNavigator.push(Routes.navBar, clean: true);
+
+            } else if (isFromLogin) {
+              /// من اللوجين → يرجع للوجين
+              AppCore.showSnackBar(
+                notification: AppNotification(
+                  message: "تم تفعيل الحساب بنجاح. سجل الدخول الآن".tr(),
+                  backgroundColor: Styles.ACTIVE,
+                  borderColor: Colors.transparent,
+                ),
+              );
+              CustomNavigator.push(Routes.login, clean: true);
+
             } else {
+              /// من forget password → يروح يغير الباسورد
               CustomNavigator.push(
                 Routes.forgetPassword,
                 arguments: {
@@ -69,6 +85,7 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
                 },
               );
             }
+
             emit(Done());
           },
         );

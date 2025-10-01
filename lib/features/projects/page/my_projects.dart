@@ -6,11 +6,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/images.dart';
 import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';
+import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart' show sl;
+import '../../new_projects/widgets/project_card.dart';
 import '../bloc/my_projects_bloc.dart';
 import '../model/my_projects_model.dart';
 import '../repo/projects_repo.dart';
 import '../widgets/my_projects_card.dart';
+import '../widgets/projects_shimmer.dart';
 
 class OwnerProjects extends StatelessWidget {
   final Map<String, dynamic>? arguments;
@@ -23,14 +26,15 @@ class OwnerProjects extends StatelessWidget {
     return BlocProvider(
       create: (context) =>
       MyProjectsBloc(sl())..add(Add(arguments: categoryId)),
-      child: _OwnerProjectsContent(categoryId: categoryId),
+      child: _OwnerProjectsContent(categoryId: categoryId,categoryName: arguments?['categoryName'],),
     );
   }
 }
 
 class _OwnerProjectsContent extends StatefulWidget {
   final int? categoryId;
-  const _OwnerProjectsContent({this.categoryId});
+  final String? categoryName;
+  const _OwnerProjectsContent({this.categoryId,this.categoryName});
 
   @override
   State<_OwnerProjectsContent> createState() => _OwnerProjectsContentState();
@@ -41,7 +45,7 @@ class _OwnerProjectsContentState extends State<_OwnerProjectsContent>
   late TabController _tabController;
 
   final Map<String?, String> statuses = {
-    null: "الكل",
+    null: "all".tr(),
     "completed": "project_status.completed".tr(),
     "draft": "project_status.draft".tr(),
     "rejected": "project_status.rejected".tr(),
@@ -76,13 +80,16 @@ class _OwnerProjectsContentState extends State<_OwnerProjectsContent>
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           centerTitle: true,
-          title: Text('owner_projects.my_projects'.tr()),
+          title: widget.categoryId==null?  Text('owner_projects.my_projects'.tr()):Text(widget.categoryName!),
 
           /// 👇 فقط لو مفيش categoryId
           bottom: widget.categoryId == null
               ? TabBar(
+            indicatorColor: Styles.PRIMARY_COLOR,
+            labelColor: Styles.PRIMARY_COLOR,
             controller: _tabController,
             isScrollable: true,
             onTap: (index) {
@@ -99,7 +106,7 @@ class _OwnerProjectsContentState extends State<_OwnerProjectsContent>
         body: BlocBuilder<MyProjectsBloc, AppState>(
           builder: (context, state) {
             if (state is Loading) {
-              return const Center(child: CircularProgressIndicator());
+              return const ProjectCardShimmer();
             } else if (state is Error) {
               return Center(child: Text("error.loading".tr()));
             } else if (state is Done) {

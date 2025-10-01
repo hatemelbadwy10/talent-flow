@@ -1,9 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart'; // لعرض الـ HTML
+import 'package:talent_flow/features/projects/widgets/projects_shimmer.dart';
+import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
+import '../../home/widgets/jop_offer_listview_item.dart';
 import '../bloc/about_bloc.dart';
 
 class AboutTalentFlowView extends StatelessWidget {
@@ -15,29 +19,12 @@ class AboutTalentFlowView extends StatelessWidget {
       create: (context) => AboutBloc(sl())..add(Add()), // يجيب البيانات
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FA),
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: const Text(
-            "عن تلنت فلو",
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          centerTitle: true,
-        ),
+        appBar:  CustomAppBar(title: "about".tr()),
         body: SafeArea(
           child: BlocBuilder<AboutBloc, AppState>(
             builder: (context, state) {
               if (state is Loading) {
-                return const Center(child: CircularProgressIndicator());
+                return const ProjectCardShimmer();
               } else if (state is Error) {
                 return const Center(
                   child: Text("حصل خطأ أثناء تحميل البيانات"),

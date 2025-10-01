@@ -8,6 +8,7 @@ import 'package:talent_flow/features/auth/pages/confirm_code/repo/confirm_code_r
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../app/core/app_event.dart';
+import '../../../../app/core/styles.dart';
 import '../../../../components/custom_button.dart';
 import '../../../../data/config/di.dart';
 import '../../widgets/auth_base.dart';
@@ -56,6 +57,29 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
     }
   }
 
+  // Enhanced paste handling method
+  void _handlePaste(String pastedText, int currentIndex) {
+    // Clean the pasted text - remove any non-digit characters
+    final cleanText = pastedText.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (cleanText.isEmpty) return;
+
+    // Clear all controllers first
+    for (var controller in _controllers) {
+      controller.clear();
+    }
+
+    // Fill controllers with pasted digits
+    final chars = cleanText.split('');
+    for (int i = 0; i < _controllers.length && i < chars.length; i++) {
+      _controllers[i].text = chars[i];
+    }
+
+    // Focus on the last filled field or the last field if all are filled
+    final lastIndex = (chars.length - 1).clamp(0, _controllers.length - 1);
+    _focusNodes[lastIndex].requestFocus();
+  }
+
   Widget _buildCodeInput(int index) {
     return SizedBox(
       width: 50,
@@ -63,9 +87,20 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
       child: RawKeyboardListener(
         focusNode: FocusNode(),
         onKey: (RawKeyEvent event) {
-          if (event is RawKeyDownEvent &&
-              event.logicalKey == LogicalKeyboardKey.backspace) {
-            _onBackspace(index);
+          if (event is RawKeyDownEvent) {
+            // Handle backspace
+            if (event.logicalKey == LogicalKeyboardKey.backspace) {
+              _onBackspace(index);
+            }
+            // Handle paste with Ctrl+V
+            else if (event.isControlPressed &&
+                event.logicalKey == LogicalKeyboardKey.keyV) {
+              Clipboard.getData(Clipboard.kTextPlain).then((data) {
+                if (data?.text != null) {
+                  _handlePaste(data!.text!, index);
+                }
+              });
+            }
           }
         },
         child: TextFormField(
@@ -89,28 +124,79 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
-              borderSide:
-              const BorderSide(color: Colors.blueAccent, width: 2.0),
+              borderSide: const BorderSide(color: Colors.blueAccent, width: 2.0),
             ),
           ),
+          onChanged: (value) {
+            if (value.length > 1) {
+              // Handle paste operation
+              _handlePaste(value, index);
+            } else {
+              // Normal single character input
+              if (value.isNotEmpty && index < 5) {
+                _focusNodes[index + 1].requestFocus();
+              }
+            }
+          },
         ),
       ),
     );
   }
 
-  Widget _buildCodeInputRow() {
+  Widget _buildCodeInputRow(BuildContext context) {
+    final isArabic = context.locale.languageCode == "ar";
+
     return Form(
       key: _formKey,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          _buildCodeInput(0),
-          _buildCodeInput(1),
-          _buildCodeInput(2),
-          const Text('-', style: TextStyle(fontSize: 24, color: Colors.grey)),
-          _buildCodeInput(3),
-          _buildCodeInput(4),
-          _buildCodeInput(5),
+          // Add a paste button for better UX
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton.icon(
+                onPressed: () async {
+                  final data = await Clipboard.getData(Clipboard.kTextPlain);
+                  if (data?.text != null) {
+                    _handlePaste(data!.text!, 0);
+                  }
+                },
+                icon: const Icon(Icons.paste, size: 16),
+                label:  Text(
+                  "paste".tr(),
+                  style: TextStyle(fontSize: 12,
+                  color: Styles.PRIMARY_COLOR
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: isArabic
+                ? [
+              _buildCodeInput(5),
+              _buildCodeInput(4),
+              _buildCodeInput(3),
+              const Text('-', style: TextStyle(fontSize: 24, color: Colors.grey)),
+              _buildCodeInput(2),
+              _buildCodeInput(1),
+              _buildCodeInput(0),
+            ]
+                : [
+              _buildCodeInput(0),
+              _buildCodeInput(1),
+              _buildCodeInput(2),
+              const Text('-', style: TextStyle(fontSize: 24, color: Colors.grey)),
+              _buildCodeInput(3),
+              _buildCodeInput(4),
+              _buildCodeInput(5),
+            ],
+          ),
         ],
       ),
     );
@@ -138,10 +224,9 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
           ),
           const SizedBox(height: 10),
 
-          _buildCodeInputRow(),
+          _buildCodeInputRow(context),
           const SizedBox(height: 24),
 
-          // ✅ خلى الزرار ياخد الـ context الصح من تحت BlocProvider
           Builder(
             builder: (context) {
               return CustomButton(
@@ -156,14 +241,13 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
                       Click(arguments: {
                         "identifier": email,
                         "otp": code,
-                        "isRegister": isRegister
+                        "isRegister": isRegister,
+                        "isFromLogin": widget.argument["isFromLogin"],
                       }),
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content:
-                          Text("confirm_code.error_incomplete".tr())),
+                      SnackBar(content: Text("confirm_code.error_incomplete".tr())),
                     );
                   }
                 },

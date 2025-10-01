@@ -175,20 +175,33 @@ class _ProjectCardState extends State<ProjectCard> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  CustomNavigator.push(
-                    sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                        false
-                        ? Routes.addOffer
-                        : Routes.addProject,
-                    arguments: {"id": _currentProjectModel.id},
-                  );
+                  final isFreelancer =
+                      sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
+
+                  if (isFreelancer) {
+                    // Freelancer → Add Offer
+                    CustomNavigator.push(
+                      Routes.addOffer,
+                      arguments: {"id": _currentProjectModel.id},
+                    );
+                  } else {
+                    // Not Freelancer → Read Project Data
+                    CustomNavigator.push(
+                      Routes.addOffer,
+                      arguments: {"id": _currentProjectModel.id},
+                    );
+                  }
                 },
-                icon: const Icon(Icons.add, color: Colors.white),
+                icon: Icon(
+                  sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false
+                      ? Icons.add
+                      : Icons.description,
+                  color: Colors.white,
+                ),
                 label: Text(
-                  sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                      false
+                  sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false
                       ? "project_card.add_offer".tr()
-                      : "project_card.similar_project".tr(),
+                      : "project_card.read_project".tr(),
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.white,
@@ -254,101 +267,3 @@ extension MyProjectsModelExtension on MyProjectsModel {
   }
 }
 
-class ProjectCardShimmer extends StatelessWidget {
-  const ProjectCardShimmer({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header (avatar + name + fav icon)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 120,
-                          height: 14,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(height: 6),
-                        Container(
-                          width: 80,
-                          height: 12,
-                          color: Colors.white,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Container(
-                  width: 24,
-                  height: 24,
-                  color: Colors.white,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Meta info
-            Row(
-              children: List.generate(
-                3,
-                    (index) => Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Container(
-                    width: 60,
-                    height: 14,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Description lines
-            Container(width: double.infinity, height: 12, color: Colors.white),
-            const SizedBox(height: 8),
-            Container(width: double.infinity, height: 12, color: Colors.white),
-            const SizedBox(height: 8),
-            Container(width: 150, height: 12, color: Colors.white),
-            const SizedBox(height: 16),
-
-            // Button
-            Container(
-              width: double.infinity,
-              height: 45,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

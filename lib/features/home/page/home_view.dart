@@ -63,57 +63,57 @@ class _HomeViewState extends State<HomeView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: context.locale.languageCode == 'ar'
                           ? [
-                              GestureDetector(
-                                onTap: () {
-                                  // Pass categories list when navigating
-                                  if (state is Done &&
-                                      state.model is HomeModel) {
-                                    final homeModel = state.model as HomeModel;
-                                    log('Categories: ${homeModel.categories}');
-                                    CustomNavigator.push(
-                                      Routes.allCategories,
-                                    );
-                                  } else {
-                                    CustomNavigator.push(Routes.allCategories);
-                                  }
-                                },
-                                child: Text(
-                                  "home.view_all".tr(),
-                                  style: const TextStyle(
-                                    color: Styles.PRIMARY_COLOR,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                "home.service_category".tr(),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                            ]
+                        GestureDetector(
+                          onTap: () {
+                            // Pass categories list when navigating
+                            if (state is Done &&
+                                state.model is HomeModel) {
+                              final homeModel = state.model as HomeModel;
+                              log('Categories: ${homeModel.categories}');
+                              CustomNavigator.push(
+                                Routes.allCategories,
+                              );
+                            } else {
+                              CustomNavigator.push(Routes.allCategories);
+                            }
+                          },
+                          child: Text(
+                            "home.view_all".tr(),
+                            style: const TextStyle(
+                              color: Styles.PRIMARY_COLOR,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          "home.service_category".tr(),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ]
                           : [
-                              Text(
-                                "home.service_category".tr(),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  CustomNavigator.push(Routes.allCategories);
-                                },
-                                child: Text(
-                                  "home.view_all".tr(),
-                                  style: const TextStyle(
-                                    color: Styles.PRIMARY_COLOR,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        Text(
+                          "home.service_category".tr(),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            CustomNavigator.push(Routes.allCategories);
+                          },
+                          child: Text(
+                            "home.view_all".tr(),
+                            style: const TextStyle(
+                              color: Styles.PRIMARY_COLOR,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 16.h),
                   ];
@@ -159,14 +159,16 @@ class _HomeViewState extends State<HomeView> {
                               return Padding(
                                 padding: EdgeInsets.only(right: 12.w),
                                 child: (sl<SharedPreferences>().getBool(
-                                            AppStorageKey.isFreelancer) ??
-                                        false)
+                                    AppStorageKey.isFreelancer) ??
+                                    false)
                                     ? const FreelancerListItemShimmer()
                                     : const JobOffererListItemShimmer(),
                               );
                             },
                           ),
                         ),
+                        SizedBox(height: 24.h), // Spacing before Partners section
+                        _buildPartnersSection(context), // New Partners section
                         SizedBox(height: 120.h),
                       ],
                     );
@@ -225,10 +227,10 @@ class _HomeViewState extends State<HomeView> {
 
                         homeModel.categories.isNotEmpty
                             ? ServiceCategoriesGrid(
-                                serviceData: homeModel.categories)
+                            serviceData: homeModel.categories)
                             : SizedBox(
-                                height: 100.h,
-                              ),
+                          height: 100.h,
+                        ),
 
                         SizedBox(height: 24.h),
                         Text(
@@ -243,25 +245,25 @@ class _HomeViewState extends State<HomeView> {
                         // Fix 4: Handle empty cards list
                         homeModel.cards.isNotEmpty
                             ? SizedBox(
-                                height: 200.h,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: homeModel.cards.length,
-                                  itemBuilder: (context, index) {
-                                    final card = homeModel?.cards[index];
-                                    return Padding(
-                                      padding: EdgeInsets.only(right: 12.w),
-                                      child: NewListItem(
-                                        title: card?.title ?? 'No Title',
-                                        imageUrl: card?.image ?? '',
-                                      ),
-                                    );
-                                  },
+                          height: 200.h,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: homeModel.cards.length,
+                            itemBuilder: (context, index) {
+                              final card = homeModel?.cards[index];
+                              return Padding(
+                                padding: EdgeInsets.only(right: 12.w),
+                                child: NewListItem(
+                                  title: card?.title ?? 'No Title',
+                                  imageUrl: card?.image ?? '',
                                 ),
-                              )
+                              );
+                            },
+                          ),
+                        )
                             : SizedBox(
-                                height: 200.h,
-                              ),
+                          height: 200.h,
+                        ),
 
                         SizedBox(height: 24.h),
                         _buildFreelancerHeader(context, isLoading: false),
@@ -279,19 +281,20 @@ class _HomeViewState extends State<HomeView> {
                                 return Padding(
                                   padding: EdgeInsets.only(right: 12.w),
                                   child: (sl<SharedPreferences>().getBool(
-                                              AppStorageKey.isFreelancer) ??
-                                          false)
+                                      AppStorageKey.isFreelancer) ??
+                                      false)
                                       ? JobOffererListItem(
-                                          name: item['name'] ?? 'N/A',
-                                          industry:
-                                              item['jop_title'] ?? 'General',
-                                          imageUrl: item['image'],
-                                        )
+                                    name: item['name'] ?? 'N/A',
+                                    industry:
+                                    item['jop_title'] ?? 'General',
+                                    imageUrl: item['image'],
+                                  )
                                       : FreelancerListItem(
-                                          name: item['name'] ?? 'N/A',
-                                          jopTitle: item['rating'].toString(),
-                                          imageUrl: item['image'],
-                                        ),
+                                    id: item['id'],
+                                    name: item['name'] ?? 'N/A',
+                                    jopTitle: item['rating'].toString(),
+                                    imageUrl: item['image'],
+                                  ),
                                 );
                               },
                             ),
@@ -301,6 +304,8 @@ class _HomeViewState extends State<HomeView> {
                             height: 250.h,
                           ),
 
+                        SizedBox(height: 24.h), // Spacing before Partners section
+                        _buildPartnersSection(context), // New Partners section
                         SizedBox(height: 120.h),
                       ],
                     );
@@ -312,9 +317,12 @@ class _HomeViewState extends State<HomeView> {
                         ...commonWidgets,
                         const Center(
                             child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text("Failed to load data. Please try again."),
-                        )),
+                              padding: EdgeInsets.all(16.0),
+                              child: Text("Failed to load data. Please try again."),
+                            )),
+                        SizedBox(height: 24.h), // Spacing before Partners section
+                        _buildPartnersSection(context), // New Partners section
+                        SizedBox(height: 120.h),
                       ],
                     );
                   }
@@ -360,14 +368,16 @@ class _HomeViewState extends State<HomeView> {
                             return Padding(
                               padding: EdgeInsets.only(right: 12.w),
                               child: (sl<SharedPreferences>().getBool(
-                                          AppStorageKey.isFreelancer) ??
-                                      false)
+                                  AppStorageKey.isFreelancer) ??
+                                  false)
                                   ? const FreelancerListItemShimmer()
                                   : const JobOffererListItemShimmer(),
                             );
                           },
                         ),
                       ),
+                      SizedBox(height: 24.h), // Spacing before Partners section
+                      _buildPartnersSection(context), // New Partners section
                       SizedBox(height: 120.h),
                     ],
                   );
@@ -386,59 +396,128 @@ class _HomeViewState extends State<HomeView> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: context.locale.languageCode == 'ar'
           ? [
-              GestureDetector(
-                onTap: () {
-                  if (!isLoading) {
-                    CustomNavigator.push(Routes.freelancers);
-                  }
-                },
-                child: Text(
-                  "home.view_all".tr(),
-                  style: TextStyle(
-                    color: isLoading ? Colors.grey : Styles.PRIMARY_COLOR,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              Text(
-                "home.freelancers".tr(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ]
+        GestureDetector(
+          onTap: () {
+            if (!isLoading) {
+              CustomNavigator.push(Routes.freelancers);
+            }
+          },
+          child: Text(
+            "home.view_all".tr(),
+            style: TextStyle(
+              color: isLoading ? Colors.grey : Styles.PRIMARY_COLOR,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        Text(
+          !(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+              false)
+              ? "home.freelancers".tr()
+              : "home.entrepreneur".tr(),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+      ]
           : [
-              Text(
-                !(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                        false)
-                    ? "home.freelancers".tr()
-                    : "home.entrepreneur".tr(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              (sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                      false)
-                  ? const SizedBox()
-                  : GestureDetector(
-                      onTap: () {
-                        if (!isLoading) {
-                          CustomNavigator.push(Routes.freelancers);
-                        }
-                      },
-                      child: Text(
-                        "home.view_all".tr(),
-                        style: TextStyle(
-                          color: isLoading ? Colors.grey : Styles.PRIMARY_COLOR,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-            ],
+        Text(
+          !(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+              false)
+              ? "home.freelancers".tr()
+              : "home.entrepreneur".tr(),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        (sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+            false)
+            ? const SizedBox()
+            : GestureDetector(
+          onTap: () {
+            if (!isLoading) {
+              CustomNavigator.push(Routes.freelancers);
+            }
+          },
+          child: Text(
+            "home.view_all".tr(),
+            style: TextStyle(
+              color: isLoading ? Colors.grey : Styles.PRIMARY_COLOR,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
     );
   }
+
+  // New Partners Section Widget
+  Widget _buildPartnersSection(BuildContext context) {
+    final partners = [
+      {
+        "image": "assets/images/Talent Flow logo 1 1.png",
+        "title": "Talent Flow"
+      },
+      {
+        "image": "assets/images/Talent Flow logo 1 1.png",
+        "title": "Partner 2"
+      },
+      {
+        "image": "assets/images/Talent Flow logo 1 1.png",
+        "title": "Partner 3"
+      },
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "home.partners".tr(),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+          SizedBox(height: 16.h),
+
+          SizedBox(
+            height: 120.h, // ارتفاع يكفي الصورة + العنوان
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: partners.length,
+              separatorBuilder: (_, __) => SizedBox(width: 16.w),
+              itemBuilder: (context, index) {
+                final partner = partners[index];
+                return Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        partner["image"]!,
+                        height: 80.h,
+                        fit: BoxFit.contain,
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        partner["title"]!,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
 
 class HomeHeader extends StatelessWidget {

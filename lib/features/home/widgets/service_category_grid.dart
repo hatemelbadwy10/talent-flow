@@ -33,7 +33,9 @@ class ServiceCategoriesGrid extends StatelessWidget {
             log("sl ${sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer)} ");
             if (sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
                 true) {
-              CustomNavigator.push(Routes.ownerProjects,arguments: {"from_category": true,"categoryId": data.id});
+              CustomNavigator.push(Routes.ownerProjects,arguments: {
+                "categoryName": data.name,
+                "from_category": true,"categoryId": data.id});
             } else {
               CustomNavigator.push(Routes.freelancers,
                   arguments: {"from_category": true,"categoryId": data.id}); // Adjust route as needed

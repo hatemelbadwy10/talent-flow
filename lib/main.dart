@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart'hide TextDirection;
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'app/core/styles.dart';
 import 'data/config/di.dart' as di;
 import 'data/config/di.dart';
 import 'data/local_data/local_database.dart';
@@ -8,6 +10,7 @@ import 'navigation/routes.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   await EasyLocalization.ensureInitialized();
   await di.init();
   await sl<LocaleDatabase>().initDatabase();
@@ -43,6 +46,11 @@ class MyApp extends StatelessWidget {
       navigatorObservers: [CustomNavigator.routeObserver],
       initialRoute: Routes.splash,
       theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          surfaceTintColor: Colors.white
+        ),
+        cardColor: Colors.white,
+        indicatorColor: Styles.PRIMARY_COLOR,
         scaffoldBackgroundColor: Colors.white,
         fontFamily: 'IBM',
       ),
