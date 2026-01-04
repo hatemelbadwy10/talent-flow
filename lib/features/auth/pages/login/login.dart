@@ -211,30 +211,30 @@ class _LoginViewState extends State<LoginView> {
                   );
                 },
               ),
-              SizedBox(height: 16.h),
-              CustomButton(
-                text: "login.login_facebook".tr(),
-                backgroundColor: Colors.white,
-                textColor: Colors.black,
-                lIconWidget: SvgPicture.asset("assets/svgs/facebook.svg"),
-                onTap: () async {
-                  final result = await SocialMediaLoginHelper().facebookLogin();
-                  result.fold(
-                        (failure) {
-                      AppCore.showSnackBar(
-                        notification: AppNotification(
-                          message: failure.error,
-                          backgroundColor: Styles.IN_ACTIVE,
-                        ),
-                      );
-                    },
-                        (socialModel) {
-                      context.read<SocialMediaBloc>().add(
-                        Click(arguments:SocialMediaProvider.facebook),
-                      );
-                    },
-                  );                },
-              ),
+              // SizedBox(height: 16.h),
+              // CustomButton(
+              //   text: "login.login_facebook".tr(),
+              //   backgroundColor: Colors.white,
+              //   textColor: Colors.black,
+              //   lIconWidget: SvgPicture.asset("assets/svgs/facebook.svg"),
+              //   onTap: () async {
+              //     final result = await SocialMediaLoginHelper().facebookLogin();
+              //     result.fold(
+              //           (failure) {
+              //         AppCore.showSnackBar(
+              //           notification: AppNotification(
+              //             message: failure.error,
+              //             backgroundColor: Styles.IN_ACTIVE,
+              //           ),
+              //         );
+              //       },
+              //           (socialModel) {
+              //         context.read<SocialMediaBloc>().add(
+              //           Click(arguments:SocialMediaProvider.facebook),
+              //         );
+              //       },
+              //     );                },
+              // ),
               if (Platform.isIOS) ...[
                 SizedBox(height: 16.h),
                 CustomButton(

@@ -44,9 +44,9 @@ class SocialMediaRepo extends BaseRepo {
         socialResponse = await socialMediaLoginHelper.googleLogin();
       }
 
-      if (provider == SocialMediaProvider.facebook) {
-        socialResponse = await socialMediaLoginHelper.facebookLogin();
-      }
+      // if (provider == SocialMediaProvider.facebook) {
+      //   socialResponse = await socialMediaLoginHelper.facebookLogin();
+      // }
 
       if (provider == SocialMediaProvider.apple) {
         socialResponse = await socialMediaLoginHelper.appleLogin();

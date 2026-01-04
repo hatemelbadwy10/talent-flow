@@ -10,7 +10,7 @@ import 'navigation/routes.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+ // await Firebase.initializeApp();
   await EasyLocalization.ensureInitialized();
   await di.init();
   await sl<LocaleDatabase>().initDatabase();
