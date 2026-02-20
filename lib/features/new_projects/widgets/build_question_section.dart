@@ -7,7 +7,6 @@ import 'package:talent_flow/features/new_projects/widgets/helper_text_widget.dar
 import 'package:talent_flow/features/new_projects/widgets/section_label_widget.dart';
 
 import '../../../app/core/styles.dart';
-import '../../../data/config/di.dart';
 import '../bloc/add_project_bloc.dart';
 import '../bloc/add_project_event.dart';
 import '../bloc/add_project_state.dart';

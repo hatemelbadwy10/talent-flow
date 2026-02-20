@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart'; // <-- 1. Import the 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
-import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/features/new_projects/widgets/add_offer_widget.dart';
 import 'package:talent_flow/features/new_projects/widgets/project_description.dart';
 

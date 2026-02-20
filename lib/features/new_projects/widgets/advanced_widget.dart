@@ -11,7 +11,8 @@ import '../bloc/add_project_state.dart';
 import 'build_question_section.dart';
 
 class AdvancedSettings extends StatelessWidget {
-  const AdvancedSettings({super.key});
+  const AdvancedSettings({super.key, required this.requiredToBeReceivedContr});
+  final TextEditingController requiredToBeReceivedContr;
 
   @override
   Widget build(BuildContext context) {
@@ -35,22 +36,17 @@ class AdvancedSettings extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Required to be received checkbox
-            Row(
-              children: [
-                Checkbox(
-                  value: state.requiredToBeReceived,
-                  onChanged: (bool? value) {
-                    context.read<AddProjectBloc>().add(
-                      UpdateRequiredToBeReceived(
-                        requiredToBeReceived: value ?? false,
-                      ),
-                    );
-                  },
-                ),
-                Expanded(
-                  child: Text('add_project.required_to_be_received'.tr()),
-                ),
-              ],
+            CustomTextField(
+              hint: 'add_project.required_to_be_received'.tr(),
+              height: 65,
+              controller: requiredToBeReceivedContr,
+              onChanged: (value) {
+                context.read<AddProjectBloc>().add(
+                  UpdateRequiredToBeReceived(
+                    requiredToBeReceived: value ?? "",
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 16),
 

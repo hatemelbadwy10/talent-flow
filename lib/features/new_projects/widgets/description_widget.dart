@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/features/new_projects/widgets/section_label_widget.dart';
 import '../../../../components/custom_text_form_field.dart';
 
-import '../../../data/config/di.dart';
 import '../bloc/add_project_bloc.dart';
 import '../bloc/add_project_event.dart';
 import 'helper_text_widget.dart';
@@ -45,7 +44,7 @@ class ProjectDescriptionField extends StatelessWidget {
           minLines: 4,
           maxLines: 6,
           hint: 'add_project.project_description_hint'.tr(),
-          onSubmit: (value) {
+          onChanged: (value) {
             context.read<AddProjectBloc>().add(
               UpdateDescription(description: value),
             );

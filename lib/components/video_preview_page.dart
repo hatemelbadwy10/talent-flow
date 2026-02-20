@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/localization/language_constant.dart';
-import 'package:talent_flow/components/custom_app_bar.dart';
 import 'package:video_player/video_player.dart';
 
 import '../app/core/styles.dart';

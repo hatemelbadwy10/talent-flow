@@ -106,6 +106,7 @@
     "welcome": "Welcome",
     "freelancers": "Freelancers",
     "entrepreneur": "Entrepreneur",
+    "job_title_not_set": "Not set",
     "view_profile": "View Profile",
     "view_company_profile": "View Company Profile",
     "partners": "Partners",
@@ -243,6 +244,11 @@
   "settings_screen": {
     "title": "Settings",
     "edit_profile": "Edit Profile",
+    "dashboard": "Dashboard",
+    "messages": "Messages",
+    "account_statement": "Account Statement",
+    "contracts": "Contracts",
+    "identity_verification": "Identity Verification",
     "upload_work": "Upload Work",
     "about_talent_flow": "What is Talent Flow?",
     "notifications": "Notifications",
@@ -252,6 +258,33 @@
     "language": "Language",
     "current_language": "العربية",
     "logout": "Logout"
+  },
+  "chat_screen": {
+    "title": "Messages",
+    "search_hint": "Search messages",
+    "user_ahmed": "Ahmed Salem",
+    "user_maryam": "Maryam Adel",
+    "user_khaled": "Khaled Nasser",
+    "user_nora": "Nora Ali",
+    "user_omar": "Omar Sami",
+    "msg_contract": "Can we update the contract details?",
+    "msg_files": "I sent all the required files.",
+    "msg_thanks": "Thanks, I will review and reply soon.",
+    "msg_meeting": "Our meeting is confirmed for tomorrow.",
+    "msg_update": "Please check the latest project update.",
+    "time_2_days": "2 days",
+    "time_yesterday": "Yesterday",
+    "time_1_hour": "1 hour",
+    "time_5_minutes": "5 min",
+    "time_now": "Now"
+  },
+  "contracts_screen": {
+    "status_pending": "Pending",
+    "status_rejected": "Rejected",
+    "status_approved": "Approved",
+    "download": "Download contract",
+    "contract_title": "Delivery App Design Creation Contract",
+    "contract_size": "Contract size: 4.2 MB"
   },
   "terms_screen": {
     "appbar_title": "Terms and Conditions",

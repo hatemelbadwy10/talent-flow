@@ -3,17 +3,15 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
-import 'package:talent_flow/navigation/custom_navigation.dart';
 import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';
 import '../../../app/core/images.dart';
 import '../../../data/config/di.dart';
-import '../../../navigation/routes.dart';
 import '../../setting/widgets/setting_app_bar.dart';
 import '../bloc/home_bloc.dart';
 import '../model/freelancers_model.dart';
 import '../model/home_model.dart' hide Card;
-import '../widgets/freelancer_details_item.dart';
+import '../widgets/freelancer_listview_item.dart';
 
 class AllFreelancersView extends StatefulWidget {
   final Map<String, dynamic>? arguments;
@@ -25,7 +23,6 @@ class AllFreelancersView extends StatefulWidget {
 }
 
 class _AllFreelancersViewState extends State<AllFreelancersView> {
-  List<Category> _categories = [];
   Category? _selectedCategory;
 
   late HomeBloc _categoriesBloc;
@@ -123,7 +120,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                               },
                               child: Text(
                                 "clear_all".tr(),
-                                style: TextStyle(
+                                style:const TextStyle(
                                   color: Styles.PRIMARY_COLOR,
                                   fontSize: 14,
                                 ),
@@ -184,7 +181,6 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                       );
                                     } else if (state is Done) {
                                       final categories = state.list as List<Category>;
-                                      _categories = categories;
 
                                       if (categories.isEmpty) {
                                         return Center(
@@ -229,7 +225,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                                 ),
                                               ),
                                               trailing: _selectedCategory == null
-                                                  ? Icon(
+                                                  ?const Icon(
                                                 Icons.check_circle,
                                                 color: Styles.PRIMARY_COLOR,
                                                 size: 20,
@@ -276,7 +272,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                                   ),
                                                 ),
                                                 trailing: isSelected
-                                                    ? Icon(
+                                                    ?const Icon(
                                                   Icons.check_circle,
                                                   color: Styles.PRIMARY_COLOR,
                                                   size: 20,
@@ -293,7 +289,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                                 },
                                               ),
                                             );
-                                          }).toList(),
+                                          }),
                                         ],
                                       );
                                     }
@@ -367,7 +363,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                         child: Container(
                           width: 8,
                           height: 8,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: Styles.PRIMARY_COLOR,
                             shape: BoxShape.circle,
                           ),
@@ -388,7 +384,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.filter_alt,
                       size: 18,
                       color: Styles.PRIMARY_COLOR,
@@ -398,7 +394,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                       "filter_applied".tr(
                         namedArgs: {"category": _selectedCategory!.name ?? ""},
                       ),
-                      style: TextStyle(
+                      style:const TextStyle(
                         color: Styles.PRIMARY_COLOR,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -507,29 +503,36 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                         ),
                       );
                     }
-                    return ListView.builder(
-                      padding: EdgeInsets.all(16.w),
-                      itemCount: freelancers.length,
-                      itemBuilder: (context, index) {
-                        final freelancer = freelancers[index];
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 16.h),
-                          child: GestureDetector(
-                            onTap: () {
-                              CustomNavigator.push(
-                                Routes.freeLancerView,
-                                arguments: {"freelancerId": freelancer.id},
-                              );
-                            },
-                            child: FreelancerListDetailItem(
-                              phoneNumber: freelancer.phone,
-                              name: freelancer.name ?? "no_name".tr(),
-                              title: freelancer.jobTitle ?? "-",
-                              rating: freelancer.rating?.toDouble() ?? 0.0,
-                              description: freelancer.bio ?? "-",
-                              imageUrl: freelancer.image,
-                            ),
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        final crossAxisCount = constraints.maxWidth >= 1000
+                            ? 4
+                            : constraints.maxWidth >= 700
+                                ? 3
+                                : 2;
+                        return GridView.builder(
+                          padding: EdgeInsets.all(16.w),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            crossAxisSpacing: 12.w,
+                            mainAxisSpacing: 12.h,
+                            childAspectRatio: 167/220,
                           ),
+                          itemCount: freelancers.length,
+                          itemBuilder: (context, index) {
+                            final freelancer = freelancers[index];
+                            final jobTitle = freelancer.jobTitle?.trim() ?? '';
+                            return FreelancerListItem(
+                              id: freelancer.id ?? 0,
+                              name: freelancer.name ?? "no_name".tr(),
+                              jopTitle: jobTitle.isNotEmpty
+                                  ? jobTitle
+                                  : "home.job_title_not_set".tr(),
+                              rating: freelancer.rating?.toDouble(),
+                              imageUrl: freelancer.image,
+                              cardWidth: double.infinity,
+                            );
+                          },
                         );
                       },
                     );

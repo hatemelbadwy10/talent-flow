@@ -8,10 +8,8 @@ import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';
 import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart' show sl;
-import '../../new_projects/widgets/project_card.dart';
 import '../bloc/my_projects_bloc.dart';
 import '../model/my_projects_model.dart';
-import '../repo/projects_repo.dart';
 import '../widgets/my_projects_card.dart';
 import '../widgets/projects_shimmer.dart';
 
@@ -77,68 +75,66 @@ class _OwnerProjectsContentState extends State<_OwnerProjectsContent>
     const double cardHeight = 320;
     const double aspectRatio = cardWidth / cardHeight;
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
-          centerTitle: true,
-          title: widget.categoryId==null?  Text('owner_projects.my_projects'.tr()):Text(widget.categoryName!),
-
-          /// 👇 فقط لو مفيش categoryId
-          bottom: widget.categoryId == null
-              ? TabBar(
-            indicatorColor: Styles.PRIMARY_COLOR,
-            labelColor: Styles.PRIMARY_COLOR,
-            controller: _tabController,
-            isScrollable: true,
-            onTap: (index) {
-              final status = statuses.keys.elementAt(index);
-              context
-                  .read<MyProjectsBloc>()
-                  .add(Add(arguments: status));
-            },
-            tabs:
-            statuses.values.map((label) => Tab(text: label)).toList(),
-          )
-              : null,
-        ),
-        body: BlocBuilder<MyProjectsBloc, AppState>(
-          builder: (context, state) {
-            if (state is Loading) {
-              return const ProjectCardShimmer();
-            } else if (state is Error) {
-              return Center(child: Text("error.loading".tr()));
-            } else if (state is Done) {
-              final projects = state.list?.cast<MyProjectsModel>();
-              if (projects != null && projects.isNotEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.only(
-                      right: 16, left: 16, top: 8, bottom: 32),
-                  child: GridView.builder(
-                    itemCount: projects.length,
-                    gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 2,
-                      mainAxisSpacing: 2,
-                      childAspectRatio: aspectRatio,
-                    ),
-                    itemBuilder: (context, index) {
-                      final project = projects[index];
-                      return ProjectPortfolioCard(
-                        projectsModel: project,
-                      );
-                    },
-                  ),
-                );
-              } else {
-                return Center(child: Image.asset(Images.emptyOrders));
-              }
-            }
-            return const SizedBox.shrink();
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        centerTitle: true,
+        title: widget.categoryId==null?  Text('owner_projects.my_projects'.tr()):Text(widget.categoryName!),
+    
+        /// 👇 فقط لو مفيش categoryId
+        bottom: widget.categoryId == null
+            ? TabBar(
+          indicatorColor: Styles.PRIMARY_COLOR,
+          labelColor: Styles.PRIMARY_COLOR,
+          controller: _tabController,
+          isScrollable: true,
+          onTap: (index) {
+            final status = statuses.keys.elementAt(index);
+            context
+                .read<MyProjectsBloc>()
+                .add(Add(arguments: status));
           },
-        ),
+          tabs:
+          statuses.values.map((label) => Tab(text: label)).toList(),
+        )
+            : null,
+      ),
+      body: BlocBuilder<MyProjectsBloc, AppState>(
+        builder: (context, state) {
+          if (state is Loading) {
+            return const ProjectCardShimmer();
+          } else if (state is Error) {
+            return Center(child: Text("error.loading".tr()));
+          } else if (state is Done) {
+            final projects = state.list?.cast<MyProjectsModel>();
+            if (projects != null && projects.isNotEmpty) {
+              return Padding(
+                padding: const EdgeInsets.only(
+                    right: 16, left: 16, top: 8, bottom: 32),
+                child: GridView.builder(
+                  itemCount: projects.length,
+                  gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 2,
+                    mainAxisSpacing: 2,
+                    childAspectRatio: aspectRatio,
+                  ),
+                  itemBuilder: (context, index) {
+                    final project = projects[index];
+                    return ProjectPortfolioCard(
+                      projectsModel: project,
+                    );
+                  },
+                ),
+              );
+            } else {
+              return Center(child: Image.asset(Images.emptyOrders));
+            }
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }

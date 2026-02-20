@@ -5,7 +5,6 @@ import 'package:talent_flow/components/animated_widget.dart';
 import '../../navigation/custom_navigation.dart';
 import '../app/core/styles.dart';
 import '../app/core/text_styles.dart';
-import '../app/localization/language_constant.dart';
 import '../components/custom_button.dart';
 
 class DateTimePicker extends StatefulWidget {

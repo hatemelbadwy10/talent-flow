@@ -1,6 +1,9 @@
 class Images {
   static const String appLogo = 'assets/images/logo.png';
-  static const String onBoardingPhoto = 'assets/images/on_board_image.png';
+  static const String onBoardingPhoto = 'assets/images/on_boarding_image.png';
+  static const String onBoardingPhoto1 = 'assets/images/on_boarding_image_1.png';
+  static const String onBoardingPhoto2 = 'assets/images/on_boarding_image_2.png';
+  static const String onBoardingPhoto3 = 'assets/images/on_boarding_image_3.png';
   static const String penIcon = 'assets/images/free_lancer_logo.png';
   static const String jopSearcher = 'assets/images/jop_searcher_logo.png';
   static const String splash = 'assets/images/splash.png';

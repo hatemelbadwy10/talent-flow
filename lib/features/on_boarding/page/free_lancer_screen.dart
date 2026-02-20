@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import '../../../app/core/images.dart';
+import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart';
 import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
@@ -18,26 +19,26 @@ class UserTypeSelectionScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Image.asset(
-            Images.onBoardingPhoto,
-            fit: BoxFit.cover,
-            height: double.infinity,
-            width: double.infinity,
-          ),
-
-
           Container(
             width: double.infinity,
-            decoration: const BoxDecoration(
+            height: double.infinity,
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Color(0xFF0C7D81),
-                  Colors.transparent,
+                  Styles.PRIMARY_COLOR.withValues(alpha: 0.3),
+                  Styles.PRIMARY_COLOR.withValues(alpha: 0.1),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: [0.0, 0.6],
               ),
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.15,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Image.asset(Images.onBoardingPhoto, height: 300, width: 300),
             ),
           ),
 
@@ -46,9 +47,16 @@ class UserTypeSelectionScreen extends StatelessWidget {
             child: Container(
               height: MediaQuery.of(context).size.height * 0.3116,
               width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Styles.PRIMARY_COLOR,
+                    Styles.WHITE_COLOR,
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(32),
                   topRight: Radius.circular(32),
                 ),
@@ -108,36 +116,33 @@ class UserTypeSelectionScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: 180,
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(iconPath, height: 44, width: 44),
-              const SizedBox(height: 16),
-              Text(
-                text,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Color(0xFF333333),
-                  fontSize: 14,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Ink(
+            height: 180,
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Styles.WHITE_COLOR,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(iconPath, height: 44, width: 44),
+                const SizedBox(height: 16),
+                Text(
+                  text,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF333333),
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

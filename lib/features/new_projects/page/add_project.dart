@@ -31,6 +31,7 @@ class _AddProjectState extends State<AddProject> {
   final _filesDescriptionController = TextEditingController();
   final _budgetController = TextEditingController();
   final _durationController = TextEditingController();
+  final _requiredToBeRecivedController = TextEditingController();
 
   @override
   void dispose() {
@@ -152,7 +153,9 @@ class _AddProjectState extends State<AddProject> {
                             ),
                             const SizedBox(height: 24),
 
-                            AdvancedSettings(),
+                            AdvancedSettings(
+                              requiredToBeReceivedContr: _requiredToBeRecivedController,
+                            ),
                             const SizedBox(height: 32),
 
                             SubmitWidget(formKey: _formKey),

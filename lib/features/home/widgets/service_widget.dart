@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
 class ServiceWidget extends StatelessWidget {
   final String iconPath;
@@ -14,11 +13,11 @@ class ServiceWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 74, // Ensures equal width
+      width: 74,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Container(
+          Ink(
             height: 74,
             width: 74,
             decoration: BoxDecoration(

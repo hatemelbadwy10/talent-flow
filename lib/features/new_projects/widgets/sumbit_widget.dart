@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/features/new_projects/bloc/add_project_bloc.dart';
 
 import '../../../app/core/styles.dart';
-import '../../../data/config/di.dart';
 import '../bloc/add_project_event.dart';
 class SubmitWidget extends StatelessWidget {
   const SubmitWidget({super.key, required this.formKey});

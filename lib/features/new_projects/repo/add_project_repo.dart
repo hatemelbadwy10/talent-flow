@@ -18,7 +18,7 @@ class ProjectRepository extends BaseRepo {
     required int duration,
     String? filesDescription,
     List<String>? similarProjects,
-    bool requiredToBeReceived = false,
+    String? requiredToBeReceived ,
     List<ProjectQuestion>? questions,
   }) async {
     try {

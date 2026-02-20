@@ -24,7 +24,7 @@ class ServiceCategoryView extends StatelessWidget {
       create: (context) => HomeBloc(homeRepo: sl<HomeRepo>())..add(Click()),
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: CustomAppBar(title: 'categories'.tr()),
+        appBar: CustomAppBar(title: 'all_categories'.tr()),
         body: BlocBuilder<HomeBloc, AppState>(
           builder: (context, state) {
             if (state is Loading) {
@@ -92,6 +92,8 @@ class ServiceCategoryTile extends StatelessWidget {
           children: [
             // Icon with a decorated background
             Container(
+              height: 50,
+              width: 50,
               padding: const EdgeInsets.all(10.0),
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(0.05),

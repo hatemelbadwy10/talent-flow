@@ -12,7 +12,7 @@ abstract class UUIDGenerator{
       uuid = iosInfo.identifierForVendor ?? "";
     }else if(Platform.isAndroid){
       AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      uuid = androidInfo.id ?? "";
+      uuid = androidInfo.id ;
     }
 
 

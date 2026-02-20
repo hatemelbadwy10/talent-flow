@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';

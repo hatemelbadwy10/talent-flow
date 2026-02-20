@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/features/new_projects/widgets/section_label_widget.dart';
 import '../../../../components/dynamic_drop_down_button.dart';
-import '../../../../data/config/di.dart';
 import '../bloc/add_project_bloc.dart';
 import '../bloc/add_project_event.dart';
 import '../bloc/add_project_state.dart';
@@ -46,12 +45,7 @@ class SpecializationDropdown extends StatelessWidget {
               items: items,
               name: state.specializationName??'add_project.select_specialization'.tr(),
               selectedValue: state.specializationId,
-              validation: (value) {
-                if (value == null) {
-                  return 'add_project.specialization_validation'.tr();
-                }
-                return null;
-              },
+              
               onChange: (selectedItem) {
                 if (selectedItem != null) {
                   log("selected item ${selectedItem.value}");

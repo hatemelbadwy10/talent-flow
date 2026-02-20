@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart'hide TextDirection;
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'app/core/styles.dart';
 import 'data/config/di.dart' as di;
 import 'data/config/di.dart';
@@ -9,7 +10,7 @@ import 'navigation/custom_navigation.dart';
 import 'navigation/routes.dart';
 
 void main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
  // await Firebase.initializeApp();
   await EasyLocalization.ensureInitialized();
   await di.init();
@@ -56,7 +57,10 @@ class MyApp extends StatelessWidget {
       ),
 
       builder: (context, child) {
-        return child!;
+        return BlocProvider(
+          create: (context) => UserBloc(repo: sl()),
+          child: child!,
+        );
       },
     );
   }

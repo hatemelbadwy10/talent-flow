@@ -29,6 +29,8 @@ import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
 import '../features/projects/page/my_projects.dart';
 import '../features/setting/page/about_talent_flow.dart';
+import '../features/setting/page/chat_screen.dart';
+import '../features/setting/page/contracts_screen.dart';
 import '../features/setting/page/edit_profile.dart';
 import '../features/setting/page/terms_and_condations.dart';
 import '../features/splash/page/splash.dart';
@@ -37,11 +39,11 @@ import 'routes.dart';
 
 abstract class CustomNavigator {
   static final GlobalKey<NavigatorState> navigatorState =
-  GlobalKey<NavigatorState>();
+      GlobalKey<NavigatorState>();
   static final RouteObserver<PageRoute> routeObserver =
-  RouteObserver<PageRoute>();
+      RouteObserver<PageRoute>();
   static final GlobalKey<ScaffoldMessengerState> scaffoldState =
-  GlobalKey<ScaffoldMessengerState>();
+      GlobalKey<ScaffoldMessengerState>();
 
   static Route<dynamic> onCreateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -99,158 +101,160 @@ abstract class CustomNavigator {
         return _pageRoute(const AddYourProjects());
       case Routes.freelancers:
         return _pageRoute(AllFreelancersView(
-            arguments: settings.arguments as Map<String, dynamic>?)
-        );
+            arguments: settings.arguments as Map<String, dynamic>?));
       case Routes.ownerProjects:
         return _pageRoute(BlocProvider(
-          create: (context) =>
-          MyProjectsBloc(sl())
-            ..add(Add()),
+          create: (context) => MyProjectsBloc(sl())..add(Add()),
           child: OwnerProjects(
-            arguments: settings.arguments as Map<String, dynamic>?,),
+            arguments: settings.arguments as Map<String, dynamic>?,
+          ),
         ));
       case Routes.entrepreneur:
         return _pageRoute(const EntrepreneurProfile());
       case Routes.freeLancerView:
         return _pageRoute(FreelancerProfileView(
-          arguments: settings.arguments as Map<String, dynamic>,));
+          arguments: settings.arguments as Map<String, dynamic>,
+        ));
 
-    //
-    // case Routes.splash:
-    //   return _pageRoute(const Splash());
-    //
-    // case Routes.login:
-    //   return _pageRoute(Login());
-    //
-    // case Routes.register:
-    //   return _pageRoute(const Register());
-    //
-    // case Routes.forgetPassword:
-    //   return _pageRoute(const ForgetPassword());
-    //
-    // case Routes.resetPassword:
-    //   return _pageRoute(ResetPassword(
-    //     data: settings.arguments as VerificationModel,
-    //   ));
-    //
-    // case Routes.changePassword:
-    //   return _pageRoute(const ChangePassword());
-    //
-    // case Routes.verification:
-    //   return _pageRoute(Verification(model: settings.arguments as VerificationModel));
-    //
+      //
+      // case Routes.splash:
+      //   return _pageRoute(const Splash());
+      //
+      // case Routes.login:
+      //   return _pageRoute(Login());
+      //
+      // case Routes.register:
+      //   return _pageRoute(const Register());
+      //
+      // case Routes.forgetPassword:
+      //   return _pageRoute(const ForgetPassword());
+      //
+      // case Routes.resetPassword:
+      //   return _pageRoute(ResetPassword(
+      //     data: settings.arguments as VerificationModel,
+      //   ));
+      //
+      // case Routes.changePassword:
+      //   return _pageRoute(const ChangePassword());
+      //
+      // case Routes.verification:
+      //   return _pageRoute(Verification(model: settings.arguments as VerificationModel));
+      //
       case Routes.editProfile:
         return _pageRoute(const EditProfileScreen());
 
-    // case Routes.profile:
-    //   return _pageRoute(const MyProfile());
-    //
-    // case Routes.dashboard:
-    //   return _pageRotute(DashBoard(
-    //     index: settings.arguments as int?,
-    //   ));
-    //
+      // case Routes.profile:
+      //   return _pageRoute(const MyProfile());
+      //
+      // case Routes.dashboard:
+      //   return _pageRotute(DashBoard(
+      //     index: settings.arguments as int?,
+      //   ));
+      //
       case Routes.notifications:
         return _pageRoute(BlocProvider(
           create: (context) => NotificationBloc(sl()),
           child: const Notification(),
         ));
-    //
-    // case Routes.services:
-    //   return _pageRoute(const ServicesPage());
-    //
-    // case Routes.offers:
-    //   return _pageRoute(const OffersPage());
-    //
-    // case Routes.brands:
-    //   return _pageRoute(const PartnersPage());
-    //
-    // case Routes.newsDetails:
-    //   return _pageRoute(NewsDetailsPage(id: settings.arguments as int));
-    //
-    // case Routes.courses:
-    //   return _pageRoute(const CoursesPage());
-    //
-    // case Routes.myCourses:
-    //   return _pageRoute(const MyCoursesPage());
-    //
-    // case Routes.courseDetails:
-    //   return _pageRoute(CourseDetailsPage(id: settings.arguments as int));
-    //
-    // case Routes.associations:
-    //   return _pageRoute(const AssociationsPage());
-    //
-    // case Routes.myAssociations:
-    //   return _pageRoute(const MyAssociationsPage());
-    //
-    // case Routes.associationDetails:
-    //   return _pageRoute(AssociationDetailsPage(id: settings.arguments as int));
-    //
-    // case Routes.conferences:
-    //   return _pageRoute(const ConferencesPage());
-    //
-    // case Routes.myConferences:
-    //   return _pageRoute(const MyConferencesPage());
-    //
-    // case Routes.conferenceDetails:
-    //   return _pageRoute(ConferenceDetailsPage(id: settings.arguments as int));
-    //
-    // case Routes.addMembershipRequest:
-    //   return _pageRoute(AddMembershipRequestPage(model: settings.arguments as MembershipRequestModel?));
-    //
-    // case Routes.addAssociationRequest:
-    //   return _pageRoute(AddAssociationRequestPage(model: settings.arguments as AssociationModel?));
-    //
-    // case Routes.addStudentMembershipRequest:
-    //   return _pageRoute(AddStudentMembershipRequestPage(model: settings.arguments as MembershipRequestModel?));
-    //
-    // case Routes.updateMembership:
-    //   return _pageRoute(UpdateMembershipPage(model: settings.arguments as MembershipRequestModel?));
-    //
-    // case Routes.addEducationalData:
-    //   return _pageRoute(AddEducationalDataPage(data: settings.arguments as Map<String, dynamic>));
-    //
-    // case Routes.addExperienceData:
-    //   return _pageRoute(AddExperienceDataPage(data: settings.arguments as Map<String, dynamic>));
-    //
-    // case Routes.membershipRequest:
-    //   return _pageRoute(const MembershipRequestPage());
-    //
-    // case Routes.videoPreview:
-    //   return _pageRoute(VideoPreviewPage(data: settings.arguments as Map));
-    //
-    // case Routes.pickLocation:
-    //   return _pageRoute(PickMapPage(data: settings.arguments as LocationModel));
-    //
-    // case Routes.payment:
-    //   return _pageRoute(InAppViewPage(url: settings.arguments as String));
-    //
-    // case Routes.whoUs:
-    //   return _pageRoute(WhoUsPage(
-    //     index: settings.arguments as int?,
-    //   ));
-    //
-    // case Routes.contactWithUs:
-    //   return _pageRoute(const ContactWithUsPage());
-    //
-    // case Routes.privacy:
-    //   return _pageRoute(const PrivacyPolicy());
-    //
+      case Routes.chats:
+        return _pageRoute(const ChatScreen());
+      case Routes.contracts:
+        return _pageRoute(const ContractsScreen());
+      //
+      // case Routes.services:
+      //   return _pageRoute(const ServicesPage());
+      //
+      // case Routes.offers:
+      //   return _pageRoute(const OffersPage());
+      //
+      // case Routes.brands:
+      //   return _pageRoute(const PartnersPage());
+      //
+      // case Routes.newsDetails:
+      //   return _pageRoute(NewsDetailsPage(id: settings.arguments as int));
+      //
+      // case Routes.courses:
+      //   return _pageRoute(const CoursesPage());
+      //
+      // case Routes.myCourses:
+      //   return _pageRoute(const MyCoursesPage());
+      //
+      // case Routes.courseDetails:
+      //   return _pageRoute(CourseDetailsPage(id: settings.arguments as int));
+      //
+      // case Routes.associations:
+      //   return _pageRoute(const AssociationsPage());
+      //
+      // case Routes.myAssociations:
+      //   return _pageRoute(const MyAssociationsPage());
+      //
+      // case Routes.associationDetails:
+      //   return _pageRoute(AssociationDetailsPage(id: settings.arguments as int));
+      //
+      // case Routes.conferences:
+      //   return _pageRoute(const ConferencesPage());
+      //
+      // case Routes.myConferences:
+      //   return _pageRoute(const MyConferencesPage());
+      //
+      // case Routes.conferenceDetails:
+      //   return _pageRoute(ConferenceDetailsPage(id: settings.arguments as int));
+      //
+      // case Routes.addMembershipRequest:
+      //   return _pageRoute(AddMembershipRequestPage(model: settings.arguments as MembershipRequestModel?));
+      //
+      // case Routes.addAssociationRequest:
+      //   return _pageRoute(AddAssociationRequestPage(model: settings.arguments as AssociationModel?));
+      //
+      // case Routes.addStudentMembershipRequest:
+      //   return _pageRoute(AddStudentMembershipRequestPage(model: settings.arguments as MembershipRequestModel?));
+      //
+      // case Routes.updateMembership:
+      //   return _pageRoute(UpdateMembershipPage(model: settings.arguments as MembershipRequestModel?));
+      //
+      // case Routes.addEducationalData:
+      //   return _pageRoute(AddEducationalDataPage(data: settings.arguments as Map<String, dynamic>));
+      //
+      // case Routes.addExperienceData:
+      //   return _pageRoute(AddExperienceDataPage(data: settings.arguments as Map<String, dynamic>));
+      //
+      // case Routes.membershipRequest:
+      //   return _pageRoute(const MembershipRequestPage());
+      //
+      // case Routes.videoPreview:
+      //   return _pageRoute(VideoPreviewPage(data: settings.arguments as Map));
+      //
+      // case Routes.pickLocation:
+      //   return _pageRoute(PickMapPage(data: settings.arguments as LocationModel));
+      //
+      // case Routes.payment:
+      //   return _pageRoute(InAppViewPage(url: settings.arguments as String));
+      //
+      // case Routes.whoUs:
+      //   return _pageRoute(WhoUsPage(
+      //     index: settings.arguments as int?,
+      //   ));
+      //
+      // case Routes.contactWithUs:
+      //   return _pageRoute(const ContactWithUsPage());
+      //
+      // case Routes.privacy:
+      //   return _pageRoute(const PrivacyPolicy());
+      //
       case Routes.terms:
         return _pageRoute(const TermsAndConditionsScreen());
-    //
-    // case Routes.faqs:
-    //   return _pageRoute(const FaqsPage());
+      //
+      // case Routes.faqs:
+      //   return _pageRoute(const FaqsPage());
 
       default:
         return MaterialPageRoute(builder: (_) => const MyApp());
     }
   }
 
-  static _pageRoute(Widget child) =>
-      Platform.isIOS
-          ? CupertinoPageRoute(builder: (_) => child)
-          : MaterialPageRoute(builder: (_) => child);
+  static _pageRoute(Widget child) => Platform.isIOS
+      ? CupertinoPageRoute(builder: (_) => child)
+      : MaterialPageRoute(builder: (_) => child);
 
   // static PageRouteBuilder<dynamic> _pageRoute(Widget child) => PageRouteBuilder(
   //     transitionDuration: const Duration(milliseconds: 100),

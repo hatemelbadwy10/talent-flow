@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
-import 'package:talent_flow/app/core/extensions.dart';
 import 'package:talent_flow/app/localization/language_constant.dart';
 import 'package:talent_flow/main_models/custom_field_model.dart';
 

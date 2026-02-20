@@ -112,6 +112,7 @@
     "whats_new": "ما الجديد على تلنت فلو؟",
     "welcome": "مرحبا بك",
     "freelancers": "المستقلون",
+    "job_title_not_set": "لم يحدد",
     "entrepreneurs": "عرضو الخدمات",
     "view_profile": "عرض الملف الشخصي",
     "view_company_profile": "عرض الملف الشخصي للشركة",
@@ -135,7 +136,7 @@
     "category": "التخصص",
     "job_title": "المسمى الوظيفي",
     "enter_job_title": "أدخل المسمى الوظيفي",
-    "contact_me": "تواصل معي"
+    "contact_me": "تواصل معى"
   },
   "project_card": {
     "user_name": "محمد عبد الرحمن",
@@ -242,6 +243,11 @@
   "settings_screen": {
     "title": "الاعدادات",
     "edit_profile": "تعديل الملف الشخصي",
+    "dashboard": "لوحة التحكم",
+    "messages": "الرسائل",
+    "account_statement": "كشف حساب",
+    "contracts": "العقود",
+    "identity_verification": "توثيق الهوية",
     "upload_work": "رفع اعمال",
     "about_talent_flow": "ما هو تالنت فلو؟",
     "notifications": "الإشعارات",
@@ -251,6 +257,33 @@
     "language": "اللغة",
     "current_language": "English",
     "logout": "تسجيل الخروج"
+  },
+  "chat_screen": {
+    "title": "الرسائل",
+    "search_hint": "ابحث في الرسائل",
+    "user_ahmed": "أحمد سالم",
+    "user_maryam": "مريم عادل",
+    "user_khaled": "خالد ناصر",
+    "user_nora": "نورة علي",
+    "user_omar": "عمر سامي",
+    "msg_contract": "هل يمكننا تحديث تفاصيل العقد؟",
+    "msg_files": "لقد أرسلت كل الملفات المطلوبة.",
+    "msg_thanks": "شكرًا، سأراجع وأرد قريبًا.",
+    "msg_meeting": "تم تأكيد اجتماعنا غدًا.",
+    "msg_update": "يرجى الاطلاع على آخر تحديث للمشروع.",
+    "time_2_days": "يومين",
+    "time_yesterday": "أمس",
+    "time_1_hour": "ساعة واحدة",
+    "time_5_minutes": "٥ دقائق",
+    "time_now": "الآن"
+  },
+  "contracts_screen": {
+    "status_pending": "معلق",
+    "status_rejected": "مرفوض",
+    "status_approved": "مقبول",
+    "download": "تنزيل العقد",
+    "contract_title": "عقد إنشاء تصميم ابلكيشن توصيل",
+    "contract_size": "حجم العقد: 4.2 MB"
   },
   "terms_screen": {
     "appbar_title": "الشروط والاحكام",

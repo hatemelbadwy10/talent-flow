@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:talent_flow/features/home/widgets/jop_offer_listview_item.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';

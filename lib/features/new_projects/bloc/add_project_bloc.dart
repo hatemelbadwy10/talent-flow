@@ -2,7 +2,6 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
 
 import '../repo/add_project_repo.dart';
 import 'add_project_event.dart';

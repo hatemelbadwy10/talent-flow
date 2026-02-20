@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter/material.dart';
+
 import 'dart:io';
 
 import '../../../app/core/app_event.dart';

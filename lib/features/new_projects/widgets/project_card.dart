@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/features/projects/model/my_projects_model.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
@@ -65,7 +64,6 @@ class _ProjectCardState extends State<ProjectCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Section 1: User Info Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

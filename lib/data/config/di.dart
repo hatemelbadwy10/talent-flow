@@ -17,6 +17,8 @@ import 'package:talent_flow/features/setting/repo/favourite_repo.dart';
 import 'package:talent_flow/features/setting/repo/notification_repo.dart';
 import 'package:talent_flow/features/setting/repo/terms_condation_repo.dart';
 import 'package:talent_flow/features/setting/repo/update_profile_repo.dart';
+import 'package:talent_flow/main_blocs/user_bloc.dart';
+import 'package:talent_flow/main_repos/user_repo.dart';
 import '../../features/auth/pages/change_password/repo/change_password_repo.dart';
 import '../../features/auth/pages/login/repo/login_repo.dart';
 import '../../features/auth/pages/register/repo/register_repo.dart';
@@ -112,6 +114,11 @@ Future<void> init() async {
       () => FavouriteRepo(sharedPreferences: sl(), dioClient: sl()));
   sl.registerLazySingleton(
       () => NotificationRepo(sharedPreferences: sl(), dioClient: sl()));
+  
+  // User Repo and Bloc
+  sl.registerLazySingleton(
+      () => UserRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton(() => UserBloc(repo: sl()));
 
   //
   // sl.registerLazySingleton(() => ChangePasswordRepo(sharedPreferences: sl(), dioClient: sl()));

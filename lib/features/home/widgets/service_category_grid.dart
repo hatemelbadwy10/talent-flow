@@ -28,7 +28,8 @@ class ServiceCategoriesGrid extends StatelessWidget {
       aspectRatio: .50,
       padding: const EdgeInsets.all(2),
       items: serviceData.map((data) {
-        return GestureDetector(
+        return InkWell(
+          borderRadius: BorderRadius.circular(16),
           onTap: () {
             log("sl ${sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer)} ");
             if (sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??

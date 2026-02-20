@@ -94,7 +94,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 onTap: () {
                   final bloc = context.read<PaymentBloc>();
                   if (bloc.state is Done) {
-                    final paymentMethods = (bloc.state as Done).list;
+                 //   final paymentMethods = (bloc.state as Done).list;
 
                   }
                 },

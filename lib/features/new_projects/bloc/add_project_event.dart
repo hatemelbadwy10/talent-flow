@@ -68,7 +68,7 @@ class UpdateSimilarProjects extends AddProjectEvent {
 }
 
 class UpdateRequiredToBeReceived extends AddProjectEvent {
-  final bool requiredToBeReceived;
+  final String requiredToBeReceived;
 
   const UpdateRequiredToBeReceived({required this.requiredToBeReceived});
 

@@ -5,6 +5,7 @@ import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 
 import '../../../app/core/app_event.dart';
+import '../../../app/core/styles.dart';
 import '../../../navigation/routes.dart';
 import '../bloc/on_boarding_bloc.dart';
 import 'build_dot_widget.dart';
@@ -35,7 +36,7 @@ class OnBoardingButton extends StatelessWidget {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xffCEE5E6),
+              backgroundColor:Styles.PRIMARY_COLOR,
               minimumSize: const Size(double.infinity, 50),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
@@ -43,7 +44,7 @@ class OnBoardingButton extends StatelessWidget {
             child: Text(
               currentPage < onboardingData.length - 1 ? 'next'.tr() : 'start'.tr(),
               style: const TextStyle(
-                  color: Color(0xFF0C7D81),
+                  color: Styles.WHITE_COLOR,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
 

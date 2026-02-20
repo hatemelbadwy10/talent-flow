@@ -12,7 +12,7 @@ class AddProjectState extends Equatable {
   final String description;
   final String? filesDescription;
   final List<String> similarProjects;
-  final bool requiredToBeReceived;
+  final String? requiredToBeReceived;
   final List<int> skills;
   final List<String>? selectedSkills ; // Add this field to store selected skills <String>
   final String? budget;
@@ -33,7 +33,7 @@ class AddProjectState extends Equatable {
     this.filesDescription,
     this.similarProjects = const [],
     this.files = const [],
-    this.requiredToBeReceived = false,
+    this.requiredToBeReceived = "",
     this.skills = const [],
     this.budget,
     this.duration,
@@ -50,7 +50,7 @@ class AddProjectState extends Equatable {
     String? description,
     String? filesDescription,
     List<String>? similarProjects,
-    bool? requiredToBeReceived,
+    String? requiredToBeReceived,
     List<int>? skills,
     List<String>? selectedSkills,
     String? budget,

@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:talent_flow/features/new_projects/widgets/skills_section.dart';
 import 'package:talent_flow/features/projects/model/single_project_model.dart';
 
-import '../../../app/core/styles.dart';
 
 class ProjectDetailsCard extends StatelessWidget {
   const ProjectDetailsCard({super.key, this.singleProjectModel});

@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:talent_flow/app/core/app_core.dart';
 
 import '../../../app/core/styles.dart';
 

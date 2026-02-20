@@ -22,98 +22,95 @@ class ProjectPortfolioCard extends StatelessWidget {
     // 🔹 Convert string status from model to enum
     final ProjectStatus status = ProjectStatusHelper.fromString(projectsModel.status);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: GestureDetector(
         onTap: () {
-          CustomNavigator.push(
-              Routes.singleProjectDetails, arguments: {"id": projectsModel.id});
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              child: SizedBox(
-                width: double.infinity,
-                height: 120, // Added fixed height for consistency
-                child: Image.network(
-                  projectsModel.specialization?.image ?? "",
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Color(0xFF7DD3FC),
-                            Color(0xFF0EA5E9),
-                          ],
+              CustomNavigator.push(
+                  Routes.singleProjectDetails, arguments: {"id": projectsModel.id});
+            },
+        child: Ink(
+          
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 120, // Added fixed height for consistency
+                  child: Image.network(
+                    projectsModel.specialization?.image ?? "",
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0xFF7DD3FC),
+                              Color(0xFF0EA5E9),
+                            ],
+                          ),
                         ),
-                      ),
-                      child: const Center(
-                        child: Icon(Icons.image, color: Colors.white, size: 40),
-                      ),
-                    );
-                  },
+                        child: const Center(
+                          child: Icon(Icons.image, color: Colors.white, size: 40),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    projectsModel.title ?? "project_portfolio.default_title".tr(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff666568),
-                      height: 1.3,
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      projectsModel.title ?? "project_portfolio.default_title".tr(),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff666568),
+                        height: 1.3,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    projectsModel.specialization?.name ?? "project_portfolio.default_specialization".tr(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff666568),
-                      height: 1.3,
+                    const SizedBox(height: 8),
+                    Text(
+                      projectsModel.specialization?.name ?? "project_portfolio.default_specialization".tr(),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff666568),
+                        height: 1.3,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _buildStatItem(Icons.thumb_up_alt_outlined, (projectsModel.proposalsCount ?? 0).toString()),
-                      const SizedBox(width: 8),
-                      _buildStatItem(Icons.visibility_outlined, (projectsModel.views ?? 0).toString()),
-                      const Spacer(), // Push status chip to the right
-                      StatusChip(status: status), // 🔹 Use converted status
-                    ],
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _buildStatItem(Icons.thumb_up_alt_outlined, (projectsModel.proposalsCount ?? 0).toString()),
+                        const SizedBox(width: 8),
+                        _buildStatItem(Icons.visibility_outlined, (projectsModel.views ?? 0).toString()),
+                        const Spacer(), // Push status chip to the right
+                        StatusChip(status: status), // 🔹 Use converted status
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -1,5 +1,4 @@
 import 'package:talent_flow/app/core/extensions.dart';
-import 'package:talent_flow/components/custom_app_bar.dart';
 import 'package:talent_flow/components/custom_network_image.dart';
 import 'package:flutter/material.dart';
 

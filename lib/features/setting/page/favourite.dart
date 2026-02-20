@@ -3,15 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/components/animated_widget.dart';
-import 'package:talent_flow/features/new_projects/bloc/add_project_bloc.dart';
 import 'package:talent_flow/features/new_projects/bloc/new_projects_bloc.dart';
-import 'package:talent_flow/features/new_projects/repo/new_projects_repo.dart';
 import 'package:talent_flow/features/new_projects/widgets/project_card.dart';
 import 'package:talent_flow/features/projects/widgets/projects_shimmer.dart';
 
 import '../../../app/core/app_event.dart';
-import '../../../app/core/styles.dart';
-import '../../../components/custom_app_bar.dart';
 import '../../../data/config/di.dart';
 import '../bloc/fav_bloc.dart';
 import '../../../app/core/app_state.dart';

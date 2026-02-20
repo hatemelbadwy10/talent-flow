@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/features/new_projects/widgets/section_label_widget.dart';
 import '../../../../components/custom_text_form_field.dart';
-import '../../../data/config/di.dart';
 import '../bloc/add_project_bloc.dart';
 import '../bloc/add_project_event.dart';
 import 'helper_text_widget.dart';

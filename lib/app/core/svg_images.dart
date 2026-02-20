@@ -86,6 +86,12 @@ class SvgImages {
   static const String listIcon = 'assets/svgs/list_icon.svg';
   static const String gridIcon = 'assets/svgs/grid_icon.svg';
   static const String settings = 'assets/svgs/settings.svg';
+  static const String dashboard = 'assets/svgs/dashboard.svg';
+  static const String messages = 'assets/svgs/message.svg';
+  static const String accountStatement = 'assets/svgs/report.svg';
+  static const String contracts = 'assets/svgs/contracts.svg';
+  static const String contract = 'assets/svgs/contract.svg';
+  static const String identityVerification = 'assets/svgs/profile-circle.svg';
   static const String setting = 'assets/svgs/setting.svg';
   static const String agency = 'assets/svgs/agency.svg';
   static const String store = 'assets/svgs/store.svg';

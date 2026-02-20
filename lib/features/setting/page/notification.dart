@@ -5,7 +5,6 @@ import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
 import 'package:talent_flow/features/setting/model/notification_model.dart';
-import 'package:talent_flow/features/setting/repo/notification_repo.dart';
 import 'package:talent_flow/features/setting/widgets/notification_card.dart';
 
 import '../../../app/core/styles.dart';
