@@ -26,7 +26,12 @@ class Routes {
   static const profile = "PROFILE";
   static const editProfile = "EDIT_PROFILE";
   static const chats = "CHATS";
+  static const accountStatement = "ACCOUNT_STATEMENT";
+  static const accountStatementDetails = "ACCOUNT_STATEMENT_DETAILS";
   static const contracts = "CONTRACTS";
+  static const contractDetails = "CONTRACT_DETAILS";
+  static const createContract = "CREATE_CONTRACT";
+  static const identityVerification = "IDENTITY_VERIFICATION";
   static const services = "CATEGORIES";
   static const brands = "BRANDS";
   static const news = "news";
@@ -47,6 +52,7 @@ class Routes {
   static const String favorites = "Favorites";
   static const settings = "SETTINGS";
   static const notifications = "NOTIFICATIONS";
+  static const dashboard = "DASHBOARD";
   static const search = "SEARCH";
   static const searchResult = "SEARCH_RESULT";
   static const userProfile = "USER_PROFILE";

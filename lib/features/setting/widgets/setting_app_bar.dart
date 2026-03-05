@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../app/core/images.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -7,6 +6,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBackPressed;
   final List<Widget>? actions; // ⬅️ هنا ضفتها
   final PreferredSizeWidget? bottom;
+  final bool centerTitle;
   const CustomAppBar({
     this.bottom,
     super.key,
@@ -14,6 +14,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showBackButton = false,
     this.onBackPressed,
     this.actions,
+    this.centerTitle = false,
   });
 
   @override
@@ -25,7 +26,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       bottom: bottom,
       backgroundColor: Colors.white,
       elevation: 0,
-      centerTitle: false,
+      centerTitle: centerTitle,
 
       leading: Padding(
               padding: const EdgeInsetsDirectional.only(start: 12),
@@ -47,24 +48,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
       leadingWidth: showBackButton ? 56 : null,
 
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(
-            Images.appLogo,
-            height: 30,
-            fit: BoxFit.contain,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.black87,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-        ],
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.black87,
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
       ),
 
       // ✅ هنا استخدمنا actions لو مش null، لو null حطينا SizedBox

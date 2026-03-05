@@ -3,14 +3,17 @@ import 'package:flutter/cupertino.dart' hide Notification;
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/features/auth/pages/register/register.dart';
+import 'package:talent_flow/features/home/bloc/freelancer_chat_bloc.dart';
 import 'package:talent_flow/features/new_projects/page/add_project.dart';
 import 'package:talent_flow/features/payment/page/payment_page.dart';
 import 'package:talent_flow/features/projects/bloc/my_projects_bloc.dart';
 import 'package:talent_flow/features/projects/page/single_project_view.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
+import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
 import 'package:talent_flow/features/setting/page/add_projects.dart';
 import 'package:talent_flow/features/setting/page/favourite.dart';
 import 'package:talent_flow/features/setting/page/notification.dart';
+import 'package:talent_flow/features/setting/page/dashboard_screen.dart';
 import '../app/core/app_event.dart';
 import '../data/config/di.dart';
 import '../features/auth/pages/change_password/change_password.dart';
@@ -20,6 +23,7 @@ import '../features/auth/pages/send_verification/send_verification.dart';
 import '../features/home/page/all_categories.dart';
 import '../features/home/page/all_freelancers_view.dart';
 import '../features/home/page/entrepreneur_profile.dart';
+import '../features/home/page/freelancer_chat_screen.dart';
 import '../features/home/page/freelancer_profile.dart';
 import '../features/home/page/home_view.dart';
 import '../features/nav_bar/page/nav_bar.dart';
@@ -29,9 +33,14 @@ import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
 import '../features/projects/page/my_projects.dart';
 import '../features/setting/page/about_talent_flow.dart';
+import '../features/setting/page/account_statement_details_screen.dart';
+import '../features/setting/page/account_statement_screen.dart';
 import '../features/setting/page/chat_screen.dart';
+import '../features/setting/page/contract_details_screen.dart';
 import '../features/setting/page/contracts_screen.dart';
+import '../features/setting/page/create_contract_screen.dart';
 import '../features/setting/page/edit_profile.dart';
+import '../features/setting/page/identity_verification_screen.dart';
 import '../features/setting/page/terms_and_condations.dart';
 import '../features/splash/page/splash.dart';
 import '../main.dart';
@@ -115,6 +124,14 @@ abstract class CustomNavigator {
         return _pageRoute(FreelancerProfileView(
           arguments: settings.arguments as Map<String, dynamic>,
         ));
+      case Routes.chat:
+        return _pageRoute(BlocProvider(
+          create: (context) => FreelancerChatBloc(sl(), sl())
+            ..add(Add(arguments: settings.arguments)),
+          child: FreelancerChatScreen(
+            arguments: settings.arguments as Map<String, dynamic>?,
+          ),
+        ));
 
       //
       // case Routes.splash:
@@ -156,10 +173,34 @@ abstract class CustomNavigator {
           create: (context) => NotificationBloc(sl()),
           child: const Notification(),
         ));
+      case Routes.dashboard:
+        return _pageRoute(const DashboardScreen());
       case Routes.chats:
-        return _pageRoute(const ChatScreen());
+        return _pageRoute(BlocProvider(
+          create: (context) => ChatsBloc(sl())..add(Add()),
+          child: const ChatScreen(),
+        ));
+      case Routes.accountStatement:
+        return _pageRoute(const AccountStatementScreen());
+      case Routes.accountStatementDetails:
+        final statementId = settings.arguments as int?;
+        if (statementId == null) {
+          return _pageRoute(const AccountStatementScreen());
+        }
+        return _pageRoute(
+            AccountStatementDetailsScreen(statementId: statementId));
       case Routes.contracts:
         return _pageRoute(const ContractsScreen());
+      case Routes.contractDetails:
+        final contractId = settings.arguments as int?;
+        if (contractId == null) {
+          return _pageRoute(const ContractsScreen());
+        }
+        return _pageRoute(ContractDetailsScreen(contractId: contractId));
+      case Routes.createContract:
+        return _pageRoute(const CreateContractScreen());
+      case Routes.identityVerification:
+        return _pageRoute(const IdentityVerificationScreen());
       //
       // case Routes.services:
       //   return _pageRoute(const ServicesPage());

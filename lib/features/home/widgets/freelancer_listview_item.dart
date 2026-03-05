@@ -118,7 +118,11 @@ class FreelancerListItem extends StatelessWidget {
                 onTap: () {
                   CustomNavigator.push(
                     Routes.chat,
-                    arguments: {"freelancerId": id},
+                    arguments: {
+                      "freelancerId": id,
+                      "freelancerName": name,
+                      "freelancerJobTitle": jopTitle,
+                    },
                   );
                 },
               )

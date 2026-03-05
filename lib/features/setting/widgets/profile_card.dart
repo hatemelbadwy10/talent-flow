@@ -24,7 +24,7 @@ class ProfileCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 10,
           ),
@@ -86,11 +86,11 @@ class ProfileCard extends StatelessWidget {
               );
             },
           ),
-              _buildProfileOption(
+          _buildProfileOption(
             svgIconPath: SvgImages.dashboard,
             text: 'settings_screen.dashboard'.tr(),
             onTap: () {
-              CustomNavigator.push(Routes.navBar);
+              CustomNavigator.push(Routes.dashboard);
             },
           ),
         ],
@@ -107,7 +107,7 @@ class ProfileCard extends StatelessWidget {
     assert(icon != null || svgIconPath != null);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
       child: Row(
         children: [
           if (svgIconPath != null)

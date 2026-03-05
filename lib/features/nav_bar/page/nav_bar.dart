@@ -23,7 +23,7 @@ class NavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> widgetOptions = [
-      const Setting(),
+      const SettingScreen(),
       const OwnerProjects(),
       BlocProvider(
         create: (context) =>

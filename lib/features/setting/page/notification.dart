@@ -26,7 +26,7 @@ class _NotificationState extends State<Notification>
     "all": "",          // All → request with ""
     "projects": "projects",
     "payments": "payments",
-    "freelancers": "freelancers",
+    "freeLancer": "freelancers",
   };
 
   late final List<String> _tabTitles;   // keys (for UI)
@@ -63,7 +63,7 @@ class _NotificationState extends State<Notification>
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => NotificationBloc(sl()),
+      create: (context) => NotificationBloc(sl())..add(Add(arguments: _tabValues[0])), // initial load
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -75,7 +75,7 @@ class _NotificationState extends State<Notification>
             isScrollable: true,
             tabs: List.generate(
               _tabTitles.length,
-                  (index) => Tab(text: _tabTitles[index]), // UI (translated key)
+                  (index) => Tab(text: _tabTitles[index].tr()), // UI translated
             ),
           ),
         ),
@@ -117,8 +117,8 @@ class _NotificationState extends State<Notification>
                 .toList(),
           );
         }
-
         return _buildShimmerList();
+
       },
     );
   }

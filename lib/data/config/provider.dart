@@ -1,6 +1,4 @@
-import 'package:talent_flow/data/config/di.dart' as di;
 import 'package:flutter_bloc/flutter_bloc.dart' show BlocProvider;
-import '../../app/core/app_event.dart';
 
 
 abstract class ProviderList {

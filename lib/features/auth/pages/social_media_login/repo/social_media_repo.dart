@@ -3,9 +3,7 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/navigation/routes.dart';
 
 import '../../../../../app/core/app_storage_keys.dart';
 import '../../../../../data/api/end_points.dart';

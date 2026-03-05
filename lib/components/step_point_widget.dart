@@ -10,11 +10,11 @@ class StepWidget extends StatefulWidget {
   final Color backgroundColor;
 
   const StepWidget({
-    Key? key,
+    super.key,
     required this.foregroundColor,
     required this.backgroundColor,
     this.value = 25,
-  }) : super(key: key);
+  });
 
   @override
   StepWidgetState createState() {

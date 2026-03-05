@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:talent_flow/app/core/extensions.dart';
+import 'package:talent_flow/navigation/custom_navigation.dart';
+import 'package:talent_flow/navigation/routes.dart';
+
+import '../model/chats_model.dart';
 
 class ChatListItem extends StatelessWidget {
   const ChatListItem({
     super.key,
-    required this.userName,
-    required this.lastMessage,
-    required this.timeLabel,
-    required this.imageUrl,
+    required this.chat,
   });
 
-  final String userName;
-  final String lastMessage;
-  final String timeLabel;
-  final String imageUrl;
+  final ChatsModel chat;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +20,9 @@ class ChatListItem extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 24,
-          backgroundImage: NetworkImage(imageUrl),
+          backgroundImage: NetworkImage(
+            chat.receiver?.image??"",
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -30,7 +30,7 @@ class ChatListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                userName,
+                chat.receiver?.name ?? '',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -41,7 +41,7 @@ class ChatListItem extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                lastMessage,
+                chat.lastMessageSnippet ?? '',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -55,7 +55,7 @@ class ChatListItem extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         Text(
-          timeLabel,
+          chat.since ?? '',
           style: const TextStyle(
             color: Color(0xFF88878B),
             fontSize: 12,
@@ -63,7 +63,17 @@ class ChatListItem extends StatelessWidget {
           ),
         ),
       ],
-    ).paddingAll(12).onTap((){},borderRadius: BorderRadius.circular(12)).setContainerToView(
+    ).paddingAll(12).onTap((){
+      CustomNavigator.push(
+        Routes.chat,
+        arguments: {
+          'conversationId': chat.id,
+          'freelancerId': chat.receiver?.id,
+          'freelancerName': chat.receiver?.name,
+          'freelancerJobTitle': chat.receiver?.jobTitle,
+        },
+      );
+    },borderRadius: BorderRadius.circular(12)).setContainerToView(
      color: Colors.white,
       radius: 12,
     );

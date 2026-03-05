@@ -14,8 +14,8 @@ import '../widgets/helo_dialoug.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/setting_item.dart';
 
-class Setting extends StatelessWidget {
-  const Setting({super.key});
+class SettingScreen extends StatelessWidget {
+  const SettingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +75,9 @@ class Setting extends StatelessWidget {
                           SettingsMenuItem(
                               svgIconPath: SvgImages.accountStatement,
                               text: 'settings_screen.account_statement'.tr(),
-                              onTap: () {}),
+                              onTap: () {
+                                CustomNavigator.push(Routes.accountStatement);
+                              }),
                           SettingsMenuItem(
                               svgIconPath: SvgImages.contracts,
                               text: 'settings_screen.contracts'.tr(),
@@ -86,7 +88,11 @@ class Setting extends StatelessWidget {
                               svgIconPath: SvgImages.identityVerification,
                               text:
                                   'settings_screen.identity_verification'.tr(),
-                              onTap: () {}),
+                              onTap: () {
+                                CustomNavigator.push(
+                                  Routes.identityVerification,
+                                );
+                              }),
                           SettingsMenuItem(
                             onTap: () {
                               final settingsBloc = context.read<SettingsBloc>();
@@ -222,7 +228,9 @@ class SettingAlternative extends StatelessWidget {
                           SettingsMenuItem(
                               svgIconPath: SvgImages.accountStatement,
                               text: 'settings_screen.account_statement'.tr(),
-                              onTap: () {}),
+                              onTap: () {
+                                CustomNavigator.push(Routes.accountStatement);
+                              }),
                           SettingsMenuItem(
                               svgIconPath: SvgImages.contracts,
                               text: 'settings_screen.contracts'.tr(),
@@ -233,7 +241,11 @@ class SettingAlternative extends StatelessWidget {
                               svgIconPath: SvgImages.identityVerification,
                               text:
                                   'settings_screen.identity_verification'.tr(),
-                              onTap: () {}),
+                              onTap: () {
+                                CustomNavigator.push(
+                                  Routes.identityVerification,
+                                );
+                              }),
                           SettingsMenuItem(
                             onTap: () {
                               final settingsBloc =

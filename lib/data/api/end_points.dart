@@ -1,12 +1,11 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 class EndPoints {
   static const bool isProductionEnv = false;
-  static String domain ="";
-  static String baseUrl =  "https://talentflowa.com/";
-  static String apiKey ="";
-  static String googleMapsBaseUrl =  "";
-  static const String generalTopic = isProductionEnv ? 'talent_flow' : 't_talent_flow';
+  static String domain = "";
+  static String baseUrl = "https://talentflowa.com/";
+  static String apiKey = "";
+  static String googleMapsBaseUrl = "";
+  static const String generalTopic =
+      isProductionEnv ? 'talent_flow' : 't_talent_flow';
   static specificTopic(id) => isProductionEnv ? '$id' : 't_$id';
 
   ///Auth
@@ -89,10 +88,12 @@ class EndPoints {
 
   ///Follow-up Membership
   static String experienceData = 'experience-details';
-  static updateExperienceData(id) => 'experience-details${id != null ? "/$id" : ""}';
+  static updateExperienceData(id) =>
+      'experience-details${id != null ? "/$id" : ""}';
 
   static String educationalData = 'educational-details';
-  static updateEducationalData(id) => 'educational-details${id != null ? "/$id" : ""}';
+  static updateEducationalData(id) =>
+      'educational-details${id != null ? "/$id" : ""}';
 
   ///Services && Partners
   static const String partners = 'partners';
@@ -101,12 +102,17 @@ class EndPoints {
 
   ///Notification
   static const String notifications = 'api/profile/notifications?type=';
+  static const String conversations = 'api/conversations';
+  static conversationMessages(id) => 'api/conversations/$id';
+  static const String sendConversationMessage =
+      'api/conversations/message/send';
   static const String markAsRead = 'mark-as-read';
   static readNotification(id) => 'notifications/$id';
   static deleteNotification(id) => 'notifications/$id';
 
   ///Check Out
   static checkOutOrder(id) => 'check-out/$id';
+
   ///Setting
   static const String associationStatistics = 'important-numbers';
   static const String faqs = 'faqs';
@@ -117,6 +123,11 @@ class EndPoints {
   static const String whoUs = 'who-us';
   static const String contactUs = 'contact-us';
   static const String help = 'api/support-tickets';
+  static const String contracts = 'api/contracts';
+  static contractDetails(int id) => 'api/contracts/$id';
+  static const String identityVerification = 'api/identity-verification';
+  static const String accountStatements = 'api/account-statment';
+  static accountStatementDetails(int id) => 'api/account-statment/$id';
 
   ///Selectors
   static const String countries = 'countries';
@@ -131,16 +142,18 @@ class EndPoints {
   static const String qualificationTypes = 'qualification-types';
 
   ///Projects
-static const String projects = 'api/projects';
-static const String addProject ='api/projects';
-static const String singleProject = '/api/projects/';
-static const String addOffer ="api/projects/proposals";
-static const String selectionOption ="api/select-options";
-static const String addWorks = "api/profile/add-works";
+  static const String projects = 'api/projects';
+  static const String addProject = 'api/projects';
+  static const String singleProject = '/api/projects/';
+  static const String addOffer = "api/projects/proposals";
+  static const String selectionOption = "api/select-options";
+  static const String addWorks = "api/profile/add-works";
+
   ///Upload File Service
   static const String uploadFileService = 'store_attachment';
   static deleteFile(id) => 'delete-file/$id';
-static const String logout = 'api/auth/logout';
+  static const String logout = 'api/auth/logout';
+
   /// maps
   static const String geoCodeUrl = '/maps/api/geocode/';
   static const String autoComplete = '/maps/api/place/autocomplete/';

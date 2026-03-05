@@ -30,7 +30,7 @@ class ChangePasswordBloc extends Bloc<AppEvent, AppState> {
               (fail) {
             AppCore.showSnackBar(
               notification: AppNotification(
-                message: fail.error ?? "change_password.error_failed".tr(),
+                message: fail.error ,
                 isFloating: true,
                 backgroundColor: Styles.IN_ACTIVE,
                 borderColor: Colors.transparent,

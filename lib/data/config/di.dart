@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/features/auth/pages/confirm_code/repo/confirm_code_repo.dart';
+import 'package:talent_flow/features/auth/pages/social_media_login/repo/chat_repo.dart';
 import 'package:talent_flow/features/auth/pages/social_media_login/repo/social_media_repo.dart';
 import 'package:talent_flow/features/home/bloc/home_bloc.dart';
 import 'package:talent_flow/features/home/repo/home_repo.dart';
@@ -12,7 +13,10 @@ import 'package:talent_flow/features/new_projects/repo/selection_option_repo.dar
 import 'package:talent_flow/features/payment/repo/pay_ment_repo.dart';
 import 'package:talent_flow/features/projects/repo/projects_repo.dart';
 import 'package:talent_flow/features/setting/repo/about_repo.dart';
+import 'package:talent_flow/features/setting/repo/account_statement_repo.dart';
 import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
+import 'package:talent_flow/features/setting/repo/chats_repo.dart';
+import 'package:talent_flow/features/setting/repo/contracts_repo.dart';
 import 'package:talent_flow/features/setting/repo/favourite_repo.dart';
 import 'package:talent_flow/features/setting/repo/notification_repo.dart';
 import 'package:talent_flow/features/setting/repo/terms_condation_repo.dart';
@@ -29,6 +33,7 @@ import '../../features/setting/repo/settings_repo.dart';
 import '../../features/splash/repo/splash_repo.dart';
 import '../../helpers/social_media_login_helper.dart';
 import '../api/end_points.dart';
+import '../realtime/pusher_service.dart';
 import '../internet_connection/internet_connection.dart';
 import '../local_data/local_database.dart';
 import '../dio/dio_client.dart';
@@ -48,6 +53,7 @@ Future<void> init() async {
       ));
   sl.registerLazySingleton(() => SocialMediaLoginHelper());
   sl.registerLazySingleton(() => InternetConnection(connectivity: sl()));
+  sl.registerLazySingleton(() => PusherService());
 
   // /// Repository
   // sl.registerLazySingleton(() => LocalizationRepo(sharedPreferences: sl(), dioClient: sl()));
@@ -75,6 +81,8 @@ Future<void> init() async {
       socialMediaLoginHelper: SocialMediaLoginHelper(),
       sharedPreferences: sl(),
       dioClient: sl()));
+  sl.registerLazySingleton(
+      () => ChatRepo(sharedPreferences: sl(), dioClient: sl()));
   //
   // sl.registerLazySingleton(() => DashboardRepo(sharedPreferences: sl(), dioClient: sl()));
   //
@@ -114,7 +122,13 @@ Future<void> init() async {
       () => FavouriteRepo(sharedPreferences: sl(), dioClient: sl()));
   sl.registerLazySingleton(
       () => NotificationRepo(sharedPreferences: sl(), dioClient: sl()));
-  
+  sl.registerLazySingleton(
+      () => ChatsRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton(
+      () => ContractsRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton(
+      () => AccountStatementRepo(sharedPreferences: sl(), dioClient: sl()));
+
   // User Repo and Bloc
   sl.registerLazySingleton(
       () => UserRepo(sharedPreferences: sl(), dioClient: sl()));

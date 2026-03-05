@@ -5,8 +5,7 @@ import '../app/core/text_styles.dart';
 import 'custom_images.dart';
 
 class ShowRate extends StatelessWidget {
-  const ShowRate({Key? key, this.rate, this.size, this.showRateNumber = true})
-      : super(key: key);
+  const ShowRate({super.key, this.rate, this.size, this.showRateNumber = true});
 
   final num? rate;
   final double? size;

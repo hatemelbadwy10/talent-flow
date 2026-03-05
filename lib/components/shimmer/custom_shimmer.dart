@@ -7,8 +7,7 @@ class CustomShimmer extends StatelessWidget {
   final Widget? child;
   final Color? color;
   final Color? subColor;
-  const CustomShimmer({Key? key, this.child, this.color, this.subColor})
-      : super(key: key);
+  const CustomShimmer({super.key, this.child, this.color, this.subColor});
 
   @override
   Widget build(BuildContext context) {
