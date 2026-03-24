@@ -1,7 +1,9 @@
-import 'package:easy_localization/easy_localization.dart'hide TextDirection;
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
+import 'app/core/app_event.dart';
+import 'app/core/app_state.dart';
 import 'app/core/styles.dart';
 import 'data/config/di.dart' as di;
 import 'data/config/di.dart';
@@ -11,7 +13,7 @@ import 'navigation/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
- // await Firebase.initializeApp();
+  // await Firebase.initializeApp();
   await EasyLocalization.ensureInitialized();
   await di.init();
   await sl<LocaleDatabase>().initDatabase();
@@ -47,18 +49,22 @@ class MyApp extends StatelessWidget {
       navigatorObservers: [CustomNavigator.routeObserver],
       initialRoute: Routes.splash,
       theme: ThemeData(
-        appBarTheme: const AppBarTheme(
-          surfaceTintColor: Colors.white
-        ),
+        appBarTheme: const AppBarTheme(surfaceTintColor: Colors.white),
         cardColor: Colors.white,
-        indicatorColor: Styles.PRIMARY_COLOR,
+        tabBarTheme:
+            const TabBarThemeData(indicatorColor: Styles.PRIMARY_COLOR),
         scaffoldBackgroundColor: Colors.white,
         fontFamily: 'IBM',
       ),
-
       builder: (context, child) {
-        return BlocProvider(
-          create: (context) => UserBloc(repo: sl()),
+        final userBloc = UserBloc.instance;
+        if (userBloc.isLogin &&
+            userBloc.user == null &&
+            userBloc.state is Start) {
+          userBloc.add(Click());
+        }
+        return BlocProvider.value(
+          value: userBloc,
           child: child!,
         );
       },

@@ -1,6 +1,6 @@
 import 'package:talent_flow/data/config/mapper.dart';
 
-class FreelancerProfileModel extends SingleMapper{
+class FreelancerProfileModel extends SingleMapper {
   FreelancerProfileModel({
     required this.id,
     required this.name,
@@ -27,7 +27,7 @@ class FreelancerProfileModel extends SingleMapper{
   final List<dynamic> reviews;
   final List<Work> works;
 
-  factory FreelancerProfileModel.fromJson(Map<String, dynamic> json){
+  factory FreelancerProfileModel.fromJson(Map<String, dynamic> json) {
     return FreelancerProfileModel(
       id: json["id"],
       name: json["name"],
@@ -36,16 +36,24 @@ class FreelancerProfileModel extends SingleMapper{
       specialization: json["specialization"],
       jobTitle: json["job_title"],
       bio: json["bio"],
-      skills: json["skills"] == null ? [] : List<String>.from(json["skills"]!.map((x) => x)),
-      statistics: json["statistics"] == null ? null : Statistics.fromJson(json["statistics"]),
-      reviews: json["reviews"] == null ? [] : List<dynamic>.from(json["reviews"]!.map((x) => x)),
-      works: json["works"] == null ? [] : List<Work>.from(json["works"]!.map((x) => Work.fromJson(x))),
+      skills: json["skills"] == null
+          ? []
+          : List<String>.from(json["skills"]!.map((x) => x)),
+      statistics: json["statistics"] == null
+          ? null
+          : Statistics.fromJson(json["statistics"]),
+      reviews: json["reviews"] == null
+          ? []
+          : List<dynamic>.from(json["reviews"]!.map((x) => x)),
+      works: json["works"] == null
+          ? []
+          : List<Work>.from(json["works"]!.map((x) => Work.fromJson(x))),
     );
   }
 
   @override
   Mapper fromJson(Map<String, dynamic> json) {
-  return FreelancerProfileModel.fromJson(json);
+    return FreelancerProfileModel.fromJson(json);
   }
 
   @override
@@ -53,7 +61,6 @@ class FreelancerProfileModel extends SingleMapper{
     // TODO: implement toJson
     throw UnimplementedError();
   }
-
 }
 
 class Statistics {
@@ -77,7 +84,7 @@ class Statistics {
   final String? registrationDate;
   final String? lastSeen;
 
-  factory Statistics.fromJson(Map<String, dynamic> json){
+  factory Statistics.fromJson(Map<String, dynamic> json) {
     return Statistics(
       rating: json["rating"],
       projectsCompletion: json["projects_completion"],
@@ -89,7 +96,6 @@ class Statistics {
       lastSeen: json["last_seen"],
     );
   }
-
 }
 
 class Work {
@@ -101,6 +107,7 @@ class Work {
     required this.views,
     required this.likes,
     required this.status,
+    required this.isInFavorites,
   });
 
   final int? id;
@@ -110,8 +117,9 @@ class Work {
   final int? views;
   final int? likes;
   final String? status;
+  final bool? isInFavorites;
 
-  factory Work.fromJson(Map<String, dynamic> json){
+  factory Work.fromJson(Map<String, dynamic> json) {
     return Work(
       id: json["id"],
       image: json["image"],
@@ -120,7 +128,9 @@ class Work {
       views: json["views"],
       likes: json["likes"],
       status: json["status"],
+      isInFavorites: json["is_in_favorites"] == true ||
+          json["is_in_favorites"] == 1 ||
+          json["is_in_favorites"]?.toString() == "1",
     );
   }
-
 }

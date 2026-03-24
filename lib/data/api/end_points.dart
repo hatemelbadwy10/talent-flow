@@ -26,6 +26,8 @@ class EndPoints {
   ///User Profile
   static const String editProfile = 'api/profile/edit-profile';
   static const String profile = 'profile';
+  static const String profileDashboard = 'api/profile/dashboard';
+  static const String favourites = 'api/profile/favourites';
 
   ///Home
   static const String home = 'api/pages/home?top_limit=5&cat_limit=8';
@@ -33,6 +35,7 @@ class EndPoints {
   static const String subCategories = 'api/categories/';
   static const String freelancers = 'api/freelancers';
   static const String freelancerDetails = 'api/freelancers/';
+  static freelancerFavourite(int id) => 'api/freelancers/$id/favourite';
 
   ///Offers
   static const String offers = 'offers';
@@ -128,6 +131,10 @@ class EndPoints {
   static const String identityVerification = 'api/identity-verification';
   static const String accountStatements = 'api/account-statment';
   static accountStatementDetails(int id) => 'api/account-statment/$id';
+  static const String bankAccounts = 'api/bank-accounts';
+  static const String bankAccountsUpdate = 'api/bank-accounts/update';
+  static bankAccountById(int id) => 'api/bank-accounts/$id';
+  static const String banksOptions = 'api/banks';
 
   ///Selectors
   static const String countries = 'countries';
@@ -143,11 +150,15 @@ class EndPoints {
 
   ///Projects
   static const String projects = 'api/projects';
+  static projectFavourite(int id) => 'api/projects/$id/favourite';
   static const String addProject = 'api/projects';
   static const String singleProject = '/api/projects/';
   static const String addOffer = "api/projects/proposals";
   static const String selectionOption = "api/select-options";
   static const String addWorks = "api/profile/add-works";
+  static workDetails(int id) => 'api/works/$id';
+  static workEdit(int id) => 'api/works/$id/edit';
+  static workFavourite(int id) => 'api/works/$id/favourite';
 
   ///Upload File Service
   static const String uploadFileService = 'store_attachment';

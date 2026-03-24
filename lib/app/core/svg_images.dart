@@ -88,6 +88,7 @@ class SvgImages {
   static const String settings = 'assets/svgs/settings.svg';
   static const String dashboard = 'assets/svgs/dashboard.svg';
   static const String messages = 'assets/svgs/message.svg';
+  static const String bank = 'assets/svgs/bank.svg';
   static const String accountStatement = 'assets/svgs/report.svg';
   static const String contracts = 'assets/svgs/contracts.svg';
   static const String contract = 'assets/svgs/contract.svg';

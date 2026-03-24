@@ -30,16 +30,17 @@ class HomeCommonHeader extends StatelessWidget {
             CustomNavigator.push(Routes.notifications);
           },
           onMessageTap: () {
-            // Navigate to messages if route exists, otherwise just handle it
+            CustomNavigator.push(Routes.chats);
           },
           userName: UserBloc.instance.user?.name,
+          jobTitle: UserBloc.instance.user?.jobTitle,
           userImage: UserBloc.instance.user?.profileImage,
           notificationCount: 0,
           messageCount: 0,
         ),
         SizedBox(height: 24.h),
         Padding(
-          padding:  EdgeInsets.symmetric(horizontal: 16.w),
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: HomeSectionHeader(
             titleKey: "home.service_category",
             onViewAll: () {
@@ -104,8 +105,8 @@ class HomeLoadingBody extends StatelessWidget {
                 return Padding(
                   padding: EdgeInsets.only(right: 12.w),
                   child: isFreelancer
-                      ? const FreelancerListItemShimmer()
-                      : const JobOffererListItemShimmer(),
+                      ? const JobOffererListItemShimmer()
+                      : const FreelancerListItemShimmer(),
                 );
               },
             ),

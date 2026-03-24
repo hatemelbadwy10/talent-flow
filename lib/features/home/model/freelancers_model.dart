@@ -21,6 +21,7 @@ class FreelancersModel extends SingleMapper {
     required this.loggedIn,
     required this.emailVerifiedAt,
     required this.phoneVerifiedAt,
+    required this.isInFavorites,
   });
 
   final int? id;
@@ -42,8 +43,9 @@ class FreelancersModel extends SingleMapper {
   final bool? loggedIn;
   final DateTime? emailVerifiedAt;
   final dynamic phoneVerifiedAt;
+  final bool? isInFavorites;
 
-  factory FreelancersModel.fromJson(Map<String, dynamic> json){
+  factory FreelancersModel.fromJson(Map<String, dynamic> json) {
     return FreelancersModel(
       id: json["id"],
       name: json["name"],
@@ -64,12 +66,15 @@ class FreelancersModel extends SingleMapper {
       loggedIn: json["logged_in"],
       emailVerifiedAt: DateTime.tryParse(json["email_verified_at"] ?? ""),
       phoneVerifiedAt: json["phone_verified_at"],
+      isInFavorites: json["is_in_favorites"] == true ||
+          json["is_in_favorites"] == 1 ||
+          json["is_in_favorites"]?.toString() == "1",
     );
   }
 
   @override
   Mapper fromJson(Map<String, dynamic> json) {
-   return FreelancersModel.fromJson(json);
+    return FreelancersModel.fromJson(json);
   }
 
   @override
@@ -77,5 +82,4 @@ class FreelancersModel extends SingleMapper {
     // TODO: implement toJson
     throw UnimplementedError();
   }
-
 }

@@ -3,14 +3,15 @@ import 'package:talent_flow/data/config/mapper.dart';
 class UserModel extends SingleMapper {
   int? id;
   String? name;
+  String? jobTitle;
   String? profileImage;
   String? phone;
   String? email;
 
-
   UserModel({
     this.id,
     this.name,
+    this.jobTitle,
     this.profileImage,
     this.phone,
     this.email,
@@ -18,11 +19,20 @@ class UserModel extends SingleMapper {
 
   UserModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    name = json['name'];
-    profileImage = json['profile_image'];
-    phone = json['phone_number'];
+    final firstName = json['first_name']?.toString().trim();
+    final lastName = json['last_name']?.toString().trim();
+    final combinedName = [firstName, lastName]
+        .whereType<String>()
+        .where((e) => e.isNotEmpty)
+        .join(' ');
+    name = (json['name']?.toString().trim().isNotEmpty ?? false)
+        ? json['name'].toString().trim()
+        : (combinedName.isNotEmpty ? combinedName : null);
+    jobTitle = json['job_title']?.toString();
+    profileImage =
+        json['profile_image']?.toString() ?? json['image']?.toString();
+    phone = json['phone_number']?.toString() ?? json['phone']?.toString();
     email = json['email'];
-
   }
 
   @override
@@ -30,10 +40,10 @@ class UserModel extends SingleMapper {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['name'] = name;
+    data['job_title'] = jobTitle;
     data['profile_image'] = profileImage;
     data['phone_number'] = phone;
     data['email'] = email;
-
 
     return data;
   }

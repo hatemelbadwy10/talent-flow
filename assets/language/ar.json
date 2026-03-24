@@ -204,6 +204,17 @@
 },
   "submit_offer_title": "تقدم للمشروع",
   "submit_button": "ارسال",
+  "edit_work": {
+    "title": "تعديل العمل",
+    "update": "حفظ التعديلات",
+    "delete": "حذف العمل",
+    "validation": "يرجى استكمال العنوان والوصف والتاريخ والمهارات.",
+    "delete_confirm_title": "حذف العمل؟",
+    "delete_confirm_body": "سيتم حذف هذا العمل نهائياً.",
+    "update_success": "تم تعديل العمل بنجاح",
+    "delete_success": "تم حذف العمل بنجاح",
+    "existing_files": "الملفات الحالية"
+  },
 
   "project_card_offer": {
     "title": "بطاقة المشروع",
@@ -246,6 +257,7 @@
     "dashboard": "لوحة التحكم",
     "messages": "الرسائل",
     "account_statement": "كشف حساب",
+    "bank_accounts": "الحساب البنكي",
     "contracts": "العقود",
     "identity_verification": "توثيق الهوية",
     "upload_work": "رفع اعمال",
@@ -256,7 +268,9 @@
     "terms_and_conditions": "الشروط والاحكام",
     "language": "اللغة",
     "current_language": "English",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "logout_confirm_title": "تسجيل الخروج",
+    "logout_confirm_body": "هل تريد تسجيل الخروج؟"
   },
   "chat_screen": {
     "title": "الرسائل",
@@ -314,7 +328,35 @@
   "account_statement_details_screen": {
     "title": "تفاصيل كشف حساب",
     "summary": "ملخص كشف الحساب",
-    "empty": "تعذر تحميل تفاصيل كشف الحساب"
+    "empty": "تعذر تحميل تفاصيل كشف الحساب",
+    "description": "الوصف",
+    "owner_section": "بيانات صاحب المشروع",
+    "proposals_section": "العروض",
+    "proposals_count": "عدد العروض",
+    "files_section": "الملفات",
+    "views": "المشاهدات",
+    "since": "منذ"
+  },
+  "bank_accounts_screen": {
+    "empty": "لا توجد حسابات بنكية",
+    "add_account": "إضافة حساب بنكي",
+    "edit_account": "تعديل الحساب البنكي",
+    "bank_name": "اسم البنك",
+    "bank_placeholder": "اختر البنك",
+    "account_name": "اسم الحساب",
+    "account_name_hint": "ادخل اسم الحساب",
+    "account_number": "رقم الحساب",
+    "account_number_hint": "ادخل رقم الحساب",
+    "save": "حفظ",
+    "update": "تحديث",
+    "cancel": "إلغاء",
+    "confirm_delete": "حذف",
+    "delete_confirmation_title": "حذف الحساب البنكي",
+    "delete_confirmation_message": "هل أنت متأكد من حذف هذا الحساب البنكي؟",
+    "validation_name": "يرجى إدخال اسم الحساب",
+    "validation_number": "يرجى إدخال رقم الحساب",
+    "validation_bank": "يرجى اختيار البنك",
+    "no_banks": "لا توجد بنوك متاحة"
   },
   "identity_verification_screen": {
     "tab_info": "إدخال معلومات",
@@ -434,6 +476,10 @@
   "completion_date_hint": "اختر تاريخ الإنجاز",
   "favourite": "مفضله",
   "no_favourite_projects": "لا يوجد اعمال مفضلة",
+  "favourite_screen": {
+    "no_favourite_freelancers": "لا يوجد فريلانسر في المفضلة",
+    "no_favourite_works": "لا يوجد أعمال في المفضلة"
+  },
   "notifications": "الاشعارات",
   "all": "الكل",
   "projects": "الأعمال",

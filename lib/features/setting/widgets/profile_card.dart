@@ -17,6 +17,11 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final prefs = sl<SharedPreferences>();
+    final isFreelancer = prefs.getBool(AppStorageKey.isFreelancer) ?? false;
+    final freelancerId =
+        int.tryParse(prefs.getString(AppStorageKey.userId) ?? '');
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -38,8 +43,7 @@ class ProfileCard extends StatelessWidget {
               CircleAvatar(
                 radius: 30,
                 backgroundImage: NetworkImage(
-                  sl<SharedPreferences>().getString(AppStorageKey.userImage) ??
-                      Images.appLogo,
+                  prefs.getString(AppStorageKey.userImage) ?? Images.appLogo,
                 ),
               ),
               const SizedBox(width: 16.0),
@@ -47,7 +51,7 @@ class ProfileCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    sl<SharedPreferences>().getString(AppStorageKey.userName) ??
+                    prefs.getString(AppStorageKey.userName) ??
                         "user_example.name".tr(),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
@@ -56,13 +60,20 @@ class ProfileCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4.0),
                   Text(
-                    sl<SharedPreferences>().getString(AppStorageKey.userEmail) ??
+                    prefs.getString(AppStorageKey.userEmail) ??
                         "user_example.email".tr(),
                     style: const TextStyle(color: Colors.grey, fontSize: 14),
                   ),
                 ],
               ),
             ],
+          ).onTap(
+            isFreelancer && freelancerId != null
+                ? () {
+                    CustomNavigator.push(Routes.profile);
+                  }
+                : null,
+            borderRadius: BorderRadius.circular(12),
           ),
           const SizedBox(height: 16.0),
           const Divider(height: 1, color: Color(0xFFEEEEEE)),
@@ -126,8 +137,8 @@ class ProfileCard extends StatelessWidget {
           Text(text, style: const TextStyle(fontSize: 15)),
         ],
       ),
-    ).onTap(onTap,
-    borderRadius: BorderRadius.circular(12)
-    ).setContainerToView();
+    )
+        .onTap(onTap, borderRadius: BorderRadius.circular(12))
+        .setContainerToView();
   }
 }

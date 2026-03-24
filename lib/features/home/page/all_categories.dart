@@ -96,7 +96,7 @@ class ServiceCategoryTile extends StatelessWidget {
               width: 50,
               padding: const EdgeInsets.all(10.0),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12.0),
               ),
               child: Image.network(

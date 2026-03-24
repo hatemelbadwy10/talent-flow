@@ -25,7 +25,9 @@ class Routes {
   static const sendCodeScreen = "SEND_CODE_SCREEN";
   static const profile = "PROFILE";
   static const editProfile = "EDIT_PROFILE";
+  static const editWork = "EDIT_WORK";
   static const chats = "CHATS";
+  static const bankAccounts = "BANK_ACCOUNTS";
   static const accountStatement = "ACCOUNT_STATEMENT";
   static const accountStatementDetails = "ACCOUNT_STATEMENT_DETAILS";
   static const contracts = "CONTRACTS";
@@ -53,6 +55,7 @@ class Routes {
   static const settings = "SETTINGS";
   static const notifications = "NOTIFICATIONS";
   static const dashboard = "DASHBOARD";
+  static const work = "WORK";
   static const search = "SEARCH";
   static const searchResult = "SEARCH_RESULT";
   static const userProfile = "USER_PROFILE";

@@ -80,7 +80,7 @@ class Owner {
   final String? image;
   final String? jobTitle;
   final String? signupDate;
-  final int? employmentRate;
+  final String? employmentRate;
   final int? openProjectsCount;
   final int? underImplementationCount;
   final int? ongoingCommunications;

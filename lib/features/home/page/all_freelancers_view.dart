@@ -82,7 +82,8 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                 return Container(
                   decoration: const BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(25)),
                   ),
                   child: Column(
                     children: [
@@ -120,7 +121,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                               },
                               child: Text(
                                 "clear_all".tr(),
-                                style:const TextStyle(
+                                style: const TextStyle(
                                   color: Styles.PRIMARY_COLOR,
                                   fontSize: 14,
                                 ),
@@ -156,7 +157,8 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                     } else if (state is Error) {
                                       return Center(
                                         child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             Icon(
                                               Icons.error_outline,
@@ -173,14 +175,16 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                             ),
                                             SizedBox(height: 8.h),
                                             TextButton(
-                                              onPressed: () => _categoriesBloc.add(Click()),
+                                              onPressed: () =>
+                                                  _categoriesBloc.add(Click()),
                                               child: Text("retry".tr()),
                                             ),
                                           ],
                                         ),
                                       );
                                     } else if (state is Done) {
-                                      final categories = state.list as List<Category>;
+                                      final categories =
+                                          state.list as List<Category>;
 
                                       if (categories.isEmpty) {
                                         return Center(
@@ -198,17 +202,20 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                         controller: controller,
                                         children: [
                                           Container(
-                                            margin: EdgeInsets.only(bottom: 8.h),
+                                            margin:
+                                                EdgeInsets.only(bottom: 8.h),
                                             decoration: BoxDecoration(
                                               border: Border.all(
                                                 color: _selectedCategory == null
                                                     ? Styles.PRIMARY_COLOR
                                                     : Colors.grey[300]!,
                                               ),
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
                                             child: ListTile(
-                                              contentPadding: EdgeInsets.symmetric(
+                                              contentPadding:
+                                                  EdgeInsets.symmetric(
                                                 horizontal: 16.w,
                                                 vertical: 4.h,
                                               ),
@@ -216,20 +223,24 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                                 "all_categories".tr(),
                                                 style: TextStyle(
                                                   fontSize: 14,
-                                                  fontWeight: _selectedCategory == null
-                                                      ? FontWeight.w600
-                                                      : FontWeight.normal,
-                                                  color: _selectedCategory == null
-                                                      ? Styles.PRIMARY_COLOR
-                                                      : Colors.black87,
+                                                  fontWeight:
+                                                      _selectedCategory == null
+                                                          ? FontWeight.w600
+                                                          : FontWeight.normal,
+                                                  color:
+                                                      _selectedCategory == null
+                                                          ? Styles.PRIMARY_COLOR
+                                                          : Colors.black87,
                                                 ),
                                               ),
-                                              trailing: _selectedCategory == null
-                                                  ?const Icon(
-                                                Icons.check_circle,
-                                                color: Styles.PRIMARY_COLOR,
-                                                size: 20,
-                                              )
+                                              trailing: _selectedCategory ==
+                                                      null
+                                                  ? const Icon(
+                                                      Icons.check_circle,
+                                                      color:
+                                                          Styles.PRIMARY_COLOR,
+                                                      size: 20,
+                                                    )
                                                   : null,
                                               onTap: () {
                                                 setModalState(() {
@@ -243,24 +254,30 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                             ),
                                           ),
                                           ...categories.map((category) {
-                                            final isSelected = _selectedCategory?.id == category.id;
+                                            final isSelected =
+                                                _selectedCategory?.id ==
+                                                    category.id;
                                             return Container(
-                                              margin: EdgeInsets.only(bottom: 8.h),
+                                              margin:
+                                                  EdgeInsets.only(bottom: 8.h),
                                               decoration: BoxDecoration(
                                                 border: Border.all(
                                                   color: isSelected
                                                       ? Styles.PRIMARY_COLOR
                                                       : Colors.grey[300]!,
                                                 ),
-                                                borderRadius: BorderRadius.circular(8),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
                                               ),
                                               child: ListTile(
-                                                contentPadding: EdgeInsets.symmetric(
+                                                contentPadding:
+                                                    EdgeInsets.symmetric(
                                                   horizontal: 16.w,
                                                   vertical: 4.h,
                                                 ),
                                                 title: Text(
-                                                  category.name ?? "no_name".tr(),
+                                                  category.name ??
+                                                      "no_name".tr(),
                                                   style: TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: isSelected
@@ -272,18 +289,21 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                                   ),
                                                 ),
                                                 trailing: isSelected
-                                                    ?const Icon(
-                                                  Icons.check_circle,
-                                                  color: Styles.PRIMARY_COLOR,
-                                                  size: 20,
-                                                )
+                                                    ? const Icon(
+                                                        Icons.check_circle,
+                                                        color: Styles
+                                                            .PRIMARY_COLOR,
+                                                        size: 20,
+                                                      )
                                                     : null,
                                                 onTap: () {
                                                   setModalState(() {
-                                                    _selectedCategory = category;
+                                                    _selectedCategory =
+                                                        category;
                                                   });
                                                   setState(() {
-                                                    _selectedCategory = category;
+                                                    _selectedCategory =
+                                                        category;
                                                   });
                                                   _applyFilters();
                                                 },
@@ -394,7 +414,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                       "filter_applied".tr(
                         namedArgs: {"category": _selectedCategory!.name ?? ""},
                       ),
-                      style:const TextStyle(
+                      style: const TextStyle(
                         color: Styles.PRIMARY_COLOR,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -451,8 +471,10 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                             SizedBox(height: 20.h),
                             ElevatedButton(
                               onPressed: () {
-                                final categoryId = widget.arguments?["categoryId"] as int?;
-                                _freelancersBloc.add(Follow(arguments: categoryId));
+                                final categoryId =
+                                    widget.arguments?["categoryId"] as int?;
+                                _freelancersBloc
+                                    .add(Follow(arguments: categoryId));
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Styles.PRIMARY_COLOR,
@@ -512,11 +534,12 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                 : 2;
                         return GridView.builder(
                           padding: EdgeInsets.all(16.w),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: crossAxisCount,
                             crossAxisSpacing: 12.w,
                             mainAxisSpacing: 12.h,
-                            childAspectRatio: 167/220,
+                            childAspectRatio: 167 / 220,
                           ),
                           itemCount: freelancers.length,
                           itemBuilder: (context, index) {
@@ -531,6 +554,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                               rating: freelancer.rating?.toDouble(),
                               imageUrl: freelancer.image,
                               cardWidth: double.infinity,
+                              isInFavorites: freelancer.isInFavorites ?? false,
                             );
                           },
                         );

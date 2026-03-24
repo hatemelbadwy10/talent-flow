@@ -34,15 +34,14 @@ class _HomeViewState extends State<HomeView> {
     return BlocProvider(
       create: (context) => HomeBloc(homeRepo: sl<HomeRepo>())..add(Add()),
       child: Scaffold(
-      
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
           child: BlocBuilder<HomeBloc, AppState>(
             builder: (context, state) {
-              final isFreelancer = sl<SharedPreferences>()
-                      .getBool(AppStorageKey.isFreelancer) ??
-                  false;
-                  
+              final isFreelancer =
+                  sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                      false;
+
               if (state is Loading) {
                 log('Showing loading state');
                 return Column(
@@ -57,20 +56,19 @@ class _HomeViewState extends State<HomeView> {
                 );
               } else if (state is Done) {
                 log('Showing done state');
-                  
+
                 // Fix 1: Check if state.model is null first
                 if (state.model == null) {
                   log('state.model is null');
                   return const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                       HomeCommonHeader(),
-                       Center(
-                          child: Text("No data available - model is null")),
+                      HomeCommonHeader(),
+                      Center(child: Text("No data available - model is null")),
                     ],
                   );
                 }
-                  
+
                 HomeModel? homeModel;
                 try {
                   if (state.model is HomeModel) {
@@ -79,8 +77,7 @@ class _HomeViewState extends State<HomeView> {
                     return const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                         HomeCommonHeader(),
-                      
+                        HomeCommonHeader(),
                       ],
                     );
                   }
@@ -88,7 +85,7 @@ class _HomeViewState extends State<HomeView> {
                   return const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                       HomeCommonHeader(),
+                      HomeCommonHeader(),
                     ],
                   );
                 }
@@ -155,7 +152,8 @@ class _HomeViewState extends State<HomeView> {
                                 itemBuilder: (context, index) {
                                   final item = homeModel?.top!.items[index];
                                   final parsedJobTitle =
-                                      item?['job_title']?.toString().trim() ?? '';
+                                      item?['job_title']?.toString().trim() ??
+                                          '';
                                   log("item: $item");
                                   log("jop_title: ${item?['job_title']}");
                                   return Padding(
@@ -173,8 +171,19 @@ class _HomeViewState extends State<HomeView> {
                                             jopTitle: parsedJobTitle.isNotEmpty
                                                 ? parsedJobTitle
                                                 : 'home.job_title_not_set'.tr(),
-                                            rating:item['rating'] != null ? double.tryParse(item['rating'].toString()) : null,
+                                            rating: item['rating'] != null
+                                                ? double.tryParse(
+                                                    item['rating'].toString())
+                                                : null,
                                             imageUrl: item['image'],
+                                            isInFavorites:
+                                                item['is_in_favorites'] ==
+                                                        true ||
+                                                    item['is_in_favorites'] ==
+                                                        1 ||
+                                                    item['is_in_favorites']
+                                                            ?.toString() ==
+                                                        '1',
                                           ),
                                   );
                                 },
@@ -200,16 +209,16 @@ class _HomeViewState extends State<HomeView> {
                     const HomeCommonHeader(),
                     const Center(
                         child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text("Failed to load data. Please try again."),
-                        )),
+                      padding: EdgeInsets.all(16.0),
+                      child: Text("Failed to load data. Please try again."),
+                    )),
                     SizedBox(height: 24.h), // Spacing before Partners section
                     const PartnersSection(), // New Partners section
                     SizedBox(height: 120.h),
                   ],
                 );
               }
-                  
+
               // Fix 6: Better handling of initial/unexpected states
               log('Showing initial/unexpected state: ${state.runtimeType}');
               return Column(
@@ -225,5 +234,4 @@ class _HomeViewState extends State<HomeView> {
       ),
     );
   }
-
 }

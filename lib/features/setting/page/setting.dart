@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
+import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 
@@ -13,6 +14,40 @@ import '../model/help_model.dart';
 import '../widgets/helo_dialoug.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/setting_item.dart';
+
+Future<void> _confirmLogout(BuildContext context) async {
+  final shouldLogout = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            title: Text('settings_screen.logout_confirm_title'.tr()),
+            content: Text('settings_screen.logout_confirm_body'.tr()),
+            actions: [
+              TextButton(
+                
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text('cancel'.tr(), style: const TextStyle(color: Styles.SUBTITLE)),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: Text(
+                  'settings_screen.logout'.tr(),
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          );
+        },
+      ) ??
+      false;
+
+  if (!shouldLogout || !context.mounted) {
+    return;
+  }
+
+  context.read<SettingsBloc>().add(Add());
+}
 
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
@@ -39,7 +74,7 @@ class SettingScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12.0),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
+                          color: Colors.grey.withValues(alpha: 0.1),
                           spreadRadius: 1,
                           blurRadius: 10,
                         ),
@@ -83,6 +118,12 @@ class SettingScreen extends StatelessWidget {
                               text: 'settings_screen.contracts'.tr(),
                               onTap: () {
                                 CustomNavigator.push(Routes.contracts);
+                              }),
+                          SettingsMenuItem(
+                              svgIconPath: SvgImages.bank,
+                              text: 'settings_screen.bank_accounts'.tr(),
+                              onTap: () {
+                                CustomNavigator.push(Routes.bankAccounts);
                               }),
                           SettingsMenuItem(
                               svgIconPath: SvgImages.identityVerification,
@@ -145,8 +186,7 @@ class SettingScreen extends StatelessWidget {
                             textColor: Colors.red,
                             iconColor: Colors.red,
                             onTap: () {
-                              BlocProvider.of<SettingsBloc>(blocContext)
-                                  .add(Add());
+                              _confirmLogout(blocContext);
                             },
                           ),
                           SizedBox(
@@ -192,7 +232,7 @@ class SettingAlternative extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12.0),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
+                          color: Colors.grey.withValues(alpha: 0.1),
                           spreadRadius: 1,
                           blurRadius: 10,
                         ),
@@ -236,6 +276,12 @@ class SettingAlternative extends StatelessWidget {
                               text: 'settings_screen.contracts'.tr(),
                               onTap: () {
                                 CustomNavigator.push(Routes.contracts);
+                              }),
+                          SettingsMenuItem(
+                              svgIconPath: SvgImages.bank,
+                              text: 'settings_screen.bank_accounts'.tr(),
+                              onTap: () {
+                                CustomNavigator.push(Routes.bankAccounts);
                               }),
                           SettingsMenuItem(
                               svgIconPath: SvgImages.identityVerification,
@@ -301,8 +347,7 @@ class SettingAlternative extends StatelessWidget {
                             textColor: Colors.red,
                             iconColor: Colors.red,
                             onTap: () {
-                              BlocProvider.of<SettingsBloc>(blocContext)
-                                  .add(Add());
+                              _confirmLogout(blocContext);
                             },
                           ),
                           SizedBox(

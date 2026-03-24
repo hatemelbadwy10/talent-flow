@@ -1,9 +1,15 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../app/core/app_state.dart';
+import '../../../main_blocs/user_bloc.dart';
 
 class HomeHeaderSection extends StatelessWidget {
   final VoidCallback? onNotificationTap;
@@ -31,120 +37,131 @@ class HomeHeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 216.h,
-      width: double.infinity,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // ── Background with teal gradient ──────────────────────────────
-          Container(
-            height: 160.h,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF0E8A8F),
-                  Color(0xFF0C7D81),
-                  Color(0xFF0A6E72),
-                ],
-              ),
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(28),
-              ),
-            ),
-            // Subtle wave/circle decoration
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(28),
-              ),
-              child: Stack(
-                children: [
-                  // Decorative circles for depth
-                  Positioned(
-                    top: -40,
-                    left: -40,
-                    child: Container(
-                      width: 160.w,
-                      height: 160.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.05),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: -20,
-                    right: 60.w,
-                    child: Container(
-                      width: 120.w,
-                      height: 120.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.04),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+    return BlocBuilder<UserBloc, AppState>(
+      builder: (context, state) {
+        final userBloc = context.read<UserBloc>();
+        final currentUser = userBloc.user;
+        final resolvedUserName = userName ?? currentUser?.name ?? "Guest";
+        final resolvedJobTitle = jobTitle ?? currentUser?.jobTitle;
+        final resolvedUserImage = userImage ?? currentUser?.profileImage;
 
-          // ── Content ────────────────────────────────────────────────────
-          SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: Dimensions.PADDING_SIZE_DEFAULT.w,
-                vertical: 16.h,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Right side: avatar + name (leading in RTL)
-                  _UserInfo(
-                    userName: userName,
-                    jobTitle: jobTitle,
-                    userImage: userImage,
+        return SizedBox(
+          height: 216.h,
+          width: double.infinity,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // ── Background with teal gradient ──────────────────────────────
+              Container(
+                height: 160.h,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF0E8A8F),
+                      Color(0xFF0C7D81),
+                      Color(0xFF0A6E72),
+                    ],
                   ),
-
-                  // Left side: action buttons (trailing in RTL)
-                  Row(
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(28),
+                  ),
+                ),
+                // Subtle wave/circle decoration
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(28),
+                  ),
+                  child: Stack(
                     children: [
-                      _ActionButton(
-                        icon: SvgImages.notification, // swap with your actual SVG key
-                        isIcon: true,
-                        badge: notificationCount,
-                        onTap: onNotificationTap,
+                      // Decorative circles for depth
+                      Positioned(
+                        top: -40,
+                        left: -40,
+                        child: Container(
+                          width: 160.w,
+                          height: 160.w,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withValues(alpha: 0.05),
+                          ),
+                        ),
                       ),
-                      SizedBox(width: 10.w),
-                      _ActionButton(
-                        icon: SvgImages.message,
-                        badge: messageCount,
-                        onTap: onMessageTap,
+                      Positioned(
+                        bottom: -20,
+                        right: 60.w,
+                        child: Container(
+                          width: 120.w,
+                          height: 120.w,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withValues(alpha: 0.04),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
 
-          // ── Floating search bar ────────────────────────────────────────
-          Positioned(
-            bottom: 16.h,
-            left: Dimensions.PADDING_SIZE_DEFAULT.w,
-            right: Dimensions.PADDING_SIZE_DEFAULT.w,
-            child: HomeSearchBar(
-              controller: searchController,
-              onSearch: onSearch,
-            ),
+              // ── Content ────────────────────────────────────────────────────
+              SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Dimensions.PADDING_SIZE_DEFAULT.w,
+                    vertical: 16.h,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Right side: avatar + name (leading in RTL)
+                      _UserInfo(
+                        userName: resolvedUserName,
+                        jobTitle: resolvedJobTitle,
+                        userImage: resolvedUserImage,
+                      ),
+
+                      // Left side: action buttons (trailing in RTL)
+                      Row(
+                        children: [
+                          _ActionButton(
+                            icon: SvgImages
+                                .notification, // swap with your actual SVG key
+                            isIcon: true,
+                            badge: notificationCount,
+                            onTap: onNotificationTap,
+                          ),
+                          SizedBox(width: 10.w),
+                          _ActionButton(
+                            icon: SvgImages.message,
+                            badge: messageCount,
+                            onTap: onMessageTap,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── Floating search bar ────────────────────────────────────────
+              Positioned(
+                bottom: 16.h,
+                left: Dimensions.PADDING_SIZE_DEFAULT.w,
+                right: Dimensions.PADDING_SIZE_DEFAULT.w,
+                child: HomeSearchBar(
+                  controller: searchController,
+                  onSearch: onSearch,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -170,7 +187,7 @@ class HomeSearchBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.10),
+            color: Colors.black.withValues(alpha: 0.10),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -224,6 +241,9 @@ class _UserInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    log(
+      'Building HomeHeaderSection with userName: $userName, jobTitle: $jobTitle, userImage: $userImage',
+    );
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -251,7 +271,7 @@ class _UserInfo extends StatelessWidget {
               Text(
                 jobTitle!,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.85),
+                  color: Colors.white.withValues(alpha: 0.85),
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
                 ),
@@ -281,7 +301,7 @@ class _Avatar extends StatelessWidget {
         border: Border.all(color: Colors.white, width: 2.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -301,7 +321,7 @@ class _Avatar extends StatelessWidget {
 
   Widget _fallbackIcon() {
     return Container(
-      color: Colors.white.withOpacity(0.2),
+      color: Colors.white.withValues(alpha: 0.2),
       child: const Icon(Icons.person, color: Colors.white, size: 28),
     );
   }
@@ -333,10 +353,10 @@ class _ActionButton extends StatelessWidget {
             width: 46.w,
             height: 46.w,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.20),
+              color: Colors.white.withValues(alpha: 0.20),
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.white.withOpacity(0.35),
+                color: Colors.white.withValues(alpha: 0.35),
                 width: 1.2,
               ),
             ),

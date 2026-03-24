@@ -26,6 +26,10 @@ import '../features/home/page/entrepreneur_profile.dart';
 import '../features/home/page/freelancer_chat_screen.dart';
 import '../features/home/page/freelancer_profile.dart';
 import '../features/home/page/home_view.dart';
+import '../features/home/page/my_freelancer_profile.dart';
+import '../features/home/page/work_screen.dart';
+import '../features/home/model/freelancer_profile_model.dart';
+import '../features/home/model/work_details_model.dart';
 import '../features/nav_bar/page/nav_bar.dart';
 import '../features/new_projects/bloc/new_projects_bloc.dart';
 import '../features/new_projects/page/add_offer_screen.dart';
@@ -35,11 +39,13 @@ import '../features/projects/page/my_projects.dart';
 import '../features/setting/page/about_talent_flow.dart';
 import '../features/setting/page/account_statement_details_screen.dart';
 import '../features/setting/page/account_statement_screen.dart';
+import '../features/setting/page/bank_accounts_screen.dart';
 import '../features/setting/page/chat_screen.dart';
 import '../features/setting/page/contract_details_screen.dart';
 import '../features/setting/page/contracts_screen.dart';
 import '../features/setting/page/create_contract_screen.dart';
 import '../features/setting/page/edit_profile.dart';
+import '../features/setting/page/edit_work_screen.dart';
 import '../features/setting/page/identity_verification_screen.dart';
 import '../features/setting/page/terms_and_condations.dart';
 import '../features/splash/page/splash.dart';
@@ -159,10 +165,15 @@ abstract class CustomNavigator {
       //
       case Routes.editProfile:
         return _pageRoute(const EditProfileScreen());
+      case Routes.editWork:
+        final workId = settings.arguments as int?;
+        if (workId == null) {
+          return _pageRoute(const HomeView());
+        }
+        return _pageRoute(EditWorkScreen(workId: workId));
 
-      // case Routes.profile:
-      //   return _pageRoute(const MyProfile());
-      //
+      case Routes.profile:
+        return _pageRoute(const MyFreelancerProfileView());
       // case Routes.dashboard:
       //   return _pageRotute(DashBoard(
       //     index: settings.arguments as int?,
@@ -175,11 +186,38 @@ abstract class CustomNavigator {
         ));
       case Routes.dashboard:
         return _pageRoute(const DashboardScreen());
+      case Routes.work:
+        final argument = settings.arguments;
+        final mapArgument = argument is Map<String, dynamic> ? argument : null;
+        final workFromMap = mapArgument?['work'];
+        final workId = argument is int
+            ? argument
+            : argument is Work
+                ? argument.id
+                : workFromMap is Work
+                    ? workFromMap.id
+                    : mapArgument?['id'] as int?;
+        final initialWork = argument is Work
+            ? WorkDetailsModel.fromWork(argument)
+            : workFromMap is Work
+                ? WorkDetailsModel.fromWork(workFromMap)
+                : null;
+        final canEdit = mapArgument?['canEdit'] == true;
+        if (workId == null) {
+          return _pageRoute(const HomeView());
+        }
+        return _pageRoute(WorkScreen(
+          workId: workId,
+          initialWork: initialWork,
+          canEdit: canEdit,
+        ));
       case Routes.chats:
         return _pageRoute(BlocProvider(
           create: (context) => ChatsBloc(sl())..add(Add()),
           child: const ChatScreen(),
         ));
+      case Routes.bankAccounts:
+        return _pageRoute(const BankAccountsScreen());
       case Routes.accountStatement:
         return _pageRoute(const AccountStatementScreen());
       case Routes.accountStatementDetails:

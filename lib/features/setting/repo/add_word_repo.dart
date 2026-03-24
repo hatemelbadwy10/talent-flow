@@ -8,6 +8,7 @@ import '../../../data/api/end_points.dart';
 import '../../../data/error/api_error_handler.dart';
 import '../../../data/error/failures.dart';
 import '../../../main_repos/base_repo.dart';
+import '../model/edit_work_request_model.dart';
 
 class WorkItem {
   final String title;
@@ -44,11 +45,13 @@ class AddWorkRepo extends BaseRepo {
 
         // Add basic fields
         formData.fields.add(MapEntry('work${workIndex}_title', work.title));
-        formData.fields.add(MapEntry('work${workIndex}_description', work.description));
+        formData.fields
+            .add(MapEntry('work${workIndex}_description', work.description));
         formData.fields.add(MapEntry('work${workIndex}_date', work.date));
 
         if (work.previewLink != null && work.previewLink!.isNotEmpty) {
-          formData.fields.add(MapEntry('work${workIndex}_preview_link', work.previewLink!));
+          formData.fields.add(
+              MapEntry('work${workIndex}_preview_link', work.previewLink!));
         }
 
         // Add single image
@@ -90,14 +93,12 @@ class AddWorkRepo extends BaseRepo {
     String? work1PreviewLink,
     File? work1Image,
     List<File>? work1Files,
-
     String? work2Title,
     String? work2Description,
     String? work2Date,
     String? work2PreviewLink,
     File? work2Image,
     List<File>? work2Files,
-
     String? work3Title,
     String? work3Description,
     String? work3Date,
@@ -113,11 +114,17 @@ class AddWorkRepo extends BaseRepo {
       formData.fields.add(MapEntry('work1_description', work1Description));
       formData.fields.add(MapEntry('work1_date', work1Date));
 
-      if (work1PreviewLink != null) formData.fields.add(MapEntry('work1_preview_link', work1PreviewLink));
-      if (work1Image != null) formData.files.add(MapEntry('work1_image', await MultipartFile.fromFile(work1Image.path)));
+      if (work1PreviewLink != null) {
+        formData.fields.add(MapEntry('work1_preview_link', work1PreviewLink));
+      }
+      if (work1Image != null) {
+        formData.files.add(MapEntry(
+            'work1_image', await MultipartFile.fromFile(work1Image.path)));
+      }
       if (work1Files != null && work1Files.isNotEmpty) {
         for (int i = 0; i < work1Files.length; i++) {
-          formData.files.add(MapEntry('work1_files[$i]', await MultipartFile.fromFile(work1Files[i].path)));
+          formData.files.add(MapEntry('work1_files[$i]',
+              await MultipartFile.fromFile(work1Files[i].path)));
         }
       }
 
@@ -127,11 +134,17 @@ class AddWorkRepo extends BaseRepo {
         formData.fields.add(MapEntry('work2_description', work2Description));
         formData.fields.add(MapEntry('work2_date', work2Date));
 
-        if (work2PreviewLink != null) formData.fields.add(MapEntry('work2_preview_link', work2PreviewLink));
-        if (work2Image != null) formData.files.add(MapEntry('work2_image', await MultipartFile.fromFile(work2Image.path)));
+        if (work2PreviewLink != null) {
+          formData.fields.add(MapEntry('work2_preview_link', work2PreviewLink));
+        }
+        if (work2Image != null) {
+          formData.files.add(MapEntry(
+              'work2_image', await MultipartFile.fromFile(work2Image.path)));
+        }
         if (work2Files != null && work2Files.isNotEmpty) {
           for (int i = 0; i < work2Files.length; i++) {
-            formData.files.add(MapEntry('work2_files[$i]', await MultipartFile.fromFile(work2Files[i].path)));
+            formData.files.add(MapEntry('work2_files[$i]',
+                await MultipartFile.fromFile(work2Files[i].path)));
           }
         }
       }
@@ -142,11 +155,17 @@ class AddWorkRepo extends BaseRepo {
         formData.fields.add(MapEntry('work3_description', work3Description));
         formData.fields.add(MapEntry('work3_date', work3Date));
 
-        if (work3PreviewLink != null) formData.fields.add(MapEntry('work3_preview_link', work3PreviewLink));
-        if (work3Image != null) formData.files.add(MapEntry('work3_image', await MultipartFile.fromFile(work3Image.path)));
+        if (work3PreviewLink != null) {
+          formData.fields.add(MapEntry('work3_preview_link', work3PreviewLink));
+        }
+        if (work3Image != null) {
+          formData.files.add(MapEntry(
+              'work3_image', await MultipartFile.fromFile(work3Image.path)));
+        }
         if (work3Files != null && work3Files.isNotEmpty) {
           for (int i = 0; i < work3Files.length; i++) {
-            formData.files.add(MapEntry('work3_files[$i]', await MultipartFile.fromFile(work3Files[i].path)));
+            formData.files.add(MapEntry('work3_files[$i]',
+                await MultipartFile.fromFile(work3Files[i].path)));
           }
         }
       }
@@ -159,6 +178,68 @@ class AddWorkRepo extends BaseRepo {
       return Right(response);
     } catch (error) {
       log('AddWorkRepo error: $error');
+      return Left(ApiErrorHandler.getServerFailure(error));
+    }
+  }
+
+  Future<Either<ServerFailure, Response>> updateWork({
+    required EditWorkRequestModel request,
+  }) async {
+    try {
+      final formData = FormData();
+
+      formData.fields.add(MapEntry('title', request.title));
+      formData.fields.add(MapEntry('description', request.description));
+      formData.fields.add(MapEntry('date', request.date));
+      formData.fields
+          .add(MapEntry('preview_link', request.previewLink?.trim() ?? ''));
+
+      for (int index = 0; index < request.skillIds.length; index++) {
+        formData.fields.add(
+            MapEntry('skills[$index]', request.skillIds[index].toString()));
+      }
+
+      if (request.image != null) {
+        formData.files.add(
+          MapEntry(
+            'image',
+            await MultipartFile.fromFile(request.image!.path),
+          ),
+        );
+      }
+
+      for (int index = 0; index < request.newFiles.length; index++) {
+        formData.files.add(
+          MapEntry(
+            'files[$index]',
+            await MultipartFile.fromFile(request.newFiles[index].path),
+          ),
+        );
+      }
+
+      for (int index = 0; index < request.oldFiles.length; index++) {
+        formData.fields
+            .add(MapEntry('old_files[$index]', request.oldFiles[index]));
+      }
+
+      final response = await dioClient.post(
+        data: formData,
+        uri: EndPoints.workEdit(request.id),
+      );
+
+      return Right(response);
+    } catch (error) {
+      log('AddWorkRepo updateWork error: $error');
+      return Left(ApiErrorHandler.getServerFailure(error));
+    }
+  }
+
+  Future<Either<ServerFailure, Response>> deleteWork(int id) async {
+    try {
+      final response = await dioClient.delete(uri: EndPoints.workDetails(id));
+      return Right(response);
+    } catch (error) {
+      log('AddWorkRepo deleteWork error: $error');
       return Left(ApiErrorHandler.getServerFailure(error));
     }
   }

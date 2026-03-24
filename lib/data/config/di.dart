@@ -15,8 +15,10 @@ import 'package:talent_flow/features/projects/repo/projects_repo.dart';
 import 'package:talent_flow/features/setting/repo/about_repo.dart';
 import 'package:talent_flow/features/setting/repo/account_statement_repo.dart';
 import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
+import 'package:talent_flow/features/setting/repo/bank_accounts_repo.dart';
 import 'package:talent_flow/features/setting/repo/chats_repo.dart';
 import 'package:talent_flow/features/setting/repo/contracts_repo.dart';
+import 'package:talent_flow/features/setting/repo/dashboard_repo.dart';
 import 'package:talent_flow/features/setting/repo/favourite_repo.dart';
 import 'package:talent_flow/features/setting/repo/notification_repo.dart';
 import 'package:talent_flow/features/setting/repo/terms_condation_repo.dart';
@@ -128,6 +130,10 @@ Future<void> init() async {
       () => ContractsRepo(sharedPreferences: sl(), dioClient: sl()));
   sl.registerLazySingleton(
       () => AccountStatementRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton(
+      () => BankAccountsRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton(
+      () => DashboardRepo(sharedPreferences: sl(), dioClient: sl()));
 
   // User Repo and Bloc
   sl.registerLazySingleton(

@@ -5,6 +5,7 @@ import 'dart:developer';
 import '../model/freelancer_profile_model.dart';
 import '../model/freelancers_model.dart';
 import '../model/home_model.dart';
+import '../model/work_details_model.dart';
 import '../repo/home_repo.dart';
 
 class HomeBloc extends Bloc<AppEvent, AppState> {
@@ -17,6 +18,7 @@ class HomeBloc extends Bloc<AppEvent, AppState> {
     on<Click>(onClick);
     on<Follow>(onGetFreelancers);
     on<FreelancerProfile>(onGetFreelancerProfile);
+    on<Open>(onGetWorkDetails);
   }
 
   Future<void> _onGetHomeData(Add event, Emitter<AppState> emit) async {
@@ -28,11 +30,11 @@ class HomeBloc extends Bloc<AppEvent, AppState> {
       log("🟢 Repository request finished");
 
       result.fold(
-            (failure) {
+        (failure) {
           log('🔴 HomeBloc Error - Failure: ${failure.error}');
           emit(Error());
         },
-            (response) {
+        (response) {
           try {
             log('🟢 Raw response data: ${response.data}');
 
@@ -50,9 +52,8 @@ class HomeBloc extends Bloc<AppEvent, AppState> {
               return;
             }
 
-            final Map<String, dynamic> responseData = response.data as Map<
-                String,
-                dynamic>;
+            final Map<String, dynamic> responseData =
+                response.data as Map<String, dynamic>;
 
             // Check if payload exists
             if (!responseData.containsKey('payload')) {
@@ -100,10 +101,10 @@ class HomeBloc extends Bloc<AppEvent, AppState> {
       final result = await _homeRepo.getCategories();
 
       result.fold(
-            (failure) {
+        (failure) {
           emit(Error());
         },
-            (response) {
+        (response) {
           try {
             if (response.data == null) {
               emit(Error());
@@ -136,8 +137,8 @@ class HomeBloc extends Bloc<AppEvent, AppState> {
             // Parse categories model
             if (payload is List) {
               final categories = payload
-                  .map((item) =>
-                  Category.fromJson(item as Map<String, dynamic>))
+                  .map(
+                      (item) => Category.fromJson(item as Map<String, dynamic>))
                   .toList();
 
               log('🟢 Categories parsed: ${categories.length}');
@@ -171,13 +172,12 @@ class HomeBloc extends Bloc<AppEvent, AppState> {
       final result = await _homeRepo.getFreelancers(categoryId: categoryId);
 
       result.fold(
-            (failure) => emit(Error()),
-            (response) {
+        (failure) => emit(Error()),
+        (response) {
           if (response.data == null || response.data['payload'] == null) {
             emit(Error());
             return;
           }
-
 
           final payload = categoryId == null
               ? response.data['payload']
@@ -188,9 +188,8 @@ class HomeBloc extends Bloc<AppEvent, AppState> {
             return;
           }
 
-          final freelancers = payload
-              .map((e) => FreelancersModel.fromJson(e))
-              .toList();
+          final freelancers =
+              payload.map((e) => FreelancersModel.fromJson(e)).toList();
 
           emit(Done(list: freelancers, reload: false, loading: false));
         },
@@ -201,15 +200,15 @@ class HomeBloc extends Bloc<AppEvent, AppState> {
     }
   }
 
-  Future<void> onGetFreelancerProfile(FreelancerProfile event,
-      Emitter<AppState> emit) async {
+  Future<void> onGetFreelancerProfile(
+      FreelancerProfile event, Emitter<AppState> emit) async {
     emit(Loading());
     try {
       final freelancerId = event.arguments as int;
       final result = await _homeRepo.getFreelancerProfile(freelancerId);
       result.fold(
-            (failure) => emit(Error()),
-            (response) {
+        (failure) => emit(Error()),
+        (response) {
           if (response.data == null || response.data['payload'] == null) {
             emit(Error());
             return;
@@ -225,6 +224,33 @@ class HomeBloc extends Bloc<AppEvent, AppState> {
       );
     } catch (e, s) {
       log("🔴 Error in onGetFreelancerProfile: $e\n$s");
+      emit(Error());
+    }
+  }
+
+  Future<void> onGetWorkDetails(Open event, Emitter<AppState> emit) async {
+    emit(Loading());
+    try {
+      final workId = event.arguments as int;
+      final result = await _homeRepo.getWorkDetails(workId);
+      result.fold(
+        (failure) => emit(Error()),
+        (response) {
+          if (response.data == null || response.data['payload'] == null) {
+            emit(Error());
+            return;
+          }
+          final payload = response.data['payload'];
+          if (payload is! Map<String, dynamic>) {
+            emit(Error());
+            return;
+          }
+          final workDetails = WorkDetailsModel.fromJson(payload);
+          emit(Done(model: workDetails, reload: false, loading: false));
+        },
+      );
+    } catch (e, s) {
+      log("🔴 Error in onGetWorkDetails: $e\n$s");
       emit(Error());
     }
   }

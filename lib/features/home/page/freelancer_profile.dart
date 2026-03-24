@@ -9,9 +9,8 @@ import '../../../app/core/app_state.dart';
 import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../projects/model/my_projects_model.dart';
-import '../../projects/widgets/my_projects_card.dart';
 import '../model/freelancer_profile_model.dart';
+import '../widgets/freelancer_work_card.dart';
 
 class FreelancerProfileView extends StatelessWidget {
   final Map<String, dynamic> arguments;
@@ -109,8 +108,9 @@ class _FreelancerHeader extends StatelessWidget {
         // Profile Image
         CircleAvatar(
           radius: 50.w,
-          backgroundColor: Styles.PRIMARY_COLOR.withOpacity(0.1),
-          backgroundImage: model.image != null ? NetworkImage(model.image!) : null,
+          backgroundColor: Styles.PRIMARY_COLOR.withValues(alpha: 0.1),
+          backgroundImage:
+              model.image != null ? NetworkImage(model.image!) : null,
           child: model.image == null
               ? Icon(Icons.person, size: 50.w, color: Styles.PRIMARY_COLOR)
               : null,
@@ -141,7 +141,8 @@ class _FreelancerHeader extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.work_outline, color: Styles.PRIMARY_COLOR, size: 16),
+            const Icon(Icons.work_outline,
+                color: Styles.PRIMARY_COLOR, size: 16),
             SizedBox(width: 8.w),
             Text(model.jobTitle ?? "no_job_title".tr()),
           ],
@@ -176,14 +177,12 @@ class _BioTab extends StatelessWidget {
               Text(model.bio!),
               SizedBox(height: 24.h),
             ],
-
             Divider(color: Colors.grey.shade400, thickness: .5),
-
             if (model.skills.isNotEmpty) ...[
               SkillsSection(skills: model.skills),
             ],
-
-            if ((model.bio == null || model.bio!.isEmpty) && model.skills.isEmpty)
+            if ((model.bio == null || model.bio!.isEmpty) &&
+                model.skills.isEmpty)
               Center(
                 child: Padding(
                   padding: EdgeInsets.only(top: 50.h),
@@ -262,12 +261,11 @@ class _WorksTab extends StatelessWidget {
           crossAxisCount: 2,
           crossAxisSpacing: 2,
           mainAxisSpacing: 2,
-          childAspectRatio: 200/320,
+          childAspectRatio: 200 / 320,
         ),
         itemCount: model.works.length,
         itemBuilder: (context, index) {
-          final work = model.works[index];
-          return ProjectPortfolioCard(projectsModel: MyProjectsModel(id: work.id,  title: work.title, description: work.description, views: work.views,  status: work.status, isInFavorites:false));
+          return FreelancerWorkCard(work: model.works[index]);
         },
       ),
     );
