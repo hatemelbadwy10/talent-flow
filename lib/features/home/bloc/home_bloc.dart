@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
 import 'dart:developer';
+import '../model/entrepreneur_profile_model.dart';
 import '../model/freelancer_profile_model.dart';
 import '../model/freelancers_model.dart';
 import '../model/home_model.dart';
@@ -18,6 +19,7 @@ class HomeBloc extends Bloc<AppEvent, AppState> {
     on<Click>(onClick);
     on<Follow>(onGetFreelancers);
     on<FreelancerProfile>(onGetFreelancerProfile);
+    on<EntrepreneurProfileEvent>(onGetEntrepreneurProfile);
     on<Open>(onGetWorkDetails);
   }
 
@@ -224,6 +226,35 @@ class HomeBloc extends Bloc<AppEvent, AppState> {
       );
     } catch (e, s) {
       log("🔴 Error in onGetFreelancerProfile: $e\n$s");
+      emit(Error());
+    }
+  }
+
+  Future<void> onGetEntrepreneurProfile(
+      EntrepreneurProfileEvent event, Emitter<AppState> emit) async {
+    emit(Loading());
+    try {
+      final entrepreneurId = event.arguments as int;
+      final result = await _homeRepo.getEntrepreneurProfile(entrepreneurId);
+      result.fold(
+        (failure) => emit(Error()),
+        (response) {
+          if (response.data == null || response.data['payload'] == null) {
+            emit(Error());
+            return;
+          }
+          final payload = response.data['payload'];
+          if (payload is! Map<String, dynamic>) {
+            emit(Error());
+            return;
+          }
+          final entrepreneurProfile =
+              EntrepreneurProfileModel.fromJson(payload);
+          emit(Done(model: entrepreneurProfile, reload: false, loading: false));
+        },
+      );
+    } catch (e, s) {
+      log("🔴 Error in onGetEntrepreneurProfile: $e\n$s");
       emit(Error());
     }
   }

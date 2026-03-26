@@ -13,6 +13,7 @@ import '../bloc/setting_bloc.dart';
 import '../model/help_model.dart';
 import '../widgets/helo_dialoug.dart';
 import '../widgets/profile_card.dart';
+import '../widgets/setting_app_bar.dart';
 import '../widgets/setting_item.dart';
 
 Future<void> _confirmLogout(BuildContext context) async {
@@ -25,9 +26,9 @@ Future<void> _confirmLogout(BuildContext context) async {
             content: Text('settings_screen.logout_confirm_body'.tr()),
             actions: [
               TextButton(
-                
                 onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: Text('cancel'.tr(), style: const TextStyle(color: Styles.SUBTITLE)),
+                child: Text('cancel'.tr(),
+                    style: const TextStyle(color: Styles.SUBTITLE)),
               ),
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(true),
@@ -57,7 +58,12 @@ class SettingScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => SettingsBloc(sl()),
       child: Scaffold(
+        appBar: CustomAppBar(
+          title: 'settings_screen.title'.tr(),
+          centerTitle: true,
+        ),
         body: SafeArea(
+          top: false,
           child: SingleChildScrollView(
             child: Padding(
               padding:
@@ -215,7 +221,12 @@ class SettingAlternative extends StatelessWidget {
     return BlocProvider(
       create: (context) => SettingsBloc(sl()),
       child: Scaffold(
+        appBar: CustomAppBar(
+          title: 'settings_screen.title'.tr(),
+          centerTitle: true,
+        ),
         body: SafeArea(
+          top: false,
           child: SingleChildScrollView(
             child: Padding(
               padding:

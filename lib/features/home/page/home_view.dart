@@ -134,7 +134,7 @@ class _HomeViewState extends State<HomeView> {
                           SizedBox(height: 24.h),
                           HomeSectionHeader(
                             titleKey: isFreelancer
-                                ? "home.entrepreneur"
+                                ? "home.entrepreneurs"
                                 : "home.freelancers",
                             isLoading: false,
                             showViewAll: !isFreelancer,
@@ -151,6 +151,12 @@ class _HomeViewState extends State<HomeView> {
                                 itemCount: homeModel.top!.items.length,
                                 itemBuilder: (context, index) {
                                   final item = homeModel?.top!.items[index];
+                                  final parsedEntrepreneurTitle =
+                                      item?['job_title']?.toString().trim() ??
+                                          item?['jop_title']
+                                              ?.toString()
+                                              .trim() ??
+                                          '';
                                   final parsedJobTitle =
                                       item?['job_title']?.toString().trim() ??
                                           '';
@@ -161,9 +167,22 @@ class _HomeViewState extends State<HomeView> {
                                     child: isFreelancer
                                         ? JobOffererListItem(
                                             name: item['name'] ?? 'N/A',
-                                            industry:
-                                                item['jop_title'] ?? 'General',
+                                            industry: parsedEntrepreneurTitle
+                                                    .isNotEmpty
+                                                ? parsedEntrepreneurTitle
+                                                : 'home.job_title_not_set'.tr(),
                                             imageUrl: item['image'],
+                                            onTap: item['id'] == null
+                                                ? null
+                                                : () {
+                                                    CustomNavigator.push(
+                                                      Routes.entrepreneur,
+                                                      arguments: {
+                                                        'entrepreneurId':
+                                                            item['id'],
+                                                      },
+                                                    );
+                                                  },
                                           )
                                         : FreelancerListItem(
                                             id: item['id'],

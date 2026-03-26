@@ -2,9 +2,15 @@ abstract class AppEvent {
   Object? arguments;
   AppEvent({this.arguments});
 }
+
 class FreelancerProfile extends AppEvent {
   FreelancerProfile({super.arguments});
 }
+
+class EntrepreneurProfileEvent extends AppEvent {
+  EntrepreneurProfileEvent({super.arguments});
+}
+
 class Follow extends AppEvent {
   Follow({super.arguments});
 }
@@ -36,8 +42,6 @@ class Leave extends AppEvent {
 class Click extends AppEvent {
   Click({super.arguments});
 }
-
-
 
 class Accept extends AppEvent {
   Accept({super.arguments});

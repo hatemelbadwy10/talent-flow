@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart' hide Notification;
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/features/auth/pages/register/register.dart';
 import 'package:talent_flow/features/home/bloc/freelancer_chat_bloc.dart';
 import 'package:talent_flow/features/new_projects/page/add_project.dart';
@@ -15,6 +16,7 @@ import 'package:talent_flow/features/setting/page/favourite.dart';
 import 'package:talent_flow/features/setting/page/notification.dart';
 import 'package:talent_flow/features/setting/page/dashboard_screen.dart';
 import '../app/core/app_event.dart';
+import '../app/core/app_storage_keys.dart';
 import '../data/config/di.dart';
 import '../features/auth/pages/change_password/change_password.dart';
 import '../features/auth/pages/confirm_code/confrim_code.dart';
@@ -125,7 +127,9 @@ abstract class CustomNavigator {
           ),
         ));
       case Routes.entrepreneur:
-        return _pageRoute(const EntrepreneurProfile());
+        return _pageRoute(EntrepreneurProfileView(
+          arguments: settings.arguments as Map<String, dynamic>?,
+        ));
       case Routes.freeLancerView:
         return _pageRoute(FreelancerProfileView(
           arguments: settings.arguments as Map<String, dynamic>,
@@ -173,7 +177,14 @@ abstract class CustomNavigator {
         return _pageRoute(EditWorkScreen(workId: workId));
 
       case Routes.profile:
-        return _pageRoute(const MyFreelancerProfileView());
+        final isFreelancer =
+            sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                false;
+        return _pageRoute(
+          isFreelancer
+              ? const MyFreelancerProfileView()
+              : const EntrepreneurProfileView(),
+        );
       // case Routes.dashboard:
       //   return _pageRotute(DashBoard(
       //     index: settings.arguments as int?,

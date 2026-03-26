@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talent_flow/app/core/images.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -25,10 +26,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       bottom: bottom,
       backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
       elevation: 0,
+      scrolledUnderElevation: 0,
       centerTitle: centerTitle,
-
-      leading: Padding(
+      leading: showBackButton
+          ? Padding(
               padding: const EdgeInsetsDirectional.only(start: 12),
               child: Center(
                 child: Container(
@@ -41,24 +44,41 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   child: IconButton(
                     padding: EdgeInsets.zero,
                     icon: Icon(Icons.arrow_back, color: Colors.grey.shade700),
-                    onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
+                    onPressed:
+                        onBackPressed ?? () => Navigator.of(context).pop(),
                   ),
                 ),
               ),
-            ),
+            )
+          : null,
       leadingWidth: showBackButton ? 56 : null,
-
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.black87,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
+      titleSpacing: showBackButton ? 8 : 16,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            Images.appLogo,
+            height: 28,
+            width: 28,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Text(
+              title,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ],
       ),
 
-      // ✅ هنا استخدمنا actions لو مش null، لو null حطينا SizedBox
-      actions: actions ?? [const SizedBox.shrink()],
+      // Keep any custom page actions; otherwise reserve nothing.
+      actions: actions ?? const [],
     );
   }
 }

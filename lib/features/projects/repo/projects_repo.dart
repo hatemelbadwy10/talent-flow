@@ -11,10 +11,22 @@ class ProjectsRepo extends BaseRepo {
   Future<Either<ServerFailure, Response>> getProjects(
       {String? status, int? categoryId}) async {
     try {
-      final uri = categoryId != null
-          ? "${EndPoints.subCategories}$categoryId"
-          : "${EndPoints.projects}/my-projects?status=$status";
-      final response = await dioClient.get(uri: uri);
+      if (categoryId != null) {
+        final response = await dioClient.get(
+          uri: "${EndPoints.subCategories}$categoryId",
+        );
+        return Right(response);
+      }
+
+      final normalizedStatus = status?.trim();
+      final hasStatusFilter = normalizedStatus != null &&
+          normalizedStatus.isNotEmpty &&
+          normalizedStatus != "all";
+
+      final response = await dioClient.get(
+        uri: "${EndPoints.projects}/my-projects",
+        queryParameters: hasStatusFilter ? {"status": normalizedStatus} : null,
+      );
       return Right(response);
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));

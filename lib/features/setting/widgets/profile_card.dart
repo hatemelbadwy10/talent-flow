@@ -19,8 +19,10 @@ class ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final prefs = sl<SharedPreferences>();
     final isFreelancer = prefs.getBool(AppStorageKey.isFreelancer) ?? false;
-    final freelancerId =
-        int.tryParse(prefs.getString(AppStorageKey.userId) ?? '');
+    final accountTypeKey = isFreelancer
+        ? 'settings_screen.account_type_freelancer'
+        : 'settings_screen.account_type_entrepreneur';
+    final userId = int.tryParse(prefs.getString(AppStorageKey.userId) ?? '');
 
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -64,11 +66,20 @@ class ProfileCard extends StatelessWidget {
                         "user_example.email".tr(),
                     style: const TextStyle(color: Colors.grey, fontSize: 14),
                   ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    accountTypeKey.tr(),
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ],
               ),
             ],
           ).onTap(
-            isFreelancer && freelancerId != null
+            userId != null
                 ? () {
                     CustomNavigator.push(Routes.profile);
                   }

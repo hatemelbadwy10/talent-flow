@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:talent_flow/app/core/extensions.dart';
+import 'package:talent_flow/app/core/styles.dart';
 
 class JobOffererListItem extends StatelessWidget {
   final String name;
   final String industry;
   final String? imageUrl; // Made nullable
+  final VoidCallback? onTap;
 
   const JobOffererListItem({
     super.key,
     required this.name,
     required this.industry,
     this.imageUrl,
+    this.onTap,
   });
 
   @override
@@ -24,7 +28,7 @@ class JobOffererListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 5,
             offset: const Offset(0, 3),
@@ -35,22 +39,26 @@ class JobOffererListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(8.0)),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(8.0)),
             child: imageUrl != null && Uri.parse(imageUrl!).isAbsolute
                 ? CachedNetworkImage(
-              imageUrl: imageUrl!,
-              height: 100.h,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(color: Colors.grey[200]),
-              errorWidget: (context, url, error) => Image.asset('assets/images/default_company_logo.png', fit: BoxFit.cover),
-            )
+                    imageUrl: imageUrl!,
+                    height: 100.h,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) =>
+                        Container(color: Colors.grey[200]),
+                    errorWidget: (context, url, error) => Image.asset(
+                        'assets/images/default_company_logo.png',
+                        fit: BoxFit.cover),
+                  )
                 : Image.asset(
-              'assets/images/default_company_logo.png', // Default image if URL is null or invalid
-              height: 100.h,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+                    'assets/images/default_company_logo.png', // Default image if URL is null or invalid
+                    height: 100.h,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
           ),
           Padding(
             padding: EdgeInsets.all(8.w),
@@ -81,7 +89,11 @@ class JobOffererListItem extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ).onTap(onTap, borderRadius: BorderRadius.circular(8)).setContainerToView(
+          borderColor: Styles.GREY_BORDER,
+          width: 150.w,
+          radius: 8,
+        );
   }
 }
 

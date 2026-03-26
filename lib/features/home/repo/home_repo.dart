@@ -65,6 +65,19 @@ class HomeRepo extends BaseRepo {
     }
   }
 
+  Future<Either<ServerFailure, Response>> getEntrepreneurProfile(int id) async {
+    try {
+      final response =
+          await dioClient.get(uri: "${EndPoints.entrepreneurDetails}$id");
+      return Right(response);
+    } on DioException catch (e) {
+      return Left(
+          ServerFailure(e.message ?? 'An unexpected Dio error occurred'));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
   Future<Either<ServerFailure, Response>> getWorkDetails(int id) async {
     try {
       final response = await dioClient.get(uri: EndPoints.workDetails(id));

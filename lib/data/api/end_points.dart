@@ -35,6 +35,7 @@ class EndPoints {
   static const String subCategories = 'api/categories/';
   static const String freelancers = 'api/freelancers';
   static const String freelancerDetails = 'api/freelancers/';
+  static const String entrepreneurDetails = 'api/entrepreneurs/';
   static freelancerFavourite(int id) => 'api/freelancers/$id/favourite';
 
   ///Offers

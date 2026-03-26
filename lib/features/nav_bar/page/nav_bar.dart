@@ -22,6 +22,7 @@ class NavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.locale;
     final List<Widget> widgetOptions = [
       const SettingScreen(),
       const OwnerProjects(),
