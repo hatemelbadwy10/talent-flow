@@ -17,9 +17,7 @@ import 'package:talent_flow/app/core/text_styles.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/auth/widgets/auth_base.dart';
 
-import '../../../../app/core/app_core.dart';
 import '../../../../app/core/app_event.dart';
-import '../../../../app/core/app_notification.dart';
 import '../../../../app/core/app_state.dart';
 import '../social_media_login/bloc/social_media_bloc.dart';
 import '../social_media_login/repo/social_media_repo.dart';
@@ -192,21 +190,8 @@ class _LoginViewState extends State<LoginView> {
                 isLoading: state is Loading,
                 lIconWidget: SvgPicture.asset("assets/svgs/google.svg"),
                 onTap: () async {
-                  final result = await SocialMediaLoginHelper().googleLogin();
-                  result.fold(
-                        (failure) {
-                      AppCore.showSnackBar(
-                        notification: AppNotification(
-                          message: failure.error,
-                          backgroundColor: Styles.IN_ACTIVE,
-                        ),
-                      );
-                    },
-                        (socialModel) {
-                      context.read<SocialMediaBloc>().add(
-                        Click(arguments:SocialMediaProvider.google),
-                      );
-                    },
+                  context.read<SocialMediaBloc>().add(
+                    Click(arguments: SocialMediaProvider.google),
                   );
                 },
               ),

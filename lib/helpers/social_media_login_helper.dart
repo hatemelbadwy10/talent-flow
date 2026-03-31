@@ -27,9 +27,17 @@ class SocialMediaLoginHelper {
 
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
+      if (googleUser == null) {
+        return left(ServerFailure("Google sign in cancelled"));
+      }
+
       // Obtain the auth details from the request
       final GoogleSignInAuthentication? googleAuth =
-      await googleUser?.authentication;
+      await googleUser.authentication;
+
+      if (googleAuth?.idToken == null) {
+        return left(ServerFailure("Failed to obtain Google ID token"));
+      }
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
@@ -41,25 +49,42 @@ class SocialMediaLoginHelper {
       UserCredential userAccountFirebase =
       await FirebaseAuth.instance.signInWithCredential(credential);
 
+      if (userAccountFirebase.user == null) {
+        return left(ServerFailure("Failed to create Firebase user"));
+      }
+
+      // ✅ Get Firebase ID Token (this is what backend needs to verify)
+      String? firebaseIdToken;
+      try {
+        firebaseIdToken = await userAccountFirebase.user!.getIdToken();
+      } catch (e) {
+        print("=====> Error getting Firebase ID token: $e");
+        return left(ServerFailure("Failed to get Firebase ID token: $e"));
+      }
+
+      if (firebaseIdToken == null || firebaseIdToken.isEmpty) {
+        return left(ServerFailure("Firebase ID token is empty"));
+      }
+
       final SocialMediaModel model = SocialMediaModel();
       model.provider = SocialMediaProvider.google.name;
       model.uid = userAccountFirebase.user?.uid;
 
-      // هنا نحفظ الـ idToken الصحيح (JWT) اللي الباك إند متوقعه
-      model.idToken = googleAuth?.idToken;
+      // ✅ Use Firebase ID Token (not Google ID Token)
+      model.idToken = firebaseIdToken;
 
-      model.name = googleUser?.displayName;
-      model.image = googleUser?.photoUrl;
-      model.email = googleUser?.email;
+      model.name = userAccountFirebase.user?.displayName ?? googleUser.displayName;
+      model.image = userAccountFirebase.user?.photoURL ?? googleUser.photoUrl;
+      model.email = userAccountFirebase.user?.email ?? googleUser.email;
       model.phone = userAccountFirebase.user?.phoneNumber;
 
       model.printData();
       return Right(model);
     } on FirebaseAuthException catch (error) {
-      print("=====> ${error.code}");
-      return left(ServerFailure(error.message ?? ""));
+      print("=====> Firebase Error: ${error.code} - ${error.message}");
+      return left(ServerFailure(error.message ?? "Firebase authentication failed"));
     } catch (error) {
-      print("=====> ${error}");
+      print("=====> Error: ${error}");
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
@@ -140,6 +165,10 @@ class SocialMediaLoginHelper {
         nonce: nonce,
       );
 
+      if (appleUser.identityToken == null) {
+        return left(ServerFailure("Failed to obtain Apple ID token"));
+      }
+
       final oAuthCredential = OAuthProvider("apple.com").credential(
         idToken: appleUser.identityToken,
         rawNonce: rawNonce,
@@ -150,11 +179,29 @@ class SocialMediaLoginHelper {
         oAuthCredential,
       );
 
+      if (userAccountFirebase.user == null) {
+        return left(ServerFailure("Failed to create Firebase user"));
+      }
+
+      // ✅ Get Firebase ID Token (this is what backend needs to verify)
+      String? firebaseIdToken;
+      try {
+        firebaseIdToken = await userAccountFirebase.user!.getIdToken();
+      } catch (e) {
+        print("=====> Error getting Firebase ID token: $e");
+        return left(ServerFailure("Failed to get Firebase ID token: $e"));
+      }
+
+      if (firebaseIdToken == null || firebaseIdToken.isEmpty) {
+        return left(ServerFailure("Firebase ID token is empty"));
+      }
+
       final SocialMediaModel model = SocialMediaModel();
 
       model.provider = SocialMediaProvider.apple.name;
       model.rawNonce = rawNonce;
-      model.idToken = appleUser.identityToken;
+      // ✅ Use Firebase ID Token (not Apple ID Token)
+      model.idToken = firebaseIdToken;
       model.uid = userAccountFirebase.user?.uid;
       model.email = userAccountFirebase.user?.email;
       model.phone = userAccountFirebase.user?.phoneNumber;
@@ -163,8 +210,10 @@ class SocialMediaLoginHelper {
       model.printData();
       return Right(model);
     } on FirebaseAuthException catch (error) {
+      print("=====> Firebase Error: ${error.code} - ${error.message}");
       return left(ServerFailure(error.message ?? ""));
     } catch (error) {
+      print("=====> Error: ${error}");
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }

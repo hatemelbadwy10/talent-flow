@@ -1,7 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talent_flow/app/core/app_core.dart';
+import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/app_state.dart';
+import 'package:talent_flow/app/core/styles.dart';
 import '../../../app/core/app_event.dart';
 import '../../../data/config/di.dart';
 import '../bloc/add_project_bloc.dart';
@@ -59,18 +62,24 @@ class _AddProjectState extends State<AddProject> {
           BlocListener<AddProjectBloc, AddProjectState>(
             listener: (context, state) {
               if (state.isSubmitted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('add_project.success_message'.tr()),
-                    backgroundColor: Colors.green,
+                AppCore.showSnackBar(
+                  notification: AppNotification(
+                    message: state.successMessage?.trim().isNotEmpty == true
+                        ? state.successMessage!
+                        : 'add_project.success'.tr(),
+                    backgroundColor: Styles.ACTIVE,
+                    borderColor: Colors.transparent,
+                    isFloating: true,
                   ),
                 );
                 Navigator.pop(context);
               } else if (state.errorMessage != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.errorMessage!),
-                    backgroundColor: Colors.red,
+                AppCore.showSnackBar(
+                  notification: AppNotification(
+                    message: state.errorMessage!,
+                    backgroundColor: Styles.IN_ACTIVE,
+                    borderColor: Colors.transparent,
+                    isFloating: true,
                   ),
                 );
               }
@@ -97,7 +106,7 @@ class _AddProjectState extends State<AddProject> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Error: ${selectOptionsState}'),
+                      Text('Error: $selectOptionsState'),
                       ElevatedButton(
                         onPressed: () {
                           context.read<SelectionOptionBloc>().add(Add());
@@ -115,7 +124,8 @@ class _AddProjectState extends State<AddProject> {
 
               return BlocBuilder<AddProjectBloc, AddProjectState>(
                 builder: (context, projectState) {
-                  final selectionModel = (selectOptionsState).model as SelectionModel;
+                  final selectionModel =
+                      (selectOptionsState).model as SelectionModel;
 
                   return SingleChildScrollView(
                     child: Padding(
@@ -129,35 +139,29 @@ class _AddProjectState extends State<AddProject> {
                               specializations: selectionModel.specializations,
                             ),
                             const SizedBox(height: 24),
-
                             ProjectTitleField(controller: _titleController),
                             const SizedBox(height: 24),
-
-                            ProjectDescriptionField(controller: _descriptionController),
+                            ProjectDescriptionField(
+                                controller: _descriptionController),
                             const SizedBox(height: 24),
-
                             SkillsDropdown(
                               availableSkills: selectionModel.skills,
                             ),
                             const SizedBox(height: 24),
-
                             BudgetField(controller: _budgetController),
                             const SizedBox(height: 24),
-
                             DurationField(controller: _durationController),
                             const SizedBox(height: 24),
-
                             FileUploadSection(
-                              filesDescriptionController: _filesDescriptionController,
-
+                              filesDescriptionController:
+                                  _filesDescriptionController,
                             ),
                             const SizedBox(height: 24),
-
                             AdvancedSettings(
-                              requiredToBeReceivedContr: _requiredToBeRecivedController,
+                              requiredToBeReceivedContr:
+                                  _requiredToBeRecivedController,
                             ),
                             const SizedBox(height: 32),
-
                             SubmitWidget(formKey: _formKey),
                           ],
                         ),

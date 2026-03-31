@@ -4,8 +4,6 @@ import 'failures.dart';
 
 class ApiErrorHandler {
   static ServerFailure getServerFailure(error) {
-    // ServerFailure failure =
-    //     getServerFailure(getTranslated("something_went_wrong"));
     if (error is Exception) {
       try {
         if (error is DioException) {
@@ -26,8 +24,8 @@ class ApiErrorHandler {
               switch (error.response!.statusCode) {
                 case 404:
                   return ServerFailure(
-                      error.response!.data["message"] != ""
-                          ? error.response!.data["message"].trim()
+                      error.response!.data["message"] != null && error.response!.data["message"].toString().isNotEmpty
+                          ? error.response!.data["message"].toString().trim()
                           : getTranslated("something_went_wrong"),
                       statusCode: 404);
                 case 401:
@@ -40,27 +38,39 @@ class ApiErrorHandler {
                       statusCode: 401);
                 case 500:
                   return ServerFailure(
-                      error.response!.data["message"] != ""
-                          ? error.response!.data["message"].trim()
+                      error.response!.data["message"] != null && error.response!.data["message"].toString().isNotEmpty
+                          ? error.response!.data["message"].toString().trim()
                           : getTranslated("something_went_wrong"),
                       statusCode: 500);
                 case 503:
                   return ServerFailure(
                       error.response!.statusMessage ??
-                          (error.response!.data["message"] != ""
-                              ? error.response!.data["message"].trim()
+                          (error.response!.data["message"] != null && error.response!.data["message"].toString().isNotEmpty
+                              ? error.response!.data["message"].toString().trim()
                               : getTranslated("something_went_wrong")),
                       statusCode: 503);
                 default:
                   try {
+                    final message = error.response!.data["message"];
+                    if (message != null && message.toString().isNotEmpty) {
+                      return ServerFailure(
+                          message.toString(),
+                          statusCode: error.response!.statusCode);
+                    }
                     return ServerFailure(
-                        error.response!.data["message"] ??
-                            getTranslated("something_went_wrong"),
+                        getTranslated("something_went_wrong"),
                         statusCode: error.response!.statusCode);
                   } catch (e) {
+                    try {
+                      final message = error.response!.data['data']["message"];
+                      if (message != null && message.toString().isNotEmpty) {
+                        return ServerFailure(
+                            message.toString(),
+                            statusCode: error.response!.statusCode);
+                      }
+                    } catch (_) {}
                     return ServerFailure(
-                        error.response!.data['data']["message"] ??
-                            getTranslated("something_went_wrong"),
+                        getTranslated("something_went_wrong"),
                         statusCode: error.response!.statusCode);
                   }
               }
@@ -72,13 +82,16 @@ class ApiErrorHandler {
               return ServerFailure("Connection Error with server");
           }
         } else {
-          return ServerFailure("Unexpected error occurred");
+          // ✅ Return the actual exception message instead of generic error
+          return ServerFailure(error.toString());
         }
       } on FormatException catch (e) {
-        return ServerFailure(getTranslated("something_went_wrong"));
+        // ✅ Return actual error instead of generic message
+        return ServerFailure(e.toString());
       }
     } else {
-      return ServerFailure("something_went_wrong");
+      // ✅ Return the actual error instead of generic message
+      return ServerFailure(error.toString());
     }
   }
 }

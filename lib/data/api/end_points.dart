@@ -42,6 +42,8 @@ class EndPoints {
   static const String offers = 'offers';
   static offerDetails(id) => 'offers/$id';
   static const paymentMethods = 'api/payment-methods';
+  static const paymentRequest = 'api/payments/request';
+  static const paymentConfirm = 'api/payments/confirm';
 
   ///News
   static const String news = 'our-news';
@@ -108,6 +110,7 @@ class EndPoints {
   static const String notifications = 'api/profile/notifications?type=';
   static const String conversations = 'api/conversations';
   static conversationMessages(id) => 'api/conversations/$id';
+  static startConversation(int userId) => 'api/conversations/start/$userId';
   static const String sendConversationMessage =
       'api/conversations/message/send';
   static const String markAsRead = 'mark-as-read';
@@ -156,6 +159,7 @@ class EndPoints {
   static const String singleProject = '/api/projects/';
   static const String addOffer = "api/projects/proposals";
   static const String selectionOption = "api/select-options";
+  static const String addWork = "api/profile/add-work";
   static const String addWorks = "api/profile/add-works";
   static workDetails(int id) => 'api/works/$id';
   static workEdit(int id) => 'api/works/$id/edit';

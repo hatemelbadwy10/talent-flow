@@ -23,6 +23,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
     return AppBar(
       bottom: bottom,
       backgroundColor: Colors.white,
@@ -43,7 +44,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   child: IconButton(
                     padding: EdgeInsets.zero,
-                    icon: Icon(Icons.arrow_back, color: Colors.grey.shade700),
+                    icon: Icon(
+                      isRtl ? Icons.arrow_forward : Icons.arrow_back,
+                      color: Colors.grey.shade700,
+                    ),
                     onPressed:
                         onBackPressed ?? () => Navigator.of(context).pop(),
                   ),

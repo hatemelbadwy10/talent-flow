@@ -1,8 +1,11 @@
 // bloc/add_project/add_project_bloc.dart
 import 'dart:developer';
 
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../data/error/failures.dart';
 import '../repo/add_project_repo.dart';
 import 'add_project_event.dart';
 import 'add_project_state.dart';
@@ -13,7 +16,6 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
   AddProjectBloc({required ProjectRepository repository})
       : _repository = repository,
         super(const AddProjectState()) {
-
     on<UpdateSpecializationId>(_onUpdateSpecializationId);
     on<UpdateTitle>(_onUpdateTitle);
     on<UpdateDescription>(_onUpdateDescription);
@@ -31,7 +33,8 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
     on<ResetForm>(_onResetForm);
   }
 
-  void _onUpdateSpecializationId(UpdateSpecializationId event, Emitter<AddProjectState> emit) {
+  void _onUpdateSpecializationId(
+      UpdateSpecializationId event, Emitter<AddProjectState> emit) {
     log("specializationId ${state.specializationId}");
     log("title ${state.title}");
     log("description ${state.description}");
@@ -44,7 +47,9 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
     log('questions ${state.questions}');
     log('files ${state.files}');
 
-    emit(state.copyWith(specializationId: event.specializationId,specializationName: event.specializationName));
+    emit(state.copyWith(
+        specializationId: event.specializationId,
+        specializationName: event.specializationName));
   }
 
   void _onUpdateTitle(UpdateTitle event, Emitter<AddProjectState> emit) {
@@ -63,7 +68,8 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
     emit(state.copyWith(title: event.title));
   }
 
-  void _onUpdateDescription(UpdateDescription event, Emitter<AddProjectState> emit) {
+  void _onUpdateDescription(
+      UpdateDescription event, Emitter<AddProjectState> emit) {
     log("specializationId ${state.specializationId}");
     log("title ${state.title}");
     log("description ${state.description}");
@@ -79,7 +85,8 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
     emit(state.copyWith(description: event.description));
   }
 
-  void _onUpdateFilesDescription(UpdateFilesDescription event, Emitter<AddProjectState> emit) {
+  void _onUpdateFilesDescription(
+      UpdateFilesDescription event, Emitter<AddProjectState> emit) {
     log("specializationId ${state.specializationId}");
     log("title ${state.title}");
     log("description ${state.description}");
@@ -95,7 +102,8 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
     emit(state.copyWith(filesDescription: event.filesDescription));
   }
 
-  void _onUpdateSimilarProjects(UpdateSimilarProjects event, Emitter<AddProjectState> emit) {
+  void _onUpdateSimilarProjects(
+      UpdateSimilarProjects event, Emitter<AddProjectState> emit) {
     log("specializationId ${state.specializationId}");
     log("title ${state.title}");
     log("description ${state.description}");
@@ -111,7 +119,8 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
     emit(state.copyWith(similarProjects: event.similarProjects));
   }
 
-  void _onUpdateRequiredToBeReceived(UpdateRequiredToBeReceived event, Emitter<AddProjectState> emit) {
+  void _onUpdateRequiredToBeReceived(
+      UpdateRequiredToBeReceived event, Emitter<AddProjectState> emit) {
     log("specializationId ${state.specializationId}");
     log("title ${state.title}");
     log("description ${state.description}");
@@ -126,6 +135,7 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
 
     emit(state.copyWith(requiredToBeReceived: event.requiredToBeReceived));
   }
+
   void _onUpdateFiles(UpdateFiles event, Emitter<AddProjectState> emit) {
     log("specializationId ${state.specializationId}");
     log("title ${state.title}");
@@ -142,7 +152,6 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
     emit(state.copyWith(files: event.files));
   }
 
-
   void _onUpdateSkills(UpdateSkills event, Emitter<AddProjectState> emit) {
     log("specializationId ${state.specializationId}");
     log("title ${state.title}");
@@ -156,9 +165,9 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
     log('questions ${state.questions}');
     log('files ${state.files}');
 
-    emit(state.copyWith(skills: event.skills,selectedSkills: event.skillNames));
+    emit(
+        state.copyWith(skills: event.skills, selectedSkills: event.skillNames));
   }
-
 
   void _onUpdateBudget(UpdateBudget event, Emitter<AddProjectState> emit) {
     log("specializationId ${state.specializationId}");
@@ -250,7 +259,8 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
     }
   }
 
-  Future<void> _onSubmitProject(SubmitProject event, Emitter<AddProjectState> emit) async {
+  Future<void> _onSubmitProject(
+      SubmitProject event, Emitter<AddProjectState> emit) async {
     log("specializationId ${state.specializationId}");
     log("title ${state.title}");
     log("description ${state.description}");
@@ -263,7 +273,14 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
     log('questions ${state.questions}');
     log('files ${state.files}');
 
-    emit(state.copyWith(isSubmitting: true, errorMessage: null));
+    emit(
+      state.copyWith(
+        isSubmitting: true,
+        isSubmitted: false,
+        clearError: true,
+        clearSuccess: true,
+      ),
+    );
 
     try {
       log("specializationId ${state.specializationId}");
@@ -277,7 +294,8 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
       log("requiredToBeReceived ${state.requiredToBeReceived}");
       log('questions ${state.questions}');
       log('files ${state.files}');
-      await _repository.addProject(
+      final Either<ServerFailure, Response> result =
+          await _repository.addProject(
         specializationId: state.specializationId!,
         title: state.title,
         description: state.description,
@@ -285,21 +303,55 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
         budget: state.budget!,
         duration: state.duration!,
         filesDescription: state.filesDescription,
-        similarProjects: state.similarProjects.isNotEmpty ? state.similarProjects : null,
+        similarProjects:
+            state.similarProjects.isNotEmpty ? state.similarProjects : null,
         requiredToBeReceived: state.requiredToBeReceived,
         questions: state.questions.isNotEmpty ? state.questions : null,
       );
 
-      emit(state.copyWith(isSubmitting: false, isSubmitted: true));
+      result.fold(
+        (failure) {
+          emit(
+            state.copyWith(
+              isSubmitting: false,
+              isSubmitted: false,
+              errorMessage: failure.error,
+              clearSuccess: true,
+            ),
+          );
+        },
+        (response) {
+          emit(
+            state.copyWith(
+              isSubmitting: false,
+              isSubmitted: true,
+              successMessage: _extractMessage(response.data),
+              clearError: true,
+            ),
+          );
+        },
+      );
     } catch (e) {
       emit(state.copyWith(
         isSubmitting: false,
+        isSubmitted: false,
         errorMessage: e.toString(),
+        clearSuccess: true,
       ));
     }
   }
 
   void _onResetForm(ResetForm event, Emitter<AddProjectState> emit) {
     emit(const AddProjectState());
+  }
+
+  String? _extractMessage(dynamic data) {
+    if (data is Map<String, dynamic>) {
+      return data['message']?.toString();
+    }
+    if (data is Map) {
+      return data['message']?.toString();
+    }
+    return null;
   }
 }

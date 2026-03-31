@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talent_flow/app/core/app_core.dart';
+import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
+import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 
@@ -30,28 +33,23 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
   }
 
   void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-        action: SnackBarAction(
-          label: 'dismiss'.tr(),
-          textColor: Colors.white,
-          onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          },
-        ),
+    AppCore.showSnackBar(
+      notification: AppNotification(
+        message: message,
+        backgroundColor: Styles.IN_ACTIVE,
+        borderColor: Colors.transparent,
+        isFloating: true,
       ),
     );
   }
 
   void _showSuccessSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
+    AppCore.showSnackBar(
+      notification: AppNotification(
+        message: message,
+        backgroundColor: Styles.ACTIVE,
+        borderColor: Colors.transparent,
+        isFloating: true,
       ),
     );
   }
@@ -64,11 +62,11 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
     }
 
     context.read<NewProjectsBloc>().add(
-      Click(arguments: {
-        "projectId": widget.id,
-        "description": description,
-      }),
-    );
+          Click(arguments: {
+            "projectId": widget.id,
+            "description": description,
+          }),
+        );
   }
 
   @override
@@ -80,28 +78,23 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
             _isLoading = true;
           });
         } else if (state is Done) {
+          final successMessage =
+              state.data?.toString().trim().isNotEmpty == true
+                  ? state.data.toString()
+                  : 'add_offer.success'.tr();
           setState(() {
             _isLoading = false;
           });
-          // Show success message
-          _showSuccessSnackBar('add_offer.success'.tr());
+          _showSuccessSnackBar(successMessage);
 
-          // Navigate to navbar/main screen after a short delay
           Future.delayed(const Duration(milliseconds: 500), () {
-            // Option 1: Navigate to navbar (adjust route name as needed)
-            CustomNavigator.push(Routes.navBar,clean: true);
-
-            // Option 2: If you want to pop to root and go to a specific tab
-            // Navigator.of(context).pushNamedAndRemoveUntil(
-            //   Routes.navbar,
-            //   (route) => false,
-            // );
+            if (!mounted) return;
+            CustomNavigator.push(Routes.navBar, clean: true);
           });
         } else if (state is Error) {
           setState(() {
             _isLoading = false;
           });
-          // Show error message
           _showErrorSnackBar('add_offer.error'.tr());
         }
       },
@@ -131,13 +124,10 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
             ),
             SizedBox(height: 16.h),
             CustomButton(
-              text: _isLoading ? 'loading'.tr() : 'submit_button'.tr(),
-              isActive: !_isLoading,
-              onTap: _isLoading ? null : _submitOffer,
-              // You might want to add a loading indicator inside the button
-              isLoading: _isLoading
-
-            ),
+                text: _isLoading ? 'loading'.tr() : 'submit_button'.tr(),
+                isActive: !_isLoading,
+                onTap: _isLoading ? null : _submitOffer,
+                isLoading: _isLoading),
           ],
         ),
       ),

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart' hide Notification;
 import 'package:flutter/material.dart' hide Notification;
@@ -6,12 +7,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/features/auth/pages/register/register.dart';
 import 'package:talent_flow/features/home/bloc/freelancer_chat_bloc.dart';
 import 'package:talent_flow/features/new_projects/page/add_project.dart';
+import 'package:talent_flow/features/payment/model/contract_payment_args.dart';
+import 'package:talent_flow/features/payment/page/contract_payment_confirm_screen.dart';
+import 'package:talent_flow/features/payment/page/contract_payment_request_screen.dart';
 import 'package:talent_flow/features/payment/page/payment_page.dart';
 import 'package:talent_flow/features/projects/bloc/my_projects_bloc.dart';
 import 'package:talent_flow/features/projects/page/single_project_view.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
 import 'package:talent_flow/features/setting/page/add_projects.dart';
+import 'package:talent_flow/features/setting/page/add_single_work_screen.dart';
 import 'package:talent_flow/features/setting/page/favourite.dart';
 import 'package:talent_flow/features/setting/page/notification.dart';
 import 'package:talent_flow/features/setting/page/dashboard_screen.dart';
@@ -115,7 +120,32 @@ abstract class CustomNavigator {
       case Routes.addProject:
         return _pageRoute(const AddProject());
       case Routes.addYourProject:
-        return _pageRoute(const AddYourProjects());
+        final arguments = settings.arguments as Map<String, dynamic>?;
+        final prefs = sl<SharedPreferences>();
+        final rawUserData = prefs.getString(AppStorageKey.userData) ?? '';
+        bool addedWorks = false;
+        if (rawUserData.isNotEmpty) {
+          try {
+            final decoded = jsonDecode(rawUserData);
+            if (decoded is Map) {
+              final value = decoded['added_works'];
+              final normalized = value?.toString().toLowerCase().trim();
+              addedWorks =
+                  value == true || normalized == 'true' || normalized == '1';
+            }
+          } catch (_) {}
+        }
+        final isFreelancer = prefs.getBool(AppStorageKey.isFreelancer) ?? true;
+        final shouldOpenSingleWork =
+            isFreelancer && addedWorks && arguments?['fromOnboarding'] != true;
+        if (shouldOpenSingleWork) {
+          return _pageRoute(const AddSingleWorkScreen());
+        }
+        return _pageRoute(
+          AddYourProjects(
+            arguments: arguments,
+          ),
+        );
       case Routes.freelancers:
         return _pageRoute(AllFreelancersView(
             arguments: settings.arguments as Map<String, dynamic>?));
@@ -246,10 +276,30 @@ abstract class CustomNavigator {
           return _pageRoute(const ContractsScreen());
         }
         return _pageRoute(ContractDetailsScreen(contractId: contractId));
+      case Routes.contractPaymentRequest:
+        final arguments = settings.arguments as ContractPaymentRequestArgs?;
+        if (arguments == null) {
+          return _pageRoute(const ContractsScreen());
+        }
+        return _pageRoute(
+          ContractPaymentRequestScreen(arguments: arguments),
+        );
+      case Routes.contractPaymentConfirm:
+        final arguments = settings.arguments as ContractPaymentConfirmArgs?;
+        if (arguments == null) {
+          return _pageRoute(const ContractsScreen());
+        }
+        return _pageRoute(
+          ContractPaymentConfirmScreen(arguments: arguments),
+        );
       case Routes.createContract:
         return _pageRoute(const CreateContractScreen());
       case Routes.identityVerification:
-        return _pageRoute(const IdentityVerificationScreen());
+        return _pageRoute(
+          IdentityVerificationScreen(
+            arguments: settings.arguments as Map<String, dynamic>?,
+          ),
+        );
       //
       // case Routes.services:
       //   return _pageRoute(const ServicesPage());

@@ -8,6 +8,7 @@ import 'package:talent_flow/navigation/routes.dart';
 import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';
 import '../../../app/core/app_storage_keys.dart';
+import '../../../app/core/user_completion_guard.dart';
 import '../../../data/config/di.dart';
 import '../../projects/model/my_projects_model.dart';
 import '../../projects/widgets/projects_shimmer.dart';
@@ -22,15 +23,16 @@ class NewProject extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-      NewProjectsBloc(sl<NewProjectsRepo>())..add(Add()), // يبدأ يجيب البيانات
+      create: (context) => NewProjectsBloc(sl<NewProjectsRepo>())
+        ..add(Add()), // يبدأ يجيب البيانات
       child: Scaffold(
         backgroundColor: Colors.grey.shade200,
         appBar: CustomAppBar(
           title: 'new_project.title'.tr(),
           showBackButton: false,
           actions: [
-            if (!(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false))
+            if (!(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                false))
               Padding(
                 padding: const EdgeInsets.only(right: 12),
                 child: CircleAvatar(
@@ -43,20 +45,27 @@ class NewProject extends StatelessWidget {
                       size: 22, // حجم الأيقونة
                     ),
                     onPressed: () {
-                      CustomNavigator.push(Routes.addProject);
+                      UserCompletionGuard.ensureCanAddProject(context).then(
+                        (allowed) {
+                          if (!allowed) return;
+                          CustomNavigator.push(Routes.addProject);
+                        },
+                      );
                     },
                   ),
                 ),
               ),
           ],
-        ),        body: Padding(
+        ),
+        body: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16.0),
           child: BlocBuilder<NewProjectsBloc, AppState>(
             builder: (context, state) {
               if (state is Loading) {
                 return const ProjectCardShimmer();
               } else if (state is Error) {
-                return const Center(child: Text("حدث خطأ أثناء تحميل المشاريع"));
+                return const Center(
+                    child: Text("حدث خطأ أثناء تحميل المشاريع"));
               } else if (state is Done) {
                 final projects = state.list as List<MyProjectsModel>;
 
@@ -68,10 +77,10 @@ class NewProject extends StatelessWidget {
                   data: projects
                       .map(
                         (project) => Padding(
-                      padding: const EdgeInsets.only(bottom: 24.0),
-                      child: ProjectCard(projectsModel: project),
-                    ),
-                  )
+                          padding: const EdgeInsets.only(bottom: 24.0),
+                          child: ProjectCard(projectsModel: project),
+                        ),
+                      )
                       .toList(),
                 );
               }

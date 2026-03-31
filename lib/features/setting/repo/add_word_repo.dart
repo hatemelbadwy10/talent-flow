@@ -31,6 +31,52 @@ class WorkItem {
 class AddWorkRepo extends BaseRepo {
   AddWorkRepo({required super.sharedPreferences, required super.dioClient});
 
+  Future<Either<ServerFailure, Response>> addWork({
+    required WorkItem work,
+  }) async {
+    try {
+      final formData = FormData();
+
+      formData.fields.add(MapEntry('title', work.title));
+      formData.fields.add(MapEntry('description', work.description));
+      formData.fields.add(MapEntry('date', work.date));
+
+      if (work.previewLink != null && work.previewLink!.isNotEmpty) {
+        formData.fields.add(MapEntry('preview_link', work.previewLink!));
+      }
+
+      if (work.image != null) {
+        formData.files.add(
+          MapEntry(
+            'image',
+            await MultipartFile.fromFile(work.image!.path),
+          ),
+        );
+      }
+
+      if (work.files != null && work.files!.isNotEmpty) {
+        for (int fileIndex = 0; fileIndex < work.files!.length; fileIndex++) {
+          formData.files.add(
+            MapEntry(
+              'files[$fileIndex]',
+              await MultipartFile.fromFile(work.files![fileIndex].path),
+            ),
+          );
+        }
+      }
+
+      final response = await dioClient.post(
+        data: formData,
+        uri: EndPoints.addWork,
+      );
+
+      return Right(response);
+    } catch (error) {
+      log('AddWorkRepo addWork error: $error');
+      return Left(ApiErrorHandler.getServerFailure(error));
+    }
+  }
+
   // ===================== Method using WorkItem list =====================
   Future<Either<ServerFailure, Response>> addWorks({
     required List<WorkItem> works,

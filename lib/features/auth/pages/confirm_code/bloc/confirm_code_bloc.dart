@@ -13,6 +13,7 @@ import '../../../../../app/core/app_event.dart';
 import '../../../../../app/core/app_notification.dart';
 import '../../../../../app/core/app_state.dart';
 import '../../../../../app/core/styles.dart';
+import '../../../../../app/core/user_completion_guard.dart';
 import '../../../../../data/error/failures.dart';
 import '../../../../../navigation/custom_navigation.dart';
 import '../../../../../navigation/routes.dart';
@@ -26,7 +27,8 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
         emit(Loading());
 
         /// البيانات جاية من الـ arguments (من الـ UI)
-        final Map<String, dynamic> data = event.arguments as Map<String, dynamic>;
+        final Map<String, dynamic> data =
+            event.arguments as Map<String, dynamic>;
         dev.log('data $data');
         log("data${data['isRegister']}");
         log("data${data['isFromLogin']}");
@@ -35,36 +37,36 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
         final String email = data['identifier'] ?? '';
 
         Either<ServerFailure, Response> response;
-          log("isRegister $isRegister - isFromLogin $isFromLogin");
+        log("isRegister $isRegister - isFromLogin $isFromLogin");
         // اختيار طريقة التأكيد بناءً على حالة المستخدم
         if (isRegister || isFromLogin) {
-          log("data${data}");
+          log("data$data");
           response = await confirmCodeRepo.verifyFromRegister(data);
         } else {
           response = await confirmCodeRepo.verifyForgetPassword(data);
         }
 
-        response.fold(
-              (fail) {
+        await response.fold<Future<void>>(
+          (fail) async {
             AppCore.showSnackBar(
               notification: AppNotification(
-                message: fail.error ?? "invalid_credentials".tr(),
+                message: fail.error,
                 isFloating: true,
                 backgroundColor: Styles.IN_ACTIVE,
                 borderColor: Colors.transparent,
               ),
             );
+            if (emit.isDone) return;
             emit(Error());
           },
-              (success) {
+          (success) async {
             log('isRegister $isRegister - isFromLogin $isFromLogin');
 
             if (isRegister) {
               /// من الريجستر → يروح للهوم
-              confirmCodeRepo.saveUserData(success.data);
-              confirmCodeRepo.saveCredentials(data);
-              CustomNavigator.push(Routes.navBar, clean: true);
-
+              await confirmCodeRepo.saveUserData(success.data);
+              await confirmCodeRepo.saveCredentials(data);
+              await UserCompletionGuard.handlePostAuthNavigation();
             } else if (isFromLogin) {
               /// من اللوجين → يرجع للوجين
               AppCore.showSnackBar(
@@ -75,7 +77,6 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
                 ),
               );
               CustomNavigator.push(Routes.login, clean: true);
-
             } else {
               /// من forget password → يروح يغير الباسورد
               CustomNavigator.push(
@@ -86,6 +87,7 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
               );
             }
 
+            if (emit.isDone) return;
             emit(Done());
           },
         );

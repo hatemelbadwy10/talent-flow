@@ -32,6 +32,8 @@ class Routes {
   static const accountStatementDetails = "ACCOUNT_STATEMENT_DETAILS";
   static const contracts = "CONTRACTS";
   static const contractDetails = "CONTRACT_DETAILS";
+  static const contractPaymentRequest = "CONTRACT_PAYMENT_REQUEST";
+  static const contractPaymentConfirm = "CONTRACT_PAYMENT_CONFIRM";
   static const createContract = "CREATE_CONTRACT";
   static const identityVerification = "IDENTITY_VERIFICATION";
   static const services = "CATEGORIES";

@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "863499364117-aom95c7e4nl6dlm1ja0t9o2te69esqgf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.talent_flow",
+            "certificate_hash": "7006b24cd635c58f90c9189eb6835a1ecf7bb3c1"
+          }
+        },
+        {
           "client_id": "863499364117-ritlg0i8mev051eijcg0s7cvknqjlclh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -35,7 +43,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "863499364117-kbsidnp8fr2b105j1j54hbilp8nchdju.apps.googleusercontent.com",
+              "client_id": "863499364117-20p1h7nvf4ab7r2eamblr2nee0vr3e6o.apps.googleusercontent.com",
               "client_type": 3
             },
             {

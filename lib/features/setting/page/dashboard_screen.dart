@@ -6,6 +6,7 @@ import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/styles.dart';
+import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/setting/bloc/dashboard_bloc.dart';
 import 'package:talent_flow/features/setting/model/dashboard_response_model.dart';
@@ -29,10 +30,15 @@ class DashboardScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsetsDirectional.only(end: 8),
               child: TextButton.icon(
-                onPressed: () {
+                onPressed: () async {
                   final isFreelancer = sl<SharedPreferences>()
                           .getBool(AppStorageKey.isFreelancer) ??
                       true;
+                  if (!isFreelancer) {
+                    final allowed =
+                        await UserCompletionGuard.ensureCanAddProject(context);
+                    if (!allowed) return;
+                  }
                   CustomNavigator.push(
                     isFreelancer ? Routes.addYourProject : Routes.addProject,
                   );

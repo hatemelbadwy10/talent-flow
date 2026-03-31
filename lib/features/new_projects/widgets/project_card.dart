@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
+import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/features/projects/model/my_projects_model.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import '../../../app/core/app_event.dart';
@@ -219,12 +220,15 @@ class _ProjectCardState extends State<ProjectCard> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () {
+              onPressed: () async {
                 final isFreelancer = sl<SharedPreferences>()
                         .getBool(AppStorageKey.isFreelancer) ??
                     false;
 
                 if (isFreelancer) {
+                  final allowed =
+                      await UserCompletionGuard.ensureCanAddOffer(context);
+                  if (!allowed) return;
                   // Freelancer → Add Offer
                   CustomNavigator.push(
                     Routes.addOffer,

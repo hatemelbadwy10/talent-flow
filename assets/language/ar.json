@@ -200,6 +200,7 @@
   "cancel": "الغاء",
   "add": "اضافة",
   "similar_projects_hint": " مشاريع مشابهة",
+  "success": "تمت إضافة المشروع بنجاح",
   "budget_options": ["$250 - $500", "$500 - $1000", "$1000 - $2500"],
   "duration_options": ["أقل من أسبوع", "أسبوع - أسبوعين", "أسبوعين - شهر", "أكثر من شهر"]
 },
@@ -250,7 +251,10 @@
   },
   "add_offer": {
     "title": "تقدم للمشروع",
-    "hint": "اكتب هنا"
+    "hint": "اكتب هنا",
+    "empty_description": "الرجاء إدخال تفاصيل العرض",
+    "success": "تم إرسال العرض بنجاح",
+    "error": "فشل في إرسال العرض"
   },
   "settings_screen": {
     "title": "الاعدادات",
@@ -320,6 +324,53 @@
     "talent_percentage": "نسبة Talent Flow من العقود",
     "termination_conditions": "شروط الإنهاء",
     "conflict_policy": "سياسة النزاعات"
+  },
+  "contract_payment": {
+    "pay": "الدفع",
+    "request_title": "تفاصيل الدفع",
+    "confirm_title": "طلب الدفع",
+    "customer_number": "رقم العميل",
+    "customer_number_hint": "ادخل رقم العميل",
+    "customer_number_required": "يرجى إدخال رقم العميل",
+    "payment_code": "كود الشراء في بنك القطري",
+    "payment_code_hint": "ادخل كود الشراء",
+    "payment_code_required": "يرجى إدخال كود الشراء",
+    "amount": "المبلغ",
+    "amount_hint": "ادخل المبلغ",
+    "amount_required": "يرجى إدخال المبلغ",
+    "start_date": "تاريخ بدء المشروع",
+    "start_date_hint": "اختر تاريخ بدء المشروع",
+    "start_date_required": "يرجى اختيار تاريخ بدء المشروع",
+    "request_button": "طلب الدفع (إرسال كلمة مرور لمرة واحدة)",
+    "request_success": "تم إرسال كلمة المرور لمرة واحدة بنجاح",
+    "confirm_heading": "يرجى إدخال رمز تأكيد الشراء",
+    "confirm_subtitle": "تأكيد الدفع (إدخال كلمة مرور لمرة واحدة)",
+    "otp": "OTP",
+    "otp_hint": "ادخل رمز التحقق",
+    "otp_required": "يرجى إدخال رمز التحقق",
+    "confirm_button": "تأكيد الدفع",
+    "confirm_success": "تم تأكيد الدفع بنجاح",
+    "resend_code": "إعادة إرسال الكود"
+  },
+  "user_completion": {
+    "add_offer_blocked_title": "لا يمكنك إضافة عرض الآن",
+    "add_project_blocked_title": "لا يمكنك إضافة مشروع الآن",
+    "subtitle": "يجب إكمال المتطلبات التالية أولاً قبل المتابعة.",
+    "missing_work": "رفع الأعمال أو معرض الأعمال",
+    "missing_bank_account": "إضافة الحساب البنكي",
+    "missing_identity": "إكمال توثيق الهوية",
+    "go_to_work": "الذهاب إلى رفع الأعمال",
+    "go_to_bank_account": "الذهاب إلى الحساب البنكي",
+    "go_to_identity": "الذهاب إلى توثيق الهوية",
+    "cancel": "إلغاء",
+    "skip": "تخطي",
+    "work_completed": "تم تحديث الأعمال بنجاح"
+  },
+  "single_work": {
+    "submit": "إضافة العمل",
+    "validation": "يرجى استكمال عنوان العمل والوصف ورابط المعاينة وتاريخ الإنجاز والصورة المصغرة.",
+    "invalid_link": "يرجى إدخال رابط معاينة صحيح",
+    "success": "تمت إضافة العمل بنجاح"
   },
   "account_statement_screen": {
     "search_hint": "ابحث",
@@ -548,6 +599,9 @@
     "default_title": "موقع لإدارة مستشفى بداخلها عيادات",
     "likes": "إعجابات",
     "views": "مشاهدات"
+  },
+  "project_proposals": {
+    "title": "العروض المقدمة"
   },
   "owner_projects": {
     "my_projects": "مشاريعي",

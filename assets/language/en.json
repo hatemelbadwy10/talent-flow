@@ -193,6 +193,7 @@
     "add": "Add",
     "question_text":   "  Question Text",
     "submit_project": "Submit Project Now",
+    "success": "Project added successfully",
     "similar_projects_hint": "Similar Projects",
     "budget_options": [
       "$250 - $500",
@@ -251,7 +252,10 @@
   },
   "add_offer": {
     "title": "Submit an Offer",
-    "hint": "Type here"
+    "hint": "Type here",
+    "empty_description": "Please enter your offer details",
+    "success": "Offer submitted successfully",
+    "error": "Failed to submit offer"
   },
   "settings_screen": {
     "title": "Settings",
@@ -321,6 +325,53 @@
     "talent_percentage": "Talent Flow Contracts Percentage",
     "termination_conditions": "Termination Conditions",
     "conflict_policy": "Conflict Policy"
+  },
+  "contract_payment": {
+    "pay": "Pay",
+    "request_title": "Payment Details",
+    "confirm_title": "Payment Request",
+    "customer_number": "Customer Number",
+    "customer_number_hint": "Enter customer number",
+    "customer_number_required": "Please enter the customer number",
+    "payment_code": "Qatari Bank Purchase Code",
+    "payment_code_hint": "Enter purchase code",
+    "payment_code_required": "Please enter the purchase code",
+    "amount": "Amount",
+    "amount_hint": "Enter amount",
+    "amount_required": "Please enter the amount",
+    "start_date": "Project Start Date",
+    "start_date_hint": "Select project start date",
+    "start_date_required": "Please choose the project start date",
+    "request_button": "Request Payment (Send one-time password)",
+    "request_success": "The one-time password was sent successfully",
+    "confirm_heading": "Please enter the purchase confirmation code",
+    "confirm_subtitle": "Confirm payment (Enter one-time password)",
+    "otp": "OTP",
+    "otp_hint": "Enter OTP",
+    "otp_required": "Please enter the OTP code",
+    "confirm_button": "Confirm Payment",
+    "confirm_success": "Payment confirmed successfully",
+    "resend_code": "Resend Code"
+  },
+  "user_completion": {
+    "add_offer_blocked_title": "You can't add an offer yet",
+    "add_project_blocked_title": "You can't add a project yet",
+    "subtitle": "Complete the following requirements before continuing.",
+    "missing_work": "Upload your work or portfolio",
+    "missing_bank_account": "Add your bank account",
+    "missing_identity": "Complete identity verification",
+    "go_to_work": "Go to upload work",
+    "go_to_bank_account": "Go to bank account",
+    "go_to_identity": "Go to identity verification",
+    "cancel": "Cancel",
+    "skip": "Skip",
+    "work_completed": "Your works were updated successfully"
+  },
+  "single_work": {
+    "submit": "Add Work",
+    "validation": "Please complete title, description, preview link, completion date, and thumbnail.",
+    "invalid_link": "Please enter a valid preview link",
+    "success": "Work added successfully"
   },
   "account_statement_screen": {
     "search_hint": "Search",
@@ -560,6 +611,9 @@
     "default_title": "Hospital management system with clinics",
     "likes": "Likes",
     "views": "Views"
+  },
+  "project_proposals": {
+    "title": "Proposals"
   },
   "owner_projects": {
     "my_projects": "My Projects",

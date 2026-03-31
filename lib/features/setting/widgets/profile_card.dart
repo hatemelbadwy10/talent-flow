@@ -100,12 +100,7 @@ class ProfileCard extends StatelessWidget {
             icon: Icons.file_upload_outlined,
             text: 'settings_screen.upload_work'.tr(),
             onTap: () {
-              CustomNavigator.push(
-                sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                        true
-                    ? Routes.addYourProject
-                    : Routes.addProject,
-              );
+              CustomNavigator.push(Routes.addYourProject);
             },
           ),
           _buildProfileOption(

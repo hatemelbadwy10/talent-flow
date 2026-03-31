@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/styles.dart';
+import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/setting/bloc/identity_verification_bloc.dart';
 import 'package:talent_flow/features/setting/mixins/identity_verification_form_mixin.dart';
@@ -17,9 +18,13 @@ import 'package:talent_flow/helpers/date_time_picker.dart';
 import 'package:talent_flow/helpers/pickers/view/image_picker_helper.dart';
 
 import '../../../components/custom_text_form_field.dart';
+import '../../../navigation/custom_navigation.dart';
+import '../../../navigation/routes.dart';
 
 class IdentityVerificationScreen extends StatefulWidget {
-  const IdentityVerificationScreen({super.key});
+  const IdentityVerificationScreen({super.key, this.arguments});
+
+  final Map<String, dynamic>? arguments;
 
   @override
   State<IdentityVerificationScreen> createState() =>
@@ -68,7 +73,8 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
 
   bool _validateInfoTab() {
     final formState = formKey.currentState;
-    final isFormValid = formState?.validate() ?? _validateInfoValuesWhenFormHidden();
+    final isFormValid =
+        formState?.validate() ?? _validateInfoValuesWhenFormHidden();
 
     if (!isFormValid && formState == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -156,9 +162,9 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
   }
 
   void _submitIdentityVerification() {
-    log(  'Attempting to submit identity verification, validating inputs first');
+    log('Attempting to submit identity verification, validating inputs first');
     if (!_validateInfoTab() || !_validateUploadTabs()) {
-      log(  'Validation failed, cannot submit identity verification');
+      log('Validation failed, cannot submit identity verification');
       return;
     }
 
@@ -173,20 +179,20 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
     log('Submitting identity verification with countryId: $countryId, front: ${front.path}, back: ${back.path}, selfie: ${selfie.path}');
 
     _identityVerificationBloc.add(
-          Add(
-            arguments: IdentityVerificationRequest(
-              countryId: countryId,
-              firstNameAr: arabicFirstNameController.text.trim(),
-              lastNameAr: arabicFamilyNameController.text.trim(),
-              firstNameEn: englishFirstNameController.text.trim(),
-              lastNameEn: englishFamilyNameController.text.trim(),
-              dateOfBirth: birthDateController.text.trim(),
-              idCardFrontFace: front,
-              idCardBackFace: back,
-              selfieWithIdCard: selfie,
-            ),
-          ),
-        );
+      Add(
+        arguments: IdentityVerificationRequest(
+          countryId: countryId,
+          firstNameAr: arabicFirstNameController.text.trim(),
+          lastNameAr: arabicFamilyNameController.text.trim(),
+          firstNameEn: englishFirstNameController.text.trim(),
+          lastNameEn: englishFamilyNameController.text.trim(),
+          dateOfBirth: birthDateController.text.trim(),
+          idCardFrontFace: front,
+          idCardBackFace: back,
+          selfieWithIdCard: selfie,
+        ),
+      ),
+    );
   }
 
   void _onTabPressed(int targetIndex) {
@@ -206,7 +212,7 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
     if (currentTab == 0 && !_validateInfoTab()) return;
 
     if (currentTab == tabTitleKeys.length - 1) {
-      log(  'Next pressed on last tab, attempting to submit identity verification');
+      log('Next pressed on last tab, attempting to submit identity verification');
       _submitIdentityVerification();
       return;
     }
@@ -216,19 +222,36 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
     }
   }
 
+  bool get _fromOnboarding => widget.arguments?['fromOnboarding'] == true;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _identityVerificationBloc,
       child: BlocListener<IdentityVerificationBloc, AppState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is Done) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            final messenger = ScaffoldMessenger.of(context);
+            final navigator = Navigator.of(context);
+
+            await UserCompletionGuard.updateStoredFlags(
+              identityAuthenticated: true,
+            );
+            if (!mounted) return;
+
+            messenger.showSnackBar(
               SnackBar(
-                content: Text('identity_verification_screen.submit_success'.tr()),
+                content: Text(
+                  'identity_verification_screen.submit_success'.tr(),
+                ),
               ),
             );
-            Navigator.of(context).pop();
+
+            if (_fromOnboarding) {
+              CustomNavigator.push(Routes.navBar, clean: true);
+            } else {
+              navigator.pop(true);
+            }
           } else if (state is Error) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

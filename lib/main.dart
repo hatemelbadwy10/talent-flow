@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
@@ -8,12 +9,15 @@ import 'app/core/styles.dart';
 import 'data/config/di.dart' as di;
 import 'data/config/di.dart';
 import 'data/local_data/local_database.dart';
+import 'firebase_options.dart';
 import 'navigation/custom_navigation.dart';
 import 'navigation/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await EasyLocalization.ensureInitialized();
   await di.init();
   await sl<LocaleDatabase>().initDatabase();

@@ -4,23 +4,26 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../../app/core/app_core.dart';
 import '../../../../../app/core/app_event.dart';
 import '../../../../../app/core/app_notification.dart';
 import '../../../../../app/core/app_state.dart';
 import '../../../../../app/core/styles.dart';
+import '../../../../../app/core/user_completion_guard.dart';
 import '../../../../../navigation/custom_navigation.dart';
 import '../../../../../navigation/routes.dart';
 import '../../../../../data/error/failures.dart';
 import '../repo/login_repo.dart';
+
 class SocialLoginClick extends AppEvent {
   final String provider;
   final String token;
   final String? userType;
-  SocialLoginClick({required this.provider, required this.token,this.userType});
+  SocialLoginClick(
+      {required this.provider, required this.token, this.userType});
 }
+
 class LoginBloc extends Bloc<AppEvent, AppState> {
   final LoginRepo repo;
 
@@ -30,19 +33,19 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
         emit(Loading());
 
         final Map<String, dynamic> data =
-        event.arguments as Map<String, dynamic>;
+            event.arguments as Map<String, dynamic>;
 
         Either<ServerFailure, Response> response = await repo.logIn(data);
 
-        response.fold(
-              (fail) async {
+        await response.fold<Future<void>>(
+          (fail) async {
             log("fail: ${fail.error}");
 
             // ✅ Check for unverified account - multiple conditions
             bool isUnverifiedAccount = _isAccountUnverified(fail);
 
             if (isUnverifiedAccount) {
-              final message = fail.error ?? 'الحساب غير مفعل';
+              final message = fail.error;
 
               AppCore.showSnackBar(
                 notification: AppNotification(
@@ -55,14 +58,15 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
               log("Unverified account message: $message");
 
               // Send verification code
-              final resendResult = await repo.resendVerificationEmail(data['email']);
+              final resendResult =
+                  await repo.resendVerificationEmail(data['email']);
 
               resendResult.fold(
-                    (resendFail) {
+                (resendFail) {
                   log("Failed to resend verification email: ${resendFail.error}");
                   // Still navigate to code screen even if resend fails
                 },
-                    (resendSuccess) {
+                (resendSuccess) {
                   log("Verification email sent successfully");
                 },
               );
@@ -77,6 +81,7 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
                 },
               );
 
+              if (emit.isDone) return;
               emit(Error());
               return;
             }
@@ -84,15 +89,16 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
             // ✅ Handle other errors (network/server/credentials)
             AppCore.showSnackBar(
               notification: AppNotification(
-                message: fail.error ?? 'حدث خطأ ما',
+                message: fail.error,
                 isFloating: true,
                 backgroundColor: Styles.IN_ACTIVE,
                 borderColor: Colors.transparent,
               ),
             );
+            if (emit.isDone) return;
             emit(Error());
           },
-              (success) async {
+          (success) async {
             log('Request data: $data');
             log("Response success: ${success.data}");
 
@@ -101,7 +107,8 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
             // ✅ Handle successful login
             await repo.saveCredentials(data);
             await repo.saveUserData(responseData);
-            CustomNavigator.push(Routes.navBar, clean: true);
+            await UserCompletionGuard.handlePostAuthNavigation();
+            if (emit.isDone) return;
             emit(Done());
           },
         );
@@ -126,22 +133,24 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
           token: event.token,
         );
 
-        response.fold(
-              (fail) {
+        await response.fold<Future<void>>(
+          (fail) async {
             AppCore.showSnackBar(
               notification: AppNotification(
-                message: fail.error ?? 'حدث خطأ ما',
+                message: fail.error,
                 isFloating: true,
                 backgroundColor: Styles.IN_ACTIVE,
                 borderColor: Colors.transparent,
               ),
             );
+            if (emit.isDone) return;
             emit(Error());
           },
-              (success) async {
+          (success) async {
             final responseData = success.data;
             await repo.saveUserData(responseData);
-            CustomNavigator.push(Routes.navBar, clean: true);
+            await UserCompletionGuard.handlePostAuthNavigation();
+            if (emit.isDone) return;
             emit(Done());
           },
         );
@@ -157,7 +166,6 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
         emit(Error());
       }
     });
-
   }
 
   /// Check if the account is unverified based on multiple conditions
@@ -169,8 +177,8 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
 
     // Check for English equivalent messages
     if ((fail.error.toLowerCase().contains("verify") ||
-            fail.error.toLowerCase().contains("confirm") ||
-            fail.error.toLowerCase().contains("unverified"))) {
+        fail.error.toLowerCase().contains("confirm") ||
+        fail.error.toLowerCase().contains("unverified"))) {
       return true;
     }
 

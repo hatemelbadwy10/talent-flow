@@ -35,6 +35,21 @@ class ContractModel implements Mapper {
   final String? terminationConditions;
   final String? conflictPolicy;
 
+  bool get isPayableForOwner {
+    final normalizedStatus = statusLabel?.trim().toLowerCase() ?? '';
+    return status == 1 ||
+        normalizedStatus.contains('accepted') ||
+        normalizedStatus.contains('approved') ||
+        normalizedStatus.contains('مقبول');
+  }
+
+  String get suggestedPaymentAmount {
+    final source = (budget?.trim() ?? '').replaceAll(',', '');
+    if (source.isEmpty) return '';
+    final match = RegExp(r'\d+(?:\.\d+)?').firstMatch(source);
+    return match?.group(0) ?? source;
+  }
+
   factory ContractModel.fromJson(Map<String, dynamic> json) {
     return ContractModel(
       id: json['id'] is int

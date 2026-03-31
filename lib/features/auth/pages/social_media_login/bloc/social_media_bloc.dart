@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -8,10 +10,9 @@ import '../../../../../app/core/app_event.dart';
 import '../../../../../app/core/app_notification.dart';
 import '../../../../../app/core/app_state.dart';
 import '../../../../../app/core/styles.dart';
+import '../../../../../app/core/user_completion_guard.dart';
 import '../../../../../data/error/failures.dart';
 import '../../../../../helpers/social_media_login_helper.dart';
-import '../../../../../navigation/custom_navigation.dart';
-import '../../../../../navigation/routes.dart';
 import '../repo/social_media_repo.dart';
 
 class SocialMediaBloc extends Bloc<AppEvent, AppState> {
@@ -27,16 +28,24 @@ class SocialMediaBloc extends Bloc<AppEvent, AppState> {
       Either<ServerFailure, Response> response = await repo
           .signInWithSocialMedia(event.arguments as SocialMediaProvider);
 
-      response.fold((fail) {
+      await response.fold<Future<void>>((fail) async {
+        log("Social login failed: ${fail.error} (Code: ${fail.statusCode})");
+        
+        // ✅ Show the actual error, not generic message
+        String errorMessage = fail.error.isNotEmpty
+            ? fail.error
+            : "invalid_credentials".tr();
+        
         AppCore.showSnackBar(
             notification: AppNotification(
-                message: "invalid_credentials".tr(),
+                message: errorMessage,
                 isFloating: true,
                 backgroundColor: Styles.IN_ACTIVE,
                 borderColor: Colors.transparent));
+        if (emit.isDone) return;
         emit(Error());
-      }, (success) {
-        CustomNavigator.push(Routes.navBar, clean: true);
+      }, (success) async {
+        await UserCompletionGuard.handlePostAuthNavigation();
         AppCore.showSnackBar(
           notification: AppNotification(
             message: "logged_in_successfully".tr(),
@@ -44,10 +53,11 @@ class SocialMediaBloc extends Bloc<AppEvent, AppState> {
             borderColor: Styles.ACTIVE,
           ),
         );
+        if (emit.isDone) return;
         emit(Done());
       });
     } catch (e) {
-      print(e.toString());
+      log('Social media auth exception: $e');
       AppCore.showSnackBar(
         notification: AppNotification(
           message: e.toString(),

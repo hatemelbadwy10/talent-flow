@@ -1,17 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
+import 'package:talent_flow/app/core/app_core.dart';
+import 'package:talent_flow/app/core/app_notification.dart';
+import 'package:talent_flow/app/core/app_storage_keys.dart';
+import 'package:talent_flow/app/core/styles.dart';
+import 'package:talent_flow/app/core/user_completion_guard.dart';
+import 'package:talent_flow/navigation/custom_navigation.dart';
+import 'package:talent_flow/navigation/routes.dart';
 
 import '../../../data/config/di.dart';
+import '../../../app/core/app_state.dart';
 import '../bloc/portofilo_form_bloc.dart';
 import '../widgets/protofilo_form.dart';
 
 class AddYourProjects extends StatelessWidget {
-  const AddYourProjects({super.key});
+  const AddYourProjects({super.key, this.arguments});
+
+  final Map<String, dynamic>? arguments;
+
+  bool get _fromOnboarding => arguments?['fromOnboarding'] == true;
 
   @override
   Widget build(BuildContext context) {
+    final isFreelancer =
+        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? true;
+    final canSkipToIdentity = !UserCompletionGuard.status.identityAuthenticated;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -22,6 +39,24 @@ class AddYourProjects extends StatelessWidget {
           height: 35,
         ),
         actions: [
+          if (isFreelancer && canSkipToIdentity)
+            TextButton(
+              onPressed: () {
+                CustomNavigator.push(
+                  Routes.identityVerification,
+                  replace: true,
+                  arguments: {'fromOnboarding': _fromOnboarding},
+                );
+              },
+              child: Text(
+                "user_completion.skip".tr(),
+                style: const TextStyle(
+                  color: Styles.PRIMARY_COLOR,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Center(
@@ -40,14 +75,48 @@ class AddYourProjects extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding:
-          EdgeInsetsGeometry.symmetric(horizontal: 20.w, vertical: 20.h),
+              EdgeInsetsGeometry.symmetric(horizontal: 20.w, vertical: 20.h),
           child: SingleChildScrollView(
             child: Column(
               children: [
                 const PortfolioInfoCard(),
                 BlocProvider(
                   create: (context) => PortfolioFormBloc(sl()),
-                  child: const PortfolioUploadForm(),
+                  child: BlocListener<PortfolioFormBloc, AppState>(
+                    listener: (context, state) async {
+                      if (state is! Done || state.reload != true) {
+                        return;
+                      }
+
+                      await UserCompletionGuard.updateStoredFlags(
+                        addedWorks: true,
+                      );
+
+                      AppCore.showSnackBar(
+                        notification: AppNotification(
+                          message: 'user_completion.work_completed'.tr(),
+                          backgroundColor: Styles.ACTIVE,
+                          isFloating: true,
+                        ),
+                      );
+
+                      if (UserCompletionGuard.status.identityAuthenticated) {
+                        if (_fromOnboarding) {
+                          CustomNavigator.push(Routes.navBar, clean: true);
+                        } else {
+                          CustomNavigator.pop(result: true);
+                        }
+                        return;
+                      }
+
+                      CustomNavigator.push(
+                        Routes.identityVerification,
+                        replace: true,
+                        arguments: {'fromOnboarding': _fromOnboarding},
+                      );
+                    },
+                    child: const PortfolioUploadForm(),
+                  ),
                 )
               ],
             ),

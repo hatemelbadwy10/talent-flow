@@ -18,12 +18,16 @@ class ConfirmCodeRepo extends BaseRepo {
     final token = json['payload']["token"];
     log("json: $json");
     sharedPreferences.setString(AppStorageKey.userId, user["id"].toString());
-     sharedPreferences.setString(AppStorageKey.userData, jsonEncode(user)); // 👈 هنا التحويل
-   sharedPreferences.setBool(AppStorageKey.isLogin, true);
-   sharedPreferences.setString(AppStorageKey.userName, user["first_name"]);
+    sharedPreferences.setString(AppStorageKey.userData, jsonEncode(user));
+    sharedPreferences.setBool(AppStorageKey.isLogin, true);
+    sharedPreferences.setString(AppStorageKey.userName, user["first_name"]);
     sharedPreferences.setString(AppStorageKey.userEmail, user["email"]);
-     sharedPreferences.setString(AppStorageKey.userImage, user["image"]);
-     sharedPreferences.setString(AppStorageKey.token, token);
+    sharedPreferences.setString(AppStorageKey.userImage, user["image"]);
+    sharedPreferences.setString(AppStorageKey.token, token);
+    sharedPreferences.setBool(
+      AppStorageKey.isFreelancer,
+      user['user_type'] != "Entrepreneur",
+    );
     dioClient.updateHeader(token);
   }
 
@@ -55,6 +59,7 @@ class ConfirmCodeRepo extends BaseRepo {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
+
   Future<Either<ServerFailure, Response>> verifyForgetPassword(
       Map<String, dynamic> data) async {
     try {

@@ -1,4 +1,3 @@
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
@@ -10,7 +9,6 @@ import '../../../app/core/styles.dart';
 import '../../projects/model/my_projects_model.dart';
 
 class NewProjectsBloc extends Bloc<AppEvent, AppState> {
-
   final NewProjectsRepo _projectsRepo;
 
   NewProjectsBloc(this._projectsRepo) : super(Start()) {
@@ -24,17 +22,17 @@ class NewProjectsBloc extends Bloc<AppEvent, AppState> {
     try {
       final result = await _projectsRepo.getProjects();
       result.fold(
-            (failure) => emit(Error()),
-            (response) {
+        (failure) => emit(Error()),
+        (response) {
           if (response.data == null || response.data['payload'] == null) {
             emit(Error());
             return;
           }
 
           final List<MyProjectsModel> projects =
-          (response.data['payload'] as List)
-              .map((e) => MyProjectsModel.fromJson(e))
-              .toList();
+              (response.data['payload'] as List)
+                  .map((e) => MyProjectsModel.fromJson(e))
+                  .toList();
 
           emit(Done(list: projects));
         },
@@ -55,37 +53,51 @@ class NewProjectsBloc extends Bloc<AppEvent, AppState> {
       final result = await _projectsRepo.addOffer(projectId, description);
 
       result.fold(
-            (failure) => emit(Error()),
-            (response) => emit(Done()),
+        (failure) => emit(Error()),
+        (response) => emit(Done(data: _extractMessage(response.data))),
       );
     } catch (e) {
       emit(Error());
     }
   }
+
   Future<void> _onAddFavorite(Update event, Emitter<AppState> emit) async {
     // emit(Loading()); // You might want a specific loading state for favorite
     try {
-      final projectId = event.arguments as int; // Assuming arguments is the project ID
+      final projectId =
+          event.arguments as int; // Assuming arguments is the project ID
       final result = await _projectsRepo.addRemoveFavorite(projectId);
 
       result.fold(
-            (failure) {
-              AppCore.showSnackBar(notification: AppNotification(
-                message: "",
-                backgroundColor: Styles.ACTIVE,
-                borderColor: Styles.ACTIVE,
-              ));
-            }, // You might want a specific error state for favorite
-            (response) {
-              AppCore.showSnackBar(notification: AppNotification(
-                message: response.data['message'],
-                backgroundColor: Styles.ACTIVE,
-                borderColor: Styles.ACTIVE,
-              ));
-            }, // You might want a specific done state for favorite
+        (failure) {
+          AppCore.showSnackBar(
+              notification: AppNotification(
+            message: "",
+            backgroundColor: Styles.ACTIVE,
+            borderColor: Styles.ACTIVE,
+          ));
+        }, // You might want a specific error state for favorite
+        (response) {
+          AppCore.showSnackBar(
+              notification: AppNotification(
+            message: response.data['message'],
+            backgroundColor: Styles.ACTIVE,
+            borderColor: Styles.ACTIVE,
+          ));
+        }, // You might want a specific done state for favorite
       );
     } catch (e) {
       emit(Error());
     }
+  }
+
+  String? _extractMessage(dynamic data) {
+    if (data is Map<String, dynamic>) {
+      return data['message']?.toString();
+    }
+    if (data is Map) {
+      return data['message']?.toString();
+    }
+    return null;
   }
 }

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/data/config/di.dart';
 
+import '../../../app/core/user_completion_guard.dart';
 import '../bloc/bank_accounts_bloc.dart';
 import '../bloc/bank_accounts_event.dart';
 import '../bloc/bank_accounts_state.dart';
@@ -105,6 +106,9 @@ class _BankAccountsScreenState extends State<BankAccountsScreen> {
       value: _bloc,
       child: BlocConsumer<BankAccountsBloc, BankAccountsState>(
         listener: (context, state) {
+          UserCompletionGuard.updateStoredFlags(
+            hasBankAccount: state.accounts.isNotEmpty,
+          );
           final messenger = ScaffoldMessenger.of(context);
           if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
             messenger.showSnackBar(

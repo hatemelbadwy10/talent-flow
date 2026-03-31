@@ -25,6 +25,22 @@ class SocialMediaRepo extends BaseRepo {
     sharedPreferences.setString(AppStorageKey.userId, json["id"].toString());
     sharedPreferences.setString(AppStorageKey.userData, jsonEncode(json));
     sharedPreferences.setBool(AppStorageKey.isLogin, true);
+    sharedPreferences.setString(
+      AppStorageKey.userName,
+      json["first_name"]?.toString() ?? json["name"]?.toString() ?? "",
+    );
+    sharedPreferences.setString(
+      AppStorageKey.userEmail,
+      json["email"]?.toString() ?? "",
+    );
+    sharedPreferences.setString(
+      AppStorageKey.userImage,
+      json["image"]?.toString() ?? "",
+    );
+    // ✅ Save user type correctly
+    bool isFreelancer = json["user_type"]?.toString() == "Freelancer";
+    sharedPreferences.setBool(AppStorageKey.isFreelancer, isFreelancer);
+    log("User saved: ${json["first_name"]} (Type: ${json["user_type"]}, isFreelancer: $isFreelancer)");
   }
 
   saveUserToken(token) {
@@ -34,8 +50,7 @@ class SocialMediaRepo extends BaseRepo {
 
   Future<Either<ServerFailure, Response>> signInWithSocialMedia(
       SocialMediaProvider provider) async {
-    print("provider: $provider");
-    left(ApiErrorHandler.getServerFailure("xx"));
+    log("provider: $provider");
     try {
       Either<ServerFailure, SocialMediaModel>? socialResponse;
       if (provider == SocialMediaProvider.google) {
@@ -50,46 +65,81 @@ class SocialMediaRepo extends BaseRepo {
         socialResponse = await socialMediaLoginHelper.appleLogin();
       }
 
-      return socialResponse!.fold((fail) {
-        print("/////////////////////////////////");
-        print("fail: $fail");
-        print("/////////////////////////////////");
-        return left(fail);
-      }, (success) async {
-        print("/////////////////////////////////");
-        print("success: ${success.idToken}");
-        print("success: ${success.image}");
-        print("success: ${success.provider}");
-        print("success: ${success.uid}");
+      if (socialResponse == null) {
+        return left(ServerFailure("Unsupported social provider"));
+      }
 
-        print("/////////////////////////////////");
-        log("success: $success");
+      return await socialResponse.fold<Future<Either<ServerFailure, Response>>>(
+        (fail) async {
+          log("social login fail: ${fail.error}");
+          return left(fail);
+        },
+        (success) async {
+          log("success: $success");
+          
+          // ✅ Validate the model before sending to backend
+          if (success.idToken == null || success.idToken!.isEmpty) {
+            log("error: Firebase ID token is null or empty");
+            return left(ServerFailure("Authentication failed: No valid token"));
+          }
 
-        Response response =
-            await dioClient.post(uri: EndPoints.socialMediaAuth, data: {
-          "token": success.idToken,
-          "provider": provider.name,
-          "user_type":
-              sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                      true
-                  ? "Freelancer"
-                  : "Entrepreneur",
-        });
-        print("response: ${response.data}");
+          try {
+            final payload = {
+              "token": success.idToken,
+              "provider": provider.name,
+              "user_type":
+                  sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                          true
+                      ? "Freelancer"
+                      : "Entrepreneur",
+            };
+            
+            log("Sending payload to backend: $payload");
+            
+            final response =
+                await dioClient.post(uri: EndPoints.socialMediaAuth, data: payload);
+            log("response: ${response.data}");
 
-        if (response.statusCode == 200) {
-          print("response: ${response.data}");
-          saveUserData(response.data["data"]);
-          saveUserToken(response.data['data']["token"]);
-          return Right(response);
-        } else {
-          print("error: ${response.data['message']}");
-          return left(
-              ApiErrorHandler.getServerFailure(response.data['message']));
-        }
-      });
+            if (response.statusCode == 200) {
+              // ✅ Backend returns data in 'payload' key, not 'data'
+              final userData = response.data["payload"]["user"];
+              final token = response.data["payload"]["token"];
+              
+              saveUserData(userData);
+              saveUserToken(token);
+              return Right(response);
+            }
+
+            log("error: ${response.data['message']}");
+            return left(
+              ServerFailure(
+                response.data['message']?.toString() ?? "Social login failed",
+                statusCode: response.statusCode,
+              ),
+            );
+          } catch (error) {
+            log("social auth request error: $error");
+
+            if (error is DioException && error.response != null) {
+              final responseData = error.response!.data;
+              final message = responseData is Map<String, dynamic>
+                  ? responseData['message']?.toString()
+                  : null;
+
+              return left(
+                ServerFailure(
+                  message ?? ApiErrorHandler.getServerFailure(error).error,
+                  statusCode: error.response!.statusCode,
+                ),
+              );
+            }
+
+            return left(ApiErrorHandler.getServerFailure(error));
+          }
+        },
+      );
     } catch (error) {
-      print("error: ${error.toString()}");
+      log("error: ${error.toString()}");
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }

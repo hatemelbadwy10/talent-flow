@@ -3,16 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../app/core/app_core.dart';
 import '../../../app/core/app_event.dart';
+import '../../../app/core/app_notification.dart';
 import '../../../app/core/app_state.dart';
+import '../../../app/core/app_storage_keys.dart';
 import '../../../app/core/styles.dart';
 import '../../../app/core/svg_images.dart';
+import '../../../components/custom_button.dart';
 import '../../../data/config/di.dart';
+import '../../../features/payment/model/contract_payment_args.dart';
 import '../../projects/widgets/projects_shimmer.dart';
 import '../bloc/contract_details_bloc.dart';
 import '../model/contract_model.dart';
 import '../widgets/setting_app_bar.dart';
+import '../../../navigation/custom_navigation.dart';
+import '../../../navigation/routes.dart';
 
 class ContractDetailsScreen extends StatelessWidget {
   const ContractDetailsScreen({super.key, required this.contractId});
@@ -62,10 +70,14 @@ class _ContractDetailsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusData = _statusStyle(contract.status);
+    final statusData = _statusStyle(contract.status, contract.statusLabel);
     final statusText = contract.statusLabel?.trim().isNotEmpty == true
         ? contract.statusLabel!
         : statusData.textKey.tr();
+    final isFreelancer =
+        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
+    final canPay =
+        !isFreelancer && contract.isPayableForOwner && contract.id != null;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -198,6 +210,43 @@ class _ContractDetailsBody extends StatelessWidget {
             title: 'contract_details_screen.conflict_policy'.tr(),
             htmlContent: contract.conflictPolicy,
           ),
+          if (canPay) ...[
+            const SizedBox(height: 20),
+            CustomButton(
+              text: 'contract_payment.pay'.tr(),
+              radius: 18,
+              height: 56,
+              rIconWidget: const Icon(
+                Icons.credit_card_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+              onTap: () async {
+                final detailsBloc = context.read<ContractDetailsBloc>();
+                final paymentResult = await CustomNavigator.push(
+                  Routes.contractPaymentRequest,
+                  arguments: ContractPaymentRequestArgs(
+                    contractId: contract.id!,
+                    contractTitle: contract.title,
+                    initialAmount: contract.suggestedPaymentAmount,
+                    initialStartDate: contract.date,
+                  ),
+                );
+
+                if (paymentResult is String &&
+                    paymentResult.trim().isNotEmpty) {
+                  AppCore.showSnackBar(
+                    notification: AppNotification(
+                      message: paymentResult,
+                      backgroundColor: Styles.PRIMARY_COLOR,
+                      isFloating: true,
+                    ),
+                  );
+                  detailsBloc.add(Add(arguments: contract.id!));
+                }
+              },
+            ),
+          ],
         ],
       ),
     );
@@ -336,7 +385,14 @@ class _StatusStyle {
   final Color backgroundColor;
 }
 
-_StatusStyle _statusStyle(int? status) {
+_StatusStyle _statusStyle(int? status, String? statusLabel) {
+  if (_isCompletedStatus(status, statusLabel)) {
+    return const _StatusStyle(
+      textKey: 'project_status.completed',
+      textColor: Color(0xFF209370),
+      backgroundColor: Color(0xFFEAF8F1),
+    );
+  }
   if (status == 1) {
     return const _StatusStyle(
       textKey: 'contracts_screen.status_approved',
@@ -356,6 +412,14 @@ _StatusStyle _statusStyle(int? status) {
     textColor: Color(0xFFB56700),
     backgroundColor: Color(0xFFFFF4E4),
   );
+}
+
+bool _isCompletedStatus(int? status, String? statusLabel) {
+  final normalizedStatus = statusLabel?.trim().toLowerCase() ?? '';
+  return status == 3 ||
+      normalizedStatus.contains('completed') ||
+      normalizedStatus.contains('مكتمل') ||
+      normalizedStatus.contains('مكتملة');
 }
 
 final _cardDecoration = BoxDecoration(

@@ -18,7 +18,7 @@ class ContractListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusData = _statusStyle(contract.status);
+    final statusData = _statusStyle(contract.status, contract.statusLabel);
     final statusText = contract.statusLabel?.trim().isNotEmpty == true
         ? contract.statusLabel!
         : statusData.textKey.tr();
@@ -151,7 +151,14 @@ class _StatusStyle {
   final Color backgroundColor;
 }
 
-_StatusStyle _statusStyle(int? status) {
+_StatusStyle _statusStyle(int? status, String? statusLabel) {
+  if (_isCompletedStatus(status, statusLabel)) {
+    return const _StatusStyle(
+      textKey: 'project_status.completed',
+      textColor: Color(0xFF209370),
+      backgroundColor: Color(0xFFEAF8F1),
+    );
+  }
   if (status == 1) {
     return const _StatusStyle(
       textKey: 'contracts_screen.status_approved',
@@ -171,4 +178,12 @@ _StatusStyle _statusStyle(int? status) {
     textColor: Color(0xFFB56700),
     backgroundColor: Color(0xFFFFF4E4),
   );
+}
+
+bool _isCompletedStatus(int? status, String? statusLabel) {
+  final normalizedStatus = statusLabel?.trim().toLowerCase() ?? '';
+  return status == 3 ||
+      normalizedStatus.contains('completed') ||
+      normalizedStatus.contains('مكتمل') ||
+      normalizedStatus.contains('مكتملة');
 }

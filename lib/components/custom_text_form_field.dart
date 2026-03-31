@@ -52,53 +52,52 @@ class CustomTextField extends StatefulWidget {
   final TextDirection? textDirection;
   final double? width;
 
-  const CustomTextField({
-    super.key,
-    this.height,
-    this.sufAssetIcon,
-    this.pAssetIcon,
-    this.pSvgIcon,
-    this.pIconColor,
-    this.sIconColor,
-    this.sufWidget,
-    this.prefixWidget,
-    this.sufSvgIcon,
-    this.keyboardAction = TextInputAction.next,
-    this.align,
-    this.inputType,
-    this.hint,
-    this.alignLabelWithHint,
-    this.onChanged,
-    this.autofillHints,
-    this.validate,
-    this.obscureText = false,
-    this.isPassword = false,
-    this.readOnly = false,
-    this.maxLines = 1,
-    this.minLines = 1,
-    this.isEnabled = true,
-    this.withPadding = true,
-    this.alignLabel = false,
-    this.controller,
-    this.errorText = "",
-    this.maxLength,
-    this.formattedType,
-    this.focusNode,
-    this.nextFocus,
-    this.iconColor,
-    this.keyboardPadding = false,
-    this.autoFocus,
-    this.initialValue,
-    this.onlyBorderColor,
-    this.customError = false,
-    this.withLabel = false,
-    this.label,
-    this.onTap,
-    this.onTapOutside,
-    this.onSubmit,
-    this.textDirection,
-    this.width
-  });
+  const CustomTextField(
+      {super.key,
+      this.height,
+      this.sufAssetIcon,
+      this.pAssetIcon,
+      this.pSvgIcon,
+      this.pIconColor,
+      this.sIconColor,
+      this.sufWidget,
+      this.prefixWidget,
+      this.sufSvgIcon,
+      this.keyboardAction = TextInputAction.next,
+      this.align,
+      this.inputType,
+      this.hint,
+      this.alignLabelWithHint,
+      this.onChanged,
+      this.autofillHints,
+      this.validate,
+      this.obscureText = false,
+      this.isPassword = false,
+      this.readOnly = false,
+      this.maxLines = 1,
+      this.minLines = 1,
+      this.isEnabled = true,
+      this.withPadding = true,
+      this.alignLabel = false,
+      this.controller,
+      this.errorText = "",
+      this.maxLength,
+      this.formattedType,
+      this.focusNode,
+      this.nextFocus,
+      this.iconColor,
+      this.keyboardPadding = false,
+      this.autoFocus,
+      this.initialValue,
+      this.onlyBorderColor,
+      this.customError = false,
+      this.withLabel = false,
+      this.label,
+      this.onTap,
+      this.onTapOutside,
+      this.onSubmit,
+      this.textDirection,
+      this.width});
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -132,10 +131,57 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   // This function determines the color of the border
   Color activationBorderColor() {
-    if (error != null) return Styles.ERORR_COLOR; // Error color takes precedence
-    if (_isFocus) return Styles.PRIMARY_COLOR; // Color when the field is focused
+    if (error != null) {
+      return Styles.ERORR_COLOR; // Error color takes precedence
+    }
+    if (_isFocus) {
+      return Styles.PRIMARY_COLOR; // Color when the field is focused
+    }
     // **CHANGE**: Return a transparent color to hide the border when not focused
-    return Styles.BORDER_COLOR;   }
+    return Styles.BORDER_COLOR;
+  }
+
+  Widget? _assetIcon(String? assetPath, Color? color) {
+    if (assetPath == null || assetPath.isEmpty) return null;
+    if (assetPath.toLowerCase().endsWith('.svg')) {
+      return customImageIconSVG(
+        imageName: assetPath,
+        color: color ?? Styles.HINT_COLOR,
+        height: 18,
+        width: 18,
+      );
+    }
+    return customImageIcon(
+      imageName: assetPath,
+      color: color ?? Styles.HINT_COLOR,
+      height: 18,
+      width: 18,
+    );
+  }
+
+  Widget? _buildPrefixIcon() {
+    final widgetIcon =
+        widget.prefixWidget ?? _assetIcon(widget.pSvgIcon, widget.pIconColor);
+    return widgetIcon ?? _assetIcon(widget.pAssetIcon, widget.pIconColor);
+  }
+
+  Widget? _buildSuffixIcon() {
+    if (widget.isPassword) {
+      return IconButton(
+        onPressed: _visibility,
+        icon: _isHidden
+            ? customImageIconSVG(imageName: SvgImages.hiddenEyeIcon)
+            : customImageIconSVG(
+                imageName: SvgImages.eyeIcon,
+                color: Styles.PRIMARY_COLOR,
+              ),
+      );
+    }
+
+    final widgetIcon =
+        widget.sufWidget ?? _assetIcon(widget.sufSvgIcon, widget.sIconColor);
+    return widgetIcon ?? _assetIcon(widget.sufAssetIcon, widget.sIconColor);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,10 +222,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
           Container(
             width: widget.width ?? context.width,
             decoration: BoxDecoration(
-              // **CHANGE**: The background is now always white
+                // **CHANGE**: The background is now always white
                 color: Styles.WHITE_COLOR,
                 border: Border.all(
-                  color: activationBorderColor(), // Uses our updated color logic
+                  color:
+                      activationBorderColor(), // Uses our updated color logic
                 ),
                 borderRadius: BorderRadius.circular(12.w)),
             child: TextFormField(
@@ -224,8 +271,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 overflow: TextOverflow.ellipsis,
                 color: Styles.HEADER,
               ),
-              scrollPadding:
-              EdgeInsets.only(bottom: context.bottom),
+              scrollPadding: EdgeInsets.only(bottom: context.bottom),
 
               textAlign: TextAlign.start,
 
@@ -244,16 +290,28 @@ class _CustomTextFieldState extends State<CustomTextField> {
                   fontWeight: FontWeight.w400,
                 ),
 
-                // Your password toggle icon logic is preserved perfectly
-                suffixIcon: widget.isPassword
-                    ? IconButton(
-                  onPressed: _visibility,
-                  icon: _isHidden
-                      ? customImageIconSVG(imageName: SvgImages.hiddenEyeIcon)
-                      : customImageIconSVG(imageName: SvgImages.eyeIcon, color: Styles.PRIMARY_COLOR),
-                )
-                    : null,
-                contentPadding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
+                prefixIcon: _buildPrefixIcon() == null
+                    ? null
+                    : Padding(
+                        padding: const EdgeInsetsDirectional.only(start: 12),
+                        child: _buildPrefixIcon(),
+                      ),
+                prefixIconConstraints: const BoxConstraints(
+                  minWidth: 40,
+                  minHeight: 40,
+                ),
+                suffixIcon: _buildSuffixIcon() == null
+                    ? null
+                    : Padding(
+                        padding: const EdgeInsetsDirectional.only(end: 12),
+                        child: _buildSuffixIcon(),
+                      ),
+                suffixIconConstraints: const BoxConstraints(
+                  minWidth: 40,
+                  minHeight: 40,
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
               ),
             ),
           ),

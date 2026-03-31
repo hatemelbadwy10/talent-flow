@@ -1,6 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
-
 import 'dart:io';
 
 import '../../../app/core/app_event.dart';
@@ -90,7 +91,8 @@ class UpdateFormField extends AppEvent {
   final int formIndex;
   final String fieldName;
   final dynamic value;
-  UpdateFormField({required this.formIndex, required this.fieldName, required this.value});
+  UpdateFormField(
+      {required this.formIndex, required this.fieldName, required this.value});
 }
 
 class UpdateFormImage extends AppEvent {
@@ -128,7 +130,14 @@ class SubmitAllPortfolios extends AppEvent {}
 class PortfolioFormBloc extends Bloc<AppEvent, AppState> {
   final AddWorkRepo workRepo;
   PortfolioFormBloc(this.workRepo)
-      : super(Done(data: PortfolioFormsState(forms: List.generate(3, (_) => const SinglePortfolioData())))) {
+      : super(
+          Done(
+            data: PortfolioFormsState(
+              forms: List.generate(3, (_) => const SinglePortfolioData()),
+            ),
+            reload: false,
+          ),
+        ) {
     on<UpdateFormField>(_onUpdateFormField);
     on<UpdateFormImage>(_onUpdateFormImage);
     on<UpdateFormFiles>(_onUpdateFormFiles);
@@ -166,7 +175,7 @@ class PortfolioFormBloc extends Bloc<AppEvent, AppState> {
     }
 
     newFormsList[event.formIndex] = newFormData;
-    emit(Done(data: currentState.copyWith(forms: newFormsList)));
+    emit(Done(data: currentState.copyWith(forms: newFormsList), reload: false));
   }
 
   void _onUpdateFormImage(UpdateFormImage event, Emitter<AppState> emit) {
@@ -177,7 +186,7 @@ class PortfolioFormBloc extends Bloc<AppEvent, AppState> {
 
     final newFormData = oldFormData.copyWith(image: event.image);
     newFormsList[event.formIndex] = newFormData;
-    emit(Done(data: currentState.copyWith(forms: newFormsList)));
+    emit(Done(data: currentState.copyWith(forms: newFormsList), reload: false));
   }
 
   void _onUpdateFormFiles(UpdateFormFiles event, Emitter<AppState> emit) {
@@ -187,11 +196,12 @@ class PortfolioFormBloc extends Bloc<AppEvent, AppState> {
     final oldFormData = newFormsList[event.formIndex];
 
     // Add new files to existing ones
-    final updatedFiles = List<File>.from(oldFormData.files)..addAll(event.files);
+    final updatedFiles = List<File>.from(oldFormData.files)
+      ..addAll(event.files);
 
     final newFormData = oldFormData.copyWith(files: updatedFiles);
     newFormsList[event.formIndex] = newFormData;
-    emit(Done(data: currentState.copyWith(forms: newFormsList)));
+    emit(Done(data: currentState.copyWith(forms: newFormsList), reload: false));
   }
 
   void _onRemoveFormFile(RemoveFormFile event, Emitter<AppState> emit) {
@@ -201,37 +211,54 @@ class PortfolioFormBloc extends Bloc<AppEvent, AppState> {
     final oldFormData = newFormsList[event.formIndex];
 
     // Remove the file at the specified index
-    final updatedFiles = List<File>.from(oldFormData.files)..removeAt(event.fileIndex);
+    final updatedFiles = List<File>.from(oldFormData.files)
+      ..removeAt(event.fileIndex);
 
     final newFormData = oldFormData.copyWith(files: updatedFiles);
     newFormsList[event.formIndex] = newFormData;
-    emit(Done(data: currentState.copyWith(forms: newFormsList)));
+    emit(Done(data: currentState.copyWith(forms: newFormsList), reload: false));
   }
 
   void _onExpandForm(ExpandForm event, Emitter<AppState> emit) {
     if (state is! Done) return;
     final currentState = (state as Done).data as PortfolioFormsState;
-    emit(Done(data: currentState.copyWith(expandedFormIndex: event.formIndex)));
+    emit(
+      Done(
+        data: currentState.copyWith(expandedFormIndex: event.formIndex),
+        reload: false,
+      ),
+    );
   }
 
   void _onUpdateSingleTerm(UpdateSingleTerm event, Emitter<AppState> emit) {
     if (state is! Done) return;
     final currentState = (state as Done).data as PortfolioFormsState;
     if (event.termIndex == 1) {
-      emit(Done(data: currentState.copyWith(termsOneAccepted: event.isAccepted)));
+      emit(
+        Done(
+          data: currentState.copyWith(termsOneAccepted: event.isAccepted),
+          reload: false,
+        ),
+      );
     } else if (event.termIndex == 2) {
-      emit(Done(data: currentState.copyWith(termsTwoAccepted: event.isAccepted)));
+      emit(
+        Done(
+          data: currentState.copyWith(termsTwoAccepted: event.isAccepted),
+          reload: false,
+        ),
+      );
     }
   }
 
-  void _onSubmitAllPortfolios(SubmitAllPortfolios event, Emitter<AppState> emit) async {
+  void _onSubmitAllPortfolios(
+      SubmitAllPortfolios event, Emitter<AppState> emit) async {
     if (state is! Done) return;
     final currentState = (state as Done).data as PortfolioFormsState;
 
     // Check if terms are accepted
     if (!currentState.termsOneAccepted || !currentState.termsTwoAccepted) {
-      print("Validation Failed: All terms must be accepted.");
-      emit(Done(data: currentState));
+      log("Validation Failed: All terms must be accepted.");
+      emit(Done(data: currentState, reload: false));
       return;
     }
 
@@ -243,12 +270,12 @@ class PortfolioFormBloc extends Bloc<AppEvent, AppState> {
     final response = await workRepo.addWorks(works: works);
 
     response.fold(
-          (failure) {
-        print("Error: ${failure}");
-        emit(Done(data: currentState));
+      (failure) {
+        log("Error: $failure");
+        emit(Done(data: currentState, reload: false));
       },
-          (success) {
-        print("All forms submitted successfully!");
+      (success) {
+        log("All forms submitted successfully!");
         emit(Done(data: currentState, reload: true));
       },
     );

@@ -28,24 +28,20 @@ class SingleProjectViewShimmer extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      body: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 16),
-              // Project Details Card Shimmer
-              const ProjectDetailsCardShimmer(),
-              const SizedBox(height: 24),
-              // Project Description Shimmer
-              const ProjectDescriptionShimmer(),
-              const SizedBox(height: 100),
+              SizedBox(height: 16),
+              ProjectDetailsCardShimmer(),
+              SizedBox(height: 24),
+              ProjectDescriptionShimmer(),
+              SizedBox(height: 100),
             ],
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: const PaymentButtonShimmer(),
     );
   }
 }
@@ -72,7 +68,7 @@ class ProjectDetailsCardShimmer extends StatelessWidget {
           border: Border.all(color: Colors.grey.shade200, width: 1.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.08),
+              color: Colors.grey.withValues(alpha: 0.08),
               spreadRadius: 1,
               blurRadius: 10,
               offset: const Offset(0, 3),
@@ -130,16 +126,17 @@ class ProjectDetailsCardShimmer extends StatelessWidget {
                       const SizedBox(height: 8),
                       // Rating stars
                       Row(
-                        children: List.generate(5, (index) =>
-                            Container(
-                              margin: const EdgeInsets.only(right: 2),
-                              width: 16,
-                              height: 16,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade300,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
+                        children: List.generate(
+                          5,
+                          (index) => Container(
+                            margin: const EdgeInsets.only(right: 2),
+                            width: 16,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(2),
                             ),
+                          ),
                         ),
                       ),
                     ],
@@ -303,7 +300,7 @@ class ProjectDescriptionShimmer extends StatelessWidget {
           border: Border.all(color: Colors.grey.shade200, width: 1.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.08),
+              color: Colors.grey.withValues(alpha: 0.08),
               spreadRadius: 1,
               blurRadius: 10,
               offset: const Offset(0, 3),
@@ -333,8 +330,8 @@ class ProjectDescriptionShimmer extends StatelessWidget {
                   width: index == 5
                       ? randomWidth(100, 250)
                       : index == 2
-                      ? randomWidth(200, double.infinity)
-                      : double.infinity,
+                          ? randomWidth(200, double.infinity)
+                          : double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(7),
@@ -360,15 +357,16 @@ class ProjectDescriptionShimmer extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: List.generate(5, (index) =>
-                  Container(
-                    height: 32,
-                    width: randomWidth(60, 120),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+              children: List.generate(
+                5,
+                (index) => Container(
+                  height: 32,
+                  width: randomWidth(60, 120),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(16),
                   ),
+                ),
               ),
             ),
 
@@ -474,7 +472,7 @@ class PaymentButtonShimmer extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
+                color: Colors.grey.withValues(alpha: 0.2),
                 spreadRadius: 1,
                 blurRadius: 8,
                 offset: const Offset(0, 3),
@@ -514,11 +512,12 @@ class AnimatedSingleProjectShimmer extends StatefulWidget {
   const AnimatedSingleProjectShimmer({super.key});
 
   @override
-  State<AnimatedSingleProjectShimmer> createState() => _AnimatedSingleProjectShimmerState();
+  State<AnimatedSingleProjectShimmer> createState() =>
+      _AnimatedSingleProjectShimmerState();
 }
 
-class _AnimatedSingleProjectShimmerState extends State<AnimatedSingleProjectShimmer>
-    with TickerProviderStateMixin {
+class _AnimatedSingleProjectShimmerState
+    extends State<AnimatedSingleProjectShimmer> with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
@@ -603,7 +602,8 @@ class _AnimatedSingleProjectShimmerState extends State<AnimatedSingleProjectShim
               ),
             ),
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
           floatingActionButton: TweenAnimationBuilder<double>(
             duration: const Duration(milliseconds: 1000),
             tween: Tween(begin: 0.0, end: 1.0),
