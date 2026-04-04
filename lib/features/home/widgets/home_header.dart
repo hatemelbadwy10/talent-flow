@@ -129,15 +129,15 @@ class HomeHeaderSection extends StatelessWidget {
                       Row(
                         children: [
                           _ActionButton(
-                            icon: SvgImages
-                                .notification, // swap with your actual SVG key
-                            isIcon: true,
+                            icon: SvgImages.notification,
+                            isIcon: false,
                             badge: notificationCount,
                             onTap: onNotificationTap,
                           ),
                           SizedBox(width: 10.w),
                           _ActionButton(
-                            icon: SvgImages.message,
+                            icon: SvgImages.messageIcon,
+                            isIcon: false,
                             badge: messageCount,
                             onTap: onMessageTap,
                           ),

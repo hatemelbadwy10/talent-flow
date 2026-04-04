@@ -224,31 +224,16 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
                         borderRadius: BorderRadius.circular(40),
                         border: Border.all(color: const Color(0xFFD9DEE6)),
                       ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            onPressed: () {},
-                            icon: customImageIconSVG(
-                              imageName: SvgImages.attach,
-                              color: const Color(0xFF6B7280),
-                              width: 20,
-                              height: 20,
-                            ),
+                      child: TextField(
+                        controller: _messageController,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Type a message',
+                          hintStyle: TextStyle(
+                            color: Color(0xFF9CA3AF),
+                            fontSize: 14,
                           ),
-                          Expanded(
-                            child: TextField(
-                              controller: _messageController,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'Type a message',
-                                hintStyle: TextStyle(
-                                  color: Color(0xFF9CA3AF),
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),

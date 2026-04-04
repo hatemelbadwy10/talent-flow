@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/extensions.dart';
 import 'package:talent_flow/components/animated_widget.dart';
@@ -19,9 +22,22 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _searchController = TextEditingController();
+  Timer? _searchTimer;
+  int? _selectedProjectId;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load project options and all chats when screen initializes
+    Future.microtask(() {
+      context.read<ChatsBloc>().add(Click());
+      context.read<ChatsBloc>().add(Add());
+    });
+  }
 
   @override
   void dispose() {
+    _searchTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -33,6 +49,25 @@ class _ChatScreenState extends State<ChatScreen> {
       final lastMessage = (chat.lastMessageSnippet ?? '').toLowerCase();
       return userName.contains(query) || lastMessage.contains(query);
     }).toList();
+  }
+
+  void _onSearchChanged(String query) {
+    // Cancel previous timer
+    _searchTimer?.cancel();
+    
+    // Trigger immediate local filtering
+    setState(() {});
+    
+    // Debounce backend search by 500ms - only search if query is not empty
+    if (query.trim().isNotEmpty) {
+      _searchTimer = Timer(const Duration(milliseconds: 500), () {
+        context.read<ChatsBloc>().add(
+          Add(arguments: {
+            'search': query,
+          }),
+        );
+      });
+    }
   }
 
   @override
@@ -90,7 +125,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: CustomTextField(
                           sufAssetIcon: 'assets/icons/search.svg',
                           controller: _searchController,
-                          onChanged: (_) => setState(() {}),
+                          onChanged: _onSearchChanged,
                           hint: 'chat_screen.search_hint'.tr(),
                         ),
                       ),
@@ -110,6 +145,47 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ],
                   ),
+                ),
+                const SizedBox(height: 14),
+                BlocBuilder<ChatsBloc, AppState>(
+                  buildWhen: (previous, current) => true,
+                  builder: (context, state) {
+                    final projectOptions = context.read<ChatsBloc>().projectOptions;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE7E7EC)),
+                      ),
+                      child: DropdownButton<int?>(
+                        isExpanded: true,
+                        underline: const SizedBox.shrink(),
+                        value: _selectedProjectId,
+                        hint: Text('chat_screen.filter_by_project'.tr()),
+                        items: [
+                          DropdownMenuItem(
+                            value: null,
+                            child: Text('chat_screen.all_projects'.tr()),
+                          ),
+                          ...projectOptions.entries.map(
+                            (entry) => DropdownMenuItem(
+                              value: entry.key,
+                              child: Text(entry.value),
+                            ),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedProjectId = value;
+                          });
+                          context.read<ChatsBloc>().add(
+                            Add(arguments: {'project_id': value}),
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 14),
                 Expanded(

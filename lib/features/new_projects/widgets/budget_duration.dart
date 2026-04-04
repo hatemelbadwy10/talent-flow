@@ -2,8 +2,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:talent_flow/features/new_projects/widgets/section_label_widget.dart';
 import '../../../../components/custom_text_form_field.dart';
+import '../../../../app/core/styles.dart';
 import '../bloc/add_project_bloc.dart';
 import '../bloc/add_project_event.dart';
 import 'helper_text_widget.dart';
@@ -69,10 +71,22 @@ class DurationField extends StatelessWidget {
           controller: controller,
           hint: 'add_project.duration_hint'.tr(),
           inputType: TextInputType.number,
+          formattedType: [FilteringTextInputFormatter.digitsOnly],
+          sufWidget: Padding(
+            padding: const EdgeInsetsDirectional.only(end: 4),
+            child: Text(
+              'add_project.duration_suffix'.tr(),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Styles.HINT_COLOR,
+              ),
+            ),
+          ),
           onChanged: (value) {
             context.read<AddProjectBloc>().add(
-              UpdateDuration(duration: int.tryParse(value) ?? 0),
-            );
+                  UpdateDuration(duration: int.tryParse(value) ?? 0),
+                );
           },
           validate: (value) {
             if (value == null || value.isEmpty) {

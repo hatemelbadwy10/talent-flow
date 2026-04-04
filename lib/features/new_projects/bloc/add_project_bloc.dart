@@ -302,6 +302,7 @@ class AddProjectBloc extends Bloc<AddProjectEvent, AddProjectState> {
         skills: state.skills,
         budget: state.budget!,
         duration: state.duration!,
+        files: state.files.isNotEmpty ? state.files : null,
         filesDescription: state.filesDescription,
         similarProjects:
             state.similarProjects.isNotEmpty ? state.similarProjects : null,

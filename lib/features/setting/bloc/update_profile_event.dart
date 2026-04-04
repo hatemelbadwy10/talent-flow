@@ -103,5 +103,49 @@ class UpdateImage extends UpdateProfileEvent {
   List<Object?> get props => [image];
 }
 
+class UpdateCountry extends UpdateProfileEvent {
+  final String countryId;
+  final String countryName;
+  const UpdateCountry({required this.countryId, required this.countryName});
+
+  @override
+  List<Object?> get props => [countryId, countryName];
+}
+
+class UpdateCity extends UpdateProfileEvent {
+  final String cityId;
+  final String cityName;
+  const UpdateCity({required this.cityId, required this.cityName});
+
+  @override
+  List<Object?> get props => [cityId, cityName];
+}
+
+class UpdateGender extends UpdateProfileEvent {
+  final String gender;
+  const UpdateGender(this.gender);
+
+  @override
+  List<Object?> get props => [gender];
+}
+
+class UpdateDateOfBirth extends UpdateProfileEvent {
+  final String dateOfBirth;
+  const UpdateDateOfBirth(this.dateOfBirth);
+
+  @override
+  List<Object?> get props => [dateOfBirth];
+}
+
+class UpdateProfessionalTitle extends UpdateProfileEvent {
+  final String professionalTitle;
+  const UpdateProfessionalTitle(this.professionalTitle);
+
+  @override
+  List<Object?> get props => [professionalTitle];
+}
+
+class ClearError extends UpdateProfileEvent {}
+
 // --- Submit form ---
 class SubmitProfile extends UpdateProfileEvent {}

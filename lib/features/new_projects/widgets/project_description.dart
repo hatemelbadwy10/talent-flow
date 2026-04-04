@@ -4,10 +4,15 @@ import 'package:easy_localization/easy_localization.dart'; // <-- 1. Import the 
 import 'package:talent_flow/features/projects/model/single_project_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-
 class ProjectDescription extends StatelessWidget {
-  const ProjectDescription({super.key, this.singleProjectModel});
+  const ProjectDescription({
+    super.key,
+    this.singleProjectModel,
+    this.showAttachments = true,
+  });
+
   final SingleProjectModel? singleProjectModel;
+  final bool showAttachments;
 
   void _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
@@ -19,6 +24,7 @@ class ProjectDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final project = singleProjectModel;
+    final fileUrls = _extractFileUrls(project?.files ?? const []);
 
     if (project == null) {
       return const SizedBox.shrink(); // لو مفيش داتا
@@ -85,8 +91,8 @@ class ProjectDescription extends StatelessWidget {
             const SizedBox(height: 24.0),
 
           // 🔹 المرفقات (files)
-          if (project.files.isNotEmpty)
-            ...project.files.map((fileUrl) {
+          if (showAttachments && fileUrls.isNotEmpty)
+            ...fileUrls.map((fileUrl) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: ClipRRect(
@@ -96,16 +102,41 @@ class ProjectDescription extends StatelessWidget {
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: 200,
-                    errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.broken_image,
+                      size: 50,
+                      color: Colors.grey,
+                    ),
                   ),
                 ),
               );
-            }).toList(),
-
+            }),
         ],
       ),
     );
+  }
+
+  List<String> _extractFileUrls(List<dynamic> files) {
+    return files
+        .map((file) {
+          if (file is String) {
+            return file.trim();
+          }
+
+          if (file is Map<String, dynamic>) {
+            return (file['file'] ??
+                    file['url'] ??
+                    file['path'] ??
+                    file['attachment'] ??
+                    '')
+                .toString()
+                .trim();
+          }
+
+          return file.toString().trim();
+        })
+        .where((file) => file.isNotEmpty)
+        .toList();
   }
 
   // /// Helper widget to build a single row for an attachment.

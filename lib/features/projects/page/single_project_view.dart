@@ -17,6 +17,7 @@ import '../../new_projects/widgets/project_description.dart';
 import '../../new_projects/widgets/project_details_card.dart';
 import '../bloc/my_projects_bloc.dart';
 import '../model/single_project_model.dart';
+import '../widgets/project_files_section.dart';
 import '../widgets/single_project_shimmer.dart';
 
 class SingleProjectView extends StatelessWidget {
@@ -30,8 +31,8 @@ class SingleProjectView extends StatelessWidget {
         sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
 
     return BlocProvider(
-      create: (context) => MyProjectsBloc(sl())
-        ..add(Click(arguments: arguments['id'])), // 👈 هنا
+      create: (context) =>
+          MyProjectsBloc(sl())..add(Click(arguments: arguments['id'])),
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -44,7 +45,7 @@ class SingleProjectView extends StatelessWidget {
             if (state is Loading) {
               return const SingleProjectViewShimmer();
             } else if (state is Error) {
-              return const Center(child: Text("فشل تحميل المشروع"));
+              return Center(child: Text('project_load_failed'.tr()));
             } else if (state is Done && state.model is SingleProjectModel) {
               final project = state.model as SingleProjectModel;
 
@@ -56,7 +57,12 @@ class SingleProjectView extends StatelessWidget {
                       ProjectDetailsCard(
                         singleProjectModel: project,
                       ),
-                      ProjectDescription(singleProjectModel: project),
+                      ProjectDescription(
+                        singleProjectModel: project,
+                        showAttachments: false,
+                      ),
+                      if (project.files.isNotEmpty)
+                        ProjectFilesSection(files: project.files),
                       if (!isFreelancer)
                         _ProjectProposalsSection(
                           proposals: project.proposals,

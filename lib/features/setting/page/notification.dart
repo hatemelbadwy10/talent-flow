@@ -67,7 +67,18 @@ class _NotificationState extends State<Notification>
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          title: Text('notifications'.tr()),
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                "assets/images/Talent Flow logo 1 1.png",
+                height: 28,
+                width: 28,
+              ),
+              const SizedBox(width: 10),
+              Text('notifications'.tr()),
+            ],
+          ),
           bottom: TabBar(
             labelColor: Styles.PRIMARY_COLOR,
             controller: _tabController,

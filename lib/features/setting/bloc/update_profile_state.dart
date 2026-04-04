@@ -19,6 +19,14 @@ class UpdateProfileState extends Equatable {
   final bool isSubmitting;
   final bool isSubmitted;
   final String? errorMessage;
+  final String? successMessage;
+  final String? countryId;
+  final String? countryName;
+  final String? cityId;
+  final String? cityName;
+  final String? gender;
+  final String? dateOfBirth;
+  final String? professionalTitle;
 
 
   const UpdateProfileState({
@@ -39,6 +47,14 @@ class UpdateProfileState extends Equatable {
     this.isSubmitting = false,
     this.isSubmitted = false,
     this.errorMessage,
+    this.successMessage,
+    this.countryId,
+    this.countryName,
+    this.cityId,
+    this.cityName,
+    this.gender,
+    this.dateOfBirth,
+    this.professionalTitle,
   });
 
   UpdateProfileState copyWith({
@@ -59,6 +75,14 @@ class UpdateProfileState extends Equatable {
     bool? isSubmitting,
     bool? isSubmitted,
     String? errorMessage,
+    String? successMessage,
+    String? countryId,
+    String? countryName,
+    String? cityId,
+    String? cityName,
+    String? gender,
+    String? dateOfBirth,
+    String? professionalTitle,
   }) {
     return UpdateProfileState(
       firstName: firstName ?? this.firstName,
@@ -79,6 +103,14 @@ class UpdateProfileState extends Equatable {
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isSubmitted: isSubmitted ?? this.isSubmitted,
       errorMessage: errorMessage ?? this.errorMessage,
+      successMessage: successMessage ?? this.successMessage,
+      countryId: countryId ?? this.countryId,
+      countryName: countryName ?? this.countryName,
+      cityId: cityId ?? this.cityId,
+      cityName: cityName ?? this.cityName,
+      gender: gender ?? this.gender,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      professionalTitle: professionalTitle ?? this.professionalTitle,
     );
   }
 
@@ -101,5 +133,13 @@ class UpdateProfileState extends Equatable {
     isSubmitting,
     isSubmitted,
     errorMessage,
+    successMessage,
+    countryId,
+    countryName,
+    cityId,
+    cityName,
+    gender,
+    dateOfBirth,
+    professionalTitle,
   ];
 }

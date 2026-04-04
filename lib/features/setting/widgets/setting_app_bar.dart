@@ -57,18 +57,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           : null,
       leadingWidth: showBackButton ? 56 : null,
       titleSpacing: showBackButton ? 8 : 16,
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(
-            Images.appLogo,
-            height: 28,
-            width: 28,
-            fit: BoxFit.contain,
-          ),
-          const SizedBox(width: 10),
-          Flexible(
-            child: Text(
+      title: showBackButton
+          ? Text(
+              title,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            )
+          : Text(
               title,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -77,12 +76,21 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 fontSize: 18,
               ),
             ),
+      actions: [
+        if (!showBackButton)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 16),
+            child: Center(
+              child: Image.asset(
+                Images.appLogoColored,
+                height: 28,
+                width: 28,
+                fit: BoxFit.contain,
+              ),
+            ),
           ),
-        ],
-      ),
-
-      // Keep any custom page actions; otherwise reserve nothing.
-      actions: actions ?? const [],
+        ...(actions ?? const []),
+      ],
     );
   }
 }

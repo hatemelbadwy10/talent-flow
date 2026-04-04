@@ -23,7 +23,7 @@ class ProfileCard extends StatelessWidget {
         ? 'settings_screen.account_type_freelancer'
         : 'settings_screen.account_type_entrepreneur';
     final userId = int.tryParse(prefs.getString(AppStorageKey.userId) ?? '');
-
+    context.locale;
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -98,9 +98,13 @@ class ProfileCard extends StatelessWidget {
           ),
           _buildProfileOption(
             icon: Icons.file_upload_outlined,
-            text: 'settings_screen.upload_work'.tr(),
+            text: isFreelancer
+                ? 'settings_screen.upload_work'.tr()
+                : 'settings_screen.add_projects'.tr(),
             onTap: () {
-              CustomNavigator.push(Routes.addYourProject);
+              CustomNavigator.push(
+                isFreelancer ? Routes.addYourProject : Routes.addProject,
+              );
             },
           ),
           _buildProfileOption(

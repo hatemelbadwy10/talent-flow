@@ -1,5 +1,7 @@
 // widgets/file_upload_section.dart
 import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,7 +43,7 @@ class FileUploadSection extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 24.0),
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.05),
+                  color: Colors.grey.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -90,10 +92,11 @@ class FileUploadSection extends StatelessWidget {
                           hint: 'add_project.files_description_hint'.tr(),
                           onChanged: (value) {
                             context.read<AddProjectBloc>().add(
-                              UpdateFilesDescription(
-                                filesDescription: value.isEmpty ? null : value,
-                              ),
-                            );
+                                  UpdateFilesDescription(
+                                    filesDescription:
+                                        value.isEmpty ? null : value,
+                                  ),
+                                );
                           },
                         );
                       },
@@ -115,10 +118,10 @@ class FileUploadSection extends StatelessWidget {
                                   ),
                                   onPressed: () {
                                     final List<File> updatedFiles =
-                                    List.from(state.files)..remove(file);
+                                        List.from(state.files)..remove(file);
                                     context.read<AddProjectBloc>().add(
-                                      UpdateFiles(files: updatedFiles),
-                                    );
+                                          UpdateFiles(files: updatedFiles),
+                                        );
                                   },
                                 ),
                               );
@@ -149,7 +152,7 @@ class FileUploadSection extends StatelessWidget {
             children: [
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title:  Text('take_a_photo'.tr()),
+                title: Text('take_a_photo'.tr()),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   _pickImageFromCamera(parentContext);
@@ -157,10 +160,18 @@ class FileUploadSection extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title:  Text('choose_from_gallery'.tr()),
+                title: Text('choose_from_gallery'.tr()),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   _pickImageFromGallery(parentContext);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.description_outlined),
+                title: Text('add_project.choose_document'.tr()),
+                onTap: () {
+                  Navigator.pop(bottomSheetContext);
+                  _pickDocuments(parentContext);
                 },
               ),
             ],
@@ -171,39 +182,83 @@ class FileUploadSection extends StatelessWidget {
   }
 
   void _pickImageFromCamera(BuildContext parentContext) async {
+    final addProjectBloc = parentContext.read<AddProjectBloc>();
+    final messenger = ScaffoldMessenger.of(parentContext);
+
     try {
       final picker = ImagePicker();
       final XFile? image = await picker.pickImage(source: ImageSource.camera);
       if (image != null) {
         final file = File(image.path);
-        parentContext.read<AddProjectBloc>().add(UpdateFiles(
+        addProjectBloc.add(UpdateFiles(
           files: List<File>.from(
-            parentContext.read<AddProjectBloc>().state.files,
+            addProjectBloc.state.files,
           )..add(file),
         ));
       }
     } catch (e) {
-      ScaffoldMessenger.of(parentContext).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text('Error picking image: $e')),
       );
     }
   }
 
   void _pickImageFromGallery(BuildContext parentContext) async {
+    final addProjectBloc = parentContext.read<AddProjectBloc>();
+    final messenger = ScaffoldMessenger.of(parentContext);
+
     try {
       final picker = ImagePicker();
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
       if (image != null) {
         final file = File(image.path);
-        parentContext.read<AddProjectBloc>().add(UpdateFiles(
+        addProjectBloc.add(UpdateFiles(
           files: List<File>.from(
-            parentContext.read<AddProjectBloc>().state.files,
+            addProjectBloc.state.files,
           )..add(file),
         ));
       }
     } catch (e) {
-      ScaffoldMessenger.of(parentContext).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text('Error picking image: $e')),
+      );
+    }
+  }
+
+  void _pickDocuments(BuildContext parentContext) async {
+    final addProjectBloc = parentContext.read<AddProjectBloc>();
+    final messenger = ScaffoldMessenger.of(parentContext);
+
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: true,
+        type: FileType.custom,
+        allowedExtensions: const ['pdf', 'doc', 'docx'],
+      );
+
+      if (result == null || result.files.isEmpty) {
+        return;
+      }
+
+      final pickedFiles = result.files
+          .where((file) => file.path != null)
+          .map((file) => File(file.path!))
+          .toList();
+
+      if (pickedFiles.isEmpty) {
+        return;
+      }
+
+      addProjectBloc.add(
+        UpdateFiles(
+          files: List<File>.from(
+            addProjectBloc.state.files,
+          )..addAll(pickedFiles),
+        ),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Error picking files: $e')),
       );
     }
   }

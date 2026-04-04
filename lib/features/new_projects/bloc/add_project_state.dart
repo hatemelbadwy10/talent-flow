@@ -103,5 +103,6 @@ class AddProjectState extends Equatable {
         isSubmitted,
         errorMessage,
         successMessage,
+        files,
       ];
 }

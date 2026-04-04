@@ -47,7 +47,7 @@ class EditProfileScreen extends StatelessWidget {
           surfaceTintColor: Colors.white,
           centerTitle: true,
           title: Image.asset(
-            Images.appLogo ?? "",
+            Images.appLogo,
             height: 35,
           ),
           actions: [
@@ -87,6 +87,8 @@ class _EditProfileFormState extends State<EditProfileForm> {
   Map<String, String> _allAvailableSkills = {};
   Map<String, String> _allAvailableSpecializations = {};
   Map<String, String> _allAvailableJobTitles = {};
+  String? _lastShownErrorMessage;
+  bool _lastShownSuccessState = false;
 
   @override
   void dispose() {
@@ -99,17 +101,26 @@ class _EditProfileFormState extends State<EditProfileForm> {
   Widget build(BuildContext context) {
     return BlocConsumer<UpdateProfileBloc, UpdateProfileState>(
       listener: (context, state) {
-        if (state.isSubmitted) {
+        // Only show success snackbar once
+        if (state.isSubmitted && !_lastShownSuccessState) {
+          _lastShownSuccessState = true;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('edit_profile.success'.tr())),
+            SnackBar(content: Text(state.successMessage ?? 'تم التحديث بنجاح')),
           );
           Navigator.of(context).pop();
         }
 
-        if (state.errorMessage != null) {
+        // Only show error snackbar if it's a new error message
+        if (state.errorMessage != null && state.errorMessage != _lastShownErrorMessage) {
+          _lastShownErrorMessage = state.errorMessage;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.errorMessage!)),
           );
+        }
+
+        // Reset error message tracker when it's cleared
+        if (state.errorMessage == null) {
+          _lastShownErrorMessage = null;
         }
       },
       builder: (context, state) {
@@ -122,6 +133,10 @@ class _EditProfileFormState extends State<EditProfileForm> {
               _buildNameFields(context, state),
               _buildEmailField(context, state),
               _buildPhoneField(context, state),
+              _buildCountryField(context, state),
+              _buildCityField(context, state),
+              _buildGenderField(context, state),
+              _buildDateOfBirthField(context, state),
               _buildSpecializationField(context, state),
               _buildJobTitleField(context, state),
               _buildBioField(context, state),
@@ -250,13 +265,156 @@ class _EditProfileFormState extends State<EditProfileForm> {
     );
   }
 
-  Widget _buildBioField(BuildContext context, UpdateProfileState state) {
+  Widget _buildCountryField(BuildContext context, UpdateProfileState state) {
     return _buildTextField(
-      label: "edit_profile.bio".tr(),
-      hint: state.bio??"edit_profile.bio_hint".tr(),
-      value: state.bio ?? '',
-      maxLines: 4,
-      onChanged: (value) => context.read<UpdateProfileBloc>().add(UpdateBio(value)),
+      label: "edit_profile.country".tr(),
+      hint: state.countryName??"edit_profile.country_hint".tr(),
+      value: state.countryName ?? '',
+      readOnly: true,
+      onChanged: (value) {},
+    );
+  }
+
+  Widget _buildCityField(BuildContext context, UpdateProfileState state) {
+    return _buildTextField(
+      label: "edit_profile.city".tr(),
+      hint: state.cityName??"edit_profile.city_hint".tr(),
+      value: state.cityName ?? '',
+      readOnly: true,
+      onChanged: (value) {},
+    );
+  }
+
+  Widget _buildGenderField(BuildContext context, UpdateProfileState state) {
+    return _buildTextField(
+      label: "edit_profile.gender".tr(),
+      hint: state.gender??"edit_profile.gender_hint".tr(),
+      value: state.gender ?? '',
+      readOnly: true,
+      onChanged: (value) {},
+    );
+  }
+
+  Widget _buildDateOfBirthField(BuildContext context, UpdateProfileState state) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              text: "edit_profile.date_of_birth".tr(),
+              style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                  color: Colors.black),
+              children: const [
+                TextSpan(
+                    text: ' *',
+                    style: TextStyle(color: Colors.red, fontSize: 16))
+              ],
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          Row(
+            children: [
+              Expanded(
+                child: _buildNumberDropdown(
+                  value: state.dateOfBirth?.split('/')[2] ?? '1990',
+                  label: 'Year',
+                  items: List.generate(100, (i) => (DateTime.now().year - i).toString()),
+                  onChanged: (value) {
+                    // Handle year change
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildNumberDropdown(
+                  value: state.dateOfBirth?.split('/')[1] ?? '03',
+                  label: 'Month',
+                  items: List.generate(12, (i) => (i + 1).toString().padLeft(2, '0')),
+                  onChanged: (value) {
+                    // Handle month change
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildNumberDropdown(
+                  value: state.dateOfBirth?.split('/')[0] ?? '22',
+                  label: 'Day',
+                  items: List.generate(31, (i) => (i + 1).toString().padLeft(2, '0')),
+                  onChanged: (value) {
+                    // Handle day change
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNumberDropdown({
+    required String? value,
+    required String label,
+    required List<String> items,
+    required Function(String?) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF7F7F7),
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(color: Colors.grey.shade300, width: 1),
+          ),
+          child: DropdownButton<String>(
+            value: value ?? items.first,
+            onChanged: onChanged,
+            items: items.map((String item) {
+              return DropdownMenuItem<String>(
+                value: item,
+                child: Text(item),
+              );
+            }).toList(),
+            isExpanded: true,
+            underline: Container(),
+            icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBioField(BuildContext context, UpdateProfileState state) {
+    return Column(
+      children: [
+        _buildTextField(
+          label: "edit_profile.bio".tr(),
+          hint: state.bio??"edit_profile.bio_hint".tr(),
+          value: state.bio ?? '',
+          maxLines: 4,
+          onChanged: (value) => context.read<UpdateProfileBloc>().add(UpdateBio(value)),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              "edit_profile.bio_description".tr(),
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -267,6 +425,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
     required Function(String) onChanged,
     int maxLines = 1,
     bool obscureText = false,
+    bool readOnly = false,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -293,6 +452,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
             hint: hint,
             maxLines: maxLines,
             obscureText: obscureText,
+            readOnly: readOnly,
             onChanged: onChanged,
           ),
         ],
@@ -507,9 +667,6 @@ class _EditProfileFormState extends State<EditProfileForm> {
           const SizedBox(height: 8.0),
           GestureDetector(
             onTap: () async {
-              // Get skill IDs from names
-              final selectedSkillIds = _getSkillIdsFromNames(state.selectedSkills ?? []);
-
               final List<String>? resultNames = await showDialog<List<String>>(
                 context: context,
                 builder: (BuildContext context) {

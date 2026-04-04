@@ -25,4 +25,15 @@ class ChatsRepo extends BaseRepo {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
+
+  Future<Either<ServerFailure, Response>> getProjectChatOptions() async {
+    try {
+      final response = await dioClient.get(
+        uri: EndPoints.projectChatOptions,
+      );
+      return Right(response);
+    } catch (error) {
+      return left(ApiErrorHandler.getServerFailure(error));
+    }
+  }
 }

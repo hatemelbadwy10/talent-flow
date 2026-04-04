@@ -1,5 +1,6 @@
 class Images {
   static const String appLogo = 'assets/images/logo.png';
+  static const String appLogoColored = 'assets/images/Talent Flow logo 1 1.png';
   static const String onBoardingPhoto = 'assets/images/on_boarding_image.png';
   static const String onBoardingPhoto1 = 'assets/images/on_boarding_image_1.png';
   static const String onBoardingPhoto2 = 'assets/images/on_boarding_image_2.png';

@@ -9,9 +9,45 @@ import '../../../app/core/app_state.dart';
 
 class ChatsBloc extends Bloc<AppEvent, AppState> {
   final ChatsRepo _chatsRepo;
+  Map<int, String> projectOptions = {};
 
   ChatsBloc(this._chatsRepo) : super(Start()) {
     on<Add>(_onGetChats);
+    on<Click>(_onLoadProjectOptions);
+  }
+
+  Future<void> _onLoadProjectOptions(Click event, Emitter<AppState> emit) async {
+    try {
+      final result = await _chatsRepo.getProjectChatOptions();
+      result.fold(
+        (failure) {
+          log("Project options error: $failure");
+        },
+        (response) {
+          try {
+            if (response.data is Map && response.data['payload'] is Map) {
+              final payload = response.data['payload'] as Map;
+              final options = <int, String>{};
+              
+              payload.forEach((key, value) {
+                final id = int.tryParse(key.toString());
+                if (id != null && value is String) {
+                  options[id] = value;
+                }
+              });
+              
+              projectOptions = options;
+              // Emit current state to trigger UI rebuild with new project options
+              emit(state);
+            }
+          } catch (e) {
+            log("Error parsing project options: $e");
+          }
+        },
+      );
+    } catch (e, s) {
+      log("Exception loading project options", error: e, stackTrace: s);
+    }
   }
 
   Future<void> _onGetChats(Add event, Emitter<AppState> emit) async {
