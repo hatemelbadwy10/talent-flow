@@ -5,13 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:talent_flow/features/auth/pages/send_verification/send_verification_bloc/send_verification_bloc.dart';
-import '../../../../app/core/app_event.dart';
-import '../../../../app/core/app_state.dart';
 import '../../../../app/core/dimensions.dart';
 import '../../../../components/custom_button.dart';
 import '../../../../components/custom_text_form_field.dart';
 import '../../../../data/config/di.dart';
 import '../../widgets/auth_base.dart';
+import 'send_verification_bloc/send_verification_event.dart';
+import 'send_verification_bloc/send_verification_state.dart';
 import 'send_verification_repo/send_verification_repo.dart';
 
 enum VerificationType { email, whatsapp }
@@ -134,16 +134,16 @@ class _SendVerificationScreenState extends State<SendVerificationScreen> {
           const SizedBox(height: 24),
 
           /// -------- BlocConsumer with Button --------
-          BlocConsumer<SendVerificationBloc, AppState>(
+          BlocConsumer<SendVerificationBloc, SendVerificationState>(
             listener: (context, state) {
-              if (state is Done) {
+              if (state is SendVerificationSuccess) {
                 // navigation already handled inside bloc
               }
             },
             builder: (context, state) {
               return CustomButton(
                 text: "send_verification.send".tr(),
-                isLoading: state is Loading,
+                isLoading: state is SendVerificationInProgress,
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
                     log('clicked');
@@ -155,7 +155,9 @@ class _SendVerificationScreenState extends State<SendVerificationScreen> {
                         : {"identifier": _phoneController.text};
 
                     BlocProvider.of<SendVerificationBloc>(context).add(
-                      Click(arguments: data),
+                      VerificationRequestSubmitted(
+                        identifier: data["identifier"] ?? "",
+                      ),
                     );
                   }
                 },

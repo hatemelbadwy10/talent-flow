@@ -6,11 +6,10 @@ import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/features/new_projects/widgets/add_offer_widget.dart';
 import 'package:talent_flow/features/new_projects/widgets/project_description.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
 import '../../projects/bloc/my_projects_bloc.dart';
-import '../../projects/model/single_project_model.dart';
+import '../../projects/bloc/my_projects_event.dart';
+import '../../projects/bloc/my_projects_state.dart';
 import '../widgets/project_details_card.dart';
 
 class AddOfferScreen extends StatelessWidget {
@@ -20,9 +19,22 @@ class AddOfferScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final projectId = argument?['id'] as int?;
+    if (projectId == null) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: Text('projectData'.tr()),
+          centerTitle: true,
+          surfaceTintColor: Colors.white,
+        ),
+        body: Center(child: Text("error.loading".tr())),
+      );
+    }
+
     return BlocProvider(
       create: (context) =>
-          MyProjectsBloc(sl())..add(Click(arguments: argument?['id'])),
+          MyProjectsBloc(sl())..add(ProjectDetailsRequested(projectId)),
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -34,25 +46,25 @@ class AddOfferScreen extends StatelessWidget {
           centerTitle: true,
           surfaceTintColor: Colors.white,
         ),
-        body: BlocBuilder<MyProjectsBloc, AppState>(
+        body: BlocBuilder<MyProjectsBloc, MyProjectsState>(
           builder: (context, state) {
-            if (state is Done) {
+            if (state is ProjectDetailsLoaded) {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
                       ProjectDetailsCard(
-                        singleProjectModel: state.model as SingleProjectModel,
+                        singleProjectModel: state.project,
                       ),
                       ProjectDescription(
-                        singleProjectModel: state.model as SingleProjectModel,
+                        singleProjectModel: state.project,
                       ),
                       sl<SharedPreferences>()
                                   .getBool(AppStorageKey.isFreelancer) ??
                               true
                           ? AddOfferWidget(
-                              id: argument?['id'],
+                              id: projectId,
                             )
                           : const SizedBox(),
                       const SizedBox(
@@ -62,9 +74,9 @@ class AddOfferScreen extends StatelessWidget {
                   ),
                 ),
               );
-            } else if (state is Loading) {
+            } else if (state is MyProjectsLoading) {
               return const Center(child: CircularProgressIndicator());
-            } else if (state is Error) {
+            } else if (state is MyProjectsFailure) {
               return Center(child: Text("error.loading".tr()));
             }
             return Container();

@@ -20,7 +20,7 @@ class CustomShimmer extends StatelessWidget {
 }
 
 class CustomShimmerText extends StatelessWidget {
-  final double? width,height;
+  final double? width, height;
   const CustomShimmerText({
     super.key,
     this.width,
@@ -31,7 +31,7 @@ class CustomShimmerText extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomShimmer(
       child: Container(
-        height:height?? 16.h,
+        height: height ?? 16.h,
         width: width,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(5), color: Colors.white),
@@ -61,7 +61,8 @@ class CustomShimmerContainer extends StatelessWidget {
   final double? height;
   final double? width;
   final double? radius;
-  const CustomShimmerContainer({super.key, this.height, this.width, this.radius});
+  const CustomShimmerContainer(
+      {super.key, this.height, this.width, this.radius});
 
   @override
   Widget build(BuildContext context) {

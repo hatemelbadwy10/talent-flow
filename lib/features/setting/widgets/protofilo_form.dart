@@ -21,13 +21,13 @@ class PortfolioUploadForm extends StatefulWidget {
 
 class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
   final List<TextEditingController> _titleControllers =
-  List.generate(3, (_) => TextEditingController());
+      List.generate(3, (_) => TextEditingController());
   final List<TextEditingController> _descriptionControllers =
-  List.generate(3, (_) => TextEditingController());
+      List.generate(3, (_) => TextEditingController());
   final List<TextEditingController> _featuresControllers =
-  List.generate(3, (_) => TextEditingController());
+      List.generate(3, (_) => TextEditingController());
   final List<TextEditingController> _linkControllers =
-  List.generate(3, (_) => TextEditingController());
+      List.generate(3, (_) => TextEditingController());
 
   // Validation errors map
   final Map<String, String?> _validationErrors = {};
@@ -79,7 +79,8 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
       if (formData.clientLink.trim().isEmpty) {
         _validationErrors['link_$i'] = 'Preview link is required';
       } else if (!_isValidUrl(formData.clientLink)) {
-        _validationErrors['link_$i'] = 'Please enter a valid URL (e.g., https://example.com)';
+        _validationErrors['link_$i'] =
+            'Please enter a valid URL (e.g., https://example.com)';
       }
     }
   }
@@ -129,7 +130,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
           children: [
             ...List.generate(
               3,
-                  (index) => _buildCollapsibleFormCard(
+              (index) => _buildCollapsibleFormCard(
                 context: context,
                 formIndex: index,
                 formState: formState,
@@ -143,13 +144,12 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
               child: ElevatedButton(
                 onPressed: isFormValid
                     ? () => context
-                    .read<PortfolioFormBloc>()
-                    .add(SubmitAllPortfolios())
+                        .read<PortfolioFormBloc>()
+                        .add(SubmitAllPortfolios())
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isFormValid
-                      ? Styles.PRIMARY_COLOR
-                      : Colors.grey.shade400,
+                  backgroundColor:
+                      isFormValid ? Styles.PRIMARY_COLOR : Colors.grey.shade400,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -229,7 +229,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
             activeColor: Styles.PRIMARY_COLOR,
             side: BorderSide(color: Colors.grey.shade400, width: 2),
             shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
           ),
         ),
       ],
@@ -263,8 +263,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-    Text(
-        "work_number".tr(args: ['${formIndex + 1}']),
+                Text("work_number".tr(args: ['${formIndex + 1}']),
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 16)),
                 Icon(isExpanded
@@ -324,7 +323,9 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
                 controller: _descriptionControllers[formIndex],
                 maxLines: 4,
                 onChanged: (value) => bloc.add(UpdateFormField(
-                    formIndex: formIndex, fieldName: 'description', value: value)),
+                    formIndex: formIndex,
+                    fieldName: 'description',
+                    value: value)),
               ),
               if (_validationErrors['description_$formIndex'] != null)
                 Padding(
@@ -355,7 +356,9 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
                 hint: "preview_link_hint".tr(),
                 controller: _linkControllers[formIndex],
                 onChanged: (value) => bloc.add(UpdateFormField(
-                    formIndex: formIndex, fieldName: 'clientLink', value: value)),
+                    formIndex: formIndex,
+                    fieldName: 'clientLink',
+                    value: value)),
               ),
               if (_validationErrors['link_$formIndex'] != null)
                 Padding(
@@ -400,8 +403,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
               borderRadius: BorderRadius.circular(8.0),
               border: Border.all(
                   color: hasError ? Colors.red : Colors.grey.shade300,
-                  width: hasError ? 2 : 1
-              ),
+                  width: hasError ? 2 : 1),
             ),
             child: Center(
               child: Column(
@@ -580,7 +582,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
               builder: (context) => DateTimePicker(
                 valueChanged: (DateTime newDate) {
                   final formattedDate =
-                  DateFormat('yyyy-MM-dd').format(newDate);
+                      DateFormat('yyyy-MM-dd').format(newDate);
                   bloc.add(UpdateFormField(
                     formIndex: formIndex,
                     fieldName: 'date',
@@ -593,7 +595,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
           },
           child: Container(
             padding:
-            const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
             decoration: BoxDecoration(
               color: Colors.grey.shade100,
               borderRadius: BorderRadius.circular(8.0),
@@ -602,7 +604,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  currentDate?.isNotEmpty == true && currentDate!=null
+                  currentDate?.isNotEmpty == true && currentDate != null
                       ? currentDate
                       : "completion_date_hint".tr(),
                   style: TextStyle(

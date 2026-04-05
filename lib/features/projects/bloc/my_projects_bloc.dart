@@ -1,94 +1,58 @@
 import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
-import '../model/my_projects_model.dart';
-import '../model/single_project_model.dart';
 import '../repo/projects_repo.dart';
+import 'my_projects_event.dart';
+import 'my_projects_state.dart';
 
-class MyProjectsBloc extends Bloc<AppEvent, AppState> {
+class MyProjectsBloc extends Bloc<MyProjectsEvent, MyProjectsState> {
   final ProjectsRepo _projectsRepo;
 
-  MyProjectsBloc(this._projectsRepo) : super(Start()) {
-    on<Add>(_onGetProjects);
-    on<Click>(onClick);
+  MyProjectsBloc(this._projectsRepo) : super(const MyProjectsInitial()) {
+    on<ProjectsRequested>(_onGetProjects);
+    on<ProjectDetailsRequested>(_onGetSingleProject);
   }
 
-  Future<void> _onGetProjects(Add event, Emitter<AppState> emit) async {
-    emit(Loading());
+  Future<void> _onGetProjects(
+    ProjectsRequested event,
+    Emitter<MyProjectsState> emit,
+  ) async {
+    emit(const MyProjectsLoading());
     try {
-      log('event.arguments ${event.arguments}');
-
-      String? status;
-      int? categoryId;
-
-      if (event.arguments is String) {
-        log('status ${event.arguments}');
-        status = event.arguments as String?;
-      } else if (event.arguments is int) {
-        log('categoryId ${event.arguments}');
-        categoryId = event.arguments as int?;
-      }
-
       final result = await _projectsRepo.getProjects(
-        status: status,
-        categoryId: categoryId,
+        status: event.status,
+        categoryId: event.categoryId,
       );
 
       result.fold(
-            (failure) {
-          log('🔴 HomeBloc Error - Failure: ${failure.error}');
-          emit(Error());
+        (failure) {
+          log('MyProjectsBloc getProjects failure: ${failure.error}');
+          emit(MyProjectsFailure(message: failure.error));
         },
-            (response) {
-          log("response ${response.data}");
-          if (response.data == null || response.data['payload'] == null) {
-            emit(Error());
-            return;
-          }
-          final List<MyProjectsModel> projects;
-
-          if (categoryId == null) {
-            projects = (response.data['payload'] as List)
-                .map((e) => MyProjectsModel.fromJson(e))
-                .toList();
-          } else {
-            projects = (response.data['payload']['items'] as List)
-                .map((e) => MyProjectsModel.fromJson(e))
-                .toList();
-          }
-
-          emit(Done(list: projects));
+        (projects) {
+          emit(MyProjectsLoaded(projects));
         },
       );
     } catch (e) {
-      log('🔴 Error in getProjects: $e');
-      emit(Error());
+      log('Error in _onGetProjects: $e');
+      emit(MyProjectsFailure(message: e.toString()));
     }
   }
-  Future<void> onClick(Click event, Emitter<AppState> emit) async {
-    emit(Loading());
+
+  Future<void> _onGetSingleProject(
+    ProjectDetailsRequested event,
+    Emitter<MyProjectsState> emit,
+  ) async {
+    emit(const MyProjectsLoading());
 
     try {
-      // ناخد الـ id من arguments
-      final id = event.arguments as int;
-
-      final result = await _projectsRepo.getSingleProject(id);
+      final result = await _projectsRepo.getSingleProject(event.projectId);
       result.fold(
-            (failure) => emit(Error()),
-            (response) {
-          if (response.data == null || response.data['payload'] == null) {
-            emit(Error());
-            return;
-          }
-
-          final project = SingleProjectModel.fromJson(response.data['payload']);
-          emit(Done(model: project)); // تقدر تمرره كـ object أو تعمل state مخصص
-        },
+        (failure) => emit(MyProjectsFailure(message: failure.error)),
+        (project) => emit(ProjectDetailsLoaded(project)),
       );
     } catch (e, s) {
-      log("Error in getSingleProject: $e\n$s");
-      emit(Error());
+      log("Error in _onGetSingleProject: $e\n$s");
+      emit(MyProjectsFailure(message: e.toString()));
     }
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart' show BlocProvider;
 
-
 abstract class ProviderList {
   static List<BlocProvider> providers = [
     // BlocProvider<LanguageBloc>(create: (_) => di.sl<LanguageBloc>()..add(Init())),

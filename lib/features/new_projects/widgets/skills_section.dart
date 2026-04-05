@@ -2,9 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/core/styles.dart';
+
 class SkillsSection extends StatelessWidget {
   const SkillsSection({super.key, required this.skills});
-final List<String>skills;
+  final List<String> skills;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -23,6 +24,7 @@ final List<String>skills;
       ],
     );
   }
+
   Widget _buildSkillChip(String label) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),

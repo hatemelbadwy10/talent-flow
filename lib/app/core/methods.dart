@@ -11,7 +11,9 @@ abstract class Methods {
   }
 
   static WeekdayCount getWeekdayCount(
-      {required DateTime startDate, required DateTime endDate, required List weekdays}) {
+      {required DateTime startDate,
+      required DateTime endDate,
+      required List weekdays}) {
     int count = 0;
     int days = 0;
     List<DateTime> daysList = [];
@@ -42,7 +44,8 @@ abstract class Methods {
 
   static convertStringToTime(timeString, {bool withFormat = false}) {
     List<String> parts = timeString.split(':');
-    TimeOfDay timeOfDay = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    TimeOfDay timeOfDay =
+        TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
     DateTime now = DateTime.now();
     DateTime dateTime = DateTime(
       now.year,
@@ -53,7 +56,10 @@ abstract class Methods {
       now.second,
     );
     if (withFormat) {
-      return dateTime.dateFormat(format: "mm : hh aa").replaceAll("ص", "صباحاً").replaceAll("م", "مساءً");
+      return dateTime
+          .dateFormat(format: "mm : hh aa")
+          .replaceAll("ص", "صباحاً")
+          .replaceAll("م", "مساءً");
     } else {
       return dateTime;
     }
@@ -118,7 +124,8 @@ abstract class Methods {
     int age = today.year - birthDate.year;
 
     // Adjust if birthday hasn't occurred yet this year
-    if (today.month < birthDate.month || (today.month == birthDate.month && today.day < birthDate.day)) {
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
       age--;
     }
 

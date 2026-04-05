@@ -1,12 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
+import 'nav_bar_event.dart';
+import 'nav_bar_state.dart';
 
-
-class NavBarBloc extends Bloc<AppEvent, AppState> {
-  NavBarBloc() : super(Done(data: 2)) {
-    on<Click>((event, emit) {
-      emit(Done(data: event.arguments));
+class NavBarBloc extends Bloc<NavBarEvent, NavBarState> {
+  NavBarBloc() : super(const NavBarState(currentIndex: 2)) {
+    on<NavBarTabChanged>((event, emit) {
+      emit(NavBarState(currentIndex: event.index));
     });
   }
 }

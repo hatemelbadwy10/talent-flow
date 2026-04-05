@@ -18,11 +18,11 @@ class DioClient extends ApiClient {
   final Dio dio;
 
   DioClient(
-      this.baseUrl, {
-        required this.dio,
-        required this.loggingInterceptor,
-        required this.sharedPreferences,
-      }) {
+    this.baseUrl, {
+    required this.dio,
+    required this.loggingInterceptor,
+    required this.sharedPreferences,
+  }) {
     dio
       ..options.baseUrl = baseUrl
       ..options.connectTimeout = const Duration(seconds: 60)
@@ -51,7 +51,7 @@ class DioClient extends ApiClient {
         "Authorization": "Bearer $token"
       else if (sharedPreferences.getString(AppStorageKey.token) != null)
         "Authorization":
-        "Bearer ${sharedPreferences.getString(AppStorageKey.token)}",
+            "Bearer ${sharedPreferences.getString(AppStorageKey.token)}",
     };
   }
 
@@ -72,7 +72,8 @@ class DioClient extends ApiClient {
       "x-api-key": EndPoints.apiKey,
       "Accept-Language": lang,
       if (sharedPreferences.getString(AppStorageKey.token) != null)
-        "Authorization": "Bearer ${sharedPreferences.getString(AppStorageKey.token)}",
+        "Authorization":
+            "Bearer ${sharedPreferences.getString(AppStorageKey.token)}",
     };
   }
 
@@ -86,7 +87,7 @@ class DioClient extends ApiClient {
       _updateHeaders();
 
       dio.options.baseUrl =
-      useGoogleUri ? EndPoints.googleMapsBaseUrl : baseUrl;
+          useGoogleUri ? EndPoints.googleMapsBaseUrl : baseUrl;
 
       final response = await dio.get(uri, queryParameters: queryParameters);
       return response;

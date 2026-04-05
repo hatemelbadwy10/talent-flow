@@ -76,7 +76,7 @@ class SocialMediaRepo extends BaseRepo {
         },
         (success) async {
           log("success: $success");
-          
+
           // ✅ Validate the model before sending to backend
           if (success.idToken == null || success.idToken!.isEmpty) {
             log("error: Firebase ID token is null or empty");
@@ -93,18 +93,18 @@ class SocialMediaRepo extends BaseRepo {
                       ? "Freelancer"
                       : "Entrepreneur",
             };
-            
+
             log("Sending payload to backend: $payload");
-            
-            final response =
-                await dioClient.post(uri: EndPoints.socialMediaAuth, data: payload);
+
+            final response = await dioClient.post(
+                uri: EndPoints.socialMediaAuth, data: payload);
             log("response: ${response.data}");
 
             if (response.statusCode == 200) {
               // ✅ Backend returns data in 'payload' key, not 'data'
               final userData = response.data["payload"]["user"];
               final token = response.data["payload"]["token"];
-              
+
               saveUserData(userData);
               saveUserToken(token);
               return Right(response);

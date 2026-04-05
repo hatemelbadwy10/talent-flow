@@ -1,4 +1,3 @@
-
 abstract class AppStorageKey {
   static const String configVideo = "config_video";
   static const String token = "token";

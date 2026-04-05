@@ -33,7 +33,7 @@ class SocialMediaLoginHelper {
 
       // Obtain the auth details from the request
       final GoogleSignInAuthentication? googleAuth =
-      await googleUser.authentication;
+          await googleUser.authentication;
 
       if (googleAuth?.idToken == null) {
         return left(ServerFailure("Failed to obtain Google ID token"));
@@ -47,7 +47,7 @@ class SocialMediaLoginHelper {
 
       // Once signed in, return the UserCredential
       UserCredential userAccountFirebase =
-      await FirebaseAuth.instance.signInWithCredential(credential);
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
       if (userAccountFirebase.user == null) {
         return left(ServerFailure("Failed to create Firebase user"));
@@ -73,7 +73,8 @@ class SocialMediaLoginHelper {
       // ✅ Use Firebase ID Token (not Google ID Token)
       model.idToken = firebaseIdToken;
 
-      model.name = userAccountFirebase.user?.displayName ?? googleUser.displayName;
+      model.name =
+          userAccountFirebase.user?.displayName ?? googleUser.displayName;
       model.image = userAccountFirebase.user?.photoURL ?? googleUser.photoUrl;
       model.email = userAccountFirebase.user?.email ?? googleUser.email;
       model.phone = userAccountFirebase.user?.phoneNumber;
@@ -82,7 +83,8 @@ class SocialMediaLoginHelper {
       return Right(model);
     } on FirebaseAuthException catch (error) {
       print("=====> Firebase Error: ${error.code} - ${error.message}");
-      return left(ServerFailure(error.message ?? "Firebase authentication failed"));
+      return left(
+          ServerFailure(error.message ?? "Firebase authentication failed"));
     } catch (error) {
       print("=====> Error: ${error}");
       return left(ApiErrorHandler.getServerFailure(error));
@@ -175,7 +177,7 @@ class SocialMediaLoginHelper {
       );
 
       UserCredential userAccountFirebase =
-      await FirebaseAuth.instance.signInWithCredential(
+          await FirebaseAuth.instance.signInWithCredential(
         oAuthCredential,
       );
 

@@ -7,7 +7,6 @@ import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
-import '../../home/widgets/jop_offer_listview_item.dart';
 import '../bloc/about_bloc.dart';
 
 class AboutTalentFlowView extends StatelessWidget {
@@ -19,7 +18,7 @@ class AboutTalentFlowView extends StatelessWidget {
       create: (context) => AboutBloc(sl())..add(Add()), // يجيب البيانات
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FA),
-        appBar:  CustomAppBar(title: "about".tr()),
+        appBar: CustomAppBar(title: "about".tr()),
         body: SafeArea(
           child: BlocBuilder<AboutBloc, AppState>(
             builder: (context, state) {

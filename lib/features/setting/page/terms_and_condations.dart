@@ -15,8 +15,7 @@ class TermsAndConditionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-      TermsBloc(sl())..add(Add()), // Fire event
+      create: (context) => TermsBloc(sl())..add(Add()), // Fire event
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FA),
         appBar: CustomAppBar(title: "terms_and_conditions".tr()),
@@ -26,7 +25,8 @@ class TermsAndConditionsScreen extends StatelessWidget {
               if (state is Loading) {
                 return const ProjectCardShimmer();
               } else if (state is Error) {
-                return const Center(child: Text("حصل خطأ أثناء تحميل البيانات"));
+                return const Center(
+                    child: Text("حصل خطأ أثناء تحميل البيانات"));
               } else if (state is Done) {
                 final termsHtml = state.data as String;
                 return SingleChildScrollView(

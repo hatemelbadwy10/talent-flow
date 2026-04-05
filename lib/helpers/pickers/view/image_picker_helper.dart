@@ -94,8 +94,8 @@ abstract class ImagePickerHelper {
             ],
             cancelButton: CupertinoActionSheetAction(
               onPressed: () => CustomNavigator.pop(),
-              child: Text(("cancel"),
-                  style: const TextStyle(color: Colors.red)),
+              child:
+                  Text(("cancel"), style: const TextStyle(color: Colors.red)),
             ),
           );
         });

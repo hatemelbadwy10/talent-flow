@@ -39,22 +39,22 @@ class SpecializationDropdown extends StatelessWidget {
         const SizedBox(height: 8),
         BlocBuilder<AddProjectBloc, AddProjectState>(
           buildWhen: (previous, current) =>
-          previous.specializationId != current.specializationId,
+              previous.specializationId != current.specializationId,
           builder: (context, state) {
             return DynamicDropDownButton(
               items: items,
-              name: state.specializationName??'add_project.select_specialization'.tr(),
+              name: state.specializationName ??
+                  'add_project.select_specialization'.tr(),
               selectedValue: state.specializationId,
-              
               onChange: (selectedItem) {
                 if (selectedItem != null) {
                   log("selected item ${selectedItem.value}");
                   context.read<AddProjectBloc>().add(
-                    UpdateSpecializationId(
-                      specializationName: selectedItem.tag,
-                      specializationId: selectedItem.value,
-                    ),
-                  );
+                        UpdateSpecializationId(
+                          specializationName: selectedItem.tag,
+                          specializationId: selectedItem.value,
+                        ),
+                      );
                 }
               },
             );

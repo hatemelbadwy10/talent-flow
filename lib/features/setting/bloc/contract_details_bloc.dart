@@ -31,9 +31,10 @@ class ContractDetailsBloc extends Bloc<AppEvent, AppState> {
         },
         (response) {
           final body = response.data;
-          final payload = body is Map<String, dynamic> && body['payload'] != null
-              ? body['payload']
-              : body;
+          final payload =
+              body is Map<String, dynamic> && body['payload'] != null
+                  ? body['payload']
+                  : body;
 
           if (payload is! Map) {
             emit(Error());

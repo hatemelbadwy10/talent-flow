@@ -54,18 +54,18 @@ class _ChatScreenState extends State<ChatScreen> {
   void _onSearchChanged(String query) {
     // Cancel previous timer
     _searchTimer?.cancel();
-    
+
     // Trigger immediate local filtering
     setState(() {});
-    
+
     // Debounce backend search by 500ms - only search if query is not empty
     if (query.trim().isNotEmpty) {
       _searchTimer = Timer(const Duration(milliseconds: 500), () {
         context.read<ChatsBloc>().add(
-          Add(arguments: {
-            'search': query,
-          }),
-        );
+              Add(arguments: {
+                'search': query,
+              }),
+            );
       });
     }
   }
@@ -79,166 +79,170 @@ class _ChatScreenState extends State<ChatScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Column(
             children: [
-                Row(
-                  children: [
-                    InkWell(
-                      onTap: () => CustomNavigator.pop(),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE7E7EC)),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          size: 18,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'chat_screen.title'.tr(),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: CustomTextField(
-                          sufAssetIcon: 'assets/icons/search.svg',
-                          controller: _searchController,
-                          onChanged: _onSearchChanged,
-                          hint: 'chat_screen.search_hint'.tr(),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      InkWell(
-                        onTap: () {},
-                        borderRadius: BorderRadius.circular(12),
-                        child: const Icon(
-                          Icons.sort_rounded,
-                          color: Colors.black87,
-                        ).onTap(() {}, borderRadius: BorderRadius.circular(12)).setContainerToView(
-                              width: 48,
-                              height: 48,
-                              color: const Color(0xFFF2F4FA),
-                              radius: 12,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                BlocBuilder<ChatsBloc, AppState>(
-                  buildWhen: (previous, current) => true,
-                  builder: (context, state) {
-                    final projectOptions = context.read<ChatsBloc>().projectOptions;
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              Row(
+                children: [
+                  InkWell(
+                    onTap: () => CustomNavigator.pop(),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: 42,
+                      height: 42,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: const Color(0xFFE7E7EC)),
                       ),
-                      child: DropdownButton<int?>(
-                        isExpanded: true,
-                        underline: const SizedBox.shrink(),
-                        value: _selectedProjectId,
-                        hint: Text('chat_screen.filter_by_project'.tr()),
-                        items: [
-                          DropdownMenuItem(
-                            value: null,
-                            child: Text('chat_screen.all_projects'.tr()),
-                          ),
-                          ...projectOptions.entries.map(
-                            (entry) => DropdownMenuItem(
-                              value: entry.key,
-                              child: Text(entry.value),
-                            ),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedProjectId = value;
-                          });
-                          context.read<ChatsBloc>().add(
-                            Add(arguments: {'project_id': value}),
-                          );
-                        },
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 18,
+                        color: Colors.black87,
                       ),
-                    );
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'chat_screen.title'.tr(),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        sufAssetIcon: 'assets/icons/search.svg',
+                        controller: _searchController,
+                        onChanged: _onSearchChanged,
+                        hint: 'chat_screen.search_hint'.tr(),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    InkWell(
+                      onTap: () {},
+                      borderRadius: BorderRadius.circular(12),
+                      child: const Icon(
+                        Icons.sort_rounded,
+                        color: Colors.black87,
+                      )
+                          .onTap(() {}, borderRadius: BorderRadius.circular(12))
+                          .setContainerToView(
+                            width: 48,
+                            height: 48,
+                            color: const Color(0xFFF2F4FA),
+                            radius: 12,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              BlocBuilder<ChatsBloc, AppState>(
+                buildWhen: (previous, current) => true,
+                builder: (context, state) {
+                  final projectOptions =
+                      context.read<ChatsBloc>().projectOptions;
+                  return Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE7E7EC)),
+                    ),
+                    child: DropdownButton<int?>(
+                      isExpanded: true,
+                      underline: const SizedBox.shrink(),
+                      value: _selectedProjectId,
+                      hint: Text('chat_screen.filter_by_project'.tr()),
+                      items: [
+                        DropdownMenuItem(
+                          value: null,
+                          child: Text('chat_screen.all_projects'.tr()),
+                        ),
+                        ...projectOptions.entries.map(
+                          (entry) => DropdownMenuItem(
+                            value: entry.key,
+                            child: Text(entry.value),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedProjectId = value;
+                        });
+                        context.read<ChatsBloc>().add(
+                              Add(arguments: {'project_id': value}),
+                            );
+                      },
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 14),
+              Expanded(
+                child: BlocBuilder<ChatsBloc, AppState>(
+                  builder: (context, state) {
+                    if (state is Loading) {
+                      return ListView.builder(
+                        itemCount: 6,
+                        itemBuilder: (_, __) => Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      );
+                    }
+
+                    if (state is Error) {
+                      return const Center(
+                        child: Text("Failed to load chats"),
+                      );
+                    }
+
+                    if (state is Done) {
+                      final allChats = state.list?.cast<ChatsModel>() ?? [];
+                      final filteredChats = _filterChats(allChats);
+
+                      if (filteredChats.isEmpty) {
+                        return const Center(
+                          child: Text("No chats found"),
+                        );
+                      }
+
+                      return ListAnimator(
+                        addPadding: false,
+                        customPadding: EdgeInsets.zero,
+                        data: filteredChats
+                            .map(
+                              (chat) => Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: ChatListItem(chat: chat),
+                              ),
+                            )
+                            .toList(),
+                      );
+                    }
+
+                    return const SizedBox.shrink();
                   },
                 ),
-                const SizedBox(height: 14),
-                Expanded(
-                  child: BlocBuilder<ChatsBloc, AppState>(
-                    builder: (context, state) {
-                      if (state is Loading) {
-                        return ListView.builder(
-                          itemCount: 6,
-                          itemBuilder: (_, __) => Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            height: 72,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        );
-                      }
-
-                      if (state is Error) {
-                        return const Center(
-                          child: Text("Failed to load chats"),
-                        );
-                      }
-
-                      if (state is Done) {
-                        final allChats = state.list?.cast<ChatsModel>() ?? [];
-                        final filteredChats = _filterChats(allChats);
-
-                        if (filteredChats.isEmpty) {
-                          return const Center(
-                            child: Text("No chats found"),
-                          );
-                        }
-
-                        return ListAnimator(
-                          addPadding: false,
-                          customPadding: EdgeInsets.zero,
-                          data: filteredChats
-                              .map(
-                                (chat) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: ChatListItem(chat: chat),
-                                ),
-                              )
-                              .toList(),
-                        );
-                      }
-
-                      return const SizedBox.shrink();
-                    },
-                  ),
-                ),
+              ),
             ],
           ),
         ),

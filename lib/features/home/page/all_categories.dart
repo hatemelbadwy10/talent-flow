@@ -6,11 +6,10 @@ import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
 import '../bloc/home_bloc.dart';
-import '../model/home_model.dart';
+import '../bloc/home_event.dart';
+import '../bloc/home_state.dart';
 import '../repo/home_repo.dart';
 
 class ServiceCategoryView extends StatelessWidget {
@@ -20,19 +19,23 @@ class ServiceCategoryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isFreelancer =
+        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
+
     return BlocProvider(
-      create: (context) => HomeBloc(homeRepo: sl<HomeRepo>())..add(Click()),
+      create: (context) => HomeBloc(homeRepo: sl<HomeRepo>())
+        ..add(const HomeCategoriesRequested()),
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: CustomAppBar(title: 'all_categories'.tr()),
-        body: BlocBuilder<HomeBloc, AppState>(
+        body: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
-            if (state is Loading) {
+            if (state is HomeLoading) {
               return const Center(child: CircularProgressIndicator());
-            } else if (state is Error) {
+            } else if (state is HomeFailure) {
               return const Center(child: Text('Error loading categories'));
-            } else if (state is Done) {
-              final category = state.list as List<Category>;
+            } else if (state is HomeCategoriesLoaded) {
+              final category = state.categories;
               return ListView.builder(
                 itemCount: category.length,
                 itemBuilder: (context, index) {
@@ -41,9 +44,7 @@ class ServiceCategoryView extends StatelessWidget {
                       title: category[index].name ?? "",
                       subtitle: category[index].description ?? "",
                       onTap: () {
-                        if (sl<SharedPreferences>()
-                                .getBool(AppStorageKey.isFreelancer) ??
-                            false) {
+                        if (isFreelancer) {
                           CustomNavigator.push(Routes.ownerProjects,
                               arguments: {
                                 "categoryName": category[index].name,

@@ -17,11 +17,13 @@ import 'package:talent_flow/app/core/text_styles.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/auth/widgets/auth_base.dart';
 
-import '../../../../app/core/app_event.dart';
-import '../../../../app/core/app_state.dart';
 import '../social_media_login/bloc/social_media_bloc.dart';
+import '../social_media_login/bloc/social_media_event.dart';
+import '../social_media_login/bloc/social_media_state.dart';
 import '../social_media_login/repo/social_media_repo.dart';
 import 'bloc/login_bloc.dart';
+import 'bloc/login_event.dart';
+import 'bloc/login_state.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});
@@ -140,19 +142,19 @@ class _LoginViewState extends State<LoginView> {
       SizedBox(height: 12.h),
 
       /// ✅ BlocBuilder حول زرار Login فقط
-      BlocBuilder<LoginBloc, AppState>(
+      BlocBuilder<LoginBloc, LoginState>(
         builder: (context, state) {
           return CustomButton(
             text: "login.title".tr(),
-            isLoading: state is Loading,
+            isLoading: state is LoginInProgress,
             onTap: () {
               if (_formKey.currentState!.validate()) {
                 context.read<LoginBloc>().add(
-                  Click(arguments: {
-                    "email": emailController.text,
-                    "password": passwordController.text,
-                  }),
-                );
+                      LoginSubmitted(
+                        email: emailController.text,
+                        password: passwordController.text,
+                      ),
+                    );
               }
             },
             gradient: const LinearGradient(
@@ -169,17 +171,24 @@ class _LoginViewState extends State<LoginView> {
       /// Divider
       Row(
         children: [
-          const Expanded(child: Divider(height: 1, color: Colors.grey, thickness: 0.5, endIndent: 10)),
+          const Expanded(
+              child: Divider(
+                  height: 1,
+                  color: Colors.grey,
+                  thickness: 0.5,
+                  endIndent: 10)),
           Text('login.or_login_with'.tr(),
               style: AppTextStyles.w500.copyWith(color: Colors.grey)),
-          const Expanded(child: Divider(height: 1, color: Colors.grey, thickness: 0.5, indent: 10)),
+          const Expanded(
+              child: Divider(
+                  height: 1, color: Colors.grey, thickness: 0.5, indent: 10)),
         ],
       ),
 
       SizedBox(height: 16.h),
 
       /// ✅ BlocBuilder للسوشيال لوجين
-      BlocBuilder<SocialMediaBloc, AppState>(
+      BlocBuilder<SocialMediaBloc, SocialMediaState>(
         builder: (context, state) {
           return Column(
             children: [
@@ -187,12 +196,14 @@ class _LoginViewState extends State<LoginView> {
                 text: "login.login_google".tr(),
                 backgroundColor: Colors.white,
                 textColor: Colors.black,
-                isLoading: state is Loading,
+                isLoading: state is SocialMediaInProgress,
                 lIconWidget: SvgPicture.asset("assets/svgs/google.svg"),
                 onTap: () async {
                   context.read<SocialMediaBloc>().add(
-                    Click(arguments: SocialMediaProvider.google),
-                  );
+                        const SocialProviderAuthenticationRequested(
+                          SocialMediaProvider.google,
+                        ),
+                      );
                 },
               ),
               // SizedBox(height: 16.h),

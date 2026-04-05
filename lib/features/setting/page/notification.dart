@@ -23,14 +23,14 @@ class _NotificationState extends State<Notification>
   late final TabController _tabController;
 
   final Map<String, String> _types = {
-    "all": "",          // All → request with ""
+    "all": "", // All → request with ""
     "projects": "projects",
     "payments": "payments",
     "freeLancer": "freelancers",
   };
 
-  late final List<String> _tabTitles;   // keys (for UI)
-  late final List<String> _tabValues;   // values (for request)
+  late final List<String> _tabTitles; // keys (for UI)
+  late final List<String> _tabValues; // values (for request)
 
   @override
   void initState() {
@@ -63,7 +63,8 @@ class _NotificationState extends State<Notification>
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => NotificationBloc(sl())..add(Add(arguments: _tabValues[0])), // initial load
+      create: (context) => NotificationBloc(sl())
+        ..add(Add(arguments: _tabValues[0])), // initial load
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -86,7 +87,7 @@ class _NotificationState extends State<Notification>
             isScrollable: true,
             tabs: List.generate(
               _tabTitles.length,
-                  (index) => Tab(text: _tabTitles[index].tr()), // UI translated
+              (index) => Tab(text: _tabTitles[index].tr()), // UI translated
             ),
           ),
         ),
@@ -94,7 +95,8 @@ class _NotificationState extends State<Notification>
           controller: _tabController,
           children: List.generate(
             _tabValues.length,
-                (index) => _buildNotificationList(type: _tabValues[index]), // request value
+            (index) => _buildNotificationList(
+                type: _tabValues[index]), // request value
           ),
         ),
       ),
@@ -122,14 +124,13 @@ class _NotificationState extends State<Notification>
             key: PageStorageKey(type),
             data: notifications
                 .map((n) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: NotificationCard(notificationModel: n),
-            ))
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: NotificationCard(notificationModel: n),
+                    ))
                 .toList(),
           );
         }
         return _buildShimmerList();
-
       },
     );
   }

@@ -5,10 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/images.dart';
 import 'package:talent_flow/app/core/styles.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
 import '../bloc/splash_bloc.dart';
+import '../bloc/splash_event.dart';
+import '../bloc/splash_state.dart';
 import '../repo/splash_repo.dart';
 
 class Splash extends StatefulWidget {
@@ -34,8 +34,9 @@ class _SplashState extends State<Splash> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => SplashBloc(repo: sl<SplashRepo>())..add(Click()),
-      child: BlocBuilder<SplashBloc, AppState>(
+      create: (context) =>
+          SplashBloc(repo: sl<SplashRepo>())..add(const SplashStarted()),
+      child: BlocBuilder<SplashBloc, SplashState>(
         builder: (context, state) {
           return AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle.dark.copyWith(

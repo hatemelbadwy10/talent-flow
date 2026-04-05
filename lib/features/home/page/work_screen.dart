@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/status_chip.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/home_bloc.dart';
+import 'package:talent_flow/features/home/bloc/home_event.dart';
+import 'package:talent_flow/features/home/bloc/home_state.dart';
 import 'package:talent_flow/features/home/model/work_details_model.dart';
 import 'package:talent_flow/features/setting/repo/favourite_repo.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
@@ -52,7 +52,7 @@ class _WorkScreenState extends State<WorkScreen> {
         await CustomNavigator.push(Routes.editWork, arguments: widget.workId);
     if (shouldRefresh == true && context.mounted) {
       _didEdit = true;
-      context.read<HomeBloc>().add(Open(arguments: widget.workId));
+      context.read<HomeBloc>().add(WorkDetailsRequested(widget.workId));
     }
   }
 
@@ -77,7 +77,7 @@ class _WorkScreenState extends State<WorkScreen> {
         _isInFavorites = previous;
       },
       (_) {
-        context.read<HomeBloc>().add(Open(arguments: widget.workId));
+        context.read<HomeBloc>().add(WorkDetailsRequested(widget.workId));
       },
     );
 
@@ -90,14 +90,13 @@ class _WorkScreenState extends State<WorkScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) =>
-          HomeBloc(homeRepo: sl())..add(Open(arguments: widget.workId)),
+          HomeBloc(homeRepo: sl())..add(WorkDetailsRequested(widget.workId)),
       child: Builder(
         builder: (context) {
-          return BlocListener<HomeBloc, AppState>(
+          return BlocListener<HomeBloc, HomeState>(
             listener: (context, state) {
-              if (state is Done && state.model is WorkDetailsModel) {
-                final nextValue =
-                    (state.model as WorkDetailsModel).isInFavorites;
+              if (state is WorkDetailsLoaded) {
+                final nextValue = state.work.isInFavorites;
                 if (nextValue != null && mounted) {
                   setState(() {
                     _isInFavorites = nextValue;
@@ -151,15 +150,15 @@ class _WorkScreenState extends State<WorkScreen> {
                       ),
                   ],
                 ),
-                body: BlocBuilder<HomeBloc, AppState>(
+                body: BlocBuilder<HomeBloc, HomeState>(
                   builder: (context, state) {
-                    if (state is Loading && widget.initialWork != null) {
+                    if (state is HomeLoading && widget.initialWork != null) {
                       return _WorkContent(
                         work: widget.initialWork!,
                       );
                     }
 
-                    if (state is Loading) {
+                    if (state is HomeLoading) {
                       return const Center(
                         child: CircularProgressIndicator(
                           color: Styles.PRIMARY_COLOR,
@@ -167,7 +166,7 @@ class _WorkScreenState extends State<WorkScreen> {
                       );
                     }
 
-                    if (state is Error) {
+                    if (state is HomeFailure) {
                       if (widget.initialWork != null) {
                         return _WorkContent(
                           work: widget.initialWork!,
@@ -178,9 +177,9 @@ class _WorkScreenState extends State<WorkScreen> {
                       );
                     }
 
-                    if (state is Done && state.model is WorkDetailsModel) {
+                    if (state is WorkDetailsLoaded) {
                       return _WorkContent(
-                        work: state.model as WorkDetailsModel,
+                        work: state.work,
                       );
                     }
 

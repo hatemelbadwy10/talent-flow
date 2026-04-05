@@ -33,10 +33,9 @@ class NotificationCard extends StatelessWidget {
             const CircleAvatar(
               radius: 24,
               backgroundImage:
-              AssetImage('assets/images/profile_placeholder.png'),
+                  AssetImage('assets/images/profile_placeholder.png'),
             ),
             const SizedBox(width: 12.0),
-
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

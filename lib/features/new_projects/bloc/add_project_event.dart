@@ -15,8 +15,8 @@ class UpdateSpecializationId extends AddProjectEvent {
   final int? specializationId;
   final String? specializationName;
 
-
-  const UpdateSpecializationId({this.specializationId,this.specializationName});
+  const UpdateSpecializationId(
+      {this.specializationId, this.specializationName});
 
   @override
   List<Object?> get props => [specializationId];
@@ -79,7 +79,7 @@ class UpdateRequiredToBeReceived extends AddProjectEvent {
 class UpdateSkills extends AddProjectEvent {
   final List<int> skills;
   final List<String> skillNames;
-  const UpdateSkills({required this.skills,required this.skillNames});
+  const UpdateSkills({required this.skills, required this.skillNames});
 
   @override
   List<Object?> get props => [skills];

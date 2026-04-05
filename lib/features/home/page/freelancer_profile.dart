@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/features/home/bloc/home_bloc.dart';
+import 'package:talent_flow/features/home/bloc/home_event.dart';
+import 'package:talent_flow/features/home/bloc/home_state.dart';
 import 'package:talent_flow/features/new_projects/widgets/skills_section.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -18,24 +18,31 @@ class FreelancerProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final freelancerId = arguments["freelancerId"] as int?;
+    if (freelancerId == null) {
+      return Scaffold(
+        backgroundColor: Styles.BACKGROUND_COLOR,
+        appBar: CustomAppBar(title: "freelancer_profile".tr()),
+        body: Center(child: Text("profile.load_failed".tr())),
+      );
+    }
+
     return BlocProvider(
       create: (_) => HomeBloc(homeRepo: sl())
-        ..add(
-          FreelancerProfile(arguments: arguments["freelancerId"]),
-        ),
+        ..add(FreelancerProfileRequested(freelancerId)),
       child: Scaffold(
         backgroundColor: Styles.BACKGROUND_COLOR,
         appBar: CustomAppBar(title: "freelancer_profile".tr()),
-        body: BlocBuilder<HomeBloc, AppState>(
+        body: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
-            if (state is Loading) {
+            if (state is HomeLoading) {
               return const Center(
                 child: CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
               );
-            } else if (state is Error) {
+            } else if (state is HomeFailure) {
               return Center(child: Text("profile.load_failed".tr()));
-            } else if (state is Done) {
-              final model = state.model as FreelancerProfileModel;
+            } else if (state is FreelancerProfileLoaded) {
+              final FreelancerProfileModel model = state.profile;
 
               return DefaultTabController(
                 length: 3,

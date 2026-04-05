@@ -18,7 +18,8 @@ class FileUploadSection extends StatelessWidget {
 
   const FileUploadSection({
     super.key,
-    required this.filesDescriptionController, required this.addProjectBloc,
+    required this.filesDescriptionController,
+    required this.addProjectBloc,
   });
 
   @override
@@ -90,7 +91,7 @@ class FileUploadSection extends StatelessWidget {
                           controller: filesDescriptionController,
                           hint: 'add_project.files_description_hint'.tr(),
                           onChanged: (value) {
-                           addProjectBloc.add(
+                            addProjectBloc.add(
                               UpdateFilesDescription(
                                 filesDescription: value.isEmpty ? null : value,
                               ),
@@ -116,7 +117,7 @@ class FileUploadSection extends StatelessWidget {
                                   ),
                                   onPressed: () {
                                     final List<File> updatedFiles =
-                                    List.from(state.files)..remove(file);
+                                        List.from(state.files)..remove(file);
                                     addProjectBloc.add(
                                       UpdateFiles(files: updatedFiles),
                                     );
@@ -161,7 +162,7 @@ class FileUploadSection extends StatelessWidget {
                 title: const Text('Choose from Gallery'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
-                  _pickImageFromGallery(parentContext,addProjectBloc);
+                  _pickImageFromGallery(parentContext, addProjectBloc);
                 },
               ),
             ],
@@ -178,10 +179,10 @@ class FileUploadSection extends StatelessWidget {
       if (image != null) {
         final file = File(image.path);
         parentContext.read<AddProjectBloc>().add(UpdateFiles(
-          files: List<File>.from(
-            parentContext.read<AddProjectBloc>().state.files,
-          )..add(file),
-        ));
+              files: List<File>.from(
+                parentContext.read<AddProjectBloc>().state.files,
+              )..add(file),
+            ));
       }
     } catch (e) {
       ScaffoldMessenger.of(parentContext).showSnackBar(
@@ -190,15 +191,16 @@ class FileUploadSection extends StatelessWidget {
     }
   }
 
-  void _pickImageFromGallery(BuildContext parentContext,AddProjectBloc addProjectBloc) async {
+  void _pickImageFromGallery(
+      BuildContext parentContext, AddProjectBloc addProjectBloc) async {
     try {
       final picker = ImagePicker();
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
       if (image != null) {
         final file = File(image.path);
-       addProjectBloc.add(UpdateFiles(
+        addProjectBloc.add(UpdateFiles(
           files: List<File>.from(
-           addProjectBloc.state.files,
+            addProjectBloc.state.files,
           )..add(file),
         ));
       }

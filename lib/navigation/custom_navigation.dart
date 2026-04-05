@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart' hide Notification;
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talent_flow/features/auth/models/auth_route_arguments.dart';
 import 'package:talent_flow/features/auth/pages/register/register.dart';
 import 'package:talent_flow/features/home/bloc/freelancer_chat_bloc.dart';
 import 'package:talent_flow/features/new_projects/page/add_project.dart';
@@ -11,7 +12,6 @@ import 'package:talent_flow/features/payment/model/contract_payment_args.dart';
 import 'package:talent_flow/features/payment/page/contract_payment_confirm_screen.dart';
 import 'package:talent_flow/features/payment/page/contract_payment_request_screen.dart';
 import 'package:talent_flow/features/payment/page/payment_page.dart';
-import 'package:talent_flow/features/projects/bloc/my_projects_bloc.dart';
 import 'package:talent_flow/features/projects/page/single_project_view.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
@@ -88,8 +88,9 @@ abstract class CustomNavigator {
       case Routes.register:
         return _pageRoute(const Register());
       case Routes.forgetPassword:
+        final arguments = _changePasswordArgs(settings.arguments);
         return _pageRoute(ChangePasswordScreen(
-          arguments: settings.arguments as Map<String, dynamic>,
+          arguments: arguments,
         ));
 
       case Routes.verificationScreen:
@@ -105,8 +106,12 @@ abstract class CustomNavigator {
       case Routes.favorites:
         return _pageRoute(const Favourite());
       case Routes.sendCodeScreen:
+        final arguments = _confirmCodeArgs(settings.arguments);
+        if (arguments == null) {
+          return _pageRoute(const Login());
+        }
         return _pageRoute(ConfirmCodeScreen(
-          argument: settings.arguments as Map<String, dynamic>,
+          argument: arguments,
         ));
       case Routes.allCategories:
         return _pageRoute(const ServiceCategoryView());
@@ -150,12 +155,11 @@ abstract class CustomNavigator {
         return _pageRoute(AllFreelancersView(
             arguments: settings.arguments as Map<String, dynamic>?));
       case Routes.ownerProjects:
-        return _pageRoute(BlocProvider(
-          create: (context) => MyProjectsBloc(sl())..add(Add()),
-          child: OwnerProjects(
+        return _pageRoute(
+          OwnerProjects(
             arguments: settings.arguments as Map<String, dynamic>?,
           ),
-        ));
+        );
       case Routes.entrepreneur:
         return _pageRoute(EntrepreneurProfileView(
           arguments: settings.arguments as Map<String, dynamic>?,
@@ -395,6 +399,43 @@ abstract class CustomNavigator {
   static _pageRoute(Widget child) => Platform.isIOS
       ? CupertinoPageRoute(builder: (_) => child)
       : MaterialPageRoute(builder: (_) => child);
+
+  static ConfirmCodeArgs? _confirmCodeArgs(Object? arguments) {
+    if (arguments is ConfirmCodeArgs) {
+      return arguments;
+    }
+    if (arguments is Map) {
+      final map = Map<String, dynamic>.from(arguments);
+      final email = map['email']?.toString() ?? map['identifier']?.toString();
+      if (email == null || email.isEmpty) {
+        return null;
+      }
+      return ConfirmCodeArgs(
+        email: email,
+        isRegister: map['isRegister'] == true,
+        isFromLogin: map['isFromLogin'] == true,
+      );
+    }
+    return null;
+  }
+
+  static ChangePasswordArgs? _changePasswordArgs(Object? arguments) {
+    if (arguments is ChangePasswordArgs) {
+      return arguments;
+    }
+    if (arguments is String && arguments.isNotEmpty) {
+      return ChangePasswordArgs(identifier: arguments);
+    }
+    if (arguments is Map) {
+      final map = Map<String, dynamic>.from(arguments);
+      final identifier = map['identifier']?.toString();
+      if (identifier == null || identifier.isEmpty) {
+        return null;
+      }
+      return ChangePasswordArgs(identifier: identifier);
+    }
+    return null;
+  }
 
   // static PageRouteBuilder<dynamic> _pageRoute(Widget child) => PageRouteBuilder(
   //     transitionDuration: const Duration(milliseconds: 100),

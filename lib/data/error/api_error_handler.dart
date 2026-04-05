@@ -24,7 +24,10 @@ class ApiErrorHandler {
               switch (error.response!.statusCode) {
                 case 404:
                   return ServerFailure(
-                      error.response!.data["message"] != null && error.response!.data["message"].toString().isNotEmpty
+                      error.response!.data["message"] != null &&
+                              error.response!.data["message"]
+                                  .toString()
+                                  .isNotEmpty
                           ? error.response!.data["message"].toString().trim()
                           : getTranslated("something_went_wrong"),
                       statusCode: 404);
@@ -38,39 +41,43 @@ class ApiErrorHandler {
                       statusCode: 401);
                 case 500:
                   return ServerFailure(
-                      error.response!.data["message"] != null && error.response!.data["message"].toString().isNotEmpty
+                      error.response!.data["message"] != null &&
+                              error.response!.data["message"]
+                                  .toString()
+                                  .isNotEmpty
                           ? error.response!.data["message"].toString().trim()
                           : getTranslated("something_went_wrong"),
                       statusCode: 500);
                 case 503:
                   return ServerFailure(
                       error.response!.statusMessage ??
-                          (error.response!.data["message"] != null && error.response!.data["message"].toString().isNotEmpty
-                              ? error.response!.data["message"].toString().trim()
+                          (error.response!.data["message"] != null &&
+                                  error.response!.data["message"]
+                                      .toString()
+                                      .isNotEmpty
+                              ? error.response!.data["message"]
+                                  .toString()
+                                  .trim()
                               : getTranslated("something_went_wrong")),
                       statusCode: 503);
                 default:
                   try {
                     final message = error.response!.data["message"];
                     if (message != null && message.toString().isNotEmpty) {
-                      return ServerFailure(
-                          message.toString(),
+                      return ServerFailure(message.toString(),
                           statusCode: error.response!.statusCode);
                     }
-                    return ServerFailure(
-                        getTranslated("something_went_wrong"),
+                    return ServerFailure(getTranslated("something_went_wrong"),
                         statusCode: error.response!.statusCode);
                   } catch (e) {
                     try {
                       final message = error.response!.data['data']["message"];
                       if (message != null && message.toString().isNotEmpty) {
-                        return ServerFailure(
-                            message.toString(),
+                        return ServerFailure(message.toString(),
                             statusCode: error.response!.statusCode);
                       }
                     } catch (_) {}
-                    return ServerFailure(
-                        getTranslated("something_went_wrong"),
+                    return ServerFailure(getTranslated("something_went_wrong"),
                         statusCode: error.response!.statusCode);
                   }
               }

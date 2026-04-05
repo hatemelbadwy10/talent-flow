@@ -6,16 +6,18 @@ class CustomCheckBoxListTile extends StatelessWidget {
   final String title;
   final String? subTitle;
   final bool value;
-   final void Function(bool?) onChange;
+  final void Function(bool?) onChange;
   const CustomCheckBoxListTile(
       {required this.title,
-         this.subTitle,
-        required this.value,required this.onChange, super.key});
+      this.subTitle,
+      required this.value,
+      required this.onChange,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
     return CheckboxListTile(
-      side:  const BorderSide(
+      side: const BorderSide(
         color: Styles.BORDER_COLOR,
         width: 9,
       ),
@@ -28,22 +30,25 @@ class CustomCheckBoxListTile extends StatelessWidget {
       activeColor: Styles.PRIMARY_COLOR,
       title: Text(
         title,
-        style:   TextStyle(
-            color:value ? Styles.PRIMARY_COLOR:Styles.HINT_COLOR,
+        style: TextStyle(
+            color: value ? Styles.PRIMARY_COLOR : Styles.HINT_COLOR,
             fontSize: 13,
-            fontWeight: FontWeight.w700) ,
+            fontWeight: FontWeight.w700),
       ),
-      subtitle:subTitle != null? Text(
-        "(${subTitle??""})",
-        style: value ? const TextStyle(
-            color: Styles.PRIMARY_COLOR,
-            fontSize: 11,
-            fontWeight: FontWeight.w600)
-            :  const TextStyle(
-            color: Styles.HINT_COLOR,
-            fontSize: 11,
-            fontWeight: FontWeight.w600),
-      ):null,
+      subtitle: subTitle != null
+          ? Text(
+              "(${subTitle ?? ""})",
+              style: value
+                  ? const TextStyle(
+                      color: Styles.PRIMARY_COLOR,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600)
+                  : const TextStyle(
+                      color: Styles.HINT_COLOR,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600),
+            )
+          : null,
       value: value,
       onChanged: onChange,
     );

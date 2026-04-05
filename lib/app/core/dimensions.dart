@@ -17,19 +17,18 @@ class Dimensions {
   static const double PADDING_SIZE_LARGE = 24.0;
   static const double PADDING_SIZE_EXTRA_LARGE = 30.0;
 
-
   static const double RADIUS_DEFAULT = 30.0;
   static const double RADIUS_LARGE = 16.0;
   static const double RADIUS_EXTRA_LARGE = 20.0;
-
 }
+
 extension ScreenScale on num {
   double get w =>
       MediaQuery.of(CustomNavigator.navigatorState.currentContext!).size.width *
-          (toDouble() / 390);
+      (toDouble() / 390);
   double get h =>
       MediaQuery.of(CustomNavigator.navigatorState.currentContext!)
           .size
           .height *
-          (toDouble() / 844);
+      (toDouble() / 844);
 }

@@ -11,8 +11,7 @@ class TermsBloc extends Bloc<AppEvent, AppState> {
     on<Add>(_onGetTerms);
   }
 
-  Future<void> _onGetTerms(
-      Add event, Emitter<AppState> emit) async {
+  Future<void> _onGetTerms(Add event, Emitter<AppState> emit) async {
     emit(Loading());
     try {
       final terms = await _termsRepo.getTermsAndCondition();

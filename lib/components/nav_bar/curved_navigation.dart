@@ -111,13 +111,12 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar>
                 ? Alignment.bottomLeft
                 : Alignment.bottomRight,
             child: Container(
-              decoration:  const BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.only(
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(12),
                   topRight: Radius.circular(12),
-                  ),
-
+                ),
               ),
               width: maxWidth,
               child: ClipRect(
@@ -174,14 +173,14 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar>
                           height: 100.0,
                           child: Row(
                               children: widget.items.map((item) {
-                                return NavButton(
-                                  onTap: _buttonTap,
-                                  position: _pos,
-                                  length: _length,
-                                  index: widget.items.indexOf(item),
-                                  child: Center(child: item),
-                                );
-                              }).toList())),
+                            return NavButton(
+                              onTap: _buttonTap,
+                              position: _pos,
+                              length: _length,
+                              index: widget.items.indexOf(item),
+                              child: Center(child: item),
+                            );
+                          }).toList())),
                     ),
                   ],
                 ),

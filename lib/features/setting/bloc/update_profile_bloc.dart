@@ -15,19 +15,22 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
       : super(const UpdateProfileState()) {
     // --- Events ---
     on<LoadUserData>(_onLoadUserData);
-    on<UpdateFirstName>((e, emit) => emit(state.copyWith(firstName: e.firstName)));
+    on<UpdateFirstName>(
+        (e, emit) => emit(state.copyWith(firstName: e.firstName)));
     on<UpdateLastName>((e, emit) => emit(state.copyWith(lastName: e.lastName)));
     on<UpdateEmail>((e, emit) => emit(state.copyWith(email: e.email)));
     on<UpdatePhone>((e, emit) => emit(state.copyWith(phone: e.phone)));
-    on<UpdateSpecialization>(
-            (e, emit) => emit(state.copyWith(specializationId: e.id, specializationName: e.name)));
-    on<UpdateJobTitle>(
-            (e, emit) => emit(state.copyWith(jobTitleId: e.id, jobTitleName: e.name)));
+    on<UpdateSpecialization>((e, emit) => emit(
+        state.copyWith(specializationId: e.id, specializationName: e.name)));
+    on<UpdateJobTitle>((e, emit) =>
+        emit(state.copyWith(jobTitleId: e.id, jobTitleName: e.name)));
     on<UpdateBio>((e, emit) => emit(state.copyWith(bio: e.bio)));
-    on<UpdateNewPassword>((e, emit) => emit(state.copyWith(newPassword: e.password)));
-    on<UpdateConfirmPassword>((e, emit) =>
-        emit(state.copyWith(newPasswordConfirmation: e.password)));
-    on<UpdateSkills>((e, emit) => emit(state.copyWith(skills: e.skillIds, selectedSkills: e.skillNames)));
+    on<UpdateNewPassword>(
+        (e, emit) => emit(state.copyWith(newPassword: e.password)));
+    on<UpdateConfirmPassword>(
+        (e, emit) => emit(state.copyWith(newPasswordConfirmation: e.password)));
+    on<UpdateSkills>((e, emit) =>
+        emit(state.copyWith(skills: e.skillIds, selectedSkills: e.skillNames)));
     on<UpdateImage>((e, emit) => emit(state.copyWith(image: e.image)));
     on<ClearError>((e, emit) => emit(state.copyWith(errorMessage: null)));
     on<SubmitProfile>(_onSubmitProfile);
@@ -40,12 +43,14 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
       log('raw: $raw');
       final data = jsonDecode(raw) as Map<String, dynamic>;
       log("state data: $data");
-      List<int> _parseSkills(dynamic skillsData) {
+      List<int> parseSkills(dynamic skillsData) {
         if (skillsData == null) return [];
 
         if (skillsData is List) {
           // case: already a list (could be int or string numbers)
-          return skillsData.map((e) => int.tryParse(e.toString()) ?? 0).toList();
+          return skillsData
+              .map((e) => int.tryParse(e.toString()) ?? 0)
+              .toList();
         }
 
         if (skillsData is String) {
@@ -58,6 +63,7 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
 
         return [];
       }
+
       emit(
         state.copyWith(
           firstName: data['first_name'] ?? '',
@@ -69,12 +75,10 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
           jobTitleId: data['job_title_id'],
           jobTitleName: data['job_title'],
           bio: data['bio'],
-          skills: _parseSkills(data['skills']),
+          skills: parseSkills(data['skills']),
           selectedSkills: List<String>.from(data['skillsNames'] ?? []),
         ),
       );
-
-
 
       log("state from prefs: ${state.firstName}");
       log("state from prefs: ${state.email}");
@@ -88,7 +92,8 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
 
   Future<void> _onSubmitProfile(
       SubmitProfile event, Emitter<UpdateProfileState> emit) async {
-    emit(state.copyWith(isSubmitting: true, errorMessage: null, successMessage: null));
+    emit(state.copyWith(
+        isSubmitting: true, errorMessage: null, successMessage: null));
 
     final result = await repo.updateProfile(
       firstName: state.firstName ?? '',
@@ -108,44 +113,49 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
     await result.fold(
       (failure) async {
         emit(state.copyWith(
-          isSubmitting: false,
-          errorMessage: failure.toString()
-        ));
+            isSubmitting: false, errorMessage: failure.toString()));
       },
       (response) async {
         String successMessage = 'تم التحديث بنجاح'; // Default message
-        
+
         try {
           if (response.data is Map<String, dynamic>) {
             final responseData = response.data as Map<String, dynamic>;
-            
+
             // Extract success message
             if (responseData.containsKey('message')) {
-              successMessage = responseData['message'] as String? ?? successMessage;
+              successMessage =
+                  responseData['message'] as String? ?? successMessage;
             }
-            
+
             // Extract and save updated user payload
             if (responseData.containsKey('payload')) {
               final payload = responseData['payload'] as Map<String, dynamic>;
-              
+
               // Save updated user data to SharedPreferences
-              await prefs.setString(AppStorageKey.userData, jsonEncode(payload));
-              
+              await prefs.setString(
+                  AppStorageKey.userData, jsonEncode(payload));
+
               log('Updated user data saved to SharedPreferences');
               log('Payload: $payload');
-              
+
               // Parse skills from response
               List<int> parseSkillsFromResponse(dynamic skillsData) {
                 if (skillsData == null) return [];
                 if (skillsData is List) {
-                  return skillsData.map((e) => int.tryParse(e.toString()) ?? 0).toList();
+                  return skillsData
+                      .map((e) => int.tryParse(e.toString()) ?? 0)
+                      .toList();
                 }
                 if (skillsData is String) {
-                  return skillsData.split(',').map((e) => int.tryParse(e.trim()) ?? 0).toList();
+                  return skillsData
+                      .split(',')
+                      .map((e) => int.tryParse(e.trim()) ?? 0)
+                      .toList();
                 }
                 return [];
               }
-              
+
               // Update state with new data from response
               emit(state.copyWith(
                 isSubmitting: false,
@@ -155,10 +165,13 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
                 lastName: payload['last_name'] as String? ?? state.lastName,
                 email: payload['email'] as String? ?? state.email,
                 phone: payload['phone'] as String? ?? state.phone,
-                specializationId: payload['specialization_id'] as int? ?? state.specializationId,
-                specializationName: payload['specialization'] as String? ?? state.specializationName,
+                specializationId: payload['specialization_id'] as int? ??
+                    state.specializationId,
+                specializationName: payload['specialization'] as String? ??
+                    state.specializationName,
                 jobTitleId: payload['job_title_id'] as int? ?? state.jobTitleId,
-                jobTitleName: payload['job_title'] as String? ?? state.jobTitleName,
+                jobTitleName:
+                    payload['job_title'] as String? ?? state.jobTitleName,
                 bio: payload['bio'] as String? ?? state.bio,
                 countryId: payload['country_id']?.toString(),
                 countryName: payload['country'] as String?,
@@ -167,7 +180,7 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
                 gender: payload['gender'] as String?,
                 dateOfBirth: payload['date_of_birth'] as String?,
                 skills: parseSkillsFromResponse(payload['skills']),
-                selectedSkills: payload['skillsNames'] != null 
+                selectedSkills: payload['skillsNames'] != null
                     ? List<String>.from(payload['skillsNames'] as List)
                     : state.selectedSkills,
               ));

@@ -91,7 +91,8 @@ class Validations {
   static String? year(String? value) {
     if (value == null || value.isEmpty) {
       return "${getTranslated("required_enter")}${getTranslated("year")}";
-    } else if (int.parse(value) < 1900 || int.parse(value) > DateTime.now().year) {
+    } else if (int.parse(value) < 1900 ||
+        int.parse(value) > DateTime.now().year) {
       return getTranslated("oops_please_enter_valid_year");
     } else {
       return null;
@@ -99,7 +100,10 @@ class Validations {
   }
 
   static String? field(dynamic value, {String? fieldName, int length = 1}) {
-    if (value == null || (value is String && value.isEmpty) || value == "" || value.toString().length < (length)) {
+    if (value == null ||
+        (value is String && value.isEmpty) ||
+        value == "" ||
+        value.toString().length < (length)) {
       return "${getTranslated(fieldName != null ? "required_enter" : "required")}${fieldName ?? ""}";
     } else {
       return null;
@@ -123,7 +127,8 @@ class Validations {
   }
 
   static String? link(String? value) {
-    final pattern = r'^(https?:\/\/)?((([a-zA-Z0-9$_.+!*\(),;?&=-]+)\.)+[a-zA-Z]{2,})';
+    final pattern =
+        r'^(https?:\/\/)?((([a-zA-Z0-9$_.+!*\(),;?&=-]+)\.)+[a-zA-Z]{2,})';
 
     final regExp = RegExp(pattern);
 
@@ -175,20 +180,24 @@ class Validations {
     }
   }
 
-  static String? minValidation(String? value, String? maxValue, {String? fieldName}) {
+  static String? minValidation(String? value, String? maxValue,
+      {String? fieldName}) {
     if (value == null || value.isEmpty) {
       return "${getTranslated("required_enter")}$fieldName";
-    } else if (maxValue != null && double.parse(value) >= double.parse(maxValue)) {
+    } else if (maxValue != null &&
+        double.parse(value) >= double.parse(maxValue)) {
       return getTranslated("oops_min_must_be_less_than_max_height");
     } else {
       return null;
     }
   }
 
-  static String? maxValidation(String? value, String? maxValue, {String? fieldName}) {
+  static String? maxValidation(String? value, String? maxValue,
+      {String? fieldName}) {
     if (value == null || value.isEmpty) {
       return "${getTranslated("required_enter")}$fieldName";
-    } else if (maxValue != null && double.parse(value) <= double.parse(maxValue)) {
+    } else if (maxValue != null &&
+        double.parse(value) <= double.parse(maxValue)) {
       return getTranslated("oops_max_must_be_more_than_min_height");
     } else {
       return null;

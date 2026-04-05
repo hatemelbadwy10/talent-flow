@@ -8,11 +8,11 @@ import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../components/custom_button.dart';
-import '../../../navigation/routes.dart'; // Add this import for navigation
+import '../../../navigation/routes.dart';
 import '../bloc/new_projects_bloc.dart';
+import '../bloc/new_projects_event.dart';
+import '../bloc/new_projects_state.dart';
 
 class AddOfferWidget extends StatefulWidget {
   final int id;
@@ -62,26 +62,25 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
     }
 
     context.read<NewProjectsBloc>().add(
-          Click(arguments: {
-            "projectId": widget.id,
-            "description": description,
-          }),
+          ProjectOfferSubmitted(
+            projectId: widget.id,
+            description: description,
+          ),
         );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<NewProjectsBloc, AppState>(
+    return BlocListener<NewProjectsBloc, NewProjectsState>(
       listener: (context, state) {
-        if (state is Loading) {
+        if (state is OfferSubmissionInProgress) {
           setState(() {
             _isLoading = true;
           });
-        } else if (state is Done) {
-          final successMessage =
-              state.data?.toString().trim().isNotEmpty == true
-                  ? state.data.toString()
-                  : 'add_offer.success'.tr();
+        } else if (state is OfferSubmissionSuccess) {
+          final successMessage = state.message?.trim().isNotEmpty == true
+              ? state.message!
+              : 'add_offer.success'.tr();
           setState(() {
             _isLoading = false;
           });
@@ -91,7 +90,7 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
             if (!mounted) return;
             CustomNavigator.push(Routes.navBar, clean: true);
           });
-        } else if (state is Error) {
+        } else if (state is OfferSubmissionFailure) {
           setState(() {
             _isLoading = false;
           });

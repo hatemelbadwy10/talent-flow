@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/components/shimmer/custom_shimmer.dart';

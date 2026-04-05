@@ -28,7 +28,6 @@ class UpdateProfileState extends Equatable {
   final String? dateOfBirth;
   final String? professionalTitle;
 
-
   const UpdateProfileState({
     this.firstName,
     this.lastName,
@@ -96,7 +95,7 @@ class UpdateProfileState extends Equatable {
       bio: bio ?? this.bio,
       newPassword: newPassword ?? this.newPassword,
       newPasswordConfirmation:
-      newPasswordConfirmation ?? this.newPasswordConfirmation,
+          newPasswordConfirmation ?? this.newPasswordConfirmation,
       skills: skills ?? this.skills,
       selectedSkills: selectedSkills ?? this.selectedSkills,
       image: image ?? this.image,
@@ -116,30 +115,30 @@ class UpdateProfileState extends Equatable {
 
   @override
   List<Object?> get props => [
-    firstName,
-    lastName,
-    email,
-    phone,
-    specializationId,
-    specializationName,
-    jobTitleId,
-    jobTitleName,
-    bio,
-    newPassword,
-    newPasswordConfirmation,
-    skills,
-    selectedSkills,
-    image,
-    isSubmitting,
-    isSubmitted,
-    errorMessage,
-    successMessage,
-    countryId,
-    countryName,
-    cityId,
-    cityName,
-    gender,
-    dateOfBirth,
-    professionalTitle,
-  ];
+        firstName,
+        lastName,
+        email,
+        phone,
+        specializationId,
+        specializationName,
+        jobTitleId,
+        jobTitleName,
+        bio,
+        newPassword,
+        newPasswordConfirmation,
+        skills,
+        selectedSkills,
+        image,
+        isSubmitting,
+        isSubmitted,
+        errorMessage,
+        successMessage,
+        countryId,
+        countryName,
+        cityId,
+        cityName,
+        gender,
+        dateOfBirth,
+        professionalTitle,
+      ];
 }

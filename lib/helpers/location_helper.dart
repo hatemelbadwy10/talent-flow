@@ -6,7 +6,6 @@ import 'package:geolocator/geolocator.dart';
 import '../navigation/custom_navigation.dart';
 
 abstract class LocationHelper {
-
   static checkLocation({bool isSplash = true}) async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -50,7 +49,8 @@ abstract class LocationHelper {
     showDialog(
         context: CustomNavigator.navigatorState.currentContext!,
         builder: (_) => CupertinoAlertDialog(
-              title: const Text("هل تريد السماح لتطبيق “talent_flow” باستخدام موقعك؟"),
+              title: const Text(
+                  "هل تريد السماح لتطبيق “talent_flow” باستخدام موقعك؟"),
               content: const Text(
                   "لإجراء رحلة مضمونه، يجمع في طريقي بيانات الموقع بداءاً من وقت فتح التطبيق. ويعمل ذلك على تحسين عمليات الالتقاء بالكباتن، ونسب التوافق، وغير ذلك الكثير."),
               actions: [

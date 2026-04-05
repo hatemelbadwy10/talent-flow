@@ -17,7 +17,7 @@ class NotificationModel extends SingleMapper {
   final Data? data;
   final int? readStatus;
 
-  factory NotificationModel.fromJson(Map<String, dynamic> json){
+  factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
       id: json["id"],
       date: DateTime.tryParse(json["date"] ?? ""),
@@ -30,7 +30,7 @@ class NotificationModel extends SingleMapper {
 
   @override
   Mapper fromJson(Map<String, dynamic> json) {
-   return NotificationModel.fromJson(json);
+    return NotificationModel.fromJson(json);
   }
 
   @override
@@ -38,7 +38,6 @@ class NotificationModel extends SingleMapper {
     // TODO: implement toJson
     throw UnimplementedError();
   }
-
 }
 
 class Data {
@@ -54,7 +53,7 @@ class Data {
   final String? amount;
   final int? freelancerId;
 
-  factory Data.fromJson(Map<String, dynamic> json){
+  factory Data.fromJson(Map<String, dynamic> json) {
     return Data(
       type: json["type"],
       extra: json["extra"],
@@ -62,5 +61,4 @@ class Data {
       freelancerId: json["freelancer_id"],
     );
   }
-
 }

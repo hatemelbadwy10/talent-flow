@@ -2,13 +2,13 @@ import 'package:talent_flow/app/core/extensions.dart';
 import 'package:talent_flow/components/custom_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 import 'package:talent_flow/app/localization/language_constant.dart';
 import 'package:talent_flow/components/custom_images.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
+import 'package:talent_flow/main_blocs/user_state.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import '../app/core/text_styles.dart';
 import 'guest_mode.dart';
@@ -22,7 +22,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, AppState>(
+    return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
         return Container(
           padding: EdgeInsets.only(

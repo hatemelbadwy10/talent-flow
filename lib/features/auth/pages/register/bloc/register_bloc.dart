@@ -1,35 +1,36 @@
 import 'dart:developer';
 
-import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../app/core/app_event.dart';
-import '../../../../../app/core/app_state.dart';
 import '../../../../../app/core/app_core.dart';
 import '../../../../../app/core/app_notification.dart';
 import '../../../../../app/core/styles.dart';
-import '../../../../../data/error/failures.dart';
+import '../../../../../features/auth/models/auth_route_arguments.dart';
 import '../../../../../navigation/custom_navigation.dart';
 import '../../../../../navigation/routes.dart';
-import '../../login/bloc/login_bloc.dart';
 import '../repo/register_repo.dart';
+import 'register_event.dart';
+import 'register_state.dart';
 
-class RegisterBloc extends Bloc<AppEvent, AppState> {
+class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   final RegisterRepo repo;
 
-  RegisterBloc({required this.repo}) : super(Start()) {
-    on<Click>((event, emit) async {
+  RegisterBloc({required this.repo}) : super(const RegisterInitial()) {
+    on<RegisterSubmitted>((event, emit) async {
       try {
-        emit(Loading());
-
-        final data = event.arguments as Map<String, dynamic>;
-
-        Either<ServerFailure, Response> response = await repo.register(data);
+        emit(const RegisterInProgress());
+        final data = {
+          "first_name": event.firstName,
+          "last_name": event.lastName,
+          "email": event.email,
+          "password": event.password,
+          "user_type": event.userType,
+        };
+        final response = await repo.register(data);
 
         response.fold(
-              (fail) {
+          (fail) {
             AppCore.showSnackBar(
               notification: AppNotification(
                 message: fail.error,
@@ -37,19 +38,17 @@ class RegisterBloc extends Bloc<AppEvent, AppState> {
                 borderColor: Styles.RED_COLOR,
               ),
             );
-            emit(Error());
+            emit(RegisterFailure(fail.error));
           },
-              (success) {
-            final String email = data["email"];
-
+          (_) {
             CustomNavigator.push(
               Routes.sendCodeScreen,
-              arguments: {
-                "email": email,
-                "isRegister": true,
-              },
+              arguments: ConfirmCodeArgs(
+                email: event.email,
+                isRegister: true,
+              ),
             );
-            emit(Done());
+            emit(const RegisterSuccess());
           },
         );
       } catch (e) {
@@ -60,12 +59,12 @@ class RegisterBloc extends Bloc<AppEvent, AppState> {
             borderColor: Styles.RED_COLOR,
           ),
         );
-        emit(Error());
+        emit(RegisterFailure(e.toString()));
       }
     });
-    on<SocialLoginClick>((event, emit) async {
+    on<RegisterWithSocialProviderSubmitted>((event, emit) async {
       try {
-        emit(Loading());
+        emit(const RegisterInProgress());
 
         final response = await repo.socialLogin(
           provider: event.provider,
@@ -73,7 +72,7 @@ class RegisterBloc extends Bloc<AppEvent, AppState> {
         );
 
         response.fold(
-              (fail) {
+          (fail) {
             AppCore.showSnackBar(
               notification: AppNotification(
                 message: fail.error,
@@ -82,14 +81,14 @@ class RegisterBloc extends Bloc<AppEvent, AppState> {
                 borderColor: Colors.transparent,
               ),
             );
-            emit(Error());
+            emit(RegisterFailure(fail.error));
           },
-              (success) async {
-            final responseData = success.data;
-            CustomNavigator.push(Routes.sendCodeScreen, arguments: {
-              "email": responseData["email"],
-            });
-            emit(Done());
+          (email) async {
+            CustomNavigator.push(
+              Routes.sendCodeScreen,
+              arguments: ConfirmCodeArgs(email: email),
+            );
+            emit(const RegisterSuccess());
           },
         );
       } catch (e) {
@@ -101,9 +100,8 @@ class RegisterBloc extends Bloc<AppEvent, AppState> {
             borderColor: Styles.RED_COLOR,
           ),
         );
-        emit(Error());
+        emit(RegisterFailure(e.toString()));
       }
     });
-
   }
 }

@@ -45,8 +45,7 @@ class NoInternetConnectionException extends ServerException {
 }
 
 class BadCertificateException extends ServerException {
-  const BadCertificateException([message])
-      : super("Bad Certificate Exception");
+  const BadCertificateException([message]) : super("Bad Certificate Exception");
 }
 
 class ConnectionErrorException extends ServerException {

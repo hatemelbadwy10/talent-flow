@@ -6,15 +6,17 @@ import '../../../../../data/api/end_points.dart';
 import '../../../../../data/error/api_error_handler.dart';
 import '../../../../../data/error/failures.dart';
 
-class SendVerificationRepo extends BaseRepo{
-  SendVerificationRepo({required super.sharedPreferences, required super.dioClient});
-  Future<Either<ServerFailure, Response>> sendVerification(data) async {
+class SendVerificationRepo extends BaseRepo {
+  SendVerificationRepo(
+      {required super.sharedPreferences, required super.dioClient});
+  Future<Either<ServerFailure, String>> sendVerification(
+      Map<String, dynamic> data) async {
     try {
       Response response = await dioClient.post(
           uri: EndPoints.forgetPassword, data: FormData.fromMap(data));
-      if (response.statusCode == 200||response.statusCode == 201) {
-        log("response ${response}");
-        return Right(response);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        log("response $response");
+        return Right(response.data['message']?.toString() ?? '');
       } else {
         return left(ServerFailure(response.data['message']));
       }
@@ -23,5 +25,4 @@ class SendVerificationRepo extends BaseRepo{
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
-
 }

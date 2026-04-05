@@ -5,19 +5,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
 import '../repo/splash_repo.dart';
+import 'splash_event.dart';
+import 'splash_state.dart';
 
-class SplashBloc extends Bloc<AppEvent, AppState> {
+class SplashBloc extends Bloc<SplashEvent, SplashState> {
   final SplashRepo repo;
 
-  SplashBloc({required this.repo}) : super(Start()) {
-    on<Click>(onClick);
+  SplashBloc({required this.repo}) : super(const SplashInitial()) {
+    on<SplashStarted>(onClick);
   }
 
-  Future<void> onClick(AppEvent event, Emitter<AppState> emit) async {
+  Future<void> onClick(SplashStarted event, Emitter<SplashState> emit) async {
+    emit(const SplashInProgress());
     Future.delayed(const Duration(milliseconds: 2200), () async {
       log("repo.isFirstTime ${repo.isFirstTime}");
 

@@ -1,5 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:talent_flow/data/api/response_payload_parser.dart';
+import 'package:talent_flow/features/payment/model/model.dart';
 
 import '../../../data/api/end_points.dart';
 import '../../../data/error/api_error_handler.dart';
@@ -9,10 +11,13 @@ import '../../../main_repos/base_repo.dart';
 class PaymentRepo extends BaseRepo {
   PaymentRepo({required super.sharedPreferences, required super.dioClient});
 
-  Future<Either<ServerFailure, Response>> getPayment() async {
+  Future<Either<ServerFailure, List<PaymentModel>>> getPayment() async {
     try {
       final response = await dioClient.get(uri: EndPoints.paymentMethods);
-      return right(response);
+      final methods = ResponsePayloadParser.payloadList(response.data)
+          .map((item) => PaymentModel.fromJson(ResponsePayloadParser.map(item)))
+          .toList();
+      return right(methods);
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }

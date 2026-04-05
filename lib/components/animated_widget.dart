@@ -32,7 +32,6 @@ class AnimatedWidgets extends StatelessWidget {
   }
 }
 
-
 class ListAnimator extends StatefulWidget {
   final List<Widget>? data;
   final int? durationMilli;
@@ -78,16 +77,17 @@ class _ListAnimatorState extends State<ListAnimator> {
                 EdgeInsets.only(top: widget.addPadding ? 8 : 0),
             physics: widget.scroll
                 ? const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics(),
-            )
+                    parent: AlwaysScrollableScrollPhysics(),
+                  )
                 : const NeverScrollableScrollPhysics(),
             reverse: widget.reverse,
             scrollDirection: widget.direction ?? Axis.vertical,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: List.generate(widget.data?.length ?? 0, (index) {
-                final offset =
-                (index % 2 == 0 ? (widget.horizontalOffset ?? 50.0) : -(widget.horizontalOffset ?? 50.0));
+                final offset = (index % 2 == 0
+                    ? (widget.horizontalOffset ?? 50.0)
+                    : -(widget.horizontalOffset ?? 50.0));
 
                 return AnimationConfiguration.staggeredList(
                   position: index,

@@ -70,11 +70,11 @@ class SkillsDropdown extends StatelessWidget {
                       log("selected skills $updatedSkills, names $updatedSkillNames");
 
                       context.read<AddProjectBloc>().add(
-                        UpdateSkills(
-                          skills: updatedSkills,
-                          skillNames: updatedSkillNames,
-                        ),
-                      );
+                            UpdateSkills(
+                              skills: updatedSkills,
+                              skillNames: updatedSkillNames,
+                            ),
+                          );
                     }
                   },
                 ),
@@ -90,8 +90,8 @@ class SkillsDropdown extends StatelessWidget {
                     return Chip(
                       label: Text(skillName),
                       onDeleted: () {
-                        final updatedSkills =
-                        List<int>.from(state.skills)..remove(id);
+                        final updatedSkills = List<int>.from(state.skills)
+                          ..remove(id);
 
                         final updatedSkillNames = updatedSkills
                             .map((id) => availableSkills[id.toString()] ?? '')
@@ -99,11 +99,11 @@ class SkillsDropdown extends StatelessWidget {
                             .toList();
 
                         context.read<AddProjectBloc>().add(
-                          UpdateSkills(
-                            skills: updatedSkills,
-                            skillNames: updatedSkillNames,
-                          ),
-                        );
+                              UpdateSkills(
+                                skills: updatedSkills,
+                                skillNames: updatedSkillNames,
+                              ),
+                            );
                       },
                     );
                   }).toList(),

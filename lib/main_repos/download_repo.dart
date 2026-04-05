@@ -6,7 +6,10 @@ class DownloadRepo {
   DownloadRepo();
   final Dio _dio = Dio();
 
-  download({required String url, required String path, Function(int, int)? onReceiveProgress}) async {
+  download(
+      {required String url,
+      required String path,
+      Function(int, int)? onReceiveProgress}) async {
     return await _dio.download(
       url,
       path,

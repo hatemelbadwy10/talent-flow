@@ -5,7 +5,7 @@ import '../app/core/text_styles.dart';
 import '../app/localization/language_constant.dart';
 
 class PriceCard extends StatelessWidget {
-  const PriceCard({super.key, this.price,this.isFree});
+  const PriceCard({super.key, this.price, this.isFree});
   final double? price;
   final bool? isFree;
 

@@ -46,7 +46,6 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
 
   @override
   Widget build(BuildContext context) {
-
     return ScaleTransition(
       scale: _scaleAnimation,
       child: Dialog(
@@ -73,7 +72,7 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
                       'add_project.add_question'.tr(),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        color:Styles.PRIMARY_COLOR,
+                        color: Styles.PRIMARY_COLOR,
                       ),
                     ),
                   ),
@@ -122,12 +121,13 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
               // Required checkbox
               CheckboxListTile(
                 value: _isRequired,
-                onChanged: (value) => setState(() => _isRequired = value ?? false),
+                onChanged: (value) =>
+                    setState(() => _isRequired = value ?? false),
                 title: Text(
                   'add_project.mandatory_question'.tr(),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
                 subtitle: Text(
                   'add_project.mandatory_question_hint'.tr(),
@@ -169,12 +169,12 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
                       onPressed: _questionController.text.isEmpty
                           ? null
                           : () {
-                        widget.onAdd(
-                          _questionController.text.trim(),
-                          _isRequired,
-                        );
-                        Navigator.pop(context);
-                      },
+                              widget.onAdd(
+                                _questionController.text.trim(),
+                                _isRequired,
+                              );
+                              Navigator.pop(context);
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Styles.PRIMARY_COLOR,
                         foregroundColor: Colors.white,

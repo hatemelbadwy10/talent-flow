@@ -22,25 +22,24 @@ class CustomButton extends StatelessWidget {
   final Widget? lIconWidget, rIconWidget;
   final Gradient? gradient;
 
-  const CustomButton({
-    super.key,
-    this.onTap,
-    this.rIconWidget,
-    this.lIconWidget,
-    this.isActive = true,
-    this.radius,
-    this.height,
-    this.isLoading = false,
-    this.textColor,
-    this.borderColor,
-    this.width,
-    this.textSize,
-    this.withBorderColor = false,
-    this.withShadow = false,
-    this.text,
-    this.backgroundColor = Styles.PRIMARY_COLOR,
-    this.gradient
-  });
+  const CustomButton(
+      {super.key,
+      this.onTap,
+      this.rIconWidget,
+      this.lIconWidget,
+      this.isActive = true,
+      this.radius,
+      this.height,
+      this.isLoading = false,
+      this.textColor,
+      this.borderColor,
+      this.width,
+      this.textSize,
+      this.withBorderColor = false,
+      this.withShadow = false,
+      this.text,
+      this.backgroundColor = Styles.PRIMARY_COLOR,
+      this.gradient});
 
   @override
   Widget build(BuildContext context) {
@@ -67,12 +66,12 @@ class CustomButton extends StatelessWidget {
             gradient: (onTap != null && isActive) ? gradient : null,
             boxShadow: withShadow
                 ? [
-              BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  spreadRadius: 2,
-                  blurRadius: 2,
-                  offset: const Offset(1, 1))
-            ]
+                    BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        spreadRadius: 2,
+                        blurRadius: 2,
+                        offset: const Offset(1, 1))
+                  ]
                 : null,
             border: Border.all(
               color: withBorderColor

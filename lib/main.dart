@@ -3,13 +3,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
-import 'app/core/app_event.dart';
-import 'app/core/app_state.dart';
 import 'app/core/styles.dart';
 import 'data/config/di.dart' as di;
 import 'data/config/di.dart';
 import 'data/local_data/local_database.dart';
 import 'firebase_options.dart';
+import 'main_blocs/user_event.dart';
+import 'main_blocs/user_state.dart';
 import 'navigation/custom_navigation.dart';
 import 'navigation/routes.dart';
 
@@ -64,8 +64,8 @@ class MyApp extends StatelessWidget {
         final userBloc = UserBloc.instance;
         if (userBloc.isLogin &&
             userBloc.user == null &&
-            userBloc.state is Start) {
-          userBloc.add(Click());
+            userBloc.state is UserInitial) {
+          userBloc.add(const LoadCurrentUser());
         }
         return BlocProvider.value(
           value: userBloc,

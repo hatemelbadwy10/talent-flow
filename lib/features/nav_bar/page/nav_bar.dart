@@ -7,15 +7,12 @@ import 'package:talent_flow/features/projects/page/my_projects.dart';
 import 'package:talent_flow/features/setting/page/setting.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../app/core/styles.dart';
-import '../../../data/config/di.dart';
-import '../../home/bloc/home_bloc.dart';
 import '../../home/page/home_view.dart';
-import '../../home/repo/home_repo.dart';
 import '../../new_projects/page/new_project.dart';
 import '../bloc/nav_bar_bloc.dart';
+import '../bloc/nav_bar_event.dart';
+import '../bloc/nav_bar_state.dart';
 
 class NavBar extends StatelessWidget {
   const NavBar({super.key});
@@ -26,11 +23,7 @@ class NavBar extends StatelessWidget {
     final List<Widget> widgetOptions = [
       const SettingScreen(),
       const OwnerProjects(),
-      BlocProvider(
-        create: (context) =>
-            HomeBloc(homeRepo: sl<HomeRepo>())..add(Click()),
-        child: const HomeView(),
-      ),
+      const HomeView(),
       const NewProject(),
     ];
 
@@ -57,13 +50,9 @@ class NavBar extends StatelessWidget {
 
     return BlocProvider(
       create: (context) => NavBarBloc(),
-      child: BlocBuilder<NavBarBloc, AppState>(
+      child: BlocBuilder<NavBarBloc, NavBarState>(
         builder: (context, state) {
-          int selectedIndex = 2;
-
-          if (state is Done) {
-            selectedIndex = state.data;
-          }
+          int selectedIndex = state.currentIndex;
 
           if (selectedIndex >= widgetOptions.length) {
             selectedIndex = 2;
@@ -78,7 +67,6 @@ class NavBar extends StatelessWidget {
               backgroundColor: Colors.transparent,
               color: Styles.PRIMARY_COLOR,
               buttonBackgroundColor: Colors.transparent,
-
               items: List.generate(labels.length, (index) {
                 final isSelected = index == selectedIndex;
 
@@ -129,11 +117,8 @@ class NavBar extends StatelessWidget {
                   ),
                 );
               }),
-
               onTap: (index) {
-                context
-                    .read<NavBarBloc>()
-                    .add(Click(arguments: index));
+                context.read<NavBarBloc>().add(NavBarTabChanged(index));
               },
             ),
           );

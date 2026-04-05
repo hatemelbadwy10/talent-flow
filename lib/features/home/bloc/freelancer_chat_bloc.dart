@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/data/realtime/pusher_service.dart';
@@ -16,6 +15,11 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
     on<SendMessage>(_onSendMessage);
     on<ReceiveMessage>(_onReceiveMessage);
   }
+
+  static const Set<String> _messageEventNames = <String>{
+    '.message.sent',
+    'message.sent',
+  };
 
   final ChatRepo _chatRepo;
   final PusherService _pusherService;
@@ -36,9 +40,8 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
     _latestArgs = mapArgs;
 
     final dynamic idRaw = mapArgs['conversationId'] ?? mapArgs['freelancerId'];
-    final int? conversationId = idRaw is int
-        ? idRaw
-        : int.tryParse(idRaw?.toString() ?? '');
+    final int? conversationId =
+        idRaw is int ? idRaw : int.tryParse(idRaw?.toString() ?? '');
 
     if (conversationId == null) {
       log('FreelancerChatBloc: conversationId is null, emitting Empty');
@@ -66,11 +69,12 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
       return;
     }
 
-    final dynamic rawId =
-        mapArgs['conversationId'] ?? _conversationId ?? _latestArgs['conversationId'] ?? _latestArgs['freelancerId'];
-    final int? conversationId = rawId is int
-        ? rawId
-        : int.tryParse(rawId?.toString() ?? '');
+    final dynamic rawId = mapArgs['conversationId'] ??
+        _conversationId ??
+        _latestArgs['conversationId'] ??
+        _latestArgs['freelancerId'];
+    final int? conversationId =
+        rawId is int ? rawId : int.tryParse(rawId?.toString() ?? '');
 
     if (conversationId == null) {
       log('FreelancerChatBloc: conversationId is null on send, emitting Error');
@@ -98,13 +102,22 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
       (response) async {
         _conversationId = conversationId;
         log('FreelancerChatBloc: send success, raw response data: ${response.data}');
-        final sentMessage = _extractMessageFromDynamic(response.data);
+        final sentMessage = _normalizeSentMessage(
+          _extractMessageFromDynamic(response.data),
+          body: body,
+          filePath: filePath,
+        );
         if (sentMessage != null) {
           log('FreelancerChatBloc: extracted sent message id=${sentMessage.id}');
           _appendMessage(sentMessage, emit);
           return;
         }
-        log('FreelancerChatBloc: could not extract sent message from response, reloading conversation');
+        log('FreelancerChatBloc: could not extract sent message from response, appending optimistic message then reloading conversation');
+        _appendMessage(
+          _buildOptimisticMessage(body: body, filePath: filePath),
+          emit,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 500));
         await _loadConversation(emit: emit, showLoader: false);
       },
     );
@@ -151,7 +164,8 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
         // Flush any messages that arrived before the conversation was loaded
         if (_pendingMessages.isNotEmpty) {
           log('FreelancerChatBloc: flushing ${_pendingMessages.length} pending messages');
-          final List<Message> updatedMessages = List<Message>.from(chat.messages);
+          final List<Message> updatedMessages =
+              List<Message>.from(chat.messages);
           for (final pending in _pendingMessages) {
             if (!_isDuplicateMessage(pending)) {
               updatedMessages.add(pending);
@@ -179,16 +193,33 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
       await _pusherService.unsubscribe(_subscribedChannelName!);
     }
 
-    _subscribedChannelName = channelName;
     log('FreelancerChatBloc: subscribing to $channelName');
-    await _pusherService.subscribe(
-      channelName: channelName,
-      onEvent: (event) {
-        if (isClosed) return;
-        log('FreelancerChatBloc: pusher event received on $channelName');
-        add(ReceiveMessage(message: event.data));
-      },
-    );
+    try {
+      await _pusherService.subscribe(
+        channelName: channelName,
+        onEvent: (event) {
+          if (isClosed) return;
+          log(
+            'FreelancerChatBloc: pusher event received on $channelName '
+            'event=${event.eventName} data=${event.data}',
+          );
+          if (!_messageEventNames.contains(event.eventName)) {
+            log(
+              'FreelancerChatBloc: skipping non-message event ${event.eventName}',
+            );
+            return;
+          }
+          add(ReceiveMessage(message: event.data));
+        },
+      );
+      _subscribedChannelName = channelName;
+    } catch (error, stackTrace) {
+      _subscribedChannelName = null;
+      log(
+        'FreelancerChatBloc: subscribe failed for $channelName: $error',
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   void _appendMessage(Message message, Emitter<AppState> emit) {
@@ -253,6 +284,57 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
     ].join('|');
   }
 
+  Message? _normalizeSentMessage(
+    Message? message, {
+    required String body,
+    required String filePath,
+  }) {
+    if (message == null) {
+      return null;
+    }
+
+    final fallbackBody = body.isNotEmpty
+        ? body
+        : (filePath.isNotEmpty
+            ? filePath.split(Platform.pathSeparator).last
+            : '');
+
+    return message.copyWith(
+      message: (message.message ?? '').trim().isNotEmpty
+          ? message.message
+          : fallbackBody,
+      messageType: (message.messageType ?? '').trim().isNotEmpty
+          ? message.messageType
+          : (filePath.isNotEmpty ? 'file' : 'text'),
+      isSent: message.isSent ?? true,
+      createdAt: message.createdAt ?? DateTime.now(),
+      status:
+          (message.status ?? '').trim().isNotEmpty ? message.status : 'sent',
+    );
+  }
+
+  Message _buildOptimisticMessage({
+    required String body,
+    required String filePath,
+  }) {
+    final fallbackBody = body.isNotEmpty
+        ? body
+        : (filePath.isNotEmpty
+            ? filePath.split(Platform.pathSeparator).last
+            : '');
+
+    return Message(
+      id: null,
+      messageType: filePath.isNotEmpty ? 'file' : 'text',
+      message: fallbackBody,
+      isSent: true,
+      sender: null,
+      createdAt: DateTime.now(),
+      time: '',
+      status: 'sent',
+    );
+  }
+
   Message? _extractMessageFromDynamic(dynamic raw) {
     log('FreelancerChatBloc: _extractMessageFromDynamic input type=${raw.runtimeType}, value=$raw');
 
@@ -269,6 +351,8 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
       root['payload'],
       (root['data'] is Map ? (root['data'] as Map)['message'] : null),
       (root['payload'] is Map ? (root['payload'] as Map)['message'] : null),
+      (root['payload'] is Map ? (root['payload'] as Map)['data'] : null),
+      (root['data'] is Map ? (root['data'] as Map)['payload'] : null),
     ];
 
     for (int i = 0; i < candidates.length; i++) {
@@ -314,8 +398,13 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
     }
 
     if (value is String && value.trim().isNotEmpty) {
+      final trimmed = value.trim();
+      if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
+        return null;
+      }
+
       try {
-        final decoded = jsonDecode(value);
+        final decoded = jsonDecode(trimmed);
         return _toJsonMap(decoded);
       } catch (e) {
         log('FreelancerChatBloc: _toJsonMap failed to jsonDecode string: $e');

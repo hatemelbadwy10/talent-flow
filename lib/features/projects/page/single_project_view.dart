@@ -2,11 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
-import '../../../app/core/app_state.dart';
 import '../../../app/core/app_storage_keys.dart';
 import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart';
@@ -16,6 +14,8 @@ import '../../auth/pages/social_media_login/repo/chat_repo.dart';
 import '../../new_projects/widgets/project_description.dart';
 import '../../new_projects/widgets/project_details_card.dart';
 import '../bloc/my_projects_bloc.dart';
+import '../bloc/my_projects_event.dart';
+import '../bloc/my_projects_state.dart';
 import '../model/single_project_model.dart';
 import '../widgets/project_files_section.dart';
 import '../widgets/single_project_shimmer.dart';
@@ -31,8 +31,8 @@ class SingleProjectView extends StatelessWidget {
         sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
 
     return BlocProvider(
-      create: (context) =>
-          MyProjectsBloc(sl())..add(Click(arguments: arguments['id'])),
+      create: (context) => MyProjectsBloc(sl())
+        ..add(ProjectDetailsRequested(arguments['id'] as int)),
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -40,14 +40,14 @@ class SingleProjectView extends StatelessWidget {
           centerTitle: true,
           surfaceTintColor: Colors.white,
         ),
-        body: BlocBuilder<MyProjectsBloc, AppState>(
+        body: BlocBuilder<MyProjectsBloc, MyProjectsState>(
           builder: (context, state) {
-            if (state is Loading) {
+            if (state is MyProjectsLoading) {
               return const SingleProjectViewShimmer();
-            } else if (state is Error) {
+            } else if (state is MyProjectsFailure) {
               return Center(child: Text('project_load_failed'.tr()));
-            } else if (state is Done && state.model is SingleProjectModel) {
-              final project = state.model as SingleProjectModel;
+            } else if (state is ProjectDetailsLoaded) {
+              final project = state.project;
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),

@@ -1,50 +1,42 @@
 import 'dart:developer';
 import 'dart:developer' as dev;
 
-import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/features/auth/pages/confirm_code/repo/confirm_code_repo.dart';
 
 import '../../../../../app/core/app_core.dart';
-import '../../../../../app/core/app_event.dart';
 import '../../../../../app/core/app_notification.dart';
-import '../../../../../app/core/app_state.dart';
 import '../../../../../app/core/styles.dart';
 import '../../../../../app/core/user_completion_guard.dart';
-import '../../../../../data/error/failures.dart';
+import '../../../../../features/auth/models/auth_route_arguments.dart';
 import '../../../../../navigation/custom_navigation.dart';
 import '../../../../../navigation/routes.dart';
+import 'confirm_code_event.dart';
+import 'confirm_code_state.dart';
 
-class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
+class ConfirmCodeBloc extends Bloc<ConfirmCodeEvent, ConfirmCodeState> {
   final ConfirmCodeRepo confirmCodeRepo;
 
-  ConfirmCodeBloc(this.confirmCodeRepo) : super(Start()) {
-    on<Click>((event, emit) async {
+  ConfirmCodeBloc(this.confirmCodeRepo) : super(const ConfirmCodeInitial()) {
+    on<ConfirmCodeSubmitted>((event, emit) async {
       try {
-        emit(Loading());
-
-        /// البيانات جاية من الـ arguments (من الـ UI)
-        final Map<String, dynamic> data =
-            event.arguments as Map<String, dynamic>;
+        emit(const ConfirmCodeInProgress());
+        final data = {
+          "identifier": event.identifier,
+          "otp": event.otp,
+          "isRegister": event.isRegister,
+          "isFromLogin": event.isFromLogin,
+        };
         dev.log('data $data');
-        log("data${data['isRegister']}");
-        log("data${data['isFromLogin']}");
-        final bool isRegister = data['isRegister'] ?? false;
-        final bool isFromLogin = data['isFromLogin'] ?? false;
-        final String email = data['identifier'] ?? '';
+        log("data${event.isRegister}");
+        log("data${event.isFromLogin}");
 
-        Either<ServerFailure, Response> response;
-        log("isRegister $isRegister - isFromLogin $isFromLogin");
-        // اختيار طريقة التأكيد بناءً على حالة المستخدم
-        if (isRegister || isFromLogin) {
-          log("data$data");
-          response = await confirmCodeRepo.verifyFromRegister(data);
-        } else {
-          response = await confirmCodeRepo.verifyForgetPassword(data);
-        }
+        log("isRegister ${event.isRegister} - isFromLogin ${event.isFromLogin}");
+        final response = event.isRegister || event.isFromLogin
+            ? await confirmCodeRepo.verifyFromRegister(data)
+            : await confirmCodeRepo.verifyForgetPassword(data);
 
         await response.fold<Future<void>>(
           (fail) async {
@@ -57,17 +49,19 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
               ),
             );
             if (emit.isDone) return;
-            emit(Error());
+            emit(ConfirmCodeFailure(fail.error));
           },
           (success) async {
-            log('isRegister $isRegister - isFromLogin $isFromLogin');
+            log(
+              'isRegister ${event.isRegister} - isFromLogin ${event.isFromLogin}',
+            );
 
-            if (isRegister) {
+            if (event.isRegister) {
               /// من الريجستر → يروح للهوم
-              await confirmCodeRepo.saveUserData(success.data);
+              await confirmCodeRepo.saveUserData(success);
               await confirmCodeRepo.saveCredentials(data);
               await UserCompletionGuard.handlePostAuthNavigation();
-            } else if (isFromLogin) {
+            } else if (event.isFromLogin) {
               /// من اللوجين → يرجع للوجين
               AppCore.showSnackBar(
                 notification: AppNotification(
@@ -81,14 +75,12 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
               /// من forget password → يروح يغير الباسورد
               CustomNavigator.push(
                 Routes.forgetPassword,
-                arguments: {
-                  "identifier": email,
-                },
+                arguments: ChangePasswordArgs(identifier: event.identifier),
               );
             }
 
             if (emit.isDone) return;
-            emit(Done());
+            emit(const ConfirmCodeSuccess());
           },
         );
       } catch (e) {
@@ -99,7 +91,7 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
             borderColor: Styles.RED_COLOR,
           ),
         );
-        emit(Error());
+        emit(ConfirmCodeFailure(e.toString()));
       }
     });
   }

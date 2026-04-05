@@ -6,10 +6,10 @@ import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/components/animated_widget.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
 import '../bloc/payment_bloc.dart';
+import '../bloc/payment_event.dart';
+import '../bloc/payment_state.dart';
 import '../model/model.dart';
 
 class PaymentPage extends StatefulWidget {
@@ -25,10 +25,11 @@ class _PaymentPageState extends State<PaymentPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => PaymentBloc(sl())..add(Add()),
+      create: (context) =>
+          PaymentBloc(sl())..add(const PaymentMethodsRequested()),
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar:CustomAppBar(title: 'payment.title'.tr()),
+        appBar: CustomAppBar(title: 'payment.title'.tr()),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
           child: Column(
@@ -44,9 +45,9 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
               const SizedBox(height: 24),
               Expanded(
-                child: BlocBuilder<PaymentBloc, AppState>(
+                child: BlocBuilder<PaymentBloc, PaymentState>(
                   builder: (context, state) {
-                    if (state is Loading) {
+                    if (state is PaymentLoading) {
                       // Show shimmer effect
                       return ListView.builder(
                         itemCount: 5,
@@ -65,18 +66,19 @@ class _PaymentPageState extends State<PaymentPage> {
                           ),
                         ),
                       );
-                    } else if (state is Done) {
-                      final List<PaymentModel> paymentMethods = state.list as List<PaymentModel>;
+                    } else if (state is PaymentMethodsLoaded) {
+                      final List<PaymentModel> paymentMethods = state.methods;
                       return ListAnimator(
                         data: paymentMethods
                             .map((option) => _buildPaymentOption(
-                          text: option.name ?? '',
-                          iconPath: option.image ?? 'assets/images/visa1.png',
-                          index: paymentMethods.indexOf(option),
-                        ))
+                                  text: option.name ?? '',
+                                  iconPath:
+                                      option.image ?? 'assets/images/visa1.png',
+                                  index: paymentMethods.indexOf(option),
+                                ))
                             .toList(),
                       );
-                    } else if (state is Error) {
+                    } else if (state is PaymentFailure) {
                       return Center(
                         child: Text(
                           'payment.error'.tr(),
@@ -93,9 +95,8 @@ class _PaymentPageState extends State<PaymentPage> {
                 text: 'payment.next'.tr(),
                 onTap: () {
                   final bloc = context.read<PaymentBloc>();
-                  if (bloc.state is Done) {
-                 //   final paymentMethods = (bloc.state as Done).list;
-
+                  if (bloc.state is PaymentMethodsLoaded) {
+                    //   final paymentMethods = (bloc.state as Done).list;
                   }
                 },
               ),
@@ -127,13 +128,17 @@ class _PaymentPageState extends State<PaymentPage> {
             color: isSelected ? const Color(0xFFE6F9F6) : Colors.white,
             borderRadius: BorderRadius.circular(8.0),
             border: Border.all(
-              color: isSelected ? const Color(0xFF00C4A1) : Colors.grey.shade300,
+              color:
+                  isSelected ? const Color(0xFF00C4A1) : Colors.grey.shade300,
               width: isSelected ? 1.5 : 1.0,
             ),
           ),
           child: Row(
             children: [
-              Image.network(iconPath, height: 24, width: 24, errorBuilder: (_, __, ___) => const Icon(Icons.payment)),
+              Image.network(iconPath,
+                  height: 24,
+                  width: 24,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.payment)),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
@@ -151,21 +156,23 @@ class _PaymentPageState extends State<PaymentPage> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? const Color(0xFF00C4A1) : Colors.grey.shade400,
+                    color: isSelected
+                        ? const Color(0xFF00C4A1)
+                        : Colors.grey.shade400,
                     width: 2,
                   ),
                 ),
                 child: isSelected
                     ? Center(
-                  child: Container(
-                    height: 12,
-                    width: 12,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFF00C4A1),
-                    ),
-                  ),
-                )
+                        child: Container(
+                          height: 12,
+                          width: 12,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFF00C4A1),
+                          ),
+                        ),
+                      )
                     : null,
               ),
             ],

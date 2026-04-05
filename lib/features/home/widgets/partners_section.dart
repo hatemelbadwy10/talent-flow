@@ -12,14 +12,8 @@ class PartnersSection extends StatelessWidget {
         "image": "assets/images/Talent Flow logo 1 1.png",
         "title": "Talent Flow"
       },
-      {
-        "image": "assets/images/Talent Flow logo 1 1.png",
-        "title": "Partner 2"
-      },
-      {
-        "image": "assets/images/Talent Flow logo 1 1.png",
-        "title": "Partner 3"
-      },
+      {"image": "assets/images/Talent Flow logo 1 1.png", "title": "Partner 2"},
+      {"image": "assets/images/Talent Flow logo 1 1.png", "title": "Partner 3"},
     ];
 
     return Padding(

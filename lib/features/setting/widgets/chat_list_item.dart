@@ -21,7 +21,7 @@ class ChatListItem extends StatelessWidget {
         CircleAvatar(
           radius: 24,
           backgroundImage: NetworkImage(
-            chat.receiver?.image??"",
+            chat.receiver?.image ?? "",
           ),
         ),
         const SizedBox(width: 12),
@@ -63,7 +63,7 @@ class ChatListItem extends StatelessWidget {
           ),
         ),
       ],
-    ).paddingAll(12).onTap((){
+    ).paddingAll(12).onTap(() {
       CustomNavigator.push(
         Routes.chat,
         arguments: {
@@ -73,8 +73,8 @@ class ChatListItem extends StatelessWidget {
           'freelancerJobTitle': chat.receiver?.jobTitle,
         },
       );
-    },borderRadius: BorderRadius.circular(12)).setContainerToView(
-     color: Colors.white,
+    }, borderRadius: BorderRadius.circular(12)).setContainerToView(
+      color: Colors.white,
       radius: 12,
     );
   }

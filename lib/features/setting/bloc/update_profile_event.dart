@@ -9,7 +9,9 @@ abstract class UpdateProfileEvent extends Equatable {
 
 // --- Initialization ---
 class LoadUserData extends UpdateProfileEvent {} // load from SharedPreferences
-class LoadSelections extends UpdateProfileEvent {} // load specialization, job titles, skills from API
+
+class LoadSelections
+    extends UpdateProfileEvent {} // load specialization, job titles, skills from API
 
 // --- Field updates ---
 class UpdateFirstName extends UpdateProfileEvent {

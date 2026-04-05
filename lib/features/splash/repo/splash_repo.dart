@@ -5,12 +5,13 @@ class SplashRepo extends BaseRepo {
   SplashRepo({required super.sharedPreferences, required super.dioClient});
 
   // Checks if the 'notFirstTime' key exists. If it DOESN'T, it's the first time.
-  bool get isFirstTime => !sharedPreferences.containsKey(AppStorageKey.notFirstTime);
+  bool get isFirstTime =>
+      !sharedPreferences.containsKey(AppStorageKey.notFirstTime);
 
   // After the user sees the onboarding, we set this to true.
-   void setFirstTime() {
-     sharedPreferences.setBool(AppStorageKey.notFirstTime, true);
-   }
+  void setFirstTime() {
+    sharedPreferences.setBool(AppStorageKey.notFirstTime, true);
+  }
 
   // Add this getter to check for a user token or any login flag
   @override

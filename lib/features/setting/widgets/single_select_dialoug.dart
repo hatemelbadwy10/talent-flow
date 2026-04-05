@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+
 class SingleSelectDialog extends StatefulWidget {
   final String title;
   final Map<String, String> options; // Map of {id: name}

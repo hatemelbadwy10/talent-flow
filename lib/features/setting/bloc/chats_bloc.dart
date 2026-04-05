@@ -16,7 +16,8 @@ class ChatsBloc extends Bloc<AppEvent, AppState> {
     on<Click>(_onLoadProjectOptions);
   }
 
-  Future<void> _onLoadProjectOptions(Click event, Emitter<AppState> emit) async {
+  Future<void> _onLoadProjectOptions(
+      Click event, Emitter<AppState> emit) async {
     try {
       final result = await _chatsRepo.getProjectChatOptions();
       result.fold(
@@ -28,14 +29,14 @@ class ChatsBloc extends Bloc<AppEvent, AppState> {
             if (response.data is Map && response.data['payload'] is Map) {
               final payload = response.data['payload'] as Map;
               final options = <int, String>{};
-              
+
               payload.forEach((key, value) {
                 final id = int.tryParse(key.toString());
                 if (id != null && value is String) {
                   options[id] = value;
                 }
               });
-              
+
               projectOptions = options;
               // Emit current state to trigger UI rebuild with new project options
               emit(state);

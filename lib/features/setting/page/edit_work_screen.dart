@@ -11,8 +11,12 @@ import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/home_bloc.dart';
+import 'package:talent_flow/features/home/bloc/home_event.dart';
+import 'package:talent_flow/features/home/bloc/home_state.dart';
 import 'package:talent_flow/features/home/model/work_details_model.dart';
 import 'package:talent_flow/features/new_projects/bloc/selection_option_bloc.dart';
+import 'package:talent_flow/features/new_projects/bloc/selection_option_event.dart';
+import 'package:talent_flow/features/new_projects/bloc/selection_option_state.dart';
 import 'package:talent_flow/features/new_projects/model/selection_option_model.dart';
 import 'package:talent_flow/features/setting/bloc/edit_work_bloc.dart';
 import 'package:talent_flow/features/setting/model/edit_work_request_model.dart';
@@ -35,10 +39,12 @@ class EditWorkScreen extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => HomeBloc(homeRepo: sl())..add(Open(arguments: workId)),
+          create: (_) =>
+              HomeBloc(homeRepo: sl())..add(WorkDetailsRequested(workId)),
         ),
         BlocProvider(
-          create: (_) => SelectionOptionBloc(sl())..add(Add()),
+          create: (_) =>
+              SelectionOptionBloc(sl())..add(const SelectionOptionsRequested()),
         ),
         BlocProvider(
           create: (_) => EditWorkBloc(sl()),
@@ -87,17 +93,17 @@ class _EditWorkViewState extends State<_EditWorkView> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        BlocListener<HomeBloc, AppState>(
+        BlocListener<HomeBloc, HomeState>(
           listener: (context, state) {
-            if (state is Done && state.model is WorkDetailsModel) {
-              _hydrateFromWork(state.model as WorkDetailsModel);
+            if (state is WorkDetailsLoaded) {
+              _hydrateFromWork(state.work);
             }
           },
         ),
-        BlocListener<SelectionOptionBloc, AppState>(
+        BlocListener<SelectionOptionBloc, SelectionOptionState>(
           listener: (context, state) {
-            if (state is Done && state.model is SelectionModel) {
-              final model = state.model as SelectionModel;
+            if (state is SelectionOptionLoaded) {
+              final SelectionModel model = state.selectionModel;
               setState(() {
                 _allAvailableSkills = model.skills;
                 _syncSelectedSkillIds();
@@ -131,15 +137,15 @@ class _EditWorkViewState extends State<_EditWorkView> {
           title: 'edit_work.title'.tr(),
           centerTitle: true,
         ),
-        body: BlocBuilder<HomeBloc, AppState>(
+        body: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, loadState) {
-            if (loadState is Loading && !_isInitialized) {
+            if (loadState is HomeLoading && !_isInitialized) {
               return const Center(
                 child: CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
               );
             }
 
-            if (loadState is Error && !_isInitialized) {
+            if (loadState is HomeFailure && !_isInitialized) {
               return Center(child: Text('something_went_wrong'.tr()));
             }
 

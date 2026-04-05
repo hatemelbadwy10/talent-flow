@@ -26,7 +26,7 @@ class CustomErrorWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  error??"",
+                  error ?? "",
                   style: AppTextStyles.w400
                       .copyWith(color: Colors.red, fontSize: 12),
                 ),

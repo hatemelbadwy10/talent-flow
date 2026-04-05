@@ -3,12 +3,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../app/core/images.dart';
 import '../../../data/config/di.dart';
 import '../../setting/widgets/setting_app_bar.dart';
 import '../bloc/home_bloc.dart';
+import '../bloc/home_event.dart';
+import '../bloc/home_state.dart';
 import '../model/freelancers_model.dart';
 import '../model/home_model.dart' hide Card;
 import '../widgets/freelancer_listview_item.dart';
@@ -36,10 +36,10 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
 
     final categoryId = widget.arguments?["categoryId"] as int?;
     if (categoryId != null) {
-      _freelancersBloc.add(Follow(arguments: categoryId));
+      _freelancersBloc.add(HomeFreelancersRequested(categoryId: categoryId));
     } else {
-      _categoriesBloc.add(Click());
-      _freelancersBloc.add(Follow());
+      _categoriesBloc.add(const HomeCategoriesRequested());
+      _freelancersBloc.add(const HomeFreelancersRequested());
     }
   }
 
@@ -59,9 +59,11 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
 
   void _applyFilters() {
     if (_selectedCategory == null) {
-      _freelancersBloc.add(Follow());
+      _freelancersBloc.add(const HomeFreelancersRequested());
     } else {
-      _freelancersBloc.add(Follow(arguments: _selectedCategory!.id));
+      _freelancersBloc.add(
+        HomeFreelancersRequested(categoryId: _selectedCategory!.id),
+      );
     }
   }
 
@@ -147,14 +149,14 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                               ),
                               SizedBox(height: 16.h),
                               Expanded(
-                                child: BlocBuilder<HomeBloc, AppState>(
+                                child: BlocBuilder<HomeBloc, HomeState>(
                                   bloc: _categoriesBloc,
                                   builder: (context, state) {
-                                    if (state is Loading) {
+                                    if (state is HomeLoading) {
                                       return const Center(
                                         child: CircularProgressIndicator(),
                                       );
-                                    } else if (state is Error) {
+                                    } else if (state is HomeFailure) {
                                       return Center(
                                         child: Column(
                                           mainAxisAlignment:
@@ -176,15 +178,16 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                             SizedBox(height: 8.h),
                                             TextButton(
                                               onPressed: () =>
-                                                  _categoriesBloc.add(Click()),
+                                                  _categoriesBloc.add(
+                                                const HomeCategoriesRequested(),
+                                              ),
                                               child: Text("retry".tr()),
                                             ),
                                           ],
                                         ),
                                       );
-                                    } else if (state is Done) {
-                                      final categories =
-                                          state.list as List<Category>;
+                                    } else if (state is HomeCategoriesLoaded) {
+                                      final categories = state.categories;
 
                                       if (categories.isEmpty) {
                                         return Center(
@@ -433,12 +436,12 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                 ),
               ),
             Expanded(
-              child: BlocBuilder<HomeBloc, AppState>(
+              child: BlocBuilder<HomeBloc, HomeState>(
                 bloc: _freelancersBloc,
                 builder: (context, state) {
-                  if (state is Loading) {
+                  if (state is HomeLoading) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (state is Error) {
+                  } else if (state is HomeFailure) {
                     return Center(
                       child: Padding(
                         padding: EdgeInsets.all(20.w),
@@ -473,8 +476,11 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                               onPressed: () {
                                 final categoryId =
                                     widget.arguments?["categoryId"] as int?;
-                                _freelancersBloc
-                                    .add(Follow(arguments: categoryId));
+                                _freelancersBloc.add(
+                                  HomeFreelancersRequested(
+                                    categoryId: categoryId,
+                                  ),
+                                );
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Styles.PRIMARY_COLOR,
@@ -490,8 +496,9 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                         ),
                       ),
                     );
-                  } else if (state is Done) {
-                    final freelancers = state.list as List<FreelancersModel>;
+                  } else if (state is HomeFreelancersLoaded) {
+                    final List<FreelancersModel> freelancers =
+                        state.freelancers;
                     if (freelancers.isEmpty) {
                       return Center(
                         child: Padding(

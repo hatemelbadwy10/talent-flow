@@ -5,10 +5,10 @@ import 'package:talent_flow/app/core/extensions.dart';
 import 'package:talent_flow/features/on_boarding/widget/on_boarding_button.dart';
 import 'package:talent_flow/features/on_boarding/widget/page_content_widget.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../app/core/images.dart';
 import '../bloc/on_boarding_bloc.dart';
+import '../bloc/on_boarding_event.dart';
+import '../bloc/on_boarding_state.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -16,7 +16,7 @@ class OnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => OnboardingBloc()..add(Init()),
+      create: (context) => OnboardingBloc()..add(const OnboardingStarted()),
       child: const OnboardingView(),
     );
   }
@@ -58,15 +58,13 @@ class _OnboardingViewState extends State<OnboardingView> {
       },
     ];
 
-    return BlocListener<OnboardingBloc, AppState>(
+    return BlocListener<OnboardingBloc, OnboardingState>(
       listener: (context, state) {
-        if (state is Done && state.data is int) {
-          _pageController.animateToPage(
-            state.data as int,
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeInOut,
-          );
-        }
+        _pageController.animateToPage(
+          state.currentPage,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+        );
       },
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -78,7 +76,9 @@ class _OnboardingViewState extends State<OnboardingView> {
                   controller: _pageController,
                   itemCount: onboardingData.length,
                   onPageChanged: (int page) {
-                    context.read<OnboardingBloc>().add(Scroll(arguments: page));
+                    context
+                        .read<OnboardingBloc>()
+                        .add(OnboardingPageChanged(page));
                   },
                   itemBuilder: (context, index) {
                     return PageContentWidget(
@@ -89,12 +89,10 @@ class _OnboardingViewState extends State<OnboardingView> {
                   },
                 ).paddingAll(16),
               ),
-              BlocBuilder<OnboardingBloc, AppState>(
+              BlocBuilder<OnboardingBloc, OnboardingState>(
                 builder: (context, state) {
-                  final currentPage =
-                      (state is Done && state.data is int) ? state.data as int : 0;
                   return OnBoardingButton(
-                    currentPage: currentPage,
+                    currentPage: state.currentPage,
                     onboardingData: onboardingData,
                   );
                 },

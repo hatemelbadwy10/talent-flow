@@ -14,9 +14,9 @@ class StepperIndex extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: Dimensions.PADDING_SIZE_EXTRA_LARGE.w,
-          ),
+      padding: EdgeInsets.symmetric(
+        horizontal: Dimensions.PADDING_SIZE_EXTRA_LARGE.w,
+      ),
       child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,

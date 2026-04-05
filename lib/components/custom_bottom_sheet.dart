@@ -33,10 +33,9 @@ abstract class CustomBottomSheet {
       isDismissible: true,
       builder: (_) {
         return Padding(
-          padding:
-              MediaQuery.of(
-                CustomNavigator.navigatorState.currentContext!,
-              ).viewInsets,
+          padding: MediaQuery.of(
+            CustomNavigator.navigatorState.currentContext!,
+          ).viewInsets,
           child: Container(
             width: CustomNavigator.navigatorState.currentContext!.width,
             constraints:
@@ -110,8 +109,7 @@ abstract class CustomBottomSheet {
                         horizontal: Dimensions.PADDING_SIZE_DEFAULT.w,
                         vertical: Dimensions.paddingSizeExtraSmall.h,
                       ),
-                      child:
-                          child ??
+                      child: child ??
                           Row(
                             children: [
                               Expanded(
@@ -163,10 +161,9 @@ abstract class CustomBottomSheet {
       isDismissible: canDismiss,
       builder: (_) {
         return Padding(
-          padding:
-              MediaQuery.of(
-                CustomNavigator.navigatorState.currentContext!,
-              ).viewInsets,
+          padding: MediaQuery.of(
+            CustomNavigator.navigatorState.currentContext!,
+          ).viewInsets,
           child: Container(
             constraints:
                 height != null ? BoxConstraints(maxHeight: height) : null,

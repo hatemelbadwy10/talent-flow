@@ -3,7 +3,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../app/core/images.dart';
 
-
 class CustomLoading extends StatelessWidget {
   const CustomLoading({super.key});
 

@@ -7,7 +7,8 @@ class NavButton extends StatelessWidget {
   final ValueChanged<int> onTap;
   final Widget child;
 
-  const NavButton({super.key, 
+  const NavButton({
+    super.key,
     required this.onTap,
     required this.position,
     required this.length,

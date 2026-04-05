@@ -1,6 +1,6 @@
 import 'package:talent_flow/data/config/mapper.dart';
 
-class PaymentModel extends SingleMapper{
+class PaymentModel extends SingleMapper {
   PaymentModel({
     required this.id,
     required this.image,
@@ -13,12 +13,15 @@ class PaymentModel extends SingleMapper{
   final String? name;
   final List<PaymentModel> items;
 
-  factory PaymentModel.fromJson(Map<String, dynamic> json){
+  factory PaymentModel.fromJson(Map<String, dynamic> json) {
     return PaymentModel(
       id: json["id"],
       image: json["image"],
       name: json["name"],
-      items: json["items"] == null ? [] : List<PaymentModel>.from(json["items"]!.map((x) => PaymentModel.fromJson(x))),
+      items: json["items"] == null
+          ? []
+          : List<PaymentModel>.from(
+              json["items"]!.map((x) => PaymentModel.fromJson(x))),
     );
   }
 
@@ -32,5 +35,4 @@ class PaymentModel extends SingleMapper{
     // TODO: implement toJson
     throw UnimplementedError();
   }
-
 }

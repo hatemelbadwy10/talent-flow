@@ -32,8 +32,8 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
     context.read<FreelancerChatBloc>().add(
           SendMessage(
             arguments: {
-              'conversationId':
-                  widget.arguments?['conversationId'] ?? widget.arguments?['freelancerId'],
+              'conversationId': widget.arguments?['conversationId'] ??
+                  widget.arguments?['freelancerId'],
               'body': body,
             },
           ),

@@ -1,41 +1,35 @@
 import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../app/core/app_core.dart';
-import '../../../../../app/core/app_event.dart';
 import '../../../../../app/core/app_notification.dart';
-import '../../../../../app/core/app_state.dart';
 import '../../../../../app/core/styles.dart';
 import '../../../../../app/core/user_completion_guard.dart';
+import '../../../../../data/error/failures.dart';
+import '../../../../../features/auth/models/auth_route_arguments.dart';
 import '../../../../../navigation/custom_navigation.dart';
 import '../../../../../navigation/routes.dart';
-import '../../../../../data/error/failures.dart';
 import '../repo/login_repo.dart';
+import 'login_event.dart';
+import 'login_state.dart';
 
-class SocialLoginClick extends AppEvent {
-  final String provider;
-  final String token;
-  final String? userType;
-  SocialLoginClick(
-      {required this.provider, required this.token, this.userType});
-}
-
-class LoginBloc extends Bloc<AppEvent, AppState> {
+class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LoginRepo repo;
 
-  LoginBloc({required this.repo}) : super(Start()) {
-    on<Click>((event, emit) async {
+  LoginBloc({required this.repo}) : super(const LoginInitial()) {
+    on<LoginSubmitted>((event, emit) async {
       try {
-        emit(Loading());
+        emit(const LoginInProgress());
+        final data = {
+          "email": event.email,
+          "password": event.password,
+        };
 
-        final Map<String, dynamic> data =
-            event.arguments as Map<String, dynamic>;
-
-        Either<ServerFailure, Response> response = await repo.logIn(data);
+        Either<ServerFailure, Map<String, dynamic>> response =
+            await repo.logIn(data);
 
         await response.fold<Future<void>>(
           (fail) async {
@@ -59,7 +53,7 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
 
               // Send verification code
               final resendResult =
-                  await repo.resendVerificationEmail(data['email']);
+                  await repo.resendVerificationEmail(event.email);
 
               resendResult.fold(
                 (resendFail) {
@@ -75,14 +69,14 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
               log("data${data['email']}");
               CustomNavigator.push(
                 Routes.sendCodeScreen,
-                arguments: {
-                  "email": data['email'],
-                  "isFromLogin": true,
-                },
+                arguments: ConfirmCodeArgs(
+                  email: event.email,
+                  isFromLogin: true,
+                ),
               );
 
               if (emit.isDone) return;
-              emit(Error());
+              emit(LoginFailure(message));
               return;
             }
 
@@ -96,20 +90,18 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
               ),
             );
             if (emit.isDone) return;
-            emit(Error());
+            emit(LoginFailure(fail.error));
           },
           (success) async {
             log('Request data: $data');
-            log("Response success: ${success.data}");
-
-            final responseData = success.data;
+            log("Response success: $success");
 
             // ✅ Handle successful login
             await repo.saveCredentials(data);
-            await repo.saveUserData(responseData);
+            await repo.saveUserData(success);
             await UserCompletionGuard.handlePostAuthNavigation();
             if (emit.isDone) return;
-            emit(Done());
+            emit(const LoginSuccess());
           },
         );
       } catch (e) {
@@ -121,12 +113,12 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
             borderColor: Styles.RED_COLOR,
           ),
         );
-        emit(Error());
+        emit(LoginFailure(e.toString()));
       }
     });
-    on<SocialLoginClick>((event, emit) async {
+    on<LoginWithSocialProviderSubmitted>((event, emit) async {
       try {
-        emit(Loading());
+        emit(const LoginInProgress());
 
         final response = await repo.socialLogin(
           provider: event.provider,
@@ -144,14 +136,13 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
               ),
             );
             if (emit.isDone) return;
-            emit(Error());
+            emit(LoginFailure(fail.error));
           },
           (success) async {
-            final responseData = success.data;
-            await repo.saveUserData(responseData);
+            await repo.saveUserData(success);
             await UserCompletionGuard.handlePostAuthNavigation();
             if (emit.isDone) return;
-            emit(Done());
+            emit(const LoginSuccess());
           },
         );
       } catch (e) {
@@ -163,7 +154,7 @@ class LoginBloc extends Bloc<AppEvent, AppState> {
             borderColor: Styles.RED_COLOR,
           ),
         );
-        emit(Error());
+        emit(LoginFailure(e.toString()));
       }
     });
   }

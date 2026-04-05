@@ -12,7 +12,6 @@ import 'dimensions.dart';
 import 'styles.dart';
 import 'text_styles.dart';
 
-
 extension StringExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
@@ -41,15 +40,15 @@ extension StringExtension on String {
   }
 
   String hiddenNumber() {
-    return this[length - 2] + this[length - 1] + List.filled(length - 2, '*').join();
+    return this[length - 2] +
+        this[length - 1] +
+        List.filled(length - 2, '*').join();
   }
 }
 
 extension DateExtention on DateTime {
   String dateFormat({required String format, String? lang}) {
-    return DateFormat(
-            format, lang)
-        .format(this);
+    return DateFormat(format, lang).format(this);
   }
 
   String arTimeFormat() {
@@ -128,8 +127,6 @@ extension MediaQueryValues on BuildContext {
 }
 // Widget Extensions
 
-
-
 Duration transitionDuration = const Duration(milliseconds: 300);
 
 extension WidgetExtension on Widget {
@@ -158,7 +155,9 @@ extension WidgetExtension on Widget {
         color: color,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(radius ?? 0)),
-          side: borderColor != null ? BorderSide(color: borderColor, width: 1) : BorderSide.none,
+          side: borderColor != null
+              ? BorderSide(color: borderColor, width: 1)
+              : BorderSide.none,
         ),
         shadows: shadows,
       ),
@@ -167,7 +166,10 @@ extension WidgetExtension on Widget {
   }
 
   Widget setMainContainer({double? padding}) {
-    return setInkContainerToView(padding: padding ?? 16, radius: Dimensions.RADIUS_LARGE, color: Colors.white);
+    return setInkContainerToView(
+        padding: padding ?? 16,
+        radius: Dimensions.RADIUS_LARGE,
+        color: Colors.white);
   }
 
   Widget setInkContainerToView({
@@ -187,7 +189,9 @@ extension WidgetExtension on Widget {
         shadows: shadows,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(radius ?? 0)),
-          side: borderColor != null ? BorderSide(color: borderColor, width: 1) : BorderSide.none,
+          side: borderColor != null
+              ? BorderSide(color: borderColor, width: 1)
+              : BorderSide.none,
         ),
       ),
       child: AnimatedContainer(
@@ -221,7 +225,9 @@ extension WidgetExtension on Widget {
         shadows: shadows,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(radius ?? 0)),
-          side: borderColor != null ? BorderSide(color: borderColor, width: 1) : BorderSide.none,
+          side: borderColor != null
+              ? BorderSide(color: borderColor, width: 1)
+              : BorderSide.none,
         ),
       ),
       child: this,
@@ -229,7 +235,10 @@ extension WidgetExtension on Widget {
   }
 
   Widget setMaterial() {
-    return Material(color: Colors.transparent, type: MaterialType.transparency, child: this);
+    return Material(
+        color: Colors.transparent,
+        type: MaterialType.transparency,
+        child: this);
   }
 
   Widget circle({
@@ -241,7 +250,8 @@ extension WidgetExtension on Widget {
   }) {
     return CircleAvatar(
       radius: radius,
-      backgroundColor: backgroundColor ?? Styles.PRIMARY_COLOR.withValues(alpha: 0.1),
+      backgroundColor:
+          backgroundColor ?? Styles.PRIMARY_COLOR.withValues(alpha: 0.1),
       foregroundColor: borderColor,
       child: child ?? this,
     );
@@ -266,7 +276,11 @@ extension WidgetExtension on Widget {
           decoration: BoxDecoration(
             color: color ?? Colors.white.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(radius),
-            border: hasBorder ? Border.all(color: color ?? Colors.white.withValues(alpha: 0.6), width: 1) : null,
+            border: hasBorder
+                ? Border.all(
+                    color: color ?? Colors.white.withValues(alpha: 0.6),
+                    width: 1)
+                : null,
           ),
           child: this,
         ),
@@ -292,7 +306,10 @@ extension WidgetExtension on Widget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  titleWidget ?? Text(title ?? '', style: titleStyle ?? AppTextStyles.w400.copyWith(fontSize: 14)),
+                  titleWidget ??
+                      Text(title ?? '',
+                          style: titleStyle ??
+                              AppTextStyles.w400.copyWith(fontSize: 14)),
                   titleIcon ?? const SizedBox.shrink(),
                 ],
               ).paddingHorizontal(titlePadding),
@@ -307,17 +324,29 @@ extension WidgetExtension on Widget {
       title: title,
       titlePadding: Dimensions.PADDING_SIZE_DEFAULT,
       titleStyle: AppTextStyles.w600.copyWith(fontSize: 16),
-      titleIcon: const Text('See all').clickable(onTap: () => onTap?.call(), style: AppTextStyles.w600.copyWith(fontSize: 12)),
+      titleIcon: const Text('See all').clickable(
+          onTap: () => onTap?.call(),
+          style: AppTextStyles.w600.copyWith(fontSize: 12)),
     );
   }
 
-  Widget setSvgToView({required String svgPath, Color? color, double size = 24, double gap = 8, bool isEnd = false}) {
+  Widget setSvgToView(
+      {required String svgPath,
+      Color? color,
+      double size = 24,
+      double gap = 8,
+      bool isEnd = false}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (isEnd) this,
         if (isEnd) SizedBox(width: gap),
-        SvgPicture.asset(svgPath, height: size, width: size, colorFilter: color != null ? ColorFilter.mode(color, BlendMode.srcIn) : null),
+        SvgPicture.asset(svgPath,
+            height: size,
+            width: size,
+            colorFilter: color != null
+                ? ColorFilter.mode(color, BlendMode.srcIn)
+                : null),
         if (!isEnd) SizedBox(width: gap),
         if (!isEnd) Expanded(child: SizedBox()),
       ],
@@ -341,12 +370,14 @@ extension WidgetExtension on Widget {
     return visible ? this : (fallback ?? const SizedBox.shrink());
   }
 
-  Widget setBorder({double? width, Color? color, double radius = 0, double padding = 0}) {
+  Widget setBorder(
+      {double? width, Color? color, double radius = 0, double padding = 0}) {
     return Container(
       clipBehavior: Clip.antiAliasWithSaveLayer,
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        border: Border.all(color: color ?? Styles.BORDER_COLOR, width: width ?? 1),
+        border:
+            Border.all(color: color ?? Styles.BORDER_COLOR, width: width ?? 1),
         borderRadius: BorderRadius.circular(radius),
       ),
       child: this,
@@ -357,7 +388,8 @@ extension WidgetExtension on Widget {
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        border: Border.all(color: color ?? Styles.BORDER_COLOR, width: width ?? 1),
+        border:
+            Border.all(color: color ?? Styles.BORDER_COLOR, width: width ?? 1),
         shape: BoxShape.circle,
       ),
       child: this,
@@ -365,7 +397,11 @@ extension WidgetExtension on Widget {
   }
 
   /// add custom corner radius each side
-  ClipRRect clipRRectOnly({double bottomEnd = 0, double bottomStart = 0, double topEnd = 0, double topStart = 0}) {
+  ClipRRect clipRRectOnly(
+      {double bottomEnd = 0,
+      double bottomStart = 0,
+      double topEnd = 0,
+      double topStart = 0}) {
     return ClipRRect(
       borderRadius: BorderRadiusDirectional.only(
         bottomEnd: Radius.circular(bottomEnd.toDouble()),
@@ -389,7 +425,8 @@ extension WidgetExtension on Widget {
 
   ClipRRect clipRRectTop(double radius) {
     return ClipRRect(
-      borderRadius: BorderRadius.only(topLeft: Radius.circular(radius), topRight: Radius.circular(radius)),
+      borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(radius), topRight: Radius.circular(radius)),
       clipBehavior: Clip.antiAliasWithSaveLayer,
       child: this,
     );
@@ -397,7 +434,9 @@ extension WidgetExtension on Widget {
 
   ClipRRect clipRRectBottom(double radius) {
     return ClipRRect(
-      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(radius), bottomRight: Radius.circular(radius)),
+      borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(radius),
+          bottomRight: Radius.circular(radius)),
       clipBehavior: Clip.antiAliasWithSaveLayer,
       child: this,
     );
@@ -405,7 +444,8 @@ extension WidgetExtension on Widget {
 
   ClipRRect clipRRectStart(double radius) {
     return ClipRRect(
-      borderRadius: BorderRadiusDirectional.horizontal(start: Radius.circular(radius)),
+      borderRadius:
+          BorderRadiusDirectional.horizontal(start: Radius.circular(radius)),
       clipBehavior: Clip.antiAliasWithSaveLayer,
       child: this,
     );
@@ -413,7 +453,8 @@ extension WidgetExtension on Widget {
 
   ClipRRect clipRRectEnd(double radius) {
     return ClipRRect(
-      borderRadius: BorderRadiusDirectional.horizontal(end: Radius.circular(radius)),
+      borderRadius:
+          BorderRadiusDirectional.horizontal(end: Radius.circular(radius)),
       clipBehavior: Clip.antiAliasWithSaveLayer,
       child: this,
     );
@@ -437,7 +478,8 @@ extension WidgetExtension on Widget {
       clipBehavior: Clip.antiAliasWithSaveLayer,
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: borderColor ?? Colors.transparent, width: borderWidth),
+          border: Border.all(
+              color: borderColor ?? Colors.transparent, width: borderWidth),
         ),
         child: this,
       ),
@@ -445,8 +487,12 @@ extension WidgetExtension on Widget {
   }
 
   /// set parent widget in center
-  Widget center({double? heightFactor, double? widthFactor, bool enabled = true}) {
-    return enabled ? Center(heightFactor: heightFactor, widthFactor: widthFactor, child: this) : this;
+  Widget center(
+      {double? heightFactor, double? widthFactor, bool enabled = true}) {
+    return enabled
+        ? Center(
+            heightFactor: heightFactor, widthFactor: widthFactor, child: this)
+        : this;
   }
 
   /// add tap to parent widget
@@ -471,13 +517,19 @@ extension WidgetExtension on Widget {
   }
 
   /// Wrap with ShaderMask widget
-  Widget withShaderMask(List<Color> colors, {BlendMode blendMode = BlendMode.srcATop}) {
-    return withShaderMaskGradient(LinearGradient(colors: colors), blendMode: blendMode);
+  Widget withShaderMask(List<Color> colors,
+      {BlendMode blendMode = BlendMode.srcATop}) {
+    return withShaderMaskGradient(LinearGradient(colors: colors),
+        blendMode: blendMode);
   }
 
   /// Wrap with ShaderMask widget Gradient
-  Widget withShaderMaskGradient(Gradient gradient, {BlendMode blendMode = BlendMode.srcATop}) {
-    return ShaderMask(shaderCallback: (rect) => gradient.createShader(rect), blendMode: blendMode, child: this);
+  Widget withShaderMaskGradient(Gradient gradient,
+      {BlendMode blendMode = BlendMode.srcATop}) {
+    return ShaderMask(
+        shaderCallback: (rect) => gradient.createShader(rect),
+        blendMode: blendMode,
+        child: this);
   }
 
   /// Validate given widget is not null and returns given value if null.
@@ -485,18 +537,24 @@ extension WidgetExtension on Widget {
 
   Widget buildWhen(bool value) => value ? this : const SizedBox.shrink();
 
-  Widget withTooltip({required String msg}) => Tooltip(message: msg, child: this);
+  Widget withTooltip({required String msg}) =>
+      Tooltip(message: msg, child: this);
 
-  Widget withSafeArea({EdgeInsets? minimum}) => SafeArea(minimum: minimum ?? EdgeInsets.zero, child: this);
+  Widget withSafeArea({EdgeInsets? minimum}) =>
+      SafeArea(minimum: minimum ?? EdgeInsets.zero, child: this);
 
   Widget bottomSafeArea({EdgeInsets? minimum}) => SafeArea(
-    minimum: EdgeInsets.only(left: Dimensions.PADDING_SIZE_DEFAULT, right: Dimensions.PADDING_SIZE_DEFAULT, bottom: 16),
-    child: this,
-  );
+        minimum: EdgeInsets.only(
+            left: Dimensions.PADDING_SIZE_DEFAULT,
+            right: Dimensions.PADDING_SIZE_DEFAULT,
+            bottom: 16),
+        child: this,
+      );
 
   /// Make your any widget refreshable with RefreshIndicator on top
   // Widget get makeRefreshable => Stack(children: [ListView(), this]);
-  RefreshIndicator makeRefreshable(Future<void> Function() onRefresh, {EdgeInsetsGeometry? padding}) {
+  RefreshIndicator makeRefreshable(Future<void> Function() onRefresh,
+      {EdgeInsetsGeometry? padding}) {
     return RefreshIndicator.adaptive(
       backgroundColor: Colors.white,
       color: Styles.PRIMARY_COLOR,
@@ -506,7 +564,9 @@ extension WidgetExtension on Widget {
       },
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: padding ?? EdgeInsets.symmetric(horizontal: Dimensions.PADDING_SIZE_DEFAULT, vertical: 16),
+        padding: padding ??
+            EdgeInsets.symmetric(
+                horizontal: Dimensions.PADDING_SIZE_DEFAULT, vertical: 16),
         children: [this],
       ),
     );
@@ -528,9 +588,16 @@ extension WidgetExtension on Widget {
     );
   }
 
-  Widget toBottomNavBar({double? bottom, Color? color, Color? borderColor, List<BoxShadow>? shadows}) {
+  Widget toBottomNavBar(
+      {double? bottom,
+      Color? color,
+      Color? borderColor,
+      List<BoxShadow>? shadows}) {
     return Column(mainAxisSize: MainAxisSize.min, children: [this])
-        .withSafeArea(minimum: EdgeInsets.symmetric(horizontal: Dimensions.PADDING_SIZE_DEFAULT).copyWith(bottom: bottom))
+        .withSafeArea(
+            minimum: EdgeInsets.symmetric(
+                    horizontal: Dimensions.PADDING_SIZE_DEFAULT)
+                .copyWith(bottom: bottom))
         .paddingTop(8)
         .setContainerToView(
           color: color ?? Colors.white,
@@ -637,13 +704,23 @@ extension PaddingExtension on Widget {
   }
 
   /// return custom padding from each side
-  Padding paddingOnly({double top = 0.0, double left = 0.0, double bottom = 0.0, double right = 0.0}) {
-    return Padding(padding: EdgeInsets.fromLTRB(left, top, right, bottom), child: this);
+  Padding paddingOnly(
+      {double top = 0.0,
+      double left = 0.0,
+      double bottom = 0.0,
+      double right = 0.0}) {
+    return Padding(
+        padding: EdgeInsets.fromLTRB(left, top, right, bottom), child: this);
   }
 
-  Padding paddingDirectionalOnly({double top = 0.0, double start = 0.0, double bottom = 0.0, double end = 0.0}) {
+  Padding paddingDirectionalOnly(
+      {double top = 0.0,
+      double start = 0.0,
+      double bottom = 0.0,
+      double end = 0.0}) {
     return Padding(
-      padding: EdgeInsetsDirectional.only(top: top, bottom: bottom, start: start, end: end),
+      padding: EdgeInsetsDirectional.only(
+          top: top, bottom: bottom, start: start, end: end),
       child: this,
     );
   }
@@ -669,7 +746,8 @@ extension RouterExtension on Widget {
     }
   }
 
-  Widget withBlocProvider<T extends Cubit<Object>>(T bloc) => BlocProvider<T>.value(value: bloc, child: this);
+  Widget withBlocProvider<T extends Cubit<Object>>(T bloc) =>
+      BlocProvider<T>.value(value: bloc, child: this);
 }
 
 /// Extension on the [Widget] class to provide additional layout-related functionality.
@@ -681,13 +759,20 @@ extension LayoutExtensions on Widget {
   SizedBox withHeight(double height) => SizedBox(height: height, child: this);
 
   /// With custom height and width
-  SizedBox withSize(double width, double height) => SizedBox(width: width, height: height, child: this);
+  SizedBox withSize(double width, double height) =>
+      SizedBox(width: width, height: height, child: this);
 
   ///scrollable
-  Widget scrollable({EdgeInsets? padding, bool primary = true, bool reverse = false, ScrollPhysics? physics}) {
+  Widget scrollable(
+      {EdgeInsets? padding,
+      bool primary = true,
+      bool reverse = false,
+      ScrollPhysics? physics}) {
     return SingleChildScrollView(
       primary: primary,
-      padding: padding ?? EdgeInsets.symmetric(horizontal: Dimensions.PADDING_SIZE_DEFAULT, vertical: 16),
+      padding: padding ??
+          EdgeInsets.symmetric(
+              horizontal: Dimensions.PADDING_SIZE_DEFAULT, vertical: 16),
       physics: physics ?? const AlwaysScrollableScrollPhysics(),
       reverse: reverse,
       child: this,
@@ -707,7 +792,9 @@ extension LayoutExtensions on Widget {
       reverse: reverse,
       primary: primary,
       shrinkWrap: shrinkWrap,
-      padding: padding ?? EdgeInsets.all(Dimensions.PADDING_SIZE_DEFAULT).copyWith(bottom: kBottomNavigationBarHeight),
+      padding: padding ??
+          EdgeInsets.all(Dimensions.PADDING_SIZE_DEFAULT)
+              .copyWith(bottom: kBottomNavigationBarHeight),
       physics: physics,
       children: [this],
     );
@@ -720,34 +807,48 @@ extension LayoutExtensions on Widget {
 
   /// add Flexible to parent widget
   Widget flexible({int flex = 1, FlexFit? fit, bool enabled = true}) {
-    return enabled ? Flexible(flex: flex, fit: fit ?? FlexFit.loose, child: this) : this;
+    return enabled
+        ? Flexible(flex: flex, fit: fit ?? FlexFit.loose, child: this)
+        : this;
   }
 
   /// add FittedBox to parent widget
   Widget fit({BoxFit? fit, AlignmentGeometry? alignment}) {
-    return FittedBox(fit: fit ?? BoxFit.contain, alignment: alignment ?? Alignment.center, child: this);
+    return FittedBox(
+        fit: fit ?? BoxFit.contain,
+        alignment: alignment ?? Alignment.center,
+        child: this);
   }
 
   SliverToBoxAdapter toSliver() => SliverToBoxAdapter(child: this);
 
   Directionality withDirectionality(String dir) {
-    final textDir = dir == 'ar' || dir == 'ur' ? material.TextDirection.rtl : material.TextDirection.ltr;
+    final textDir = dir == 'ar' || dir == 'ur'
+        ? material.TextDirection.rtl
+        : material.TextDirection.ltr;
     return Directionality(textDirection: textDir, child: this);
   }
 }
 
 extension TransformExtension on Widget {
   /// add rotation to parent widget
-  Widget rotate({required double angle, bool transformHitTests = true, Offset? origin}) {
-    return Transform.rotate(origin: origin, angle: (angle * 3.141592653589793) / 180, transformHitTests: transformHitTests, child: this);
+  Widget rotate(
+      {required double angle, bool transformHitTests = true, Offset? origin}) {
+    return Transform.rotate(
+        origin: origin,
+        angle: (angle * 3.141592653589793) / 180,
+        transformHitTests: transformHitTests,
+        child: this);
   }
 
   Widget flipHorizontal({bool enable = true, bool transformHitTests = true}) {
-    return Transform.flip(flipX: enable, transformHitTests: transformHitTests, child: this);
+    return Transform.flip(
+        flipX: enable, transformHitTests: transformHitTests, child: this);
   }
 
   Widget flipVertical({bool enable = true, bool transformHitTests = true}) {
-    return Transform.flip(flipY: enable, transformHitTests: transformHitTests, child: this);
+    return Transform.flip(
+        flipY: enable, transformHitTests: transformHitTests, child: this);
   }
 
   //rotate with animation to parent widget
@@ -760,7 +861,11 @@ extension TransformExtension on Widget {
   }
 
   /// add scaling to parent widget
-  Widget scale({required double scale, Offset? origin, AlignmentGeometry? alignment, bool transformHitTests = true}) {
+  Widget scale(
+      {required double scale,
+      Offset? origin,
+      AlignmentGeometry? alignment,
+      bool transformHitTests = true}) {
     return Transform.scale(
       scale: scale,
       origin: origin,
@@ -771,20 +876,29 @@ extension TransformExtension on Widget {
   }
 
   /// add translate to parent widget
-  Widget translate({required Offset offset, bool transformHitTests = true, Key? key}) {
-    return Transform.translate(offset: offset, transformHitTests: transformHitTests, key: key, child: this);
+  Widget translate(
+      {required Offset offset, bool transformHitTests = true, Key? key}) {
+    return Transform.translate(
+        offset: offset,
+        transformHitTests: transformHitTests,
+        key: key,
+        child: this);
   }
 }
 
 extension AnimationExtension on Widget {
   Widget setHero(String heroKey) => Hero(
-    tag: heroKey,
-    child: Material(color: Colors.transparent, child: this),
-  );
+        tag: heroKey,
+        child: Material(color: Colors.transparent, child: this),
+      );
 
   /// add opacity to parent widget
-  Widget opacity({required double opacity, int durationInSecond = 1, Duration? duration}) {
-    return AnimatedOpacity(opacity: opacity, duration: duration ?? const Duration(milliseconds: 500), child: this);
+  Widget opacity(
+      {required double opacity, int durationInSecond = 1, Duration? duration}) {
+    return AnimatedOpacity(
+        opacity: opacity,
+        duration: duration ?? const Duration(milliseconds: 500),
+        child: this);
   }
 
   /// Validate given widget is not null and returns given value if null.
@@ -798,7 +912,8 @@ extension AnimationExtension on Widget {
     );
   }
 
-  Widget setAnimatedContainer({Duration? duration, double? width, double? hight}) {
+  Widget setAnimatedContainer(
+      {Duration? duration, double? width, double? hight}) {
     return AnimatedContainer(
       width: width,
       height: hight,
@@ -842,7 +957,8 @@ extension TextEx on Text {
           onTap: onTap,
           onHighlightChanged: (value) => highlighted.value = value,
           splashColor: value ? splashColor.withValues(alpha: 0.5) : splashColor,
-          highlightColor: value ? highlightColor.withValues(alpha: 0.5) : highlightColor,
+          highlightColor:
+              value ? highlightColor.withValues(alpha: 0.5) : highlightColor,
           borderRadius: borderRadius,
           onTapDown: (details) => highlighted.value = true,
           onTapUp: (details) => highlighted.value = false,
@@ -850,14 +966,19 @@ extension TextEx on Text {
           child: AnimatedDefaultTextStyle(
             curve: Curves.easeInOut,
             duration: const Duration(milliseconds: 100),
-            style:
-                style?.copyWith(color: value ? style.color?.withValues(alpha: 0.5) : style.color) ??
+            style: style?.copyWith(
+                    color: value
+                        ? style.color?.withValues(alpha: 0.5)
+                        : style.color) ??
                 AppTextStyles.w600.copyWith(
                   fontSize: fontSize,
                   fontWeight: fontWeight,
-                  color: value ? Styles.PRIMARY_COLOR.withValues(alpha: 0.5) : Styles.PRIMARY_COLOR,
+                  color: value
+                      ? Styles.PRIMARY_COLOR.withValues(alpha: 0.5)
+                      : Styles.PRIMARY_COLOR,
                 ),
-            child: Padding(padding: padding ?? EdgeInsets.all(paddingValue), child: this),
+            child: Padding(
+                padding: padding ?? EdgeInsets.all(paddingValue), child: this),
           ),
         );
       },
@@ -870,13 +991,15 @@ extension ColorEx on Color {
 
   Color darken([double amount = 0.1]) {
     final hslColor = HSLColor.fromColor(this);
-    final darkenedHslColor = hslColor.withLightness((hslColor.lightness - amount).clamp(0.0, 1.0));
+    final darkenedHslColor =
+        hslColor.withLightness((hslColor.lightness - amount).clamp(0.0, 1.0));
     return darkenedHslColor.toColor();
   }
 
   Color lighten([double amount = 0.1]) {
     final hslColor = HSLColor.fromColor(this);
-    final lightenedHslColor = hslColor.withLightness((hslColor.lightness + amount).clamp(0.0, 1.0));
+    final lightenedHslColor =
+        hslColor.withLightness((hslColor.lightness + amount).clamp(0.0, 1.0));
     return lightenedHslColor.toColor();
   }
 

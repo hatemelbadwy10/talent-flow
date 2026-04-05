@@ -29,8 +29,8 @@ class ProjectDescriptionField extends StatelessWidget {
             onPressed: () {
               controller.clear();
               context.read<AddProjectBloc>().add(
-                const UpdateDescription(description: ''),
-              );
+                    const UpdateDescription(description: ''),
+                  );
             },
             child: Text(
               'add_project.reset'.tr(),
@@ -46,8 +46,8 @@ class ProjectDescriptionField extends StatelessWidget {
           hint: 'add_project.project_description_hint'.tr(),
           onChanged: (value) {
             context.read<AddProjectBloc>().add(
-              UpdateDescription(description: value),
-            );
+                  UpdateDescription(description: value),
+                );
           },
           validate: (value) {
             if (value == null || value.isEmpty) {

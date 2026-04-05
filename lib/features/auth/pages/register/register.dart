@@ -10,9 +10,7 @@ import 'package:talent_flow/features/auth/widgets/auth_base.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../app/core/app_core.dart';
-import '../../../../app/core/app_event.dart';
 import '../../../../app/core/app_notification.dart';
-import '../../../../app/core/app_state.dart';
 import '../../../../app/core/app_storage_keys.dart';
 import '../../../../app/core/styles.dart';
 import '../../../../app/core/text_styles.dart';
@@ -23,9 +21,10 @@ import '../../../../navigation/routes.dart';
 import '../../../../data/config/di.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../login/bloc/login_bloc.dart';
 import '../social_media_login/bloc/social_media_bloc.dart';
 import 'bloc/register_bloc.dart'; // Import Bloc
+import 'bloc/register_event.dart';
+import 'bloc/register_state.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -54,9 +53,8 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     final bool isFreelancer =
         sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
-    final String userType = isFreelancer
-        ? "Freelancer"
-        : "Entrepreneur"; // Determine user type
+    final String userType =
+        isFreelancer ? "Freelancer" : "Entrepreneur"; // Determine user type
 
     return MultiBlocProvider(
       providers: [
@@ -99,7 +97,6 @@ class _RegisterState extends State<Register> {
             key: _formKey,
             child: Column(
               children: [
-
                 /// --------- First & Last name fields ---------
                 Row(
                   children: [
@@ -181,26 +178,24 @@ class _RegisterState extends State<Register> {
 
           /// --------- Register button ---------
           SizedBox(height: 12.h),
-          BlocConsumer<RegisterBloc, AppState>(
+          BlocConsumer<RegisterBloc, RegisterState>(
             listener: (context, state) {
-              if (state is Done) {}
+              if (state is RegisterSuccess) {}
             },
             builder: (context, state) {
               return CustomButton(
-                isLoading: state is Loading,
+                isLoading: state is RegisterInProgress,
                 text: "register.register_button".tr(),
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
-                    log("usertype ${userType}");
+                    log("usertype $userType");
                     BlocProvider.of<RegisterBloc>(context).add(
-                      Click(
-                        arguments: {
-                          "first_name": _firstNameController.text,
-                          "last_name": _lastNameController.text,
-                          "email": _emailController.text,
-                          "password": _passwordController.text,
-                          "user_type": userType,
-                        },
+                      RegisterSubmitted(
+                        firstName: _firstNameController.text,
+                        lastName: _lastNameController.text,
+                        email: _emailController.text,
+                        password: _passwordController.text,
+                        userType: userType,
                       ),
                     );
                   }
@@ -255,7 +250,7 @@ class _RegisterState extends State<Register> {
               final result = await SocialMediaLoginHelper().googleLogin();
 
               result.fold(
-                    (failure) {
+                (failure) {
                   // show error
                   AppCore.showSnackBar(
                     notification: AppNotification(
@@ -264,16 +259,16 @@ class _RegisterState extends State<Register> {
                     ),
                   );
                 },
-                    (socialModel) {
+                (socialModel) {
                   // call bloc event
                   context.read<RegisterBloc>().add(
-                    SocialLoginClick(
-                      provider: socialModel.provider!, // "google"
-                      token: socialModel.idToken!,
-                      userType: userType,
+                        RegisterWithSocialProviderSubmitted(
+                          provider: socialModel.provider!, // "google"
+                          token: socialModel.idToken!,
+                          userType: userType,
 // the token for backend
-                    ),
-                  );
+                        ),
+                      );
                 },
               );
             },

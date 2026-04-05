@@ -12,14 +12,14 @@ class AppNotification {
   final void Function()? onVisible;
   AppNotification(
       {required this.message,
-        this.onVisible,
-        this.iconName,
-        this.backgroundColor = Colors.black,
-        this.borderColor = Colors.transparent,
-        this.isFloating = false,
-        this.withAction = false,
-        this.action,
-        double? radius}) {
+      this.onVisible,
+      this.iconName,
+      this.backgroundColor = Colors.black,
+      this.borderColor = Colors.transparent,
+      this.isFloating = false,
+      this.withAction = false,
+      this.action,
+      double? radius}) {
     this.radius = radius ?? (isFloating ? 15 : 0);
   }
 }

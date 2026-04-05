@@ -19,13 +19,13 @@ class NewListItem extends StatelessWidget {
         // Use CachedNetworkImage for network images
         image: imageUrl != null && Uri.parse(imageUrl!).isAbsolute
             ? DecorationImage(
-          image: CachedNetworkImageProvider(imageUrl!),
-          fit: BoxFit.cover,
-        )
+                image: CachedNetworkImageProvider(imageUrl!),
+                fit: BoxFit.cover,
+              )
             : const DecorationImage(
-          image: AssetImage("assets/images/new_item.jpg"), // Fallback
-          fit: BoxFit.cover,
-        ),
+                image: AssetImage("assets/images/new_item.jpg"), // Fallback
+                fit: BoxFit.cover,
+              ),
       ),
       child: Container(
         decoration: BoxDecoration(

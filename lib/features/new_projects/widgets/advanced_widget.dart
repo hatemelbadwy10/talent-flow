@@ -42,10 +42,10 @@ class AdvancedSettings extends StatelessWidget {
               controller: requiredToBeReceivedContr,
               onChanged: (value) {
                 context.read<AddProjectBloc>().add(
-                  UpdateRequiredToBeReceived(
-                    requiredToBeReceived: value ?? "",
-                  ),
-                );
+                      UpdateRequiredToBeReceived(
+                        requiredToBeReceived: value ?? "",
+                      ),
+                    );
               },
             ),
             const SizedBox(height: 16),
@@ -60,8 +60,8 @@ class AdvancedSettings extends StatelessWidget {
               onChanged: (value) {
                 final projects = value.isEmpty ? <String>[] : [value];
                 context.read<AddProjectBloc>().add(
-                  UpdateSimilarProjects(similarProjects: projects),
-                );
+                      UpdateSimilarProjects(similarProjects: projects),
+                    );
               },
             ),
           ],

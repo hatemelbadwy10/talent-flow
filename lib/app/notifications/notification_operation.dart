@@ -1,6 +1,5 @@
 part of 'notification_helper.dart';
 
-
 @pragma('vm:entry-point')
 scheduleNotification(String title, String subtitle, String data) async {
   var rng = math.Random();

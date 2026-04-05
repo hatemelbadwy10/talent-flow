@@ -20,7 +20,6 @@ class FreelancerListDetailItem extends StatelessWidget {
     this.phoneNumber,
   });
 
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -41,22 +40,27 @@ class FreelancerListDetailItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center, // Align items vertically in the middle
+            crossAxisAlignment: CrossAxisAlignment
+                .center, // Align items vertically in the middle
             children: [
               // Profile image
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Styles.PRIMARY_COLOR, width: 2), // Example border color
+                  border: Border.all(
+                      color: Styles.PRIMARY_COLOR,
+                      width: 2), // Example border color
                 ),
                 child: CircleAvatar(
                   radius: 30, // Adjusted radius for a slightly smaller look
                   backgroundColor: Colors.grey.shade200,
-                  backgroundImage: imageUrl != null && Uri.parse(imageUrl!).isAbsolute
-                      ? NetworkImage(imageUrl!)
-                      : null,
+                  backgroundImage:
+                      imageUrl != null && Uri.parse(imageUrl!).isAbsolute
+                          ? NetworkImage(imageUrl!)
+                          : null,
                   child: imageUrl == null || !Uri.parse(imageUrl!).isAbsolute
-                      ? const Icon(Icons.person, size: 30, color: Styles.PRIMARY_COLOR)
+                      ? const Icon(Icons.person,
+                          size: 30, color: Styles.PRIMARY_COLOR)
                       : null,
                 ),
               ),
@@ -91,7 +95,8 @@ class FreelancerListDetailItem extends StatelessWidget {
                         const Icon(Icons.star, color: Colors.amber, size: 18),
                         SizedBox(width: 4.w),
                         Text(
-                          rating.toStringAsFixed(1), // Display rating with one decimal
+                          rating.toStringAsFixed(
+                              1), // Display rating with one decimal
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey[700],

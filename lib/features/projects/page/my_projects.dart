@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/images.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart' show sl;
 import '../bloc/my_projects_bloc.dart';
+import '../bloc/my_projects_event.dart';
+import '../bloc/my_projects_state.dart';
 import '../model/my_projects_model.dart';
 import '../widgets/my_projects_card.dart';
 import '../widgets/projects_shimmer.dart';
@@ -23,8 +23,11 @@ class OwnerProjects extends StatelessWidget {
     log('categoryId $categoryId');
     return BlocProvider(
       create: (context) =>
-      MyProjectsBloc(sl())..add(Add(arguments: categoryId)),
-      child: _OwnerProjectsContent(categoryId: categoryId,categoryName: arguments?['categoryName'],),
+          MyProjectsBloc(sl())..add(ProjectsRequested(categoryId: categoryId)),
+      child: _OwnerProjectsContent(
+        categoryId: categoryId,
+        categoryName: arguments?['categoryName'],
+      ),
     );
   }
 }
@@ -32,7 +35,7 @@ class OwnerProjects extends StatelessWidget {
 class _OwnerProjectsContent extends StatefulWidget {
   final int? categoryId;
   final String? categoryName;
-  const _OwnerProjectsContent({this.categoryId,this.categoryName});
+  const _OwnerProjectsContent({this.categoryId, this.categoryName});
 
   @override
   State<_OwnerProjectsContent> createState() => _OwnerProjectsContentState();
@@ -80,42 +83,42 @@ class _OwnerProjectsContentState extends State<_OwnerProjectsContent>
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         centerTitle: true,
-        title: widget.categoryId==null?  Text('owner_projects.my_projects'.tr()):Text(widget.categoryName!),
-    
+        title: widget.categoryId == null
+            ? Text('owner_projects.my_projects'.tr())
+            : Text(widget.categoryName!),
+
         /// 👇 فقط لو مفيش categoryId
         bottom: widget.categoryId == null
             ? TabBar(
-          indicatorColor: Styles.PRIMARY_COLOR,
-          labelColor: Styles.PRIMARY_COLOR,
-          controller: _tabController,
-          isScrollable: true,
-          onTap: (index) {
-            final status = statuses.keys.elementAt(index);
-            context
-                .read<MyProjectsBloc>()
-                .add(Add(arguments: status));
-          },
-          tabs:
-          statuses.values.map((label) => Tab(text: label)).toList(),
-        )
+                indicatorColor: Styles.PRIMARY_COLOR,
+                labelColor: Styles.PRIMARY_COLOR,
+                controller: _tabController,
+                isScrollable: true,
+                onTap: (index) {
+                  final status = statuses.keys.elementAt(index);
+                  context
+                      .read<MyProjectsBloc>()
+                      .add(ProjectsRequested(status: status));
+                },
+                tabs: statuses.values.map((label) => Tab(text: label)).toList(),
+              )
             : null,
       ),
-      body: BlocBuilder<MyProjectsBloc, AppState>(
+      body: BlocBuilder<MyProjectsBloc, MyProjectsState>(
         builder: (context, state) {
-          if (state is Loading) {
+          if (state is MyProjectsLoading) {
             return const ProjectCardShimmer();
-          } else if (state is Error) {
+          } else if (state is MyProjectsFailure) {
             return Center(child: Text("error.loading".tr()));
-          } else if (state is Done) {
-            final projects = state.list?.cast<MyProjectsModel>();
-            if (projects != null && projects.isNotEmpty) {
+          } else if (state is MyProjectsLoaded) {
+            final List<MyProjectsModel> projects = state.projects;
+            if (projects.isNotEmpty) {
               return Padding(
                 padding: const EdgeInsets.only(
                     right: 16, left: 16, top: 8, bottom: 32),
                 child: GridView.builder(
                   itemCount: projects.length,
-                  gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 2,
                     mainAxisSpacing: 2,

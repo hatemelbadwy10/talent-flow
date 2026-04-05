@@ -58,7 +58,18 @@ abstract class FilePickerHelper {
   static List<String> getFileExtension(FileType type) {
     print.log("========> Actual File Type $type");
     if (type == FileType.video) {
-      return ["3gp", "avi", "mp4", "MP4", "gif", "mov", "wmv", "hevc", "flv", "fyi"];
+      return [
+        "3gp",
+        "avi",
+        "mp4",
+        "MP4",
+        "gif",
+        "mov",
+        "wmv",
+        "hevc",
+        "flv",
+        "fyi"
+      ];
     } else if (type == FileType.audio) {
       return ["mpeg", "mpga", "mp3", "wav", "aac", "m4a", "ogg", "flac"];
     } else if (type == FileType.image) {
@@ -73,7 +84,9 @@ abstract class FilePickerHelper {
     if (bytes <= 0) return "0 B";
     const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
     var i = (log(bytes) / log(1024)).floor();
-    return (bytes / pow(1024, i)).toStringAsFixed(decimals) + ' ' + "${suffixes[i]}";
+    return (bytes / pow(1024, i)).toStringAsFixed(decimals) +
+        ' ' +
+        "${suffixes[i]}";
   }
 
   static String getName(String fullName) {

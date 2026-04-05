@@ -4,18 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
+import 'package:talent_flow/features/auth/models/auth_route_arguments.dart';
 import 'package:talent_flow/features/auth/pages/confirm_code/repo/confirm_code_repo.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../../../../app/core/app_event.dart';
 import '../../../../app/core/styles.dart';
 import '../../../../components/custom_button.dart';
 import '../../../../data/config/di.dart';
 import '../../widgets/auth_base.dart';
 import 'bloc/confirm_code_bloc.dart';
+import 'bloc/confirm_code_event.dart';
+import 'bloc/confirm_code_state.dart';
 
 class ConfirmCodeScreen extends StatefulWidget {
-  final Map<String, dynamic> argument;
+  final ConfirmCodeArgs argument;
   const ConfirmCodeScreen({super.key, required this.argument});
 
   @override
@@ -25,7 +27,7 @@ class ConfirmCodeScreen extends StatefulWidget {
 class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
   final _formKey = GlobalKey<FormState>();
   final List<TextEditingController> _controllers =
-  List.generate(6, (_) => TextEditingController());
+      List.generate(6, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   @override
@@ -124,7 +126,8 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
-              borderSide: const BorderSide(color: Colors.blueAccent, width: 2.0),
+              borderSide:
+                  const BorderSide(color: Colors.blueAccent, width: 2.0),
             ),
           ),
           onChanged: (value) {
@@ -162,14 +165,13 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
                   }
                 },
                 icon: const Icon(Icons.paste, size: 16),
-                label:  Text(
+                label: Text(
                   "paste".tr(),
-                  style: TextStyle(fontSize: 12,
-                  color: Styles.PRIMARY_COLOR
-                  ),
+                  style: TextStyle(fontSize: 12, color: Styles.PRIMARY_COLOR),
                 ),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 ),
               ),
             ],
@@ -179,23 +181,25 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: isArabic
                 ? [
-              _buildCodeInput(5),
-              _buildCodeInput(4),
-              _buildCodeInput(3),
-              const Text('-', style: TextStyle(fontSize: 24, color: Colors.grey)),
-              _buildCodeInput(2),
-              _buildCodeInput(1),
-              _buildCodeInput(0),
-            ]
+                    _buildCodeInput(5),
+                    _buildCodeInput(4),
+                    _buildCodeInput(3),
+                    const Text('-',
+                        style: TextStyle(fontSize: 24, color: Colors.grey)),
+                    _buildCodeInput(2),
+                    _buildCodeInput(1),
+                    _buildCodeInput(0),
+                  ]
                 : [
-              _buildCodeInput(0),
-              _buildCodeInput(1),
-              _buildCodeInput(2),
-              const Text('-', style: TextStyle(fontSize: 24, color: Colors.grey)),
-              _buildCodeInput(3),
-              _buildCodeInput(4),
-              _buildCodeInput(5),
-            ],
+                    _buildCodeInput(0),
+                    _buildCodeInput(1),
+                    _buildCodeInput(2),
+                    const Text('-',
+                        style: TextStyle(fontSize: 24, color: Colors.grey)),
+                    _buildCodeInput(3),
+                    _buildCodeInput(4),
+                    _buildCodeInput(5),
+                  ],
           ),
         ],
       ),
@@ -214,7 +218,6 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
           const SizedBox(height: 40),
-
           Align(
             alignment: AlignmentDirectional.centerStart,
             child: Text(
@@ -223,42 +226,45 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
             ),
           ),
           const SizedBox(height: 10),
-
           _buildCodeInputRow(context),
           const SizedBox(height: 24),
-
           Builder(
             builder: (context) {
-              return CustomButton(
-                text: "confirm_code.send".tr(),
-                onTap: () {
-                  final code = _controllers.map((c) => c.text).join();
-                  if (code.length == 6) {
-                    final email = widget.argument["email"];
-                    final isRegister = widget.argument["isRegister"] ?? false;
-                    log('email $email');
-                    context.read<ConfirmCodeBloc>().add(
-                      Click(arguments: {
-                        "identifier": email,
-                        "otp": code,
-                        "isRegister": isRegister,
-                        "isFromLogin": widget.argument["isFromLogin"],
-                      }),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("confirm_code.error_incomplete".tr())),
-                    );
-                  }
+              return BlocBuilder<ConfirmCodeBloc, ConfirmCodeState>(
+                builder: (context, state) {
+                  return CustomButton(
+                    text: "confirm_code.send".tr(),
+                    isLoading: state is ConfirmCodeInProgress,
+                    onTap: () {
+                      final code = _controllers.map((c) => c.text).join();
+                      if (code.length == 6) {
+                        log('email ${widget.argument.email}');
+                        context.read<ConfirmCodeBloc>().add(
+                              ConfirmCodeSubmitted(
+                                identifier: widget.argument.email,
+                                otp: code,
+                                isRegister: widget.argument.isRegister,
+                                isFromLogin: widget.argument.isFromLogin,
+                              ),
+                            );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("confirm_code.error_incomplete".tr()),
+                          ),
+                        );
+                      }
+                    },
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF031A1B),
+                        Color(0xFF0C7D81),
+                      ],
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
+                    ),
+                  );
                 },
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF031A1B),
-                    Color(0xFF0C7D81),
-                  ],
-                  begin: Alignment.centerRight,
-                  end: Alignment.centerLeft,
-                ),
               );
             },
           ),

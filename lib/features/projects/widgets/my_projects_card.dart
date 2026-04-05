@@ -20,18 +20,18 @@ class ProjectPortfolioCard extends StatelessWidget {
   Widget build(BuildContext context) {
     log("projectsModel.status ${projectsModel.status}");
     // 🔹 Convert string status from model to enum
-    final ProjectStatus status = ProjectStatusHelper.fromString(projectsModel.status);
+    final ProjectStatus status =
+        ProjectStatusHelper.fromString(projectsModel.status);
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
-              CustomNavigator.push(
-                  Routes.singleProjectDetails, arguments: {"id": projectsModel.id});
-            },
+          CustomNavigator.push(Routes.singleProjectDetails,
+              arguments: {"id": projectsModel.id});
+        },
         child: Ink(
-          
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -41,7 +41,8 @@ class ProjectPortfolioCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
                 child: SizedBox(
                   width: double.infinity,
                   height: 120, // Added fixed height for consistency
@@ -61,7 +62,8 @@ class ProjectPortfolioCard extends StatelessWidget {
                           ),
                         ),
                         child: const Center(
-                          child: Icon(Icons.image, color: Colors.white, size: 40),
+                          child:
+                              Icon(Icons.image, color: Colors.white, size: 40),
                         ),
                       );
                     },
@@ -74,7 +76,8 @@ class ProjectPortfolioCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      projectsModel.title ?? "project_portfolio.default_title".tr(),
+                      projectsModel.title ??
+                          "project_portfolio.default_title".tr(),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -86,7 +89,8 @@ class ProjectPortfolioCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      projectsModel.specialization?.name ?? "project_portfolio.default_specialization".tr(),
+                      projectsModel.specialization?.name ??
+                          "project_portfolio.default_specialization".tr(),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -99,9 +103,11 @@ class ProjectPortfolioCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _buildStatItem(Icons.thumb_up_alt_outlined, (projectsModel.proposalsCount ?? 0).toString()),
+                        _buildStatItem(Icons.thumb_up_alt_outlined,
+                            (projectsModel.proposalsCount ?? 0).toString()),
                         const SizedBox(width: 8),
-                        _buildStatItem(Icons.visibility_outlined, (projectsModel.views ?? 0).toString()),
+                        _buildStatItem(Icons.visibility_outlined,
+                            (projectsModel.views ?? 0).toString()),
                         const Spacer(), // Push status chip to the right
                         StatusChip(status: status), // 🔹 Use converted status
                       ],

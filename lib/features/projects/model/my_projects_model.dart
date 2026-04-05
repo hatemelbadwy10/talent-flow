@@ -3,16 +3,16 @@ import 'package:talent_flow/data/config/mapper.dart';
 class MyProjectsModel extends SingleMapper {
   MyProjectsModel({
     required this.id,
-     this.owner,
+    this.owner,
     required this.title,
     required this.description,
     required this.views,
-     this.since,
-     this.proposalsCount,
+    this.since,
+    this.proposalsCount,
     required this.status,
-     this.isPaid,
-     this.specialization,
-     this.isInFavorites,
+    this.isPaid,
+    this.specialization,
+    this.isInFavorites,
   });
 
   final int? id;
@@ -45,11 +45,11 @@ class MyProjectsModel extends SingleMapper {
       // 🔹 If specialization is missing, fallback to using image/title
       specialization: json["specialization"] == null
           ? (json["image"] != null
-          ? Specialization(
-        name: json["specialization_name"] ?? "", // optional
-        image: json["image"],
-      )
-          : null)
+              ? Specialization(
+                  name: json["specialization_name"] ?? "", // optional
+                  image: json["image"],
+                )
+              : null)
           : Specialization.fromJson(json["specialization"]),
 
       isInFavorites: json["is_in_favorites"] ?? false,

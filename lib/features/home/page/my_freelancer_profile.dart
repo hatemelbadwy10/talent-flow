@@ -2,13 +2,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/home_bloc.dart';
+import 'package:talent_flow/features/home/bloc/home_event.dart';
+import 'package:talent_flow/features/home/bloc/home_state.dart';
 import 'package:talent_flow/features/home/model/freelancer_profile_model.dart';
 import 'package:talent_flow/features/home/widgets/freelancer_work_card.dart';
 import 'package:talent_flow/features/new_projects/widgets/skills_section.dart';
@@ -38,7 +38,7 @@ class MyFreelancerProfileView extends StatelessWidget {
 
     return BlocProvider(
       create: (_) =>
-          HomeBloc(homeRepo: sl())..add(FreelancerProfile(arguments: userId)),
+          HomeBloc(homeRepo: sl())..add(FreelancerProfileRequested(userId)),
       child: Scaffold(
         backgroundColor: const Color(0xFFF7F9FB),
         appBar: CustomAppBar(
@@ -55,18 +55,18 @@ class MyFreelancerProfileView extends StatelessWidget {
             SizedBox(width: 8.w),
           ],
         ),
-        body: BlocBuilder<HomeBloc, AppState>(
+        body: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
-            if (state is Loading) {
+            if (state is HomeLoading) {
               return const Center(
                 child: CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
               );
             }
-            if (state is Error) {
+            if (state is HomeFailure) {
               return Center(child: Text('profile.load_failed'.tr()));
             }
-            if (state is Done && state.model is FreelancerProfileModel) {
-              final model = state.model as FreelancerProfileModel;
+            if (state is FreelancerProfileLoaded) {
+              final FreelancerProfileModel model = state.profile;
               return DefaultTabController(
                 length: 3,
                 child: Column(
@@ -415,7 +415,7 @@ class _WorksTab extends StatelessWidget {
                       model.id != null) {
                     context
                         .read<HomeBloc>()
-                        .add(FreelancerProfile(arguments: model.id));
+                        .add(FreelancerProfileRequested(model.id!));
                   }
                 },
         );

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +9,7 @@ import '../components/custom_network_image.dart';
 import '../components/image_pop_up_viewer.dart';
 import '../helpers/pickers/view/image_picker_helper.dart';
 import '../main_blocs/user_bloc.dart';
+import '../main_blocs/user_state.dart';
 
 class ProfileImageWidget extends StatelessWidget {
   const ProfileImageWidget(
@@ -30,7 +30,7 @@ class ProfileImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, AppState>(
+    return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
         return GestureDetector(
           onTap: () {
@@ -88,7 +88,7 @@ class ProfileImageWidget extends StatelessWidget {
               if (withEdit)
                 Positioned(
                   bottom: 0,
-                  left:  0,
+                  left: 0,
                   right: null,
                   child: InkWell(
                     highlightColor: Colors.transparent,

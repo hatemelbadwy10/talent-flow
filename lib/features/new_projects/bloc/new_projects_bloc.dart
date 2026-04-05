@@ -3,101 +3,81 @@ import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/features/new_projects/repo/new_projects_repo.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../app/core/styles.dart';
-import '../../projects/model/my_projects_model.dart';
+import 'new_projects_event.dart';
+import 'new_projects_state.dart';
 
-class NewProjectsBloc extends Bloc<AppEvent, AppState> {
+class NewProjectsBloc extends Bloc<NewProjectsEvent, NewProjectsState> {
   final NewProjectsRepo _projectsRepo;
 
-  NewProjectsBloc(this._projectsRepo) : super(Start()) {
-    on<Add>(_onGetProjects);
-    on<Click>(_onClick);
-    on<Update>(_onAddFavorite);
+  NewProjectsBloc(this._projectsRepo) : super(const NewProjectsInitial()) {
+    on<NewProjectsRequested>(_onGetProjects);
+    on<ProjectOfferSubmitted>(_onSubmitOffer);
+    on<ProjectFavouriteToggled>(_onAddFavorite);
   }
 
-  Future<void> _onGetProjects(Add event, Emitter<AppState> emit) async {
-    emit(Loading());
+  Future<void> _onGetProjects(
+    NewProjectsRequested event,
+    Emitter<NewProjectsState> emit,
+  ) async {
+    emit(const NewProjectsLoading());
     try {
       final result = await _projectsRepo.getProjects();
       result.fold(
-        (failure) => emit(Error()),
-        (response) {
-          if (response.data == null || response.data['payload'] == null) {
-            emit(Error());
-            return;
-          }
-
-          final List<MyProjectsModel> projects =
-              (response.data['payload'] as List)
-                  .map((e) => MyProjectsModel.fromJson(e))
-                  .toList();
-
-          emit(Done(list: projects));
-        },
+        (failure) => emit(NewProjectsFailure(message: failure.error)),
+        (projects) => emit(NewProjectsLoaded(projects)),
       );
     } catch (_) {
-      emit(Error());
+      emit(const NewProjectsFailure());
     }
   }
 
-  Future<void> _onClick(Click event, Emitter<AppState> emit) async {
-    emit(Loading());
+  Future<void> _onSubmitOffer(
+    ProjectOfferSubmitted event,
+    Emitter<NewProjectsState> emit,
+  ) async {
+    emit(const OfferSubmissionInProgress());
 
     try {
-      final args = event.arguments as Map<String, dynamic>;
-      final projectId = args["projectId"] as int;
-      final description = args["description"] as String;
-
-      final result = await _projectsRepo.addOffer(projectId, description);
+      final result =
+          await _projectsRepo.addOffer(event.projectId, event.description);
 
       result.fold(
-        (failure) => emit(Error()),
-        (response) => emit(Done(data: _extractMessage(response.data))),
+        (failure) => emit(OfferSubmissionFailure(message: failure.error)),
+        (message) => emit(OfferSubmissionSuccess(message: message)),
       );
     } catch (e) {
-      emit(Error());
+      emit(OfferSubmissionFailure(message: e.toString()));
     }
   }
 
-  Future<void> _onAddFavorite(Update event, Emitter<AppState> emit) async {
-    // emit(Loading()); // You might want a specific loading state for favorite
+  Future<void> _onAddFavorite(
+    ProjectFavouriteToggled event,
+    Emitter<NewProjectsState> emit,
+  ) async {
     try {
-      final projectId =
-          event.arguments as int; // Assuming arguments is the project ID
-      final result = await _projectsRepo.addRemoveFavorite(projectId);
+      final result = await _projectsRepo.addRemoveFavorite(event.projectId);
 
       result.fold(
         (failure) {
           AppCore.showSnackBar(
               notification: AppNotification(
-            message: "",
+            message: failure.error,
             backgroundColor: Styles.ACTIVE,
             borderColor: Styles.ACTIVE,
           ));
-        }, // You might want a specific error state for favorite
-        (response) {
+        },
+        (message) {
           AppCore.showSnackBar(
               notification: AppNotification(
-            message: response.data['message'],
+            message: message ?? '',
             backgroundColor: Styles.ACTIVE,
             borderColor: Styles.ACTIVE,
           ));
-        }, // You might want a specific done state for favorite
+        },
       );
     } catch (e) {
-      emit(Error());
+      emit(NewProjectsFailure(message: e.toString()));
     }
-  }
-
-  String? _extractMessage(dynamic data) {
-    if (data is Map<String, dynamic>) {
-      return data['message']?.toString();
-    }
-    if (data is Map) {
-      return data['message']?.toString();
-    }
-    return null;
   }
 }

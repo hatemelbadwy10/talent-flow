@@ -4,17 +4,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 
-import '../../../../../app/core/app_event.dart';
-import '../../../../../app/core/app_state.dart';
 import '../../../../../components/custom_button.dart';
 import '../../../../../helpers/social_media_login_helper.dart';
 import '../bloc/social_media_bloc.dart';
+import '../bloc/social_media_event.dart';
+import '../bloc/social_media_state.dart';
+
 class SocialLoginWidget extends StatelessWidget {
   const SocialLoginWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
- return   BlocBuilder<SocialMediaBloc, AppState>(
+    return BlocBuilder<SocialMediaBloc, SocialMediaState>(
       builder: (context, state) {
         return Column(
           children: [
@@ -22,12 +23,14 @@ class SocialLoginWidget extends StatelessWidget {
               text: "login.login_google".tr(),
               backgroundColor: Colors.white,
               textColor: Colors.black,
-              isLoading: state is Loading,
+              isLoading: state is SocialMediaInProgress,
               lIconWidget: SvgPicture.asset("assets/svgs/google.svg"),
               onTap: () async {
                 context.read<SocialMediaBloc>().add(
-                  Click(arguments:SocialMediaProvider.google),
-                );
+                      const SocialProviderAuthenticationRequested(
+                        SocialMediaProvider.google,
+                      ),
+                    );
               },
             ),
             SizedBox(height: 16.h),
@@ -38,8 +41,11 @@ class SocialLoginWidget extends StatelessWidget {
               lIconWidget: SvgPicture.asset("assets/svgs/facebook.svg"),
               onTap: () async {
                 context.read<SocialMediaBloc>().add(
-                  Click(arguments:SocialMediaProvider.facebook),
-                );               },
+                      const SocialProviderAuthenticationRequested(
+                        SocialMediaProvider.facebook,
+                      ),
+                    );
+              },
             ),
           ],
         );

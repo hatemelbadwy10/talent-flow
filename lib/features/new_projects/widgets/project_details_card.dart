@@ -266,6 +266,7 @@ class ProjectDetailsCard extends StatelessWidget {
     final translated = statusKey.tr();
     return translated == statusKey ? normalizedStatus : translated;
   }
+
   String _formatEmploymentRate(String? value) {
     final numericValue = double.tryParse((value ?? '').trim());
     if (numericValue == null) {

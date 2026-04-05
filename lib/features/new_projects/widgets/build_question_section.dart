@@ -46,11 +46,17 @@ class QuestionSection extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.add, size: 20,color: Styles.PRIMARY_COLOR,),
+                  const Icon(
+                    Icons.add,
+                    size: 20,
+                    color: Styles.PRIMARY_COLOR,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'add_project.add_question'.tr(),
-                    style: const TextStyle(fontWeight: FontWeight.bold,color: Styles.PRIMARY_COLOR),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Styles.PRIMARY_COLOR),
                   ),
                 ],
               ),
@@ -63,7 +69,8 @@ class QuestionSection extends StatelessWidget {
     );
   }
 
-  Widget _buildQuestionItem(BuildContext context, int index, ProjectQuestion question) {
+  Widget _buildQuestionItem(
+      BuildContext context, int index, ProjectQuestion question) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 1,
@@ -91,8 +98,9 @@ class QuestionSection extends StatelessWidget {
                           isRequired: value ?? false,
                         );
                         context.read<AddProjectBloc>().add(
-                          UpdateQuestion(index: index, question: updatedQuestion),
-                        );
+                              UpdateQuestion(
+                                  index: index, question: updatedQuestion),
+                            );
                       },
                     ),
                     Text('add_project.mandatory_question'.tr()),
@@ -100,7 +108,9 @@ class QuestionSection extends StatelessWidget {
                 ),
                 TextButton.icon(
                   onPressed: () {
-                    context.read<AddProjectBloc>().add(RemoveQuestion(index: index));
+                    context
+                        .read<AddProjectBloc>()
+                        .add(RemoveQuestion(index: index));
                   },
                   icon: const Icon(Icons.delete, size: 16, color: Colors.red),
                   label: Text(

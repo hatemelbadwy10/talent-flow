@@ -57,6 +57,8 @@ class SettingsMenuItem extends StatelessWidget {
             ),
         ],
       ),
-    ).onTap(onTap ?? () {},borderRadius: BorderRadius.circular(12)).setContainerToView();
+    )
+        .onTap(onTap ?? () {}, borderRadius: BorderRadius.circular(12))
+        .setContainerToView();
   }
 }

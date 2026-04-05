@@ -172,8 +172,8 @@ class _DynamicDropDownButtonState extends State<DynamicDropDownButton> {
           labelText: widget.label,
           errorStyle: AppTextStyles.w500
               .copyWith(color: Styles.FAILED_COLOR, fontSize: 11),
-          labelStyle: AppTextStyles.w400
-              .copyWith(color: Styles.DISABLED, fontSize: 14),
+          labelStyle:
+              AppTextStyles.w400.copyWith(color: Styles.DISABLED, fontSize: 14),
         ),
         style: AppTextStyles.w500
             .copyWith(color: Styles.PRIMARY_COLOR, fontSize: 14),

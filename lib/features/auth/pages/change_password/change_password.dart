@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../../app/core/app_event.dart';
-import '../../../../app/core/app_state.dart';
 import '../../../../components/custom_button.dart';
 import '../../../../components/custom_text_form_field.dart';
 import '../../../../data/config/di.dart';
+import '../../models/auth_route_arguments.dart';
 import '../../widgets/auth_base.dart';
 import 'bloc/change_password_bloc.dart';
+import 'bloc/change_password_event.dart';
+import 'bloc/change_password_state.dart';
 import 'repo/change_password_repo.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
-  final Map<String, dynamic>? arguments;
+  final ChangePasswordArgs? arguments;
 
   const ChangePasswordScreen({super.key, this.arguments});
 
@@ -39,13 +40,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       child: AuthBase(
         children: [
           SizedBox(height: 86.h),
-
           Text(
             "change_password.title".tr(),
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
           const SizedBox(height: 40),
-
           Form(
             key: _formKey,
             child: Column(
@@ -81,27 +80,22 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ],
             ),
           ),
-
           const SizedBox(height: 24),
-
-          BlocBuilder<ChangePasswordBloc, AppState>(
+          BlocBuilder<ChangePasswordBloc, ChangePasswordState>(
             builder: (context, state) {
               return CustomButton(
                 text: "change_password.confirm_change".tr(),
-                isLoading: state is Loading,
+                isLoading: state is ChangePasswordInProgress,
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
-                    final String identifier = widget.arguments?["identifier"] ?? "";
-
-                    final Map<String, dynamic> changePasswordData = {
-                      "identifier": identifier,
-                      "password": _newPasswordController.text,
-                      "password_confirmation": _confirmPasswordController.text,
-                    };
-
                     context.read<ChangePasswordBloc>().add(
-                      Click(arguments: changePasswordData),
-                    );
+                          ChangePasswordSubmitted(
+                            identifier: widget.arguments?.identifier ?? "",
+                            password: _newPasswordController.text,
+                            passwordConfirmation:
+                                _confirmPasswordController.text,
+                          ),
+                        );
                   }
                 },
                 gradient: const LinearGradient(

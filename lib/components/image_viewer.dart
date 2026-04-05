@@ -17,7 +17,9 @@ class ImageViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: '',),
+      appBar: const CustomAppBar(
+        title: '',
+      ),
       body: isFromInternet
           ? Center(
               child: CustomNetworkImage.containerNewWorkImage(

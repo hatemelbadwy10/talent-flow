@@ -11,6 +11,8 @@ abstract class BaseRepo {
   String get userId => sharedPreferences.getString(AppStorageKey.userId) ?? "";
   String get token => sharedPreferences.getString(AppStorageKey.token) ?? "";
   bool get isLogin => sharedPreferences.containsKey(AppStorageKey.isLogin);
-  setMarketType(v) => sharedPreferences.setString(AppStorageKey.marketplaceType, v);
-  String? get marketType => sharedPreferences.getString(AppStorageKey.marketplaceType);
+  setMarketType(v) =>
+      sharedPreferences.setString(AppStorageKey.marketplaceType, v);
+  String? get marketType =>
+      sharedPreferences.getString(AppStorageKey.marketplaceType);
 }

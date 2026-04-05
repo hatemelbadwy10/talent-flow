@@ -30,44 +30,46 @@ class InternetConnection {
     }
 
     isNotConnected ? null : AppCore.hideSnackBar();
-    if(isNotConnected) {
+    if (isNotConnected) {
       Timer(Duration.zero, () {
-      CustomNavigator.scaffoldState.currentState!.showSnackBar(
-        SnackBar(
-          margin: EdgeInsets.symmetric(
-            horizontal: Dimensions.PADDING_SIZE_DEFAULT.w,
-            vertical: Dimensions.PADDING_SIZE_DEFAULT.h,
-          ),
-          padding: EdgeInsets.symmetric(
-            horizontal: Dimensions.PADDING_SIZE_DEFAULT.w,
-            vertical: Dimensions.PADDING_SIZE_DEFAULT.h,
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(color: Colors.grey.withOpacity(0.6),)),
-          content: Row(
-            children: [
-              Icon(
-                !isNotConnected ? Icons.wifi : Icons.wifi_off_sharp,
-                color: Colors.white,
-              ),
-              SizedBox(width: Dimensions.PADDING_SIZE_DEFAULT.w),
-              Expanded(
-                child: Text(
-                  getTranslated(
-                      !isNotConnected ? "connected" : "no_connection"),
-                  style: AppTextStyles.w600
-                      .copyWith(fontSize: 14, color: Colors.white),
+        CustomNavigator.scaffoldState.currentState!.showSnackBar(
+          SnackBar(
+            margin: EdgeInsets.symmetric(
+              horizontal: Dimensions.PADDING_SIZE_DEFAULT.w,
+              vertical: Dimensions.PADDING_SIZE_DEFAULT.h,
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: Dimensions.PADDING_SIZE_DEFAULT.w,
+              vertical: Dimensions.PADDING_SIZE_DEFAULT.h,
+            ),
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: Colors.grey.withOpacity(0.6),
+                )),
+            content: Row(
+              children: [
+                Icon(
+                  !isNotConnected ? Icons.wifi : Icons.wifi_off_sharp,
+                  color: Colors.white,
                 ),
-              ),
-            ],
+                SizedBox(width: Dimensions.PADDING_SIZE_DEFAULT.w),
+                Expanded(
+                  child: Text(
+                    getTranslated(
+                        !isNotConnected ? "connected" : "no_connection"),
+                    style: AppTextStyles.w600
+                        .copyWith(fontSize: 14, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.grey.withOpacity(0.6),
           ),
-          backgroundColor: Colors.grey.withOpacity(0.6),
-        ),
-      );
-    });
+        );
+      });
     }
 
     log("===> onConnectivityChanged${result.toString()}");

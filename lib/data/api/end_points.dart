@@ -119,8 +119,9 @@ class EndPoints {
 
   ///Check Out
   static checkOutOrder(id) => 'check-out/$id';
+
   ///chats
-    static const String projectChatOptions = 'api/projects/chat/options';
+  static const String projectChatOptions = 'api/projects/chat/options';
 
   ///Setting
   static const String associationStatistics = 'important-numbers';

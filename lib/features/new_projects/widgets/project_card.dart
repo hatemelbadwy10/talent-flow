@@ -4,16 +4,15 @@ import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/features/projects/model/my_projects_model.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
-import '../../../app/core/app_event.dart';
 import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart';
 import '../../../navigation/routes.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/features/new_projects/bloc/new_projects_bloc.dart'; // Import your Bloc
+import 'package:talent_flow/features/new_projects/bloc/new_projects_bloc.dart';
+import 'package:talent_flow/features/new_projects/bloc/new_projects_event.dart';
 import 'package:talent_flow/features/setting/repo/favourite_repo.dart';
-import '../../../app/core/app_state.dart'; // Import AppState for BlocListener
 
 class ProjectCard extends StatefulWidget {
   final MyProjectsModel projectsModel;
@@ -144,8 +143,9 @@ class _ProjectCardState extends State<ProjectCard> {
                     }
 
                     if (newProjectsBloc != null) {
-                      newProjectsBloc
-                          .add(Update(arguments: _currentProjectModel.id!));
+                      newProjectsBloc.add(
+                        ProjectFavouriteToggled(_currentProjectModel.id!),
+                      );
                       return;
                     }
 
@@ -277,21 +277,7 @@ class _ProjectCardState extends State<ProjectCard> {
       return card;
     }
 
-    return BlocListener<NewProjectsBloc, AppState>(
-      listener: (context, state) {
-        if (state is Done && state.list == null) {
-          // Assuming a successful favorite toggle returns a 'Done' state
-          // and if 'list' is null, it's not a project list update
-          // You might refine this check based on your AppState implementation
-          setState(() {
-            _currentProjectModel = _currentProjectModel.copyWith(
-              isInFavorites: !(_currentProjectModel.isInFavorites ?? false),
-            );
-          });
-        }
-      },
-      child: card,
-    );
+    return card;
   }
 
   Widget _buildMetaInfo({required IconData icon, required String text}) {

@@ -1,68 +1,66 @@
 import 'dart:developer';
 
-import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../../../../../app/core/app_event.dart';
-import '../../../../../app/core/app_state.dart';
 import '../../../../../app/core/app_core.dart';
 import '../../../../../app/core/app_notification.dart';
 import '../../../../../app/core/styles.dart';
-import '../../../../../data/error/failures.dart';
+import '../../../../../features/auth/models/auth_route_arguments.dart';
 import '../../../../../navigation/custom_navigation.dart';
 import '../../../../../navigation/routes.dart';
 import '../send_verification_repo/send_verification_repo.dart';
+import 'send_verification_event.dart';
+import 'send_verification_state.dart';
 
-class SendVerificationBloc extends Bloc<AppEvent, AppState> {
+class SendVerificationBloc
+    extends Bloc<SendVerificationEvent, SendVerificationState> {
   final SendVerificationRepo repo;
 
-  SendVerificationBloc({required this.repo}) : super(Start()) {
-    on<Click>((event, emit) async {
+  SendVerificationBloc({required this.repo})
+      : super(const SendVerificationInitial()) {
+    on<VerificationRequestSubmitted>((event, emit) async {
       try {
-        emit(Loading());
-        final data = event.arguments as Map<String, dynamic>;
-
-        Either<ServerFailure, Response> response =
-        await repo.sendVerification(data);
+        emit(const SendVerificationInProgress());
+        final data = {"identifier": event.identifier};
+        final response = await repo.sendVerification(data);
 
         response.fold(
-              (fail) {
-                log("fail ${fail.statusCode}");
-                log("fail ${fail.error}");
+          (fail) {
+            log("fail ${fail.statusCode}");
+            log("fail ${fail.error}");
             AppCore.showSnackBar(
               notification: AppNotification(
-                message: fail.error ?? "something_went_wrong".tr(), // Changed from fail.error to fail.message
+                message: fail.error.isNotEmpty
+                    ? fail.error
+                    : "something_went_wrong".tr(),
                 backgroundColor: Styles.IN_ACTIVE,
                 borderColor: Styles.RED_COLOR,
               ),
             );
-            emit(Error());
+            emit(SendVerificationFailure(fail.error));
           },
-              (success) {
-            final String email = data["identifier"] ; // Added null safety
-
+          (message) {
             AppCore.showSnackBar(
               notification: AppNotification(
-                message: success.data["message"] ?? "verification_sent_successfully".tr(),
+                message: message.isNotEmpty
+                    ? message
+                    : "verification_sent_successfully".tr(),
                 backgroundColor: Colors.green,
                 borderColor: Colors.transparent,
               ),
             );
 
-            // Navigate to confirm code screen
-            log('email: $email');
+            log('email: ${event.identifier}');
             CustomNavigator.push(
               Routes.sendCodeScreen,
-              arguments: {
-                "email": email,
-                "isRegister": false,
-              },
+              arguments: ConfirmCodeArgs(
+                email: event.identifier,
+              ),
             );
 
-            emit(Done());
+            emit(const SendVerificationSuccess());
           },
         );
       } catch (e) {
@@ -74,7 +72,7 @@ class SendVerificationBloc extends Bloc<AppEvent, AppState> {
             borderColor: Styles.RED_COLOR,
           ),
         );
-        emit(Error());
+        emit(SendVerificationFailure(e.toString()));
       }
     });
   }

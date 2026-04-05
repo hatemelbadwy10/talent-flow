@@ -2,13 +2,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/home_bloc.dart';
+import 'package:talent_flow/features/home/bloc/home_event.dart';
+import 'package:talent_flow/features/home/bloc/home_state.dart';
 import 'package:talent_flow/features/home/model/entrepreneur_profile_model.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
@@ -45,7 +45,7 @@ class EntrepreneurProfileView extends StatelessWidget {
 
     return BlocProvider(
       create: (_) => HomeBloc(homeRepo: sl())
-        ..add(EntrepreneurProfileEvent(arguments: entrepreneurId)),
+        ..add(EntrepreneurProfileRequested(entrepreneurId)),
       child: Scaffold(
         backgroundColor: const Color(0xFFF7F9FB),
         appBar: CustomAppBar(
@@ -66,18 +66,18 @@ class EntrepreneurProfileView extends StatelessWidget {
                 ]
               : null,
         ),
-        body: BlocBuilder<HomeBloc, AppState>(
+        body: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
-            if (state is Loading) {
+            if (state is HomeLoading) {
               return const Center(
                 child: CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
               );
             }
-            if (state is Error) {
+            if (state is HomeFailure) {
               return Center(child: Text('profile.load_failed'.tr()));
             }
-            if (state is Done && state.model is EntrepreneurProfileModel) {
-              final model = state.model as EntrepreneurProfileModel;
+            if (state is EntrepreneurProfileLoaded) {
+              final EntrepreneurProfileModel model = state.profile;
               return DefaultTabController(
                 length: 2,
                 child: NestedScrollView(

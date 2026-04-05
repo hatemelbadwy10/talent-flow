@@ -8,8 +8,8 @@ import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../app/core/app_state.dart';
 import '../../../main_blocs/user_bloc.dart';
+import '../../../main_blocs/user_state.dart';
 
 class HomeHeaderSection extends StatelessWidget {
   final VoidCallback? onNotificationTap;
@@ -37,7 +37,7 @@ class HomeHeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, AppState>(
+    return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
         final userBloc = context.read<UserBloc>();
         final currentUser = userBloc.user;

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-
 class HalfCircleAnalyticsChart extends StatelessWidget {
   const HalfCircleAnalyticsChart(
-      this.chartData, {
-        Key? key,
-        this.innerRadius = "80%",
-      }) : super(key: key);
+    this.chartData, {
+    Key? key,
+    this.innerRadius = "80%",
+  }) : super(key: key);
   final List<ChartData> chartData;
   final String innerRadius;
   @override
@@ -26,13 +25,11 @@ class HalfCircleAnalyticsChart extends StatelessWidget {
           endAngle: 90,
           innerRadius: innerRadius,
           radius: "100%",
-
         )
       ],
     );
   }
 }
-
 
 class ChartData {
   ChartData(this.x, this.y, [this.color]);
