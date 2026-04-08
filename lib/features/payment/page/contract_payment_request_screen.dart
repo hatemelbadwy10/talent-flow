@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:talent_flow/app/core/app_currency.dart';
 import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/styles.dart';
@@ -183,6 +184,17 @@ class _ContractPaymentRequestScreenState
                   }
                   return null;
                 },
+                sufWidget: Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 8),
+                  child: Text(
+                    AppCurrency.code,
+                    style: const TextStyle(
+                      color: Styles.HINT_COLOR,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
               _field(
                 controller: _startDateController,

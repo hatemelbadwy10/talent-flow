@@ -54,9 +54,7 @@ class SingleProjectModel extends SingleMapper {
           : List<ProjectProposal>.from(
               json["proposals"]!.map((x) => ProjectProposal.fromJson(x)),
             ),
-      files: json["files"] == null
-          ? []
-          : List<dynamic>.from(json["files"]!.map((x) => x)),
+      files: _extractFiles(json["files"] ?? json["attachments"]),
     );
   }
 
@@ -69,6 +67,23 @@ class SingleProjectModel extends SingleMapper {
   Map<String, dynamic> toJson() {
     // TODO: implement toJson
     throw UnimplementedError();
+  }
+
+  static List<dynamic> _extractFiles(dynamic value) {
+    if (value is List) {
+      return List<dynamic>.from(value);
+    }
+
+    if (value == null) {
+      return const [];
+    }
+
+    final normalizedValue = value.toString().trim();
+    if (normalizedValue.isEmpty) {
+      return const [];
+    }
+
+    return [normalizedValue];
   }
 }
 

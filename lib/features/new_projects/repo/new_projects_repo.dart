@@ -28,6 +28,36 @@ class NewProjectsRepo extends BaseRepo {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
+
+  Future<Either<ServerFailure, Response>> updateOffer({
+    required int proposalId,
+    required int projectId,
+    required String offer,
+  }) async {
+    try {
+      final queryParameters = {
+        "project_id": projectId,
+        "description": offer,
+      };
+
+      try {
+        final response = await dioClient.put(
+          uri: EndPoints.projectProposal(proposalId),
+          queryParameters: queryParameters,
+        );
+        return Right(response);
+      } catch (_) {
+        final response = await dioClient.post(
+          uri: EndPoints.projectProposal(proposalId),
+          queryParameters: queryParameters,
+        );
+        return Right(response);
+      }
+    } catch (error) {
+      return left(ApiErrorHandler.getServerFailure(error));
+    }
+  }
+
   Future<Either<Failure, dynamic>> addRemoveFavorite(int id) async {
     try {
       final response = await dioClient.get(uri: "${EndPoints.projects}/$id/favourite");

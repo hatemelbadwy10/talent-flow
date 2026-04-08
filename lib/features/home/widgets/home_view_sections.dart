@@ -10,7 +10,6 @@ import 'package:talent_flow/features/home/widgets/partners_section.dart';
 import 'package:talent_flow/features/home/widgets/service_category_grid.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
-import 'package:talent_flow/main_blocs/user_bloc.dart';
 
 import 'freelancer_listview_item.dart';
 
@@ -32,9 +31,6 @@ class HomeCommonHeader extends StatelessWidget {
           onMessageTap: () {
             CustomNavigator.push(Routes.chats);
           },
-          userName: UserBloc.instance.user?.name,
-          jobTitle: UserBloc.instance.user?.jobTitle,
-          userImage: UserBloc.instance.user?.profileImage,
           notificationCount: 0,
           messageCount: 0,
         ),

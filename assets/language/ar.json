@@ -191,7 +191,7 @@
   "select_specialization": "اختر التخصص",
   "specialization_validation": "الرجاء اختيار التخصص",
   "select_skill": "اختر المهارة",
-  "budget_hint": "$250 - $500",
+  "budget_hint": "250 - 500",
   "duration_hint": " المده",
   "files_description_hint": "اوصف الملف",
   "choose_from_gallery": "اختر من المعرض",
@@ -203,10 +203,11 @@
   "add": "اضافة",
   "similar_projects_hint": " مشاريع مشابهة",
   "success": "تمت إضافة المشروع بنجاح",
-  "budget_options": ["$250 - $500", "$500 - $1000", "$1000 - $2500"],
+  "budget_options": ["250 - 500", "500 - 1000", "1000 - 2500"],
   "duration_options": ["أقل من أسبوع", "أسبوع - أسبوعين", "أسبوعين - شهر", "أكثر من شهر"]
 },
   "submit_offer_title": "تقدم للمشروع",
+  "update_offer_title": "تعديل العرض",
   "submit_button": "ارسال",
   "edit_work": {
     "title": "تعديل العمل",
@@ -253,10 +254,14 @@
   },
   "add_offer": {
     "title": "تقدم للمشروع",
+    "update_title": "تعديل عرضك",
     "hint": "اكتب هنا",
     "empty_description": "الرجاء إدخال تفاصيل العرض",
     "success": "تم إرسال العرض بنجاح",
-    "error": "فشل في إرسال العرض"
+    "update_success": "تم تحديث العرض بنجاح",
+    "error": "فشل في إرسال العرض",
+    "update_error": "فشل في تحديث العرض",
+    "update_button": "تحديث"
   },
   "settings_screen": {
     "title": "الاعدادات",
@@ -287,6 +292,7 @@
   },
   "chat_screen": {
     "title": "الرسائل",
+    "create_contract": "إنشاء عقد",
     "search_hint": "ابحث في الرسائل",
     "filter_by_project": "تصفية حسب المشروع",
     "all_projects": "جميع المشاريع",
@@ -328,7 +334,55 @@
     "terms": "الشروط",
     "talent_percentage": "نسبة Talent Flow من العقود",
     "termination_conditions": "شروط الإنهاء",
-    "conflict_policy": "سياسة النزاعات"
+    "conflict_policy": "سياسة النزاعات",
+    "status": {
+      "accepted": "مقبول",
+      "pending": "معلق",
+      "in_progress": "قيد التنفيذ",
+      "work_under_review": "العمل تحت المراجعة",
+      "wait_to_pay_freelancer": "بانتظار دفع المستحقات للمستقل",
+      "has_notes": "توجد ملاحظات",
+      "disagreement": "نزاع",
+      "closed": "مغلق",
+      "rejected": "مرفوض"
+    },
+    "sections": {
+      "has_notes": "توجد ملاحظات",
+      "reject_reason": "سبب الرفض"
+    },
+    "actions": {
+      "title": "الإجراءات",
+      "approve_contract": "الموافقة على العقد",
+      "reject_contract": "رفض",
+      "edit_contract": "تعديل العقد",
+      "go_to_payment": "الانتقال إلى الدفع",
+      "mark_as_completed": "تحديد العمل كمكتمل",
+      "review_entrepreneur": "تقييم صاحب المشروع",
+      "accept_close_project": "قبول إغلاق المشروع",
+      "have_notes": "إضافة ملاحظات",
+      "submit_complaint": "تقديم شكوى"
+    },
+    "complaint": {
+      "submitted_by_you": "لقد قمت بتقديم شكوى، انتظر المراجعة وسوف نتواصل معك",
+      "submitted_by_other_party": "قام الطرف الآخر بتقديم شكوى"
+    },
+    "hints": {
+      "reject_reason": "اكتب سبب الرفض",
+      "work_notes": "اكتب الملاحظات",
+      "complaint": "اشرح الشكوى",
+      "review_comment": "اكتب التقييم",
+      "rating": "أدخل التقييم من 0 إلى 5"
+    },
+    "common": {
+      "cancel": "إلغاء",
+      "submit": "إرسال",
+      "action_completed": "تم تنفيذ الإجراء بنجاح"
+    },
+    "validation": {
+      "required": "هذا الحقل مطلوب",
+      "rating": "أدخل تقييمًا صحيحًا من 0 إلى 5"
+    },
+    "edit_contract_pending": "تدفق تعديل العقد بانتظار ربط تحديث العقد من الخلفية."
   },
   "contract_payment": {
     "pay": "الدفع",
@@ -447,32 +501,36 @@
     "back_image_required": "يرجى رفع صورة الهوية الخلفية",
     "selfie_image_required": "يرجى رفع صورة السيلفي مع الهوية",
     "submit_success": "تم إرسال طلب التحقق بنجاح",
+    "submit_processing": "تم إرسال طلب التحقق وهو الآن قيد المراجعة",
     "submit_error": "فشل إرسال طلب التحقق",
-    "country_sa": "السعودية",
-    "country_eg": "مصر",
-    "country_ae": "الإمارات",
-    "country_kw": "الكويت",
-    "country_qa": "قطر"
+    "under_review_title": "التحقق من الهوية قيد المراجعة",
+    "under_review_message": "طلب التحقق من الهوية الخاص بك قيد المراجعة حالياً. يرجى الانتظار حتى يتم الرد عليك."
   },
   "create_contract_screen": {
     "title": "إنشاء عقد",
+    "edit_title": "تعديل العقد",
     "project_info": "معلومات المشروع",
     "project_title": "عنوان المشروع",
     "project_title_value": "ابلكيشن توصيل",
     "project_owner": "صاحب المشروع",
     "project_owner_value": "أحمد محمد",
     "current_budget": "الميزانية الحالية",
-    "current_budget_value": "2500 USD",
+    "current_budget_value": "2500",
     "current_duration": "المدة الحالية",
     "current_duration_value": "30 يوم",
     "contract_name": "اسم العقد *",
     "date": "التاريخ *",
-    "agreed_cost": "التكلفة المتفق عليها (USD)*",
+    "agreed_cost": "التكلفة المتفق عليها *",
+    "duration": "المدة (بالأيام) *",
     "contract_terms": "شروط العقد *",
     "additional_notes": "ملاحظات إضافية",
     "contract_files": "ملفات العقد *",
     "required_field": "هذا الحقل مطلوب",
     "talent_flow_ratio": "نسبة تلنت فلو من العقود",
+    "talent_flow_percentage": "نسبة تلنت فلو",
+    "create_button": "إنشاء العقد",
+    "update_button": "تحديث العقد",
+    "create_success": "تم إنشاء العقد بنجاح",
     "conditions_text": "يحق لأي من الطرفين إنهاء الاتفاقية في أي وقت من خلال إشعار خطي للطرف الآخر قبل مدة لا تقل عن (30) يومًا. كما يحق للطرف الأول إنهاء الاتفاقية فورًا في حال خرق الطرف الآخر لأي من البنود الجوهرية، أو استخدام الخدمة بطريقة غير قانونية أو مخالفة لشروط الاستخدام. عند الإنهاء، يلتزم المستخدم بتسوية أي التزامات مالية مستحقة، وتُلغى جميع الحقوق الممنوحة له بموجب هذه الاتفاقية. في حال نشوء أي نزاع بين المستخدم والشركة فيما يتعلق باستخدام الخدمة أو تفسير هذه الاتفاقية، يسعى الطرفان أولاً إلى حل النزاع وديًا من خلال التواصل المباشر خلال مدة لا تتجاوز (15) يومًا. إذا تعذر التوصل إلى حل ودي، يُحال النزاع إلى الجهات القضائية المختصة في الدولة التي يقع فيها المقر الرئيسي للشركة. تخضع هذه الاتفاقية وتُفسر وفقًا للقوانين المعمول بها في تلك الدولة."
   },
   "favourite_tabs": {
@@ -594,6 +652,7 @@
     "country_hint": "اختر الدولة",
     "city": "المدينة",
     "city_hint": "اختر المدينة",
+    "select_country_first": "اختر الدولة أولاً",
     "gender": "الجنس",
     "gender_hint": "اختر النوع",
     "gender_male": "ذكر",
@@ -620,7 +679,9 @@
     "views": "مشاهدات"
   },
   "project_proposals": {
-    "title": "العروض المقدمة"
+    "title": "العروض المقدمة",
+    "your_proposal": "عرضك",
+    "edit_offer": "تعديل العرض"
   },
   "owner_projects": {
     "my_projects": "مشاريعي",

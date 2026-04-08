@@ -1,5 +1,5 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart'; // <-- 1. Import the package
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
@@ -18,41 +18,69 @@ class AddOfferScreen extends StatelessWidget {
 
   const AddOfferScreen({super.key, this.argument});
 
+  int? _currentUserId() {
+    final rawUserId = sl<SharedPreferences>().getString(AppStorageKey.userId);
+    return int.tryParse(rawUserId ?? '');
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isFreelancer =
+        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? true;
+
     return BlocProvider(
       create: (context) =>
           MyProjectsBloc(sl())..add(Click(arguments: argument?['id'])),
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Text(
-              sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                      true
-                  ? 'submit_offer_title'.tr()
-                  : 'projectData'.tr()),
-          centerTitle: true,
-          surfaceTintColor: Colors.white,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: BlocBuilder<MyProjectsBloc, AppState>(
+            builder: (context, state) {
+              final project = state is Done ? state.model as SingleProjectModel : null;
+              final myProposal = isFreelancer
+                  ? _findMyProposal(project)
+                  : null;
+              final hasEditArguments = argument?['proposalId'] != null;
+              final title = !isFreelancer
+                  ? 'projectData'.tr()
+                  : (hasEditArguments || myProposal != null
+                      ? 'update_offer_title'.tr()
+                      : 'submit_offer_title'.tr());
+
+              return AppBar(
+                backgroundColor: Colors.white,
+                title: Text(title),
+                centerTitle: true,
+                surfaceTintColor: Colors.white,
+              );
+            },
+          ),
         ),
         body: BlocBuilder<MyProjectsBloc, AppState>(
           builder: (context, state) {
             if (state is Done) {
+              final project = state.model as SingleProjectModel;
+              final myProposal = isFreelancer ? _findMyProposal(project) : null;
+
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
                       ProjectDetailsCard(
-                        singleProjectModel: state.model as SingleProjectModel,
+                        singleProjectModel: project,
                       ),
                       ProjectDescription(
-                        singleProjectModel: state.model as SingleProjectModel,
+                        singleProjectModel: project,
                       ),
-                      sl<SharedPreferences>()
-                                  .getBool(AppStorageKey.isFreelancer) ??
-                              true
+                      isFreelancer
                           ? AddOfferWidget(
                               id: argument?['id'],
+                              proposalId:
+                                  argument?['proposalId'] as int? ?? myProposal?.id,
+                              initialDescription:
+                                  argument?['initialDescription'] as String? ??
+                                      myProposal?.description,
                             )
                           : const SizedBox(),
                       const SizedBox(
@@ -72,5 +100,19 @@ class AddOfferScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  ProjectProposal? _findMyProposal(SingleProjectModel? project) {
+    if (project == null) {
+      return null;
+    }
+
+    final currentUserId = _currentUserId();
+    for (final proposal in project.proposals) {
+      if (proposal.freelancerId == currentUserId) {
+        return proposal;
+      }
+    }
+    return null;
   }
 }

@@ -20,6 +20,7 @@ import 'package:talent_flow/features/new_projects/bloc/selection_option_bloc.dar
 import 'package:talent_flow/features/new_projects/model/selection_option_model.dart';
 import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
+import 'package:talent_flow/main_blocs/location_options_bloc.dart';
 
 import '../../../helpers/pickers/view/image_picker_helper.dart';
 import '../repo/update_profile_repo.dart';
@@ -39,6 +40,10 @@ class EditProfileScreen extends StatelessWidget {
             prefs: sl<SharedPreferences>(),
             repo: sl<UpdateProfileRepo>(),
           )..add(LoadUserData()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              LocationOptionsBloc(sl())..add(const LoadCountries()),
         ),
       ],
       child: Scaffold(
@@ -82,13 +87,15 @@ class EditProfileForm extends StatefulWidget {
 
 class _EditProfileFormState extends State<EditProfileForm> {
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   Map<String, String> _allAvailableSkills = {};
   Map<String, String> _allAvailableSpecializations = {};
   Map<String, String> _allAvailableJobTitles = {};
   String? _lastShownErrorMessage;
   bool _lastShownSuccessState = false;
+  String? _lastLoadedCitiesCountryId;
 
   @override
   void dispose() {
@@ -111,11 +118,22 @@ class _EditProfileFormState extends State<EditProfileForm> {
         }
 
         // Only show error snackbar if it's a new error message
-        if (state.errorMessage != null && state.errorMessage != _lastShownErrorMessage) {
+        if (state.errorMessage != null &&
+            state.errorMessage != _lastShownErrorMessage) {
           _lastShownErrorMessage = state.errorMessage;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.errorMessage!)),
           );
+        }
+
+        final countryId = state.countryId;
+        if ((countryId ?? '').isEmpty) {
+          _lastLoadedCitiesCountryId = null;
+        } else if (countryId != _lastLoadedCitiesCountryId) {
+          _lastLoadedCitiesCountryId = countryId;
+          context
+              .read<LocationOptionsBloc>()
+              .add(LoadCities(countryId: countryId!));
         }
 
         // Reset error message tracker when it's cleared
@@ -169,9 +187,11 @@ class _EditProfileFormState extends State<EditProfileForm> {
                   color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(12.0),
                   image: DecorationImage(
-                    image:state.image != null
+                    image: state.image != null
                         ? FileImage(state.image!) as ImageProvider
-                        : NetworkImage(sl<SharedPreferences>().getString(AppStorageKey.userImage) ?? Images.appLogo),
+                        : NetworkImage(sl<SharedPreferences>()
+                                .getString(AppStorageKey.userImage) ??
+                            Images.appLogo),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -201,16 +221,20 @@ class _EditProfileFormState extends State<EditProfileForm> {
               children: [
                 IconButton(
                     onPressed: () {
-                      ImagePickerHelper.openCamera(onGet: (file){
-                        context.read<UpdateProfileBloc>().add(UpdateImage(file));
+                      ImagePickerHelper.openCamera(onGet: (file) {
+                        context
+                            .read<UpdateProfileBloc>()
+                            .add(UpdateImage(file));
                       });
                     },
                     icon: const Icon(Icons.camera_alt_outlined,
                         color: Colors.grey)),
                 IconButton(
                     onPressed: () {
-                      ImagePickerHelper.openGallery(onGet: (file){
-                        context.read<UpdateProfileBloc>().add(UpdateImage(file));
+                      ImagePickerHelper.openGallery(onGet: (file) {
+                        context
+                            .read<UpdateProfileBloc>()
+                            .add(UpdateImage(file));
                       });
                     },
                     icon: const Icon(Icons.image_outlined, color: Colors.grey)),
@@ -229,18 +253,20 @@ class _EditProfileFormState extends State<EditProfileForm> {
         Expanded(
           child: _buildTextField(
             label: "edit_profile.first_name".tr(),
-            hint: state.firstName??"edit_profile.first_name_hint".tr(),
+            hint: state.firstName ?? "edit_profile.first_name_hint".tr(),
             value: state.firstName ?? '',
-            onChanged: (value) => context.read<UpdateProfileBloc>().add(UpdateFirstName(value)),
+            onChanged: (value) =>
+                context.read<UpdateProfileBloc>().add(UpdateFirstName(value)),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: _buildTextField(
             label: "edit_profile.last_name".tr(),
-          hint: state.lastName??"edit_profile.last_name_hint".tr(),
+            hint: state.lastName ?? "edit_profile.last_name_hint".tr(),
             value: state.lastName ?? '',
-            onChanged: (value) => context.read<UpdateProfileBloc>().add(UpdateLastName(value)),
+            onChanged: (value) =>
+                context.read<UpdateProfileBloc>().add(UpdateLastName(value)),
           ),
         ),
       ],
@@ -250,52 +276,121 @@ class _EditProfileFormState extends State<EditProfileForm> {
   Widget _buildEmailField(BuildContext context, UpdateProfileState state) {
     return _buildTextField(
       label: "edit_profile.email".tr(),
-      hint: state.email?? "edit_profile.email_hint".tr(),
+      hint: state.email ?? "edit_profile.email_hint".tr(),
       value: state.email ?? '',
-      onChanged: (value) => context.read<UpdateProfileBloc>().add(UpdateEmail(value)),
+      onChanged: (value) =>
+          context.read<UpdateProfileBloc>().add(UpdateEmail(value)),
     );
   }
 
   Widget _buildPhoneField(BuildContext context, UpdateProfileState state) {
     return _buildTextField(
       label: "edit_profile.phone".tr(),
-      hint: state.phone??"edit_profile.phone_hint".tr(),
+      hint: state.phone ?? "edit_profile.phone_hint".tr(),
       value: state.phone ?? '',
-      onChanged: (value) => context.read<UpdateProfileBloc>().add(UpdatePhone(value)),
+      onChanged: (value) =>
+          context.read<UpdateProfileBloc>().add(UpdatePhone(value)),
     );
   }
 
   Widget _buildCountryField(BuildContext context, UpdateProfileState state) {
-    return _buildTextField(
-      label: "edit_profile.country".tr(),
-      hint: state.countryName??"edit_profile.country_hint".tr(),
-      value: state.countryName ?? '',
-      readOnly: true,
-      onChanged: (value) {},
+    return BlocBuilder<LocationOptionsBloc, LocationOptionsState>(
+      builder: (context, locationState) {
+        if (locationState.isLoadingCountries &&
+            locationState.countries.isEmpty) {
+          return LoadingDropDown(
+            label: "edit_profile.country".tr(),
+            loadingText: "Loading countries...",
+          );
+        }
+
+        if ((locationState.countriesError ?? '').isNotEmpty &&
+            locationState.countries.isEmpty) {
+          return ErrorDropDown(
+            label: "edit_profile.country".tr(),
+            errorText: locationState.countriesError!,
+          );
+        }
+
+        return _buildSingleSelectDropdownField(
+          label: "edit_profile.country".tr(),
+          hintText: "edit_profile.country_hint".tr(),
+          currentSelectionName: state.countryName,
+          options: locationState.countries,
+          onSelected: (id, name) {
+            context.read<UpdateProfileBloc>().add(
+                  UpdateCountry(countryId: id, countryName: name),
+                );
+          },
+        );
+      },
     );
   }
 
   Widget _buildCityField(BuildContext context, UpdateProfileState state) {
-    return _buildTextField(
-      label: "edit_profile.city".tr(),
-      hint: state.cityName??"edit_profile.city_hint".tr(),
-      value: state.cityName ?? '',
-      readOnly: true,
-      onChanged: (value) {},
+    return BlocBuilder<LocationOptionsBloc, LocationOptionsState>(
+      builder: (context, locationState) {
+        if ((state.countryId ?? '').isEmpty) {
+          return _buildSingleSelectDropdownField(
+            label: "edit_profile.city".tr(),
+            hintText: "edit_profile.select_country_first".tr(),
+            currentSelectionName: state.cityName,
+            options: const {},
+            enabled: false,
+            onSelected: (_, __) {},
+          );
+        }
+
+        if (locationState.isLoadingCities) {
+          return LoadingDropDown(
+            label: "edit_profile.city".tr(),
+            loadingText: "Loading cities...",
+          );
+        }
+
+        if ((locationState.citiesError ?? '').isNotEmpty &&
+            locationState.cities.isEmpty) {
+          return ErrorDropDown(
+            label: "edit_profile.city".tr(),
+            errorText: locationState.citiesError!,
+          );
+        }
+
+        return _buildSingleSelectDropdownField(
+          label: "edit_profile.city".tr(),
+          hintText: "edit_profile.city_hint".tr(),
+          currentSelectionName: state.cityName,
+          options: locationState.cities,
+          enabled: locationState.cities.isNotEmpty,
+          onSelected: (id, name) {
+            context.read<UpdateProfileBloc>().add(
+                  UpdateCity(cityId: id, cityName: name),
+                );
+          },
+        );
+      },
     );
   }
 
   Widget _buildGenderField(BuildContext context, UpdateProfileState state) {
-    return _buildTextField(
+    final genderOptions = <String, String>{
+      'male': "edit_profile.gender_male".tr(),
+      'female': "edit_profile.gender_female".tr(),
+    };
+
+    return _buildSingleSelectDropdownField(
       label: "edit_profile.gender".tr(),
-      hint: state.gender??"edit_profile.gender_hint".tr(),
-      value: state.gender ?? '',
-      readOnly: true,
-      onChanged: (value) {},
+      hintText: "edit_profile.gender_hint".tr(),
+      currentSelectionName: _genderDisplayName(state.gender),
+      options: genderOptions,
+      onSelected: (id, name) {
+        context.read<UpdateProfileBloc>().add(UpdateGender(id));
+      },
     );
   }
 
-  Widget _buildDateOfBirthField(BuildContext context, UpdateProfileState state) {
+  Widget _buildDateOfBirthField(
+      BuildContext context, UpdateProfileState state) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
@@ -320,33 +415,36 @@ class _EditProfileFormState extends State<EditProfileForm> {
             children: [
               Expanded(
                 child: _buildNumberDropdown(
-                  value: state.dateOfBirth?.split('/')[2] ?? '1990',
+                  value: _datePart(state.dateOfBirth, 0) ?? '1990',
                   label: 'Year',
-                  items: List.generate(100, (i) => (DateTime.now().year - i).toString()),
+                  items: List.generate(
+                      100, (i) => (DateTime.now().year - i).toString()),
                   onChanged: (value) {
-                    // Handle year change
+                    _updateDateOfBirthPart(context, state, year: value);
                   },
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _buildNumberDropdown(
-                  value: state.dateOfBirth?.split('/')[1] ?? '03',
+                  value: _datePart(state.dateOfBirth, 1) ?? '01',
                   label: 'Month',
-                  items: List.generate(12, (i) => (i + 1).toString().padLeft(2, '0')),
+                  items: List.generate(
+                      12, (i) => (i + 1).toString().padLeft(2, '0')),
                   onChanged: (value) {
-                    // Handle month change
+                    _updateDateOfBirthPart(context, state, month: value);
                   },
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _buildNumberDropdown(
-                  value: state.dateOfBirth?.split('/')[0] ?? '22',
+                  value: _datePart(state.dateOfBirth, 2) ?? '01',
                   label: 'Day',
-                  items: List.generate(31, (i) => (i + 1).toString().padLeft(2, '0')),
+                  items: List.generate(
+                      31, (i) => (i + 1).toString().padLeft(2, '0')),
                   onChanged: (value) {
-                    // Handle day change
+                    _updateDateOfBirthPart(context, state, day: value);
                   },
                 ),
               ),
@@ -396,10 +494,11 @@ class _EditProfileFormState extends State<EditProfileForm> {
       children: [
         _buildTextField(
           label: "edit_profile.bio".tr(),
-          hint: state.bio??"edit_profile.bio_hint".tr(),
+          hint: state.bio ?? "edit_profile.bio_hint".tr(),
           value: state.bio ?? '',
           maxLines: 4,
-          onChanged: (value) => context.read<UpdateProfileBloc>().add(UpdateBio(value)),
+          onChanged: (value) =>
+              context.read<UpdateProfileBloc>().add(UpdateBio(value)),
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: 16.0),
@@ -460,7 +559,8 @@ class _EditProfileFormState extends State<EditProfileForm> {
     );
   }
 
-  Widget _buildSpecializationField(BuildContext context, UpdateProfileState state) {
+  Widget _buildSpecializationField(
+      BuildContext context, UpdateProfileState state) {
     return BlocConsumer<SelectionOptionBloc, AppState>(
       listener: (context, selectionState) {
         if (selectionState is Done && selectionState.model is SelectionModel) {
@@ -480,14 +580,15 @@ class _EditProfileFormState extends State<EditProfileForm> {
         if (selectionState is Done && selectionState.model is SelectionModel) {
           return _buildSingleSelectDropdownField(
             label: "edit_profile.specialization".tr(),
-            hintText: state.specializationName??"edit_profile.specialization_hint".tr(),
+            hintText: state.specializationName ??
+                "edit_profile.specialization_hint".tr(),
             currentSelectionName: state.specializationName,
             options: _allAvailableSpecializations,
             onSelected: (id, name) {
               context.read<UpdateProfileBloc>().add(UpdateSpecialization(
-                id: int.parse(id),
-                name: name,
-              ));
+                    id: int.parse(id),
+                    name: name,
+                  ));
             },
           );
         }
@@ -519,14 +620,14 @@ class _EditProfileFormState extends State<EditProfileForm> {
         if (selectionState is Done && selectionState.model is SelectionModel) {
           return _buildSingleSelectDropdownField(
             label: "edit_profile.job_title".tr(),
-            hintText: state.jobTitleName??"edit_profile.job_title_hint".tr(),
+            hintText: state.jobTitleName ?? "edit_profile.job_title_hint".tr(),
             currentSelectionName: state.jobTitleName,
             options: _allAvailableJobTitles,
             onSelected: (id, name) {
               context.read<UpdateProfileBloc>().add(UpdateJobTitle(
-                id: int.parse(id),
-                name: name,
-              ));
+                    id: int.parse(id),
+                    name: name,
+                  ));
             },
           );
         }
@@ -544,6 +645,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
     required String? currentSelectionName,
     required Map<String, String> options,
     required Function(String id, String name) onSelected,
+    bool enabled = true,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -566,28 +668,33 @@ class _EditProfileFormState extends State<EditProfileForm> {
           ),
           const SizedBox(height: 8.0),
           GestureDetector(
-            onTap: () async {
-              final String? resultId = await showDialog<String>(
-                context: context,
-                builder: (BuildContext context) {
-                  return SingleSelectDialog(
-                    title: label,
-                    options: options,
-                    initialSelectedId: options.containsValue(currentSelectionName)
-                        ? options.entries
-                        .firstWhere((element) => element.value == currentSelectionName)
-                        .key
-                        : null,
-                  );
-                },
-              );
+            onTap: !enabled || options.isEmpty
+                ? null
+                : () async {
+                    final String? resultId = await showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SingleSelectDialog(
+                          title: label,
+                          options: options,
+                          initialSelectedId:
+                              options.containsValue(currentSelectionName)
+                                  ? options.entries
+                                      .firstWhere((element) =>
+                                          element.value == currentSelectionName)
+                                      .key
+                                  : null,
+                        );
+                      },
+                    );
 
-              if (resultId != null && options.containsKey(resultId)) {
-                onSelected(resultId, options[resultId]!);
-              }
-            },
+                    if (resultId != null && options.containsKey(resultId)) {
+                      onSelected(resultId, options[resultId]!);
+                    }
+                  },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
               decoration: BoxDecoration(
                 color: const Color(0xFFF7F7F7),
                 borderRadius: BorderRadius.circular(8.0),
@@ -600,9 +707,11 @@ class _EditProfileFormState extends State<EditProfileForm> {
                     child: Text(
                       currentSelectionName ?? hintText,
                       style: TextStyle(
-                        color: currentSelectionName != null
-                            ? Colors.black
-                            : Colors.grey.shade600,
+                        color: !enabled
+                            ? Colors.grey.shade500
+                            : currentSelectionName != null
+                                ? Colors.black
+                                : Colors.grey.shade600,
                       ),
                     ),
                   ),
@@ -635,7 +744,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
             context,
             state,
             "edit_profile.skills".tr(),
-           state.selectedSkills?.join(", ") ?? "edit_profile.skills_hint".tr(),
+            state.selectedSkills?.join(", ") ?? "edit_profile.skills_hint".tr(),
           );
         }
         return _buildSkillsErrorState();
@@ -643,8 +752,8 @@ class _EditProfileFormState extends State<EditProfileForm> {
     );
   }
 
-  Widget _buildSkillsSelectionField(
-      BuildContext context, UpdateProfileState state, String label, String hintText) {
+  Widget _buildSkillsSelectionField(BuildContext context,
+      UpdateProfileState state, String label, String hintText) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
@@ -677,15 +786,18 @@ class _EditProfileFormState extends State<EditProfileForm> {
                 },
               );
 
-              if (resultNames != null) {
-                final skillIds = _getSkillIdsFromNames(resultNames);
-                context.read<UpdateProfileBloc>().add(
-                  UpdateSkills(skillIds: skillIds, skillNames: resultNames),
-                );
+              if (!mounted || resultNames == null) {
+                return;
               }
+
+              final skillIds = _getSkillIdsFromNames(resultNames);
+              this.context.read<UpdateProfileBloc>().add(
+                    UpdateSkills(skillIds: skillIds, skillNames: resultNames),
+                  );
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
               decoration: BoxDecoration(
                 color: const Color(0xFFF7F7F7),
                 borderRadius: BorderRadius.circular(8.0),
@@ -695,25 +807,32 @@ class _EditProfileFormState extends State<EditProfileForm> {
                 children: [
                   Expanded(
                     child: (state.selectedSkills ?? []).isEmpty
-                        ? Text(hintText, style: TextStyle(color: Colors.grey.shade600))
+                        ? Text(hintText,
+                            style: TextStyle(color: Colors.grey.shade600))
                         : Wrap(
-                      spacing: 8.0,
-                      runSpacing: 4.0,
-                      children: (state.selectedSkills ?? []).map((skillName) {
-                        return Chip(
-                          label: Text(skillName),
-                          onDeleted: () {
-                            final updatedSkills = List<String>.from(state.selectedSkills ?? []);
-                            updatedSkills.remove(skillName);
-                            final skillIds = _getSkillIdsFromNames(updatedSkills);
-                            context.read<UpdateProfileBloc>().add(
-                              UpdateSkills(skillIds: skillIds, skillNames: updatedSkills),
-                            );
-                          },
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        );
-                      }).toList(),
-                    ),
+                            spacing: 8.0,
+                            runSpacing: 4.0,
+                            children:
+                                (state.selectedSkills ?? []).map((skillName) {
+                              return Chip(
+                                label: Text(skillName),
+                                onDeleted: () {
+                                  final updatedSkills = List<String>.from(
+                                      state.selectedSkills ?? []);
+                                  updatedSkills.remove(skillName);
+                                  final skillIds =
+                                      _getSkillIdsFromNames(updatedSkills);
+                                  context.read<UpdateProfileBloc>().add(
+                                        UpdateSkills(
+                                            skillIds: skillIds,
+                                            skillNames: updatedSkills),
+                                      );
+                                },
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                              );
+                            }).toList(),
+                          ),
                   ),
                   const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
                 ],
@@ -726,23 +845,27 @@ class _EditProfileFormState extends State<EditProfileForm> {
   }
 
   List<int> _getSkillIdsFromNames(List<String> skillNames) {
-    return skillNames.map((name) {
-      return _allAvailableSkills.entries
-          .firstWhere((entry) => entry.value == name,
-          orElse: () => MapEntry('0', ''))
-          .key;
-    }).where((id) => id != '0').map(int.parse).toList();
+    return skillNames
+        .map((name) {
+          return _allAvailableSkills.entries
+              .firstWhere((entry) => entry.value == name,
+                  orElse: () => const MapEntry('0', ''))
+              .key;
+        })
+        .where((id) => id != '0')
+        .map(int.parse)
+        .toList();
   }
 
   Widget _buildSkillsLoadingState() => LoadingDropDown(
-    label: "edit_profile.skills".tr(),
-    loadingText: "Loading skills...",
-  );
+        label: "edit_profile.skills".tr(),
+        loadingText: "Loading skills...",
+      );
 
   Widget _buildSkillsErrorState() => ErrorDropDown(
-    label: "edit_profile.skills".tr(),
-    errorText: "Failed to load skills. Please try again.",
-  );
+        label: "edit_profile.skills".tr(),
+        errorText: "Failed to load skills. Please try again.",
+      );
 
   Widget _buildPasswordFields(BuildContext context, UpdateProfileState state) {
     return Column(
@@ -751,13 +874,16 @@ class _EditProfileFormState extends State<EditProfileForm> {
           label: "edit_profile.new_password".tr(),
           hint: "edit_profile.password_hint".tr(),
           controller: _newPasswordController,
-          onChanged: (value) => context.read<UpdateProfileBloc>().add(UpdateNewPassword(value)),
+          onChanged: (value) =>
+              context.read<UpdateProfileBloc>().add(UpdateNewPassword(value)),
         ),
         _buildPasswordField(
           label: "edit_profile.confirm_password".tr(),
           hint: "edit_profile.password_hint".tr(),
           controller: _confirmPasswordController,
-          onChanged: (value) => context.read<UpdateProfileBloc>().add(UpdateConfirmPassword(value)),
+          onChanged: (value) => context
+              .read<UpdateProfileBloc>()
+              .add(UpdateConfirmPassword(value)),
         ),
         // Align(
         //   alignment: Alignment.centerLeft,
@@ -809,7 +935,55 @@ class _EditProfileFormState extends State<EditProfileForm> {
       onTap: state.isSubmitting
           ? null
           : () => context.read<UpdateProfileBloc>().add(SubmitProfile()),
-      text: state.isSubmitting ? "edit_profile.saving".tr() : "edit_profile.save".tr(),
+      text: state.isSubmitting
+          ? "edit_profile.saving".tr()
+          : "edit_profile.save".tr(),
     );
+  }
+
+  String? _datePart(String? value, int index) {
+    final match =
+        RegExp(r'^(\d{4})[-/](\d{2})[-/](\d{2})$').firstMatch(value ?? '');
+    if (match == null) {
+      return null;
+    }
+    switch (index) {
+      case 0:
+        return match.group(1);
+      case 1:
+        return match.group(2);
+      case 2:
+        return match.group(3);
+      default:
+        return null;
+    }
+  }
+
+  void _updateDateOfBirthPart(
+    BuildContext context,
+    UpdateProfileState state, {
+    String? year,
+    String? month,
+    String? day,
+  }) {
+    final nextYear = year ?? _datePart(state.dateOfBirth, 0) ?? '1990';
+    final nextMonth = month ?? _datePart(state.dateOfBirth, 1) ?? '01';
+    final nextDay = day ?? _datePart(state.dateOfBirth, 2) ?? '01';
+    context.read<UpdateProfileBloc>().add(
+          UpdateDateOfBirth('$nextYear-$nextMonth-$nextDay'),
+        );
+  }
+
+  String? _genderDisplayName(String? gender) {
+    switch ((gender ?? '').trim().toLowerCase()) {
+      case 'male':
+      case 'ذكر':
+        return "edit_profile.gender_male".tr();
+      case 'female':
+      case 'أنثى':
+        return "edit_profile.gender_female".tr();
+      default:
+        return null;
+    }
   }
 }

@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/main_repos/base_repo.dart';
 
+import '../../../../../app/core/app_currency.dart';
 import '../../../../../app/core/app_storage_keys.dart';
 import '../../../../../data/api/end_points.dart';
 import '../../../../../data/config/di.dart';
@@ -18,6 +19,8 @@ class LoginRepo extends BaseRepo {
   saveUserData(json) async {
     final user = json['payload']['user'];
     final token = json['payload']["token"];
+
+    await AppCurrency.cacheFromPayload(json);
 
     await sharedPreferences.setString(AppStorageKey.userId, user["id"].toString());
     await sharedPreferences.setString(AppStorageKey.userData, jsonEncode(user));

@@ -1,12 +1,11 @@
 part of 'notification_helper.dart';
 
-
 @pragma('vm:entry-point')
 scheduleNotification(String title, String subtitle, String data) async {
   var rng = math.Random();
   var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
-    'channel_id',
-    'your channel name',
+    'talent_flow_notifications',
+    'Talent Flow Notifications',
     importance: Importance.high,
     priority: Priority.high,
     ticker: 'ticker',

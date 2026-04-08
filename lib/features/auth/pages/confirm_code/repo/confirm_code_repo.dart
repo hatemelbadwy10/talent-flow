@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 
+import '../../../../../app/core/app_currency.dart';
 import '../../../../../app/core/app_storage_keys.dart';
 import '../../../../../data/api/end_points.dart';
 import '../../../../../data/error/api_error_handler.dart';
@@ -17,6 +18,7 @@ class ConfirmCodeRepo extends BaseRepo {
     final user = json['payload']['user'];
     final token = json['payload']["token"];
     log("json: $json");
+    AppCurrency.cacheFromPayload(json);
     sharedPreferences.setString(AppStorageKey.userId, user["id"].toString());
     sharedPreferences.setString(AppStorageKey.userData, jsonEncode(user));
     sharedPreferences.setBool(AppStorageKey.isLogin, true);

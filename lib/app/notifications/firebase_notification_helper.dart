@@ -9,7 +9,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   log('on Message background notification ${message.data}');
   log('on Message background data ${message.notification?.body}');
-  log('Handling a background message: ${message.notification!.toMap()}');
+  log('Handling a background message: ${message.notification?.toMap()}');
   handlePath(message.data);
 }
 
@@ -17,6 +17,7 @@ FirebaseMessaging? _firebaseMessaging;
 
 class FirebaseNotifications {
   static FirebaseNotifications? _instance;
+  static bool _isInitialized = false;
 
   FirebaseNotifications._internal();
 
@@ -26,16 +27,54 @@ class FirebaseNotifications {
   }
 
   static Future<void> setUpFirebase() async {
+    if (_isInitialized) {
+      return;
+    }
+
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     _firebaseMessaging = FirebaseMessaging.instance;
-    _firebaseMessaging!.setAutoInitEnabled(true);
-    FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    await _firebaseMessaging!.setAutoInitEnabled(true);
+    final notificationSettings = await _firebaseMessaging!.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+    log(
+      'FCM authorization status: ${notificationSettings.authorizationStatus.name}',
+    );
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
     );
-    localNotification();
-    firebaseCloudMessagingListeners();
+    await localNotification();
+    await _cacheFcmToken(await _firebaseMessaging!.getToken());
+    _firebaseMessaging!.onTokenRefresh.listen(_cacheFcmToken);
+    await firebaseCloudMessagingListeners();
+    _isInitialized = true;
+  }
+
+  static Future<String?> getFcmToken({bool forceRefresh = false}) async {
+    _firebaseMessaging ??= FirebaseMessaging.instance;
+    final token = forceRefresh
+        ? await _firebaseMessaging!.getToken()
+        : (await _firebaseMessaging!.getToken()) ?? cachedFcmToken;
+    await _cacheFcmToken(token);
+    return token;
+  }
+
+  static String? get cachedFcmToken =>
+      sl<SharedPreferences>().getString(AppStorageKey.fcmToken);
+
+  static Future<void> _cacheFcmToken(String? token) async {
+    if (token == null || token.isEmpty) {
+      log('FCM token is null or empty');
+      return;
+    }
+    await sl<SharedPreferences>().setString(AppStorageKey.fcmToken, token);
+    log('FCM token: $token');
   }
 
   static Future<void> firebaseCloudMessagingListeners() async {
@@ -46,9 +85,12 @@ class FirebaseNotifications {
         log('on Message body ${data.notification?.body}');
         Map notify = data.data;
         log('$notify');
-        if (Platform.isAndroid) {
-          scheduleNotification(data.notification!.title ?? '',
-              data.notification!.body ?? '', json.encode(notify));
+        if (Platform.isAndroid && data.notification != null) {
+          scheduleNotification(
+            data.notification!.title ?? '',
+            data.notification!.body ?? '',
+            json.encode(notify),
+          );
         }
         updateUserFunctions(notify: notify);
       },
@@ -62,6 +104,9 @@ class FirebaseNotifications {
 
     FirebaseMessaging.instance.getInitialMessage().then((value) {
       log('Data from initial message >>>>>> ${value?.data}');
+      if (value != null && value.data.isNotEmpty) {
+        handlePath(value.data);
+      }
     });
 
     _notificationsPlugin!.getActiveNotifications().then((value) {
@@ -76,10 +121,10 @@ class FirebaseNotifications {
     _notificationsPlugin!
         .getNotificationAppLaunchDetails()
         .then((NotificationAppLaunchDetails? data) {
-      log('on Opened From Notification ${json.decode(json.encode(data!.notificationResponse?.payload.toString()))}');
-      if (data.notificationResponse?.payload != null &&
-          data.notificationResponse?.payload != '') {
-        handlePath(json.decode(data.notificationResponse?.payload ?? ''));
+      log('on Opened From Notification ${json.decode(json.encode(data?.notificationResponse?.payload.toString()))}');
+      final payload = data?.notificationResponse?.payload;
+      if ((payload ?? '').isNotEmpty) {
+        handlePath(json.decode(payload!));
       }
     });
   }

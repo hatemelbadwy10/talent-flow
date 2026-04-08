@@ -86,7 +86,7 @@ class ProjectPortfolioCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      projectsModel.specialization?.name ?? "project_portfolio.default_specialization".tr(),
+                      projectsModel.date??"",
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,

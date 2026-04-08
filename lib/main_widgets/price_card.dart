@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../app/core/app_currency.dart';
 import '../app/core/styles.dart';
 import '../app/core/text_styles.dart';
 import '../app/localization/language_constant.dart';
@@ -15,7 +16,7 @@ class PriceCard extends StatelessWidget {
       children: [
         if (isFree != true)
           Text(
-            "${price?.toStringAsFixed(1) ?? 0} ${getTranslated("kwd")}",
+            AppCurrency.formatAmount(price?.toStringAsFixed(1) ?? 0),
             style: AppTextStyles.w700
                 .copyWith(fontSize: 16, color: Styles.PRIMARY_COLOR),
           )

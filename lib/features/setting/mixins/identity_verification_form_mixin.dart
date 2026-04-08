@@ -16,7 +16,7 @@ mixin IdentityVerificationFormMixin<T extends StatefulWidget> on State<T> {
   final TextEditingController birthDateController = TextEditingController();
 
   final ValueNotifier<int> currentTabNotifier = ValueNotifier<int>(0);
-  final ValueNotifier<String?> selectedCountryKeyNotifier =
+  final ValueNotifier<String?> selectedCountryIdNotifier =
       ValueNotifier<String?>(null);
   final ValueNotifier<DateTime?> birthDateNotifier = ValueNotifier<DateTime?>(
     null,
@@ -32,19 +32,9 @@ mixin IdentityVerificationFormMixin<T extends StatefulWidget> on State<T> {
     'identity_verification_screen.tab_selfie',
   ];
 
-  final List<String> countryKeys = const [
-    'identity_verification_screen.country_sa',
-    'identity_verification_screen.country_eg',
-    'identity_verification_screen.country_ae',
-    'identity_verification_screen.country_kw',
-    'identity_verification_screen.country_qa',
-  ];
-
-  final List<int> countryIds = const [1, 2, 3, 4, 5];
-
   Listenable get screenListenable => Listenable.merge([
         currentTabNotifier,
-        selectedCountryKeyNotifier,
+        selectedCountryIdNotifier,
         birthDateNotifier,
         acknowledgedNotifier,
         uploadedTabImagesNotifier,
@@ -57,15 +47,7 @@ mixin IdentityVerificationFormMixin<T extends StatefulWidget> on State<T> {
   }
 
   int? get selectedCountryId {
-    final selectedKey = selectedCountryKeyNotifier.value;
-    if (selectedKey == null) {
-      return null;
-    }
-    final index = countryKeys.indexOf(selectedKey);
-    if (index < 0 || index >= countryIds.length) {
-      return null;
-    }
-    return countryIds[index];
+    return int.tryParse(selectedCountryIdNotifier.value ?? '');
   }
 
   File? get idCardFrontFace => uploadedTabImagesNotifier.value[1];
@@ -82,7 +64,7 @@ mixin IdentityVerificationFormMixin<T extends StatefulWidget> on State<T> {
     birthDateController.dispose();
 
     currentTabNotifier.dispose();
-    selectedCountryKeyNotifier.dispose();
+    selectedCountryIdNotifier.dispose();
     birthDateNotifier.dispose();
     acknowledgedNotifier.dispose();
     uploadedTabImagesNotifier.dispose();

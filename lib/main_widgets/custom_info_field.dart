@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:talent_flow/app/core/app_currency.dart';
 import 'package:talent_flow/app/core/extensions.dart';
-import 'package:talent_flow/app/localization/language_constant.dart';
 
 import '../app/core/dimensions.dart';
 import '../app/core/styles.dart';
@@ -33,7 +33,7 @@ class CustomInfoField extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12.w),
                 border: Border.all(color: Styles.LIGHT_BORDER_COLOR)),
             child: Text(
-              "$value ${getTranslated("kwd")}",
+              AppCurrency.formatAmount(value),
               style: AppTextStyles.w600.copyWith(
                 fontSize: 14,
                 color: Styles.DETAILS_COLOR,

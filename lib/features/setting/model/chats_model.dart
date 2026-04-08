@@ -4,6 +4,7 @@ import 'package:talent_flow/data/config/mapper.dart';
 class ChatsModel implements Mapper{
     ChatsModel({
         required this.id,
+        required this.projectId,
         required this.receiver,
         required this.unreadCount,
         required this.lastMessageSnippet,
@@ -12,6 +13,7 @@ class ChatsModel implements Mapper{
     });
 
     final int? id;
+    final int? projectId;
     final Receiver? receiver;
     final int? unreadCount;
     final String? lastMessageSnippet;
@@ -20,6 +22,7 @@ class ChatsModel implements Mapper{
 
     ChatsModel copyWith({
         int? id,
+        int? projectId,
         Receiver? receiver,
         int? unreadCount,
         String? lastMessageSnippet,
@@ -28,6 +31,7 @@ class ChatsModel implements Mapper{
     }) {
         return ChatsModel(
             id: id ?? this.id,
+            projectId: projectId ?? this.projectId,
             receiver: receiver ?? this.receiver,
             unreadCount: unreadCount ?? this.unreadCount,
             lastMessageSnippet: lastMessageSnippet ?? this.lastMessageSnippet,
@@ -39,6 +43,7 @@ class ChatsModel implements Mapper{
     factory ChatsModel.fromJson(Map<String, dynamic> json){ 
         return ChatsModel(
             id: json["id"],
+            projectId: _parseInt(json["project_id"]),
             receiver: json["receiver"] == null ? null : Receiver.fromJson(json["receiver"]),
             unreadCount: json["unread_count"],
             lastMessageSnippet: json["last_message_snippet"],
@@ -51,6 +56,7 @@ class ChatsModel implements Mapper{
       Map<String, dynamic> toJson() {
         return {
           "id": id,
+          "project_id": projectId,
           "unread_count": unreadCount,
           "last_message_snippet": lastMessageSnippet,
           "since": since,
@@ -58,6 +64,13 @@ class ChatsModel implements Mapper{
         };
       }
 
+}
+
+int? _parseInt(dynamic value) {
+  if (value is int) {
+    return value;
+  }
+  return int.tryParse(value?.toString() ?? '');
 }
 
 class Receiver {

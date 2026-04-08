@@ -1,10 +1,14 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 import 'package:talent_flow/components/custom_images.dart';
+import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/freelancer_chat_bloc.dart';
 import 'package:talent_flow/features/home/model/chat_model.dart';
 import 'package:talent_flow/features/home/widgets/chat_bubble.dart';
@@ -23,6 +27,13 @@ class FreelancerChatScreen extends StatefulWidget {
 class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
   final TextEditingController _messageController = TextEditingController();
 
+  int? _parseInt(dynamic value) {
+    if (value is int) {
+      return value;
+    }
+    return int.tryParse(value?.toString() ?? '');
+  }
+
   void _sendMessage() {
     final String body = _messageController.text.trim();
     if (body.isEmpty) {
@@ -32,8 +43,8 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
     context.read<FreelancerChatBloc>().add(
           SendMessage(
             arguments: {
-              'conversationId':
-                  widget.arguments?['conversationId'] ?? widget.arguments?['freelancerId'],
+              'conversationId': widget.arguments?['conversationId'] ??
+                  widget.arguments?['freelancerId'],
               'body': body,
             },
           ),
@@ -54,6 +65,10 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
     final fallbackFreelancerJobTitle =
         (widget.arguments?['freelancerJobTitle'] as String?)?.trim();
     final freelancerId = widget.arguments?['freelancerId'];
+    final fallbackProjectId = _parseInt(
+        widget.arguments?['projectId'] ?? widget.arguments?['project_id']);
+    final isFreelancer =
+        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
 
     return Scaffold(
       appBar: AppBar(
@@ -127,25 +142,43 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
             );
           },
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              CustomNavigator.push(
-                Routes.createContract,
-                arguments: {'freelancerId': freelancerId},
-              );
-            },
-            child: const Text(
-              'Create Contract',
-              style: TextStyle(
-                color: Styles.PRIMARY_COLOR,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
+        actions: isFreelancer
+            ? const []
+            : [
+                BlocBuilder<FreelancerChatBloc, AppState>(
+                  builder: (context, state) {
+                    final currentProjectId =
+                        state is Done && state.data is ChatModel
+                            ? (state.data as ChatModel).projectId ??
+                                fallbackProjectId
+                            : fallbackProjectId;
+
+                    return TextButton(
+                      onPressed: () {
+                        CustomNavigator.push(
+                          Routes.createContract,
+                          arguments: {
+                            'freelancerId': freelancerId,
+                            'conversationId':
+                                widget.arguments?['conversationId'],
+                            if (currentProjectId != null)
+                              'projectId': currentProjectId,
+                          },
+                        );
+                      },
+                      child: Text(
+                        'chat_screen.create_contract'.tr(),
+                        style: const TextStyle(
+                          color: Styles.PRIMARY_COLOR,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+              ],
       ),
       body: SafeArea(
         top: false,

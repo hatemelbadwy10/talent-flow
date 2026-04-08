@@ -68,6 +68,8 @@ class ChatListItem extends StatelessWidget {
         Routes.chat,
         arguments: {
           'conversationId': chat.id,
+          'project_id': chat.projectId,
+          'projectId': chat.projectId,
           'freelancerId': chat.receiver?.id,
           'freelancerName': chat.receiver?.name,
           'freelancerJobTitle': chat.receiver?.jobTitle,

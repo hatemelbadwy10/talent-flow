@@ -7,6 +7,7 @@ class UserModel extends SingleMapper {
   String? profileImage;
   String? phone;
   String? email;
+  String? identityVerifyStatus;
 
   UserModel({
     this.id,
@@ -15,6 +16,7 @@ class UserModel extends SingleMapper {
     this.profileImage,
     this.phone,
     this.email,
+    this.identityVerifyStatus,
   });
 
   UserModel.fromJson(Map<String, dynamic> json) {
@@ -33,6 +35,7 @@ class UserModel extends SingleMapper {
         json['profile_image']?.toString() ?? json['image']?.toString();
     phone = json['phone_number']?.toString() ?? json['phone']?.toString();
     email = json['email'];
+    identityVerifyStatus = json['identity_verify_status']?.toString();
   }
 
   @override
@@ -44,6 +47,7 @@ class UserModel extends SingleMapper {
     data['profile_image'] = profileImage;
     data['phone_number'] = phone;
     data['email'] = email;
+    data['identity_verify_status'] = identityVerifyStatus;
 
     return data;
   }

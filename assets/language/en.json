@@ -183,7 +183,7 @@
     "select_specialization": "Select Specialization",
     "specialization_validation": "Please select a specialization",
     "select_skill": "Select Skill",
-    "budget_hint": "$250 - $500",
+    "budget_hint": "250 - 500",
     "duration_hint": " Less than a week",
     "files_description_hint": "Upload up to 20 attachments",
     "choose_from_gallery": "Choose from Gallery",
@@ -198,9 +198,9 @@
     "success": "Project added successfully",
     "similar_projects_hint": "Similar Projects",
     "budget_options": [
-      "$250 - $500",
-      "$500 - $1000",
-      "$1000 - $2500"
+      "250 - 500",
+      "500 - 1000",
+      "1000 - 2500"
     ],
     "duration_options": [
       "Less than a week",
@@ -210,6 +210,7 @@
     ]
   },
   "submit_offer_title": "Submit Offer",
+  "update_offer_title": "Update Offer",
   "submit_button": "Submit",
   "edit_work": {
     "title": "Edit Work",
@@ -254,10 +255,14 @@
   },
   "add_offer": {
     "title": "Submit an Offer",
+    "update_title": "Update Your Offer",
     "hint": "Type here",
     "empty_description": "Please enter your offer details",
     "success": "Offer submitted successfully",
-    "error": "Failed to submit offer"
+    "update_success": "Offer updated successfully",
+    "error": "Failed to submit offer",
+    "update_error": "Failed to update offer",
+    "update_button": "Update"
   },
   "settings_screen": {
     "title": "Settings",
@@ -288,6 +293,7 @@
   },
   "chat_screen": {
     "title": "Messages",
+    "create_contract": "Create Contract",
     "search_hint": "Search messages",
     "filter_by_project": "Filter by project",
     "all_projects": "All Projects",
@@ -329,7 +335,55 @@
     "terms": "Terms",
     "talent_percentage": "Talent Flow Contracts Percentage",
     "termination_conditions": "Termination Conditions",
-    "conflict_policy": "Conflict Policy"
+    "conflict_policy": "Conflict Policy",
+    "status": {
+      "accepted": "Accepted",
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "work_under_review": "Work Under Review",
+      "wait_to_pay_freelancer": "Wait To Pay Freelancer",
+      "has_notes": "Has Notes",
+      "disagreement": "Disagreement",
+      "closed": "Closed",
+      "rejected": "Rejected"
+    },
+    "sections": {
+      "has_notes": "Has Notes",
+      "reject_reason": "Reject Reason"
+    },
+    "actions": {
+      "title": "Actions",
+      "approve_contract": "Approve Contract",
+      "reject_contract": "Reject",
+      "edit_contract": "Edit Contract",
+      "go_to_payment": "Go To Payment",
+      "mark_as_completed": "Mark As Completed",
+      "review_entrepreneur": "Review Entrepreneur",
+      "accept_close_project": "Accept Close Project",
+      "have_notes": "Have Notes",
+      "submit_complaint": "Submit Complaint"
+    },
+    "complaint": {
+      "submitted_by_you": "You have submitted a complaint, wait for review and we will contact you",
+      "submitted_by_other_party": "The other party submitted a complaint"
+    },
+    "hints": {
+      "reject_reason": "Enter reject reason",
+      "work_notes": "Enter work notes",
+      "complaint": "Describe your complaint",
+      "review_comment": "Write your review",
+      "rating": "Enter rating from 0 to 5"
+    },
+    "common": {
+      "cancel": "Cancel",
+      "submit": "Submit",
+      "action_completed": "Action completed successfully"
+    },
+    "validation": {
+      "required": "This field is required",
+      "rating": "Enter a valid rating from 0 to 5"
+    },
+    "edit_contract_pending": "Edit contract flow is pending backend update integration."
   },
   "contract_payment": {
     "pay": "Pay",
@@ -448,32 +502,36 @@
     "back_image_required": "Please upload the back ID image",
     "selfie_image_required": "Please upload a selfie with ID",
     "submit_success": "Identity verification submitted successfully",
+    "submit_processing": "Identity verification submitted and is now under review",
     "submit_error": "Failed to submit identity verification",
-    "country_sa": "Saudi Arabia",
-    "country_eg": "Egypt",
-    "country_ae": "United Arab Emirates",
-    "country_kw": "Kuwait",
-    "country_qa": "Qatar"
+    "under_review_title": "Identity Verification Under Review",
+    "under_review_message": "Your identity verification request is currently under review. Please wait until the team responds."
   },
   "create_contract_screen": {
     "title": "Create Contract",
+    "edit_title": "Edit Contract",
     "project_info": "Project Information",
     "project_title": "Project Title",
     "project_title_value": "Delivery App",
     "project_owner": "Project Owner",
     "project_owner_value": "Ahmed Mohamed",
     "current_budget": "Current Budget",
-    "current_budget_value": "2500 USD",
+    "current_budget_value": "2500",
     "current_duration": "Current Duration",
     "current_duration_value": "30 days",
     "contract_name": "Contract Name *",
     "date": "Date *",
-    "agreed_cost": "Agreed Cost (USD)*",
+    "agreed_cost": "Agreed Cost *",
+    "duration": "Duration (days) *",
     "contract_terms": "Contract Terms *",
     "additional_notes": "Additional Notes",
     "contract_files": "Contract Files *",
     "required_field": "This field is required",
     "talent_flow_ratio": "Talent Flow Contract Ratio",
+    "talent_flow_percentage": "Talent Flow Percentage",
+    "create_button": "Create Contract",
+    "update_button": "Update Contract",
+    "create_success": "Contract created successfully",
     "conditions_text": "Either party has the right to terminate this agreement at any time by written notice to the other party at least (30) days in advance. The first party also has the right to terminate the agreement immediately if the other party breaches any essential terms, or uses the service in an illegal way or in violation of the terms of use. Upon termination, the user must settle any outstanding financial obligations, and all rights granted under this agreement are revoked. In case of any dispute between the user and the company regarding the use of the service or interpretation of this agreement, both parties shall first seek an amicable settlement through direct communication within a period not exceeding (15) days. If an amicable solution cannot be reached, the dispute shall be referred to the competent courts in the country where the company's headquarters is located. This agreement is governed and interpreted according to the laws applicable in that country."
   },
   "favourite_tabs": {
@@ -606,6 +664,7 @@
     "country_hint": "Choose your country",
     "city": "City",
     "city_hint": "Choose your city",
+    "select_country_first": "Choose your country first",
     "gender": "Gender",
     "gender_hint": "Choose your gender",
     "gender_male": "Male",
@@ -632,7 +691,9 @@
     "views": "Views"
   },
   "project_proposals": {
-    "title": "Proposals"
+    "title": "Proposals",
+    "your_proposal": "Your Proposal",
+    "edit_offer": "Edit Offer"
   },
   "owner_projects": {
     "my_projects": "My Projects",

@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../../app/core/app_currency.dart';
 import '../../../../../app/core/app_storage_keys.dart';
 import '../../../../../data/api/end_points.dart';
 import '../../../../../data/config/di.dart';
@@ -22,6 +23,7 @@ class SocialMediaRepo extends BaseRepo {
   final SocialMediaLoginHelper socialMediaLoginHelper;
 
   saveUserData(json) {
+    AppCurrency.cacheFromPayload(json);
     sharedPreferences.setString(AppStorageKey.userId, json["id"].toString());
     sharedPreferences.setString(AppStorageKey.userData, jsonEncode(json));
     sharedPreferences.setBool(AppStorageKey.isLogin, true);

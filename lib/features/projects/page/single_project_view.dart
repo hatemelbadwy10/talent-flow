@@ -25,6 +25,11 @@ class SingleProjectView extends StatelessWidget {
 
   const SingleProjectView({super.key, required this.arguments});
 
+  int? _currentUserId() {
+    final rawUserId = sl<SharedPreferences>().getString(AppStorageKey.userId);
+    return int.tryParse(rawUserId ?? '');
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isFreelancer =
@@ -48,6 +53,13 @@ class SingleProjectView extends StatelessWidget {
               return Center(child: Text('project_load_failed'.tr()));
             } else if (state is Done && state.model is SingleProjectModel) {
               final project = state.model as SingleProjectModel;
+              final currentUserId = _currentUserId();
+              final myProposal = isFreelancer
+                  ? project.proposals.cast<ProjectProposal?>().firstWhere(
+                        (proposal) => proposal?.freelancerId == currentUserId,
+                        orElse: () => null,
+                      )
+                  : null;
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -63,6 +75,11 @@ class SingleProjectView extends StatelessWidget {
                       ),
                       if (project.files.isNotEmpty)
                         ProjectFilesSection(files: project.files),
+                      if (isFreelancer && myProposal != null)
+                        _OwnProposalSection(
+                          proposal: myProposal,
+                          projectId: arguments['id'] as int?,
+                        ),
                       if (!isFreelancer)
                         _ProjectProposalsSection(
                           proposals: project.proposals,
@@ -77,6 +94,122 @@ class SingleProjectView extends StatelessWidget {
             return const SizedBox.shrink();
           },
         ),
+      ),
+    );
+  }
+}
+
+class _OwnProposalSection extends StatelessWidget {
+  const _OwnProposalSection({
+    required this.proposal,
+    required this.projectId,
+  });
+
+  final ProjectProposal proposal;
+  final int? projectId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 20.h),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'project_proposals.your_proposal'.tr(),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Styles.HEADER,
+                ),
+              ),
+            ),
+            TextButton.icon(
+              onPressed: projectId == null
+                  ? null
+                  : () {
+                      CustomNavigator.push(
+                        Routes.addOffer,
+                        arguments: {
+                          'id': projectId,
+                          'proposalId': proposal.id,
+                          'initialDescription': proposal.description,
+                        },
+                      );
+                    },
+              icon: const Icon(
+                Icons.edit_outlined,
+                size: 18,
+              ),
+              label: Text('project_proposals.edit_offer'.tr()),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        _OwnProposalCard(proposal: proposal),
+      ],
+    );
+  }
+}
+
+class _OwnProposalCard extends StatelessWidget {
+  const _OwnProposalCard({required this.proposal});
+
+  final ProjectProposal proposal;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Styles.BORDER_COLOR),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if ((proposal.since ?? '').trim().isNotEmpty) ...[
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.access_time,
+                  size: 15,
+                  color: Styles.HINT_COLOR,
+                ),
+                SizedBox(width: 4.w),
+                Text(
+                  proposal.since!,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Styles.HINT_COLOR,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+          ],
+          if ((proposal.description ?? '').trim().isNotEmpty)
+            Text(
+              proposal.description!,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.6,
+                color: Styles.SUBTITLE,
+              ),
+            ),
+        ],
       ),
     );
   }

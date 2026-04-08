@@ -6,8 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../components/user_completion_dialog.dart';
 import '../../data/config/di.dart';
 import '../../features/setting/repo/bank_accounts_repo.dart';
+import '../../main_blocs/user_bloc.dart';
 import '../../navigation/custom_navigation.dart';
 import '../../navigation/routes.dart';
+import 'app_event.dart';
 import 'app_storage_keys.dart';
 
 enum GuardedAction {
@@ -88,6 +90,7 @@ abstract class UserCompletionGuard {
     bool? addedWorks,
     bool? hasBankAccount,
     bool? identityAuthenticated,
+    String? identityVerifyStatus,
   }) async {
     final rawUser = _readUserData();
     if (rawUser.isEmpty) return;
@@ -101,8 +104,16 @@ abstract class UserCompletionGuard {
     if (identityAuthenticated != null) {
       rawUser['identity_authenticated'] = identityAuthenticated;
     }
+    if (identityVerifyStatus != null) {
+      rawUser['identity_verify_status'] = identityVerifyStatus;
+    }
 
     await _prefs.setString(AppStorageKey.userData, jsonEncode(rawUser));
+    UserBloc.instance.add(Click());
+  }
+
+  static String? get identityVerifyStatus {
+    return _readUserData()['identity_verify_status']?.toString();
   }
 
   static Future<void> handlePostAuthNavigation() async {

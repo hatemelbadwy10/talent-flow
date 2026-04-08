@@ -1,6 +1,7 @@
 class ChatModel {
     ChatModel({
         required this.id,
+        required this.projectId,
         required this.contractId,
         required this.hasContract,
         required this.receiver,
@@ -8,6 +9,7 @@ class ChatModel {
     });
 
     final int? id;
+    final int? projectId;
     final dynamic contractId;
     final bool? hasContract;
     final Receiver? receiver;
@@ -15,6 +17,7 @@ class ChatModel {
 
     ChatModel copyWith({
         int? id,
+        int? projectId,
         int? contractId,
         bool? hasContract,
         Receiver? receiver,
@@ -22,6 +25,7 @@ class ChatModel {
     }) {
         return ChatModel(
             id: id ?? this.id,
+            projectId: projectId ?? this.projectId,
             contractId: contractId ?? this.contractId,
             hasContract: hasContract ?? this.hasContract,
             receiver: receiver ?? this.receiver,
@@ -32,6 +36,7 @@ class ChatModel {
     factory ChatModel.fromJson(Map<String, dynamic> json){ 
         return ChatModel(
             id: json["id"],
+            projectId: _parseInt(json["project_id"]),
             contractId: json["contract_id"],
             hasContract: json["has_contract"],
             receiver: json["receiver"] == null ? null : Receiver.fromJson(json["receiver"]),
@@ -39,6 +44,13 @@ class ChatModel {
         );
     }
 
+}
+
+int? _parseInt(dynamic value) {
+    if (value is int) {
+        return value;
+    }
+    return int.tryParse(value?.toString() ?? "");
 }
 
 class Message {

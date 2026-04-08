@@ -1,13 +1,11 @@
-// widgets/skills_dropdown.dart
-import 'dart:developer';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../components/dynamic_drop_down_button.dart';
+import 'package:talent_flow/app/core/styles.dart';
+import 'package:talent_flow/features/setting/widgets/multi_select_skills_dialog.dart';
 import '../bloc/add_project_bloc.dart';
 import '../bloc/add_project_event.dart';
 import '../bloc/add_project_state.dart';
-import '../model/drop_down_model.dart';
 import 'section_label_widget.dart';
 
 class SkillsDropdown extends StatelessWidget {
@@ -20,10 +18,6 @@ class SkillsDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = availableSkills.entries
-        .map((entry) => DropdownItem(entry.value, value: int.parse(entry.key)))
-        .toList();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -48,40 +42,71 @@ class SkillsDropdown extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Dynamic multi-select dropdown
-                DynamicDropDownButton(
-                  items: items,
-                  name: dropdownName,
-                  selectedValue: null, // allow multiple
-                  onChange: (selectedItem) {
-                    if (selectedItem != null) {
-                      final updatedSkills = List<int>.from(state.skills);
+                InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () async {
+                    final resultNames = await showDialog<List<String>>(
+                      context: context,
+                      builder: (dialogContext) => MultiSelectSkillsDialog(
+                        allSkills: availableSkills.values.toList(),
+                        initialSelectedSkills: selectedSkillNames,
+                      ),
+                    );
 
-                      if (!updatedSkills.contains(selectedItem.value)) {
-                        updatedSkills.add(selectedItem.value);
-                      }
-
-                      // get names of updated skills
-                      final updatedSkillNames = updatedSkills
-                          .map((id) => availableSkills[id.toString()] ?? '')
-                          .where((name) => name.isNotEmpty)
-                          .toList();
-
-                      log("selected skills $updatedSkills, names $updatedSkillNames");
-
-                      context.read<AddProjectBloc>().add(
-                        UpdateSkills(
-                          skills: updatedSkills,
-                          skillNames: updatedSkillNames,
-                        ),
-                      );
+                    if (!context.mounted) {
+                      return;
                     }
+
+                    if (resultNames == null) {
+                      return;
+                    }
+
+                    final updatedSkills = availableSkills.entries
+                        .where((entry) => resultNames.contains(entry.value))
+                        .map((entry) => int.parse(entry.key))
+                        .toList();
+
+                    context.read<AddProjectBloc>().add(
+                          UpdateSkills(
+                            skills: updatedSkills,
+                            skillNames: resultNames,
+                          ),
+                        );
                   },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Styles.FILL_COLOR,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Styles.LIGHT_BORDER_COLOR),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            dropdownName,
+                            style: TextStyle(
+                              color: selectedSkillNames.isEmpty
+                                  ? Styles.DISABLED
+                                  : Styles.PRIMARY_COLOR,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: Styles.ACCENT_COLOR,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-
                 const SizedBox(height: 10),
-
-                // Show selected skills as Chips
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
@@ -90,8 +115,8 @@ class SkillsDropdown extends StatelessWidget {
                     return Chip(
                       label: Text(skillName),
                       onDeleted: () {
-                        final updatedSkills =
-                        List<int>.from(state.skills)..remove(id);
+                        final updatedSkills = List<int>.from(state.skills)
+                          ..remove(id);
 
                         final updatedSkillNames = updatedSkills
                             .map((id) => availableSkills[id.toString()] ?? '')
@@ -99,11 +124,11 @@ class SkillsDropdown extends StatelessWidget {
                             .toList();
 
                         context.read<AddProjectBloc>().add(
-                          UpdateSkills(
-                            skills: updatedSkills,
-                            skillNames: updatedSkillNames,
-                          ),
-                        );
+                              UpdateSkills(
+                                skills: updatedSkills,
+                                skillNames: updatedSkillNames,
+                              ),
+                            );
                       },
                     );
                   }).toList(),

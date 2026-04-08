@@ -119,8 +119,9 @@ class EndPoints {
 
   ///Check Out
   static checkOutOrder(id) => 'check-out/$id';
+
   ///chats
-    static const String projectChatOptions = 'api/projects/chat/options';
+  static const String projectChatOptions = 'api/projects/chat/options';
 
   ///Setting
   static const String associationStatistics = 'important-numbers';
@@ -134,6 +135,16 @@ class EndPoints {
   static const String help = 'api/support-tickets';
   static const String contracts = 'api/contracts';
   static contractDetails(int id) => 'api/contracts/$id';
+  static contractUpdate(int id) => 'api/contracts/$id';
+  static contractApprove(int id) => 'api/contracts/$id/approve';
+  static contractReject(int id) => 'api/contracts/$id/reject';
+  static contractComplete(int id) => 'api/contracts/$id/complete';
+  static contractRejectWork(int id) => 'api/contracts/$id/reject-work';
+  static contractComplain(int id) => 'api/contracts/$id/complain';
+  static contractClose(int id) => 'api/contracts/$id/close';
+  static contractReview(int id) => 'api/contracts/$id/review';
+  static contractCreatePageInfo(int projectId) =>
+      'api/contracts/add/page-info/$projectId';
   static const String identityVerification = 'api/identity-verification';
   static const String accountStatements = 'api/account-statment';
   static accountStatementDetails(int id) => 'api/account-statment/$id';
@@ -143,7 +154,8 @@ class EndPoints {
   static const String banksOptions = 'api/banks';
 
   ///Selectors
-  static const String countries = 'countries';
+  static const String countries = 'api/countries';
+  static countryCities(String id) => 'api/countries/$id/cities';
   static const String birthPlaces = 'countries';
   static const String jobSectors = 'job-sectors';
   static const String pharmacy = 'pharmacy-masters';
@@ -160,6 +172,7 @@ class EndPoints {
   static const String addProject = 'api/projects';
   static const String singleProject = '/api/projects/';
   static const String addOffer = "api/projects/proposals";
+  static projectProposal(int id) => 'api/projects/proposals/$id';
   static const String selectionOption = "api/select-options";
   static const String addWork = "api/profile/add-work";
   static const String addWorks = "api/profile/add-works";

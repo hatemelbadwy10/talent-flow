@@ -1,4 +1,3 @@
-
 abstract class AppStorageKey {
   static const String configVideo = "config_video";
   static const String token = "token";
@@ -10,12 +9,14 @@ abstract class AppStorageKey {
   static const String userName = "user_name";
   static const String userImage = "user_image";
   static const String userEmail = "user_email";
+  static const String fcmToken = "fcm_token";
   static const String isSubscribe = "is_subscribe";
   static String firstTimeOnApp = "first_time";
   static const String languageCode = "languageCode";
   static const String marketplaceType = "marketplace_type";
   static const String countryCode = "countryCode";
   static const String isFreelancer = "is_freelancer";
+  static const String currency = "currency";
   static const List languages = [];
   // static List<LanguageModel> languages = [
   //   LanguageModel(

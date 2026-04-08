@@ -16,7 +16,15 @@ import '../bloc/new_projects_bloc.dart';
 
 class AddOfferWidget extends StatefulWidget {
   final int id;
-  const AddOfferWidget({super.key, required this.id});
+  final int? proposalId;
+  final String? initialDescription;
+
+  const AddOfferWidget({
+    super.key,
+    required this.id,
+    this.proposalId,
+    this.initialDescription,
+  });
 
   @override
   State<AddOfferWidget> createState() => _AddOfferWidgetState();
@@ -25,6 +33,14 @@ class AddOfferWidget extends StatefulWidget {
 class _AddOfferWidgetState extends State<AddOfferWidget> {
   final TextEditingController _controller = TextEditingController();
   bool _isLoading = false;
+
+  bool get _isEditing => widget.proposalId != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.text = widget.initialDescription?.trim() ?? '';
+  }
 
   @override
   void dispose() {
@@ -65,6 +81,7 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
           Click(arguments: {
             "projectId": widget.id,
             "description": description,
+            "proposalId": widget.proposalId,
           }),
         );
   }
@@ -81,7 +98,9 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
           final successMessage =
               state.data?.toString().trim().isNotEmpty == true
                   ? state.data.toString()
-                  : 'add_offer.success'.tr();
+                  : (_isEditing
+                      ? 'add_offer.update_success'.tr()
+                      : 'add_offer.success'.tr());
           setState(() {
             _isLoading = false;
           });
@@ -95,7 +114,9 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
           setState(() {
             _isLoading = false;
           });
-          _showErrorSnackBar('add_offer.error'.tr());
+          _showErrorSnackBar(
+            _isEditing ? 'add_offer.update_error'.tr() : 'add_offer.error'.tr(),
+          );
         }
       },
       child: Container(
@@ -110,7 +131,7 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'add_offer.title'.tr(),
+              _isEditing ? 'add_offer.update_title'.tr() : 'add_offer.title'.tr(),
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             SizedBox(height: 16.h),
@@ -124,7 +145,11 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
             ),
             SizedBox(height: 16.h),
             CustomButton(
-                text: _isLoading ? 'loading'.tr() : 'submit_button'.tr(),
+                text: _isLoading
+                    ? 'loading'.tr()
+                    : (_isEditing
+                        ? 'add_offer.update_button'.tr()
+                        : 'submit_button'.tr()),
                 isActive: !_isLoading,
                 onTap: _isLoading ? null : _submitOffer,
                 isLoading: _isLoading),

@@ -293,7 +293,11 @@ abstract class CustomNavigator {
           ContractPaymentConfirmScreen(arguments: arguments),
         );
       case Routes.createContract:
-        return _pageRoute(const CreateContractScreen());
+        return _pageRoute(
+          CreateContractScreen(
+            arguments: settings.arguments as Map<String, dynamic>?,
+          ),
+        );
       case Routes.identityVerification:
         return _pageRoute(
           IdentityVerificationScreen(

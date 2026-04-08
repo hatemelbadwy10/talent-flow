@@ -6,6 +6,13 @@ class ContractModel implements Mapper {
     required this.title,
     required this.status,
     required this.statusLabel,
+    this.projectId,
+    this.projectOwnerId,
+    this.freelancerId,
+    this.rejectWorkNotes,
+    this.rejectReason,
+    this.userHasSubmittedComplaint = false,
+    this.userHasSubmittedReview = false,
     this.projectTitle,
     this.projectDescription,
     this.projectOwner,
@@ -23,6 +30,13 @@ class ContractModel implements Mapper {
   final String? title;
   final int? status;
   final String? statusLabel;
+  final int? projectId;
+  final int? projectOwnerId;
+  final int? freelancerId;
+  final String? rejectWorkNotes;
+  final String? rejectReason;
+  final bool userHasSubmittedComplaint;
+  final bool userHasSubmittedReview;
   final String? projectTitle;
   final String? projectDescription;
   final String? projectOwner;
@@ -36,11 +50,7 @@ class ContractModel implements Mapper {
   final String? conflictPolicy;
 
   bool get isPayableForOwner {
-    final normalizedStatus = statusLabel?.trim().toLowerCase() ?? '';
-    return status == 1 ||
-        normalizedStatus.contains('accepted') ||
-        normalizedStatus.contains('approved') ||
-        normalizedStatus.contains('مقبول');
+    return status == 1;
   }
 
   String get suggestedPaymentAmount {
@@ -60,6 +70,19 @@ class ContractModel implements Mapper {
           ? json['status'] as int
           : int.tryParse(json['status']?.toString() ?? ''),
       statusLabel: json['status_label']?.toString(),
+      projectId: json['project_id'] is int
+          ? json['project_id'] as int
+          : int.tryParse(json['project_id']?.toString() ?? ''),
+      projectOwnerId: json['project_owner_id'] is int
+          ? json['project_owner_id'] as int
+          : int.tryParse(json['project_owner_id']?.toString() ?? ''),
+      freelancerId: json['freelancer_id'] is int
+          ? json['freelancer_id'] as int
+          : int.tryParse(json['freelancer_id']?.toString() ?? ''),
+      rejectWorkNotes: json['reject_work_notes']?.toString(),
+      rejectReason: json['reject_reason']?.toString(),
+      userHasSubmittedComplaint: _toBool(json['user_has_submitted_complaint']),
+      userHasSubmittedReview: _toBool(json['user_has_submitted_review']),
       projectTitle: json['project_title']?.toString(),
       projectDescription: json['project_description']?.toString(),
       projectOwner: json['project_owner']?.toString(),
@@ -82,6 +105,13 @@ class ContractModel implements Mapper {
       'title': title,
       'status': status,
       'status_label': statusLabel,
+      'project_id': projectId,
+      'project_owner_id': projectOwnerId,
+      'freelancer_id': freelancerId,
+      'reject_work_notes': rejectWorkNotes,
+      'reject_reason': rejectReason,
+      'user_has_submitted_complaint': userHasSubmittedComplaint,
+      'user_has_submitted_review': userHasSubmittedReview,
       'project_title': projectTitle,
       'project_description': projectDescription,
       'project_owner': projectOwner,
@@ -95,4 +125,16 @@ class ContractModel implements Mapper {
       'conflict_policy': conflictPolicy,
     };
   }
+}
+
+bool _toBool(dynamic value) {
+  if (value is bool) {
+    return value;
+  }
+  if (value is num) {
+    return value != 0;
+  }
+
+  final normalized = value?.toString().trim().toLowerCase() ?? '';
+  return normalized == '1' || normalized == 'true' || normalized == 'yes';
 }

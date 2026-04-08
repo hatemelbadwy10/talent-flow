@@ -24,6 +24,7 @@ import 'package:talent_flow/features/setting/repo/notification_repo.dart';
 import 'package:talent_flow/features/setting/repo/terms_condation_repo.dart';
 import 'package:talent_flow/features/setting/repo/update_profile_repo.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
+import 'package:talent_flow/main_repos/location_options_repo.dart';
 import 'package:talent_flow/main_repos/user_repo.dart';
 import '../../features/auth/pages/change_password/repo/change_password_repo.dart';
 import '../../features/auth/pages/login/repo/login_repo.dart';
@@ -128,6 +129,8 @@ Future<void> init() async {
       () => ChatsRepo(sharedPreferences: sl(), dioClient: sl()));
   sl.registerLazySingleton(
       () => ContractsRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton(
+      () => LocationOptionsRepo(sharedPreferences: sl(), dioClient: sl()));
   sl.registerLazySingleton(
       () => AccountStatementRepo(sharedPreferences: sl(), dioClient: sl()));
   sl.registerLazySingleton(

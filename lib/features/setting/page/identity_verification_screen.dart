@@ -1,11 +1,14 @@
 import 'dart:developer';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_event.dart';
+import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
@@ -16,6 +19,7 @@ import 'package:talent_flow/features/setting/model/identity_verification_request
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/helpers/date_time_picker.dart';
 import 'package:talent_flow/helpers/pickers/view/image_picker_helper.dart';
+import 'package:talent_flow/main_blocs/location_options_bloc.dart';
 
 import '../../../components/custom_text_form_field.dart';
 import '../../../navigation/custom_navigation.dart';
@@ -34,15 +38,21 @@ class IdentityVerificationScreen extends StatefulWidget {
 class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
     with IdentityVerificationFormMixin {
   late final IdentityVerificationBloc _identityVerificationBloc;
+  late final LocationOptionsBloc _locationOptionsBloc;
+  bool _isUnderReview = false;
 
   @override
   void initState() {
     super.initState();
     _identityVerificationBloc = IdentityVerificationBloc(sl());
+    _locationOptionsBloc = LocationOptionsBloc(sl())
+      ..add(const LoadCountries());
+    _isUnderReview = _readIdentityVerifyStatus().toLowerCase() == 'processing';
   }
 
   @override
   void dispose() {
+    _locationOptionsBloc.close();
     _identityVerificationBloc.close();
     disposeIdentityFormData();
     super.dispose();
@@ -224,10 +234,30 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
 
   bool get _fromOnboarding => widget.arguments?['fromOnboarding'] == true;
 
+  String _readIdentityVerifyStatus() {
+    final rawUserData =
+        sl<SharedPreferences>().getString(AppStorageKey.userData) ?? '';
+    if (rawUserData.isEmpty) {
+      return '';
+    }
+
+    try {
+      final decoded = jsonDecode(rawUserData);
+      if (decoded is Map) {
+        return decoded['identity_verify_status']?.toString() ?? '';
+      }
+    } catch (_) {}
+
+    return '';
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _identityVerificationBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _identityVerificationBloc),
+        BlocProvider.value(value: _locationOptionsBloc),
+      ],
       child: BlocListener<IdentityVerificationBloc, AppState>(
         listener: (context, state) async {
           if (state is Done) {
@@ -235,14 +265,18 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
             final navigator = Navigator.of(context);
 
             await UserCompletionGuard.updateStoredFlags(
-              identityAuthenticated: true,
+              identityVerifyStatus: 'Processing',
             );
             if (!mounted) return;
+
+            setState(() {
+              _isUnderReview = true;
+            });
 
             messenger.showSnackBar(
               SnackBar(
                 content: Text(
-                  'identity_verification_screen.submit_success'.tr(),
+                  'identity_verification_screen.submit_processing'.tr(),
                 ),
               ),
             );
@@ -269,6 +303,10 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
               body: AnimatedBuilder(
                 animation: screenListenable,
                 builder: (context, _) {
+                  if (_isUnderReview) {
+                    return _buildUnderReviewState();
+                  }
+
                   final currentTab = currentTabNotifier.value;
                   final isSubmitting = state is Loading;
 
@@ -406,30 +444,83 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
             englishOnly: true,
           ),
           const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            key: ValueKey(selectedCountryKeyNotifier.value),
-            initialValue: selectedCountryKeyNotifier.value,
-            decoration: InputDecoration(
-              labelText: 'identity_verification_screen.country'.tr(),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            items: countryKeys
-                .map(
-                  (key) => DropdownMenuItem<String>(
-                    value: key,
-                    child: Text(key.tr()),
+          BlocBuilder<LocationOptionsBloc, LocationOptionsState>(
+            builder: (context, locationState) {
+              final countries = locationState.countries;
+              final selectedCountryId = selectedCountryIdNotifier.value;
+              final hasSelectedCountry = selectedCountryId != null &&
+                  countries.containsKey(selectedCountryId);
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DropdownButtonFormField<String>(
+                    key: ValueKey(selectedCountryId),
+                    initialValue: hasSelectedCountry ? selectedCountryId : null,
+                    decoration: InputDecoration(
+                      labelText: 'identity_verification_screen.country'.tr(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      suffixIcon: locationState.isLoadingCountries
+                          ? const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: SizedBox(
+                                width: 16,
+                                height: 16,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            )
+                          : null,
+                    ),
+                    items: countries.entries
+                        .map(
+                          (entry) => DropdownMenuItem<String>(
+                            value: entry.key,
+                            child: Text(entry.value),
+                          ),
+                        )
+                        .toList(),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'identity_verification_screen.required_field'
+                            .tr();
+                      }
+                      return null;
+                    },
+                    onChanged: locationState.isLoadingCountries
+                        ? null
+                        : (value) => selectedCountryIdNotifier.value = value,
                   ),
-                )
-                .toList(),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'identity_verification_screen.required_field'.tr();
-              }
-              return null;
+                  if ((locationState.countriesError ?? '').isNotEmpty &&
+                      countries.isEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            locationState.countriesError!,
+                            style: const TextStyle(
+                              color: Styles.FAILED_COLOR,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            context
+                                .read<LocationOptionsBloc>()
+                                .add(const LoadCountries());
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              );
             },
-            onChanged: (value) => selectedCountryKeyNotifier.value = value,
           ),
           const SizedBox(height: 12),
           CustomTextField(
@@ -461,6 +552,54 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
             controlAffinity: ListTileControlAffinity.leading,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildUnderReviewState() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  color: Styles.PRIMARY_COLOR.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.hourglass_top_rounded,
+                  size: 42,
+                  color: Styles.PRIMARY_COLOR,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'identity_verification_screen.under_review_title'.tr(),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'identity_verification_screen.under_review_message'.tr(),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  height: 1.6,
+                  color: Color(0xFF666666),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

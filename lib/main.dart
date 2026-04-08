@@ -6,6 +6,7 @@ import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'app/core/app_event.dart';
 import 'app/core/app_state.dart';
 import 'app/core/styles.dart';
+import 'app/notifications/notification_helper.dart';
 import 'data/config/di.dart' as di;
 import 'data/config/di.dart';
 import 'data/local_data/local_database.dart';
@@ -21,6 +22,7 @@ void main() async {
   await EasyLocalization.ensureInitialized();
   await di.init();
   await sl<LocaleDatabase>().initDatabase();
+  await FirebaseNotifications.setUpFirebase();
 
   runApp(
     EasyLocalization(

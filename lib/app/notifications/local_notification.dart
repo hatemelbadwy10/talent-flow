@@ -2,12 +2,19 @@ part of 'notification_helper.dart';
 
 FlutterLocalNotificationsPlugin? _notificationsPlugin =
     FlutterLocalNotificationsPlugin();
+const AndroidNotificationChannel _androidNotificationChannel =
+    AndroidNotificationChannel(
+  'talent_flow_notifications',
+  'Talent Flow Notifications',
+  description: 'Notifications for Talent Flow app updates and messages',
+  importance: Importance.high,
+);
 
-localNotification() {
+Future<void> localNotification() async {
   _notificationsPlugin = FlutterLocalNotificationsPlugin();
 
   if (Platform.isIOS) {
-    _notificationsPlugin!
+    await _notificationsPlugin!
         .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>()!
         .requestPermissions(
@@ -16,10 +23,14 @@ localNotification() {
           sound: true,
         );
   } else {
-    _notificationsPlugin
+    await _notificationsPlugin
         ?.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
+    await _notificationsPlugin
+        ?.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(_androidNotificationChannel);
   }
 
   var android = const AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -32,11 +43,14 @@ localNotification() {
     android: android,
     iOS: ios,
   );
-  _notificationsPlugin!.initialize(
+  await _notificationsPlugin!.initialize(
     initSetting,
     onDidReceiveNotificationResponse: (not) {
-      print("onSelect Message ${not.payload}");
-      handlePath(json.decode(not.payload ?? ""));
+      log("onSelect Message ${not.payload}");
+      if ((not.payload ?? '').isEmpty) {
+        return;
+      }
+      handlePath(json.decode(not.payload!));
     },
   );
 }

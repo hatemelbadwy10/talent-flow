@@ -49,8 +49,15 @@ class NewProjectsBloc extends Bloc<AppEvent, AppState> {
       final args = event.arguments as Map<String, dynamic>;
       final projectId = args["projectId"] as int;
       final description = args["description"] as String;
+      final proposalId = args["proposalId"] as int?;
 
-      final result = await _projectsRepo.addOffer(projectId, description);
+      final result = proposalId == null
+          ? await _projectsRepo.addOffer(projectId, description)
+          : await _projectsRepo.updateOffer(
+              proposalId: proposalId,
+              projectId: projectId,
+              offer: description,
+            );
 
       result.fold(
         (failure) => emit(Error()),

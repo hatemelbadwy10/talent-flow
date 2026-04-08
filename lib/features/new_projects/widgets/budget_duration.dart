@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
+import 'package:talent_flow/app/core/app_currency.dart';
 import 'package:talent_flow/features/new_projects/widgets/section_label_widget.dart';
 import '../../../../components/custom_text_form_field.dart';
 import '../../../../app/core/styles.dart';
@@ -32,6 +33,20 @@ class BudgetField extends StatelessWidget {
           controller: controller,
           hint: 'add_project.budget_hint'.tr(),
           inputType: TextInputType.number,
+          formattedType: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}$')),
+          ],
+          sufWidget: Padding(
+            padding: const EdgeInsetsDirectional.only(end: 4),
+            child: Text(
+              AppCurrency.code,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Styles.HINT_COLOR,
+              ),
+            ),
+          ),
           onChanged: (value) {
             context.read<AddProjectBloc>().add(UpdateBudget(budget: value));
           },

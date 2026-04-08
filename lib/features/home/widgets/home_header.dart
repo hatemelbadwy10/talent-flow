@@ -1,15 +1,16 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../app/core/app_state.dart';
-import '../../../main_blocs/user_bloc.dart';
+import '../../../app/core/app_storage_keys.dart';
+import '../../../data/config/di.dart';
 
 class HomeHeaderSection extends StatelessWidget {
   final VoidCallback? onNotificationTap;
@@ -37,131 +38,140 @@ class HomeHeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, AppState>(
-      builder: (context, state) {
-        final userBloc = context.read<UserBloc>();
-        final currentUser = userBloc.user;
-        final resolvedUserName = userName ?? currentUser?.name ?? "Guest";
-        final resolvedJobTitle = jobTitle ?? currentUser?.jobTitle;
-        final resolvedUserImage = userImage ?? currentUser?.profileImage;
+    final prefs = sl<SharedPreferences>();
+    final rawUserData = prefs.getString(AppStorageKey.userData);
+    String? storedJobTitle;
 
-        return SizedBox(
-          height: 216.h,
-          width: double.infinity,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // ── Background with teal gradient ──────────────────────────────
-              Container(
-                height: 160.h,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF0E8A8F),
-                      Color(0xFF0C7D81),
-                      Color(0xFF0A6E72),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(28),
-                  ),
-                ),
-                // Subtle wave/circle decoration
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(28),
-                  ),
-                  child: Stack(
-                    children: [
-                      // Decorative circles for depth
-                      Positioned(
-                        top: -40,
-                        left: -40,
-                        child: Container(
-                          width: 160.w,
-                          height: 160.w,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.05),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: -20,
-                        right: 60.w,
-                        child: Container(
-                          width: 120.w,
-                          height: 120.w,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.04),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+    if ((rawUserData ?? '').isNotEmpty) {
+      try {
+        final decoded = jsonDecode(rawUserData!);
+        if (decoded is Map<String, dynamic>) {
+          storedJobTitle = decoded['job_title']?.toString();
+        }
+      } catch (_) {}
+    }
+
+    final resolvedUserName =
+        userName ?? prefs.getString(AppStorageKey.userName) ?? "Guest";
+    final resolvedJobTitle = jobTitle ?? storedJobTitle;
+    final resolvedUserImage =
+        userImage ?? prefs.getString(AppStorageKey.userImage);
+
+    return SizedBox(
+      height: 216.h,
+      width: double.infinity,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // ── Background with teal gradient ──────────────────────────────
+          Container(
+            height: 160.h,
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0E8A8F),
+                  Color(0xFF0C7D81),
+                  Color(0xFF0A6E72),
+                ],
               ),
-
-              // ── Content ────────────────────────────────────────────────────
-              SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: Dimensions.PADDING_SIZE_DEFAULT.w,
-                    vertical: 16.h,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Right side: avatar + name (leading in RTL)
-                      _UserInfo(
-                        userName: resolvedUserName,
-                        jobTitle: resolvedJobTitle,
-                        userImage: resolvedUserImage,
-                      ),
-
-                      // Left side: action buttons (trailing in RTL)
-                      Row(
-                        children: [
-                          _ActionButton(
-                            icon: SvgImages.notification,
-                            isIcon: false,
-                            badge: notificationCount,
-                            onTap: onNotificationTap,
-                          ),
-                          SizedBox(width: 10.w),
-                          _ActionButton(
-                            icon: SvgImages.messageIcon,
-                            isIcon: false,
-                            badge: messageCount,
-                            onTap: onMessageTap,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(28),
               ),
-
-              // ── Floating search bar ────────────────────────────────────────
-              Positioned(
-                bottom: 16.h,
-                left: Dimensions.PADDING_SIZE_DEFAULT.w,
-                right: Dimensions.PADDING_SIZE_DEFAULT.w,
-                child: HomeSearchBar(
-                  controller: searchController,
-                  onSearch: onSearch,
-                ),
+            ),
+            // Subtle wave/circle decoration
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(28),
               ),
-            ],
+              child: Stack(
+                children: [
+                  // Decorative circles for depth
+                  Positioned(
+                    top: -40,
+                    left: -40,
+                    child: Container(
+                      width: 160.w,
+                      height: 160.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.05),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: -20,
+                    right: 60.w,
+                    child: Container(
+                      width: 120.w,
+                      height: 120.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.04),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        );
-      },
+
+          // ── Content ────────────────────────────────────────────────────
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: Dimensions.PADDING_SIZE_DEFAULT.w,
+                vertical: 16.h,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Right side: avatar + name (leading in RTL)
+                  _UserInfo(
+                    userName: resolvedUserName,
+                    jobTitle: resolvedJobTitle,
+                    userImage: resolvedUserImage,
+                  ),
+
+                  // Left side: action buttons (trailing in RTL)
+                  Row(
+                    children: [
+                      _ActionButton(
+                        icon: SvgImages.notification,
+                        isIcon: false,
+                        badge: notificationCount,
+                        onTap: onNotificationTap,
+                      ),
+                      SizedBox(width: 10.w),
+                      _ActionButton(
+                        icon: SvgImages.messageIcon,
+                        isIcon: false,
+                        badge: messageCount,
+                        onTap: onMessageTap,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ── Floating search bar ────────────────────────────────────────
+          Positioned(
+            bottom: 16.h,
+            left: Dimensions.PADDING_SIZE_DEFAULT.w,
+            right: Dimensions.PADDING_SIZE_DEFAULT.w,
+            child: HomeSearchBar(
+              controller: searchController,
+              onSearch: onSearch,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
