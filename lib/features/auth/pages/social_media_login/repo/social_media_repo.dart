@@ -13,6 +13,7 @@ import '../../../../../data/error/api_error_handler.dart';
 import '../../../../../data/error/failures.dart';
 import '../../../../../helpers/social_media_login_helper.dart';
 import '../../../../../main_repos/base_repo.dart';
+import '../../../../auth/repo/auth_device_token_sync.dart';
 
 class SocialMediaRepo extends BaseRepo {
   SocialMediaRepo(
@@ -22,32 +23,36 @@ class SocialMediaRepo extends BaseRepo {
 
   final SocialMediaLoginHelper socialMediaLoginHelper;
 
-  saveUserData(json) {
-    AppCurrency.cacheFromPayload(json);
-    sharedPreferences.setString(AppStorageKey.userId, json["id"].toString());
-    sharedPreferences.setString(AppStorageKey.userData, jsonEncode(json));
-    sharedPreferences.setBool(AppStorageKey.isLogin, true);
-    sharedPreferences.setString(
+  Future<void> saveUserData(json) async {
+    await AppCurrency.cacheFromPayload(json);
+    await sharedPreferences.setString(
+      AppStorageKey.userId,
+      json["id"].toString(),
+    );
+    await sharedPreferences.setString(AppStorageKey.userData, jsonEncode(json));
+    await sharedPreferences.setBool(AppStorageKey.isLogin, true);
+    await sharedPreferences.setString(
       AppStorageKey.userName,
       json["first_name"]?.toString() ?? json["name"]?.toString() ?? "",
     );
-    sharedPreferences.setString(
+    await sharedPreferences.setString(
       AppStorageKey.userEmail,
       json["email"]?.toString() ?? "",
     );
-    sharedPreferences.setString(
+    await sharedPreferences.setString(
       AppStorageKey.userImage,
       json["image"]?.toString() ?? "",
     );
     // ✅ Save user type correctly
     bool isFreelancer = json["user_type"]?.toString() == "Freelancer";
-    sharedPreferences.setBool(AppStorageKey.isFreelancer, isFreelancer);
+    await sharedPreferences.setBool(AppStorageKey.isFreelancer, isFreelancer);
     log("User saved: ${json["first_name"]} (Type: ${json["user_type"]}, isFreelancer: $isFreelancer)");
   }
 
-  saveUserToken(token) {
-    sharedPreferences.setString(AppStorageKey.token, token);
-    dioClient.updateHeader(token);
+  Future<void> saveUserToken(token) async {
+    await sharedPreferences.setString(AppStorageKey.token, token);
+    await dioClient.updateHeader(token);
+    await syncAuthenticatedDeviceToken(dioClient);
   }
 
   Future<Either<ServerFailure, Response>> signInWithSocialMedia(
@@ -78,7 +83,7 @@ class SocialMediaRepo extends BaseRepo {
         },
         (success) async {
           log("success: $success");
-          
+
           // ✅ Validate the model before sending to backend
           if (success.idToken == null || success.idToken!.isEmpty) {
             log("error: Firebase ID token is null or empty");
@@ -95,20 +100,20 @@ class SocialMediaRepo extends BaseRepo {
                       ? "Freelancer"
                       : "Entrepreneur",
             };
-            
+
             log("Sending payload to backend: $payload");
-            
-            final response =
-                await dioClient.post(uri: EndPoints.socialMediaAuth, data: payload);
+
+            final response = await dioClient.post(
+                uri: EndPoints.socialMediaAuth, data: payload);
             log("response: ${response.data}");
 
             if (response.statusCode == 200) {
               // ✅ Backend returns data in 'payload' key, not 'data'
               final userData = response.data["payload"]["user"];
               final token = response.data["payload"]["token"];
-              
-              saveUserData(userData);
-              saveUserToken(token);
+
+              await saveUserData(userData);
+              await saveUserToken(token);
               return Right(response);
             }
 

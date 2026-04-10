@@ -213,7 +213,7 @@ class _HomeViewState extends State<HomeView> {
                               height: 250.h,
                             ),
                           SizedBox(height: 24.h),
-                          const PartnersSection(),
+                          PartnersSection(partners: homeModel.partners),
                           SizedBox(height: 120.h),
                         ],
                       ),

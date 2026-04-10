@@ -1,15 +1,18 @@
 import 'package:talent_flow/data/config/mapper.dart';
+import 'package:talent_flow/features/home/model/partner_model.dart';
 
 class HomeModel extends SingleMapper {
   HomeModel({
     required this.cards,
     required this.top,
     required this.categories,
+    required this.partners,
   });
 
   final List<Card> cards;
   final Top? top;
   final List<Category> categories;
+  final List<PartnerModel> partners;
 
   factory HomeModel.fromJson(Map<String, dynamic> json) {
     return HomeModel(
@@ -21,6 +24,10 @@ class HomeModel extends SingleMapper {
           ? []
           : List<Category>.from(
               json["categories"]!.map((x) => Category.fromJson(x))),
+      partners: json["partners"] == null
+          ? []
+          : List<PartnerModel>.from(
+              json["partners"]!.map((x) => PartnerModel.fromJson(x))),
     );
   }
 

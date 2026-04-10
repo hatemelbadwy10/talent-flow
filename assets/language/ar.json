@@ -117,7 +117,7 @@
     "entrepreneurs": "عرضو الخدمات",
     "view_profile": "عرض الملف الشخصي",
     "view_company_profile": "عرض الملف الشخصي للشركة",
-    "partners": "شريكاء",
+    "partners": "شركاء",
     "services": {
       "graphic_design": "التصميم الجرافيكي",
       "digital_marketing": "التسويق الرقمي",
@@ -293,6 +293,14 @@
   "chat_screen": {
     "title": "الرسائل",
     "create_contract": "إنشاء عقد",
+    "type_message": "اكتب رسالة",
+    "recording": "جارٍ تسجيل رسالة صوتية...",
+    "voice_message": "رسالة صوتية",
+    "no_messages": "لا توجد رسائل بعد",
+    "load_failed": "فشل تحميل المحادثة",
+    "no_conversation": "لم يتم تحديد محادثة",
+    "microphone_permission_denied": "يلزم السماح بالوصول إلى الميكروفون لتسجيل الرسائل الصوتية.",
+    "voice_message_failed": "تعذر تسجيل أو إرسال الرسالة الصوتية حالياً.",
     "search_hint": "ابحث في الرسائل",
     "filter_by_project": "تصفية حسب المشروع",
     "all_projects": "جميع المشاريع",
@@ -317,6 +325,8 @@
     "status_rejected": "مرفوض",
     "status_approved": "مقبول",
     "download": "تنزيل العقد",
+    "download_success": "تم تنزيل العقد بنجاح",
+    "download_permission_denied": "يلزم السماح بالوصول للملفات لتنزيل العقد",
     "contract_title": "عقد إنشاء تصميم ابلكيشن توصيل",
     "contract_size": "حجم العقد: 4.2 MB"
   },
@@ -391,7 +401,7 @@
     "customer_number": "رقم العميل",
     "customer_number_hint": "ادخل رقم العميل",
     "customer_number_required": "يرجى إدخال رقم العميل",
-    "payment_code": "كود الشراء في بنك القطري",
+    "payment_code": "كود الشراء في بنك القطبي",
     "payment_code_hint": "ادخل كود الشراء",
     "payment_code_required": "يرجى إدخال كود الشراء",
     "amount": "المبلغ",
@@ -410,6 +420,13 @@
     "confirm_button": "تأكيد الدفع",
     "confirm_success": "تم تأكيد الدفع بنجاح",
     "resend_code": "إعادة إرسال الكود"
+  },
+  "partner_profile": {
+    "title": "الشريك",
+    "unavailable": "بيانات الشريك غير متوفرة",
+    "about": "نبذة",
+    "website": "الموقع الإلكتروني",
+    "no_description": "لا يوجد وصف متاح"
   },
   "user_completion": {
     "add_offer_blocked_title": "لا يمكنك إضافة عرض الآن",

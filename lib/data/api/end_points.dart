@@ -28,6 +28,7 @@ class EndPoints {
   static const String profile = 'profile';
   static const String profileDashboard = 'api/profile/dashboard';
   static const String favourites = 'api/profile/favourites';
+  static const String updateDeviceToken = 'api/profile/update-device-token';
 
   ///Home
   static const String home = 'api/pages/home?top_limit=5&cat_limit=8';

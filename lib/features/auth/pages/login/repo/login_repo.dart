@@ -12,6 +12,7 @@ import '../../../../../data/api/end_points.dart';
 import '../../../../../data/config/di.dart';
 import '../../../../../data/error/api_error_handler.dart';
 import '../../../../../data/error/failures.dart';
+import '../../../../auth/repo/auth_device_token_sync.dart';
 
 class LoginRepo extends BaseRepo {
   LoginRepo({required super.sharedPreferences, required super.dioClient});
@@ -22,9 +23,11 @@ class LoginRepo extends BaseRepo {
 
     await AppCurrency.cacheFromPayload(json);
 
-    await sharedPreferences.setString(AppStorageKey.userId, user["id"].toString());
+    await sharedPreferences.setString(
+        AppStorageKey.userId, user["id"].toString());
     await sharedPreferences.setString(AppStorageKey.userData, jsonEncode(user));
-    await sharedPreferences.setString(AppStorageKey.userName, user["first_name"]);
+    await sharedPreferences.setString(
+        AppStorageKey.userName, user["first_name"]);
     await sharedPreferences.setString(AppStorageKey.userEmail, user["email"]);
     await sharedPreferences.setString(AppStorageKey.userImage, user["image"]);
     await sharedPreferences.setBool(AppStorageKey.isLogin, true);
@@ -41,6 +44,7 @@ class LoginRepo extends BaseRepo {
     log("✅ User saved: ${user["first_name"]} ${user["last_name"]}");
     log("✅ Token saved: $token");
     await dioClient.updateHeader(token); // Update headers with token
+    await syncAuthenticatedDeviceToken(dioClient);
   }
 
   saveCredentials(credentials) {
@@ -51,8 +55,8 @@ class LoginRepo extends BaseRepo {
   getCredentials() {
     if (sharedPreferences.containsKey(AppStorageKey.credentials)) {
       return jsonDecode(sharedPreferences.getString(
-        AppStorageKey.credentials,
-      ) ??
+            AppStorageKey.credentials,
+          ) ??
           "{}");
     }
   }
@@ -61,7 +65,7 @@ class LoginRepo extends BaseRepo {
       Map<String, dynamic> data) async {
     try {
       Response response =
-      await dioClient.post(uri: EndPoints.logIn, data: data);
+          await dioClient.post(uri: EndPoints.logIn, data: data);
 
       log("Login response status: ${response.statusCode}");
       log("Login response data: ${response.data}");
@@ -89,7 +93,8 @@ class LoginRepo extends BaseRepo {
         final responseData = error.response!.data;
         log("DioException response data: $responseData");
 
-        if (responseData is Map<String, dynamic> && responseData.containsKey('message')) {
+        if (responseData is Map<String, dynamic> &&
+            responseData.containsKey('message')) {
           return left(ServerFailure(responseData['message']));
         }
       }
@@ -113,13 +118,15 @@ class LoginRepo extends BaseRepo {
       if (response.statusCode == 200) {
         return Right(response);
       } else {
-        return left(ServerFailure(response.data['message'] ?? 'فشل في إرسال رمز التحقق'));
+        return left(ServerFailure(
+            response.data['message'] ?? 'فشل في إرسال رمز التحقق'));
       }
     } catch (error) {
       log("Resend verification error: $error");
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
+
   Future<Either<ServerFailure, Response>> socialLogin({
     required String provider,
     required String token,
@@ -133,7 +140,7 @@ class LoginRepo extends BaseRepo {
       log("🔹 Social login request: $data");
 
       Response response =
-      await dioClient.post(uri: EndPoints.socialLogin, data: data);
+          await dioClient.post(uri: EndPoints.socialLogin, data: data);
 
       log("Social login response status: ${response.statusCode}");
       log("Social login response data: ${response.data}");
@@ -145,7 +152,8 @@ class LoginRepo extends BaseRepo {
           return Right(response); // let Bloc handle logic
         }
       } else {
-        return left(ServerFailure(response.data['message'] ?? "فشل تسجيل الدخول"));
+        return left(
+            ServerFailure(response.data['message'] ?? "فشل تسجيل الدخول"));
       }
     } catch (error) {
       log("Social login error: $error");
@@ -161,5 +169,4 @@ class LoginRepo extends BaseRepo {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
-
 }

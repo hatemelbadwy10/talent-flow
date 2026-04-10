@@ -54,9 +54,56 @@ Future<void> handlePathByRoute(Map notify) async {
   Future.delayed(
     Duration.zero,
     () {
-      if (sl<UserBloc>().isLogin) {
-        CustomNavigator.push(Routes.notifications);
+      if (!sl<UserBloc>().isLogin) {
+        return;
       }
+
+      final type = notify['type']?.toString().trim().toLowerCase();
+      final id = _parseNotificationId(notify['id']);
+      final projectId = _parseNotificationId(
+        notify['project_id'] ?? notify['projectId'] ?? notify['id'],
+      );
+
+      switch (type) {
+        case 'project':
+          if (id != null) {
+            CustomNavigator.push(
+              Routes.singleProjectDetails,
+              arguments: {'id': id},
+            );
+            return;
+          }
+          break;
+        case 'contract':
+          if (id != null) {
+            CustomNavigator.push(Routes.contractDetails, arguments: id);
+            return;
+          }
+          break;
+        case 'conversation':
+          if (id != null) {
+            CustomNavigator.push(
+              Routes.chat,
+              arguments: {
+                'conversationId': id,
+                if (projectId != null) 'project_id': projectId,
+                if (projectId != null) 'projectId': projectId,
+              },
+            );
+            return;
+          }
+          break;
+      }
+
+      CustomNavigator.push(Routes.notifications);
     },
   );
+}
+
+int? _parseNotificationId(dynamic value) {
+  if (value is int) {
+    return value;
+  }
+
+  return int.tryParse(value?.toString() ?? '');
 }

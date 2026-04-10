@@ -34,6 +34,7 @@ import '../features/home/page/freelancer_chat_screen.dart';
 import '../features/home/page/freelancer_profile.dart';
 import '../features/home/page/home_view.dart';
 import '../features/home/page/my_freelancer_profile.dart';
+import '../features/home/page/partner_profile.dart';
 import '../features/home/page/work_screen.dart';
 import '../features/home/model/freelancer_profile_model.dart';
 import '../features/home/model/work_details_model.dart';
@@ -311,8 +312,12 @@ abstract class CustomNavigator {
       // case Routes.offers:
       //   return _pageRoute(const OffersPage());
       //
-      // case Routes.brands:
-      //   return _pageRoute(const PartnersPage());
+      case Routes.brands:
+        return _pageRoute(
+          PartnerProfileView(
+            arguments: settings.arguments as Map<String, dynamic>?,
+          ),
+        );
       //
       // case Routes.newsDetails:
       //   return _pageRoute(NewsDetailsPage(id: settings.arguments as int));

@@ -294,6 +294,14 @@
   "chat_screen": {
     "title": "Messages",
     "create_contract": "Create Contract",
+    "type_message": "Type a message",
+    "recording": "Recording voice message...",
+    "voice_message": "Voice message",
+    "no_messages": "No messages yet",
+    "load_failed": "Failed to load conversation",
+    "no_conversation": "No conversation selected",
+    "microphone_permission_denied": "Microphone permission is required to record voice messages.",
+    "voice_message_failed": "Unable to record or send the voice message right now.",
     "search_hint": "Search messages",
     "filter_by_project": "Filter by project",
     "all_projects": "All Projects",
@@ -318,6 +326,8 @@
     "status_rejected": "Rejected",
     "status_approved": "Approved",
     "download": "Download contract",
+    "download_success": "Contract downloaded successfully",
+    "download_permission_denied": "Storage permission is required to download the contract",
     "contract_title": "Delivery App Design Creation Contract",
     "contract_size": "Contract size: 4.2 MB"
   },
@@ -390,8 +400,10 @@
     "request_title": "Payment Details",
     "confirm_title": "Payment Request",
     "customer_number": "Customer Number",
-    "customer_number_hint": "Enter customer number",
-    "customer_number_required": "Please enter the customer number",
+    "customer_number_hint": "Choose bank account",
+    "customer_number_required": "Please choose a bank account",
+    "select_bank_account": "Choose bank account",
+    "bank_account_empty": "No bank accounts found. Please add a bank account first",
     "payment_code": "Qatari Bank Purchase Code",
     "payment_code_hint": "Enter purchase code",
     "payment_code_required": "Please enter the purchase code",
@@ -411,6 +423,13 @@
     "confirm_button": "Confirm Payment",
     "confirm_success": "Payment confirmed successfully",
     "resend_code": "Resend Code"
+  },
+  "partner_profile": {
+    "title": "Partner",
+    "unavailable": "Partner data is unavailable",
+    "about": "About",
+    "website": "Website",
+    "no_description": "No description available"
   },
   "user_completion": {
     "add_offer_blocked_title": "You can't add an offer yet",

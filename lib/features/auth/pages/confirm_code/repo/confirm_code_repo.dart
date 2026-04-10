@@ -10,27 +10,33 @@ import '../../../../../data/api/end_points.dart';
 import '../../../../../data/error/api_error_handler.dart';
 import '../../../../../data/error/failures.dart';
 import '../../../../../main_repos/base_repo.dart';
+import '../../../../auth/repo/auth_device_token_sync.dart';
 
 class ConfirmCodeRepo extends BaseRepo {
   ConfirmCodeRepo({required super.sharedPreferences, required super.dioClient});
 
-  saveUserData(json) {
+  Future<void> saveUserData(json) async {
     final user = json['payload']['user'];
     final token = json['payload']["token"];
     log("json: $json");
-    AppCurrency.cacheFromPayload(json);
-    sharedPreferences.setString(AppStorageKey.userId, user["id"].toString());
-    sharedPreferences.setString(AppStorageKey.userData, jsonEncode(user));
-    sharedPreferences.setBool(AppStorageKey.isLogin, true);
-    sharedPreferences.setString(AppStorageKey.userName, user["first_name"]);
-    sharedPreferences.setString(AppStorageKey.userEmail, user["email"]);
-    sharedPreferences.setString(AppStorageKey.userImage, user["image"]);
-    sharedPreferences.setString(AppStorageKey.token, token);
-    sharedPreferences.setBool(
+    await AppCurrency.cacheFromPayload(json);
+    await sharedPreferences.setString(
+      AppStorageKey.userId,
+      user["id"].toString(),
+    );
+    await sharedPreferences.setString(AppStorageKey.userData, jsonEncode(user));
+    await sharedPreferences.setBool(AppStorageKey.isLogin, true);
+    await sharedPreferences.setString(
+        AppStorageKey.userName, user["first_name"]);
+    await sharedPreferences.setString(AppStorageKey.userEmail, user["email"]);
+    await sharedPreferences.setString(AppStorageKey.userImage, user["image"]);
+    await sharedPreferences.setString(AppStorageKey.token, token);
+    await sharedPreferences.setBool(
       AppStorageKey.isFreelancer,
       user['user_type'] != "Entrepreneur",
     );
-    dioClient.updateHeader(token);
+    await dioClient.updateHeader(token);
+    await syncAuthenticatedDeviceToken(dioClient);
   }
 
   saveCredentials(credentials) {

@@ -18,6 +18,7 @@ FirebaseMessaging? _firebaseMessaging;
 class FirebaseNotifications {
   static FirebaseNotifications? _instance;
   static bool _isInitialized = false;
+  static const bool _disableFcmOnIos = true;
 
   FirebaseNotifications._internal();
 
@@ -28,6 +29,12 @@ class FirebaseNotifications {
 
   static Future<void> setUpFirebase() async {
     if (_isInitialized) {
+      return;
+    }
+
+    if (_disableFcmOnIos && Platform.isIOS) {
+      log('FCM is temporarily disabled on iOS.');
+      _isInitialized = true;
       return;
     }
 
@@ -57,6 +64,11 @@ class FirebaseNotifications {
   }
 
   static Future<String?> getFcmToken({bool forceRefresh = false}) async {
+    if (_disableFcmOnIos && Platform.isIOS) {
+      log('Skipping FCM token fetch because iOS FCM is disabled.');
+      return null;
+    }
+
     _firebaseMessaging ??= FirebaseMessaging.instance;
     final token = forceRefresh
         ? await _firebaseMessaging!.getToken()

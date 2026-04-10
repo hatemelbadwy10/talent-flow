@@ -10,6 +10,8 @@ import 'package:talent_flow/components/custom_text_form_field.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/payment/model/contract_payment_args.dart';
 import 'package:talent_flow/features/payment/repo/pay_ment_repo.dart';
+import 'package:talent_flow/features/setting/model/bank_accounts_response_model.dart';
+import 'package:talent_flow/features/setting/repo/bank_accounts_repo.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/helpers/date_time_picker.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
@@ -37,8 +39,12 @@ class _ContractPaymentRequestScreenState
   late final TextEditingController _startDateController;
 
   bool _isSubmitting = false;
+  bool _isLoadingBankAccounts = false;
+  List<BankAccountModel> _bankAccounts = const <BankAccountModel>[];
+  BankAccountModel? _selectedBankAccount;
 
   PaymentRepo get _paymentRepo => sl<PaymentRepo>();
+  BankAccountsRepo get _bankAccountsRepo => sl<BankAccountsRepo>();
 
   @override
   void initState() {
@@ -49,6 +55,7 @@ class _ContractPaymentRequestScreenState
     _startDateController = TextEditingController(
       text: _normalizeStartDate(widget.arguments.initialStartDate),
     );
+    _loadBankAccounts();
   }
 
   @override
@@ -58,6 +65,110 @@ class _ContractPaymentRequestScreenState
     _amountController.dispose();
     _startDateController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadBankAccounts() async {
+    setState(() => _isLoadingBankAccounts = true);
+    final result = await _bankAccountsRepo.getBankAccounts();
+    if (!mounted) return;
+
+    result.fold(
+      (failure) {
+        setState(() => _isLoadingBankAccounts = false);
+        AppCore.showSnackBar(
+          notification: AppNotification(
+            message: failure.error,
+            backgroundColor: Styles.LOGOUT_COLOR,
+            isFloating: true,
+          ),
+        );
+      },
+      (response) {
+        setState(() {
+          _bankAccounts = response.items;
+          _isLoadingBankAccounts = false;
+        });
+      },
+    );
+  }
+
+  Future<void> _selectBankAccount() async {
+    FocusScope.of(context).unfocus();
+
+    if (_isLoadingBankAccounts) {
+      return;
+    }
+
+    if (_bankAccounts.isEmpty) {
+      AppCore.showSnackBar(
+        notification: AppNotification(
+          message: 'contract_payment.bank_account_empty'.tr(),
+          backgroundColor: Styles.LOGOUT_COLOR,
+          isFloating: true,
+        ),
+      );
+      return;
+    }
+
+    final selected = await showModalBottomSheet<BankAccountModel>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'contract_payment.select_bank_account'.tr(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: _bankAccounts.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final account = _bankAccounts[index];
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          _formatBankAccountTitle(account),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: Text(
+                          _formatBankAccountSubtitle(account),
+                        ),
+                        onTap: () => Navigator.of(context).pop(account),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selected == null || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _selectedBankAccount = selected;
+      _customerNumberController.text = _formatBankAccountDisplay(selected);
+    });
   }
 
   Future<void> _pickStartDate() async {
@@ -87,7 +198,7 @@ class _ContractPaymentRequestScreenState
 
     setState(() => _isSubmitting = true);
     final result = await _paymentRepo.requestContractPayment(
-      customerNumber: _customerNumberController.text.trim(),
+      customerNumber: _selectedCustomerNumber,
       paymentCode: _paymentCodeController.text.trim(),
       paymentAmount: _amountController.text.trim(),
     );
@@ -109,7 +220,7 @@ class _ContractPaymentRequestScreenState
           Routes.contractPaymentConfirm,
           arguments: ContractPaymentConfirmArgs(
             contractId: widget.arguments.contractId,
-            customerNumber: _customerNumberController.text.trim(),
+            customerNumber: _selectedCustomerNumber,
             paymentCode: _paymentCodeController.text.trim(),
             paymentAmount: _amountController.text.trim(),
             startDate: _startDateController.text.trim(),
@@ -144,14 +255,23 @@ class _ContractPaymentRequestScreenState
                 controller: _customerNumberController,
                 label: 'contract_payment.customer_number'.tr(),
                 hint: 'contract_payment.customer_number_hint'.tr(),
-                inputType: TextInputType.phone,
-                formattedType: [FilteringTextInputFormatter.digitsOnly],
-                sufWidget: const Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: Styles.HINT_COLOR,
-                ),
+                readOnly: true,
+                onTap: _selectBankAccount,
+                sufWidget: _isLoadingBankAccounts
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: Styles.HINT_COLOR,
+                      ),
                 validate: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (_selectedBankAccount == null) {
                     return 'contract_payment.customer_number_required'.tr();
                   }
                   return null;
@@ -274,5 +394,37 @@ class _ContractPaymentRequestScreenState
 
     final normalized = source.replaceAll('/', '-');
     return DateTime.tryParse(normalized);
+  }
+
+  String get _selectedCustomerNumber =>
+      _selectedBankAccount?.number?.trim() ?? '';
+
+  String _formatBankAccountDisplay(BankAccountModel account) {
+    final title = _formatBankAccountTitle(account);
+    final number = account.number?.trim() ?? '';
+    if (number.isEmpty) {
+      return title;
+    }
+    return '$title - $number';
+  }
+
+  String _formatBankAccountTitle(BankAccountModel account) {
+    final name = account.name?.trim();
+    if (name != null && name.isNotEmpty) {
+      return name;
+    }
+    final bankName = account.bankName?.trim();
+    if (bankName != null && bankName.isNotEmpty) {
+      return bankName;
+    }
+    return 'contract_payment.customer_number'.tr();
+  }
+
+  String _formatBankAccountSubtitle(BankAccountModel account) {
+    final parts = <String>[
+      if (account.bankName?.trim().isNotEmpty == true) account.bankName!.trim(),
+      if (account.number?.trim().isNotEmpty == true) account.number!.trim(),
+    ];
+    return parts.join(' - ');
   }
 }

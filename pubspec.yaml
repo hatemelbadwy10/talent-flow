@@ -129,7 +129,7 @@ dependencies:
   iconsax_plus: ^1.0.0
   curved_labeled_navigation_bar: ^2.0.6
   easy_localization: ^3.0.8
-  # record: ^5.0.0
+  record: ^6.2.0
   pusher_channels_flutter: 2.4.0
 
 
@@ -164,6 +164,7 @@ flutter:
 
   assets:
    - assets/images/
+   - assets/contracts/
    - assets/svgs/
    - assets/language/
   #   - images/a_dot_ham.jpeg

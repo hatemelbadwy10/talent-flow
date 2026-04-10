@@ -4,9 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:talent_flow/app/core/extensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
+import 'package:talent_flow/features/setting/helpers/contract_pdf_downloader.dart';
 import 'package:talent_flow/features/setting/model/contract_model.dart';
 
-class ContractListItem extends StatelessWidget {
+class ContractListItem extends StatefulWidget {
   const ContractListItem({
     super.key,
     required this.contract,
@@ -17,18 +18,52 @@ class ContractListItem extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
+  State<ContractListItem> createState() => _ContractListItemState();
+}
+
+class _ContractListItemState extends State<ContractListItem> {
+  bool _isDownloading = false;
+
+  Future<void> _handleDownload() async {
+    if (_isDownloading) {
+      return;
+    }
+
+    setState(() {
+      _isDownloading = true;
+    });
+
+    await ContractPdfDownloader.downloadTemplate();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isDownloading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final contract = widget.contract;
     final statusData = _statusStyle(contract.status, contract.statusLabel);
     final statusText = contract.statusLabel?.trim().isNotEmpty == true
         ? contract.statusLabel!
         : statusData.textKey.tr();
     final isApproved = contract.status == 1;
+    final title = contract.title?.trim().isNotEmpty == true
+        ? contract.title!
+        : 'contracts_screen.contract_title'.tr();
+    final subtitle = contract.id != null
+        ? 'ID #${contract.id}'
+        : 'contracts_screen.contract_size'.tr();
 
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.all(14),
@@ -81,7 +116,7 @@ class ContractListItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      contract.title ?? '-',
+                      title,
                       style: const TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w600,
@@ -90,7 +125,7 @@ class ContractListItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'ID #${contract.id ?? '-'}',
+                      subtitle,
                       style: const TextStyle(
                         color: Color(0xFF88878B),
                         fontWeight: FontWeight.w500,
@@ -123,11 +158,47 @@ class ContractListItem extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.download_rounded),
-                    color: Styles.PRIMARY_COLOR,
-                    tooltip: 'contracts_screen.download'.tr(),
+                  InkWell(
+                    onTap: _isDownloading ? null : _handleDownload,
+                    borderRadius: BorderRadius.circular(999),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Styles.PRIMARY_COLOR.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: _isDownloading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Styles.PRIMARY_COLOR,
+                              ),
+                            )
+                          : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.download_rounded,
+                                  size: 18,
+                                  color: Styles.PRIMARY_COLOR,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'contracts_screen.download'.tr(),
+                                  style: const TextStyle(
+                                    color: Styles.PRIMARY_COLOR,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
                   ).visible(isApproved),
                 ],
               ),
