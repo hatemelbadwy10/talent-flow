@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
@@ -21,6 +22,7 @@ import 'package:talent_flow/features/new_projects/model/selection_option_model.d
 import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/main_blocs/location_options_bloc.dart';
+import 'package:talent_flow/navigation/routes.dart';
 
 import '../../../helpers/pickers/view/image_picker_helper.dart';
 import '../repo/update_profile_repo.dart';
@@ -96,6 +98,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
   String? _lastShownErrorMessage;
   bool _lastShownSuccessState = false;
   String? _lastLoadedCitiesCountryId;
+  bool _isSendingPhoneVerification = false;
 
   @override
   void dispose() {
@@ -278,18 +281,106 @@ class _EditProfileFormState extends State<EditProfileForm> {
       label: "edit_profile.email".tr(),
       hint: state.email ?? "edit_profile.email_hint".tr(),
       value: state.email ?? '',
+      readOnly: true,
       onChanged: (value) =>
           context.read<UpdateProfileBloc>().add(UpdateEmail(value)),
     );
   }
 
   Widget _buildPhoneField(BuildContext context, UpdateProfileState state) {
-    return _buildTextField(
-      label: "edit_profile.phone".tr(),
-      hint: state.phone ?? "edit_profile.phone_hint".tr(),
-      value: state.phone ?? '',
-      onChanged: (value) =>
-          context.read<UpdateProfileBloc>().add(UpdatePhone(value)),
+    final isVerified = _isPhoneVerified(state);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              text: "edit_profile.phone".tr(),
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+                color: Colors.black,
+              ),
+              children: const [
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: Colors.red, fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: CustomTextField(
+                  initialValue: state.phone ?? '',
+                  hint: state.phone ?? "edit_profile.phone_hint".tr(),
+                  inputType: TextInputType.phone,
+                  formattedType: [FilteringTextInputFormatter.digitsOnly],
+                  onChanged: (value) =>
+                      context.read<UpdateProfileBloc>().add(UpdatePhone(value)),
+                ),
+              ),
+              const SizedBox(width: 12),
+              SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _isSendingPhoneVerification
+                      ? null
+                      : isVerified
+                          ? null
+                          : () => _sendPhoneVerification(context, state),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isVerified
+                        ? const Color(0xFFE7F7EE)
+                        : Styles.PRIMARY_COLOR,
+                    foregroundColor:
+                        isVerified ? const Color(0xFF157347) : Colors.white,
+                    disabledBackgroundColor: isVerified
+                        ? const Color(0xFFE7F7EE)
+                        : Colors.grey.shade300,
+                    disabledForegroundColor: isVerified
+                        ? const Color(0xFF157347)
+                        : Colors.grey.shade600,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isSendingPhoneVerification
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(
+                          isVerified
+                              ? "edit_profile.verified".tr()
+                              : "edit_profile.verify".tr(),
+                        ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isVerified
+                ? "edit_profile.phone_verified_status".tr()
+                : "edit_profile.phone_unverified_status".tr(),
+            style: TextStyle(
+              fontSize: 12,
+              color:
+                  isVerified ? const Color(0xFF157347) : Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -939,6 +1030,89 @@ class _EditProfileFormState extends State<EditProfileForm> {
           ? "edit_profile.saving".tr()
           : "edit_profile.save".tr(),
     );
+  }
+
+  bool _isPhoneVerified(UpdateProfileState state) {
+    final currentPhone = state.phone?.trim() ?? '';
+    final verifiedPhone = state.verifiedPhone?.trim() ?? '';
+    return currentPhone.isNotEmpty &&
+        verifiedPhone.isNotEmpty &&
+        currentPhone == verifiedPhone &&
+        (state.phoneVerifiedAt?.trim().isNotEmpty ?? false);
+  }
+
+  Future<void> _sendPhoneVerification(
+    BuildContext context,
+    UpdateProfileState state,
+  ) async {
+    final phone = state.phone?.trim() ?? '';
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final updateProfileBloc = context.read<UpdateProfileBloc>();
+    if (phone.isEmpty) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text("edit_profile.phone_required_for_verification".tr()),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSendingPhoneVerification = true);
+    final result = await updateProfileBloc.repo.sendPhoneVerificationOtp(phone);
+    if (!mounted) {
+      return;
+    }
+
+    await result.fold(
+      (failure) async {
+        messenger.showSnackBar(
+          SnackBar(content: Text(failure.error)),
+        );
+      },
+      (response) async {
+        final message = response.data is Map<String, dynamic>
+            ? (response.data['message']?.toString() ??
+                "edit_profile.phone_verification_sent".tr())
+            : "edit_profile.phone_verification_sent".tr();
+        messenger.showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+
+        final routeResult = await navigator.pushNamed(
+          Routes.sendCodeScreen,
+          arguments: {
+            'identifier': phone,
+            'isPhoneVerification': true,
+          },
+        );
+        final verificationResult =
+            routeResult is Map<String, dynamic> ? routeResult : null;
+
+        if (!mounted || verificationResult == null) {
+          return;
+        }
+
+        final verifiedIdentifier =
+            verificationResult['identifier']?.toString().trim() ?? '';
+        final verifiedAt = verificationResult['verifiedAt']?.toString() ??
+            DateTime.now().toIso8601String();
+
+        if (verifiedIdentifier == phone) {
+          updateProfileBloc.add(
+            MarkPhoneVerified(
+              phone: verifiedIdentifier,
+              verifiedAt: verifiedAt,
+            ),
+          );
+        }
+      },
+    );
+
+    if (!mounted) {
+      return;
+    }
+    setState(() => _isSendingPhoneVerification = false);
   }
 
   String? _datePart(String? value, int index) {

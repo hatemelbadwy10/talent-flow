@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
-import 'package:talent_flow/components/animated_widget.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/projects/widgets/projects_shimmer.dart';
 import 'package:talent_flow/features/setting/bloc/contracts_bloc.dart';
@@ -93,41 +92,31 @@ class _ContractsScreenState extends State<ContractsScreen> {
 
               return RefreshIndicator(
                 onRefresh: _refreshContracts,
-                child: Padding(
+                child: ListView.separated(
                   padding: const EdgeInsets.all(16),
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      ListAnimator(
-                        addPadding: false,
-                        customPadding: EdgeInsets.zero,
-                        data: contracts
-                            .map(
-                              (contract) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: ContractListItem(
-                                  contract: contract,
-                                  onTap: () async {
-                                    final id = contract.id;
-                                    if (id == null) {
-                                      return;
-                                    }
-                                    final result = await CustomNavigator.push(
-                                      Routes.contractDetails,
-                                      arguments: id,
-                                    );
-                                    if (!mounted || result != true) {
-                                      return;
-                                    }
-                                    await _refreshContracts();
-                                  },
-                                ),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ],
-                  ),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: contracts.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final contract = contracts[index];
+                    return ContractListItem(
+                      contract: contract,
+                      onTap: () async {
+                        final id = contract.id;
+                        if (id == null) {
+                          return;
+                        }
+                        final result = await CustomNavigator.push(
+                          Routes.contractDetails,
+                          arguments: id,
+                        );
+                        if (!mounted || result != true) {
+                          return;
+                        }
+                        await _refreshContracts();
+                      },
+                    );
+                  },
                 ),
               );
             }

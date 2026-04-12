@@ -261,6 +261,7 @@ class ProjectDetailsCard extends StatelessWidget {
       ProjectStatus.open => 'project_status.open',
       ProjectStatus.inProgress => 'project_status.in_progress',
       ProjectStatus.underReview => 'project_status.under_review',
+      ProjectStatus.closed => 'project_status.closed',
     };
 
     final translated = statusKey.tr();

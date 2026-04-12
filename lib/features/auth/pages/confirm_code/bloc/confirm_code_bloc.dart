@@ -34,12 +34,16 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
         log("data${data['isFromLogin']}");
         final bool isRegister = data['isRegister'] ?? false;
         final bool isFromLogin = data['isFromLogin'] ?? false;
-        final String email = data['identifier'] ?? '';
+        final bool isPhoneVerification = data['isPhoneVerification'] == true;
+        final String identifier =
+            (data['identifier'] ?? data['email'] ?? '').toString();
 
         Either<ServerFailure, Response> response;
         log("isRegister $isRegister - isFromLogin $isFromLogin");
         // اختيار طريقة التأكيد بناءً على حالة المستخدم
-        if (isRegister || isFromLogin) {
+        if (isPhoneVerification) {
+          response = await confirmCodeRepo.verifyPhone(data);
+        } else if (isRegister || isFromLogin) {
           log("data$data");
           response = await confirmCodeRepo.verifyFromRegister(data);
         } else {
@@ -62,7 +66,22 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
           (success) async {
             log('isRegister $isRegister - isFromLogin $isFromLogin');
 
-            if (isRegister) {
+            if (isPhoneVerification) {
+              AppCore.showSnackBar(
+                notification: AppNotification(
+                  message: success.data['message'] ??
+                      "edit_profile.phone_verified_success".tr(),
+                  backgroundColor: Styles.ACTIVE,
+                  borderColor: Colors.transparent,
+                ),
+              );
+              CustomNavigator.pop(
+                result: {
+                  'identifier': identifier,
+                  'verifiedAt': DateTime.now().toIso8601String(),
+                },
+              );
+            } else if (isRegister) {
               /// من الريجستر → يروح للهوم
               await confirmCodeRepo.saveUserData(success.data);
               await confirmCodeRepo.saveCredentials(data);
@@ -82,7 +101,7 @@ class ConfirmCodeBloc extends Bloc<AppEvent, AppState> {
               CustomNavigator.push(
                 Routes.forgetPassword,
                 arguments: {
-                  "identifier": email,
+                  "identifier": identifier,
                 },
               );
             }

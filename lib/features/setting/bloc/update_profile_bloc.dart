@@ -19,7 +19,8 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
         (e, emit) => emit(state.copyWith(firstName: e.firstName)));
     on<UpdateLastName>((e, emit) => emit(state.copyWith(lastName: e.lastName)));
     on<UpdateEmail>((e, emit) => emit(state.copyWith(email: e.email)));
-    on<UpdatePhone>((e, emit) => emit(state.copyWith(phone: e.phone)));
+    on<UpdatePhone>(_onUpdatePhone);
+    on<MarkPhoneVerified>(_onMarkPhoneVerified);
     on<UpdateCountry>(_onUpdateCountry);
     on<UpdateCity>(
       (e, emit) => emit(
@@ -45,7 +46,13 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
     on<UpdateSkills>((e, emit) =>
         emit(state.copyWith(skills: e.skillIds, selectedSkills: e.skillNames)));
     on<UpdateImage>((e, emit) => emit(state.copyWith(image: e.image)));
-    on<ClearError>((e, emit) => emit(state.copyWith(errorMessage: null)));
+    on<ClearError>(
+      (e, emit) => emit(
+        state.copyWith(
+          clearErrorMessage: true,
+        ),
+      ),
+    );
     on<SubmitProfile>(_onSubmitProfile);
   }
 
@@ -83,6 +90,11 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
           lastName: data['last_name'] ?? '',
           email: data['email'] ?? '',
           phone: data['phone'] ?? '',
+          verifiedPhone:
+              (data['phone_verified_at']?.toString().isNotEmpty ?? false)
+                  ? data['phone']?.toString()
+                  : null,
+          phoneVerifiedAt: data['phone_verified_at']?.toString(),
           countryId: data['country_id']?.toString(),
           countryName: data['country']?.toString(),
           cityId: data['city_id']?.toString(),
@@ -109,6 +121,36 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
     }
   }
 
+  void _onUpdatePhone(
+    UpdatePhone event,
+    Emitter<UpdateProfileState> emit,
+  ) {
+    final nextPhone = event.phone.trim();
+    final verifiedPhone = state.verifiedPhone?.trim();
+    final shouldClearVerification = verifiedPhone != null &&
+        verifiedPhone.isNotEmpty &&
+        nextPhone != verifiedPhone;
+
+    emit(
+      state.copyWith(
+        phone: event.phone,
+        clearPhoneVerification: shouldClearVerification,
+      ),
+    );
+  }
+
+  void _onMarkPhoneVerified(
+    MarkPhoneVerified event,
+    Emitter<UpdateProfileState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        verifiedPhone: event.phone,
+        phoneVerifiedAt: event.verifiedAt,
+      ),
+    );
+  }
+
   void _onUpdateCountry(
     UpdateCountry event,
     Emitter<UpdateProfileState> emit,
@@ -125,8 +167,13 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
 
   Future<void> _onSubmitProfile(
       SubmitProfile event, Emitter<UpdateProfileState> emit) async {
-    emit(state.copyWith(
-        isSubmitting: true, errorMessage: null, successMessage: null));
+    emit(
+      state.copyWith(
+        isSubmitting: true,
+        clearErrorMessage: true,
+        clearSuccessMessage: true,
+      ),
+    );
 
     final result = await repo.updateProfile(
       firstName: state.firstName ?? '',
@@ -204,6 +251,13 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
                 lastName: payload['last_name'] as String? ?? state.lastName,
                 email: payload['email'] as String? ?? state.email,
                 phone: payload['phone'] as String? ?? state.phone,
+                verifiedPhone:
+                    (payload['phone_verified_at']?.toString().isNotEmpty ??
+                            false)
+                        ? payload['phone']?.toString()
+                        : state.verifiedPhone,
+                phoneVerifiedAt: payload['phone_verified_at']?.toString() ??
+                    state.phoneVerifiedAt,
                 specializationId: payload['specialization_id'] as int? ??
                     state.specializationId,
                 specializationName: payload['specialization'] as String? ??

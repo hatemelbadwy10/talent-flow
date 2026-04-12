@@ -18,6 +18,7 @@ class EndPoints {
   static const String resend = 'resend-code';
   static const String verifyRegister = "api/auth/verify-otp?register";
   static const String verifyOtp = 'api/auth/verify-otp';
+  static const String verifyPhone = 'api/auth/verify-phone';
   static const String deleteAccount = 'delete-account';
   static const String reactivateAccount = 'reactivate-account';
   static const String setLang = 'set-lang';

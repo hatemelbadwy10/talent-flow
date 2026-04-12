@@ -6,6 +6,7 @@ import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 import 'package:talent_flow/features/setting/helpers/contract_pdf_downloader.dart';
 import 'package:talent_flow/features/setting/model/contract_model.dart';
+import 'package:talent_flow/features/setting/model/contract_status.dart';
 
 class ContractListItem extends StatefulWidget {
   const ContractListItem({
@@ -51,7 +52,10 @@ class _ContractListItemState extends State<ContractListItem> {
     final statusText = contract.statusLabel?.trim().isNotEmpty == true
         ? contract.statusLabel!
         : statusData.textKey.tr();
-    final isApproved = contract.status == 1;
+    final contractStatus = ContractStatus.fromBackend(contract.status);
+    final canDownload = contractStatus == ContractStatus.accepted ||
+        contractStatus == ContractStatus.inProgress ||
+        contractStatus == ContractStatus.waitToPayFreelancer;
     final title = contract.title?.trim().isNotEmpty == true
         ? contract.title!
         : 'contracts_screen.contract_title'.tr();
@@ -199,7 +203,7 @@ class _ContractListItemState extends State<ContractListItem> {
                               ],
                             ),
                     ),
-                  ).visible(isApproved),
+                  ).visible(canDownload),
                 ],
               ),
             ],

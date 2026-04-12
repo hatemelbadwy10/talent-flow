@@ -9,7 +9,9 @@ abstract class UpdateProfileEvent extends Equatable {
 
 // --- Initialization ---
 class LoadUserData extends UpdateProfileEvent {} // load from SharedPreferences
-class LoadSelections extends UpdateProfileEvent {} // load specialization, job titles, skills from API
+
+class LoadSelections
+    extends UpdateProfileEvent {} // load specialization, job titles, skills from API
 
 // --- Field updates ---
 class UpdateFirstName extends UpdateProfileEvent {
@@ -42,6 +44,18 @@ class UpdatePhone extends UpdateProfileEvent {
 
   @override
   List<Object?> get props => [phone];
+}
+
+class MarkPhoneVerified extends UpdateProfileEvent {
+  final String phone;
+  final String verifiedAt;
+  const MarkPhoneVerified({
+    required this.phone,
+    required this.verifiedAt,
+  });
+
+  @override
+  List<Object?> get props => [phone, verifiedAt];
 }
 
 class UpdateSpecialization extends UpdateProfileEvent {

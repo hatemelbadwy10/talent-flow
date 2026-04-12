@@ -29,25 +29,28 @@ class DashboardScreen extends StatelessWidget {
           actions: [
             Padding(
               padding: const EdgeInsetsDirectional.only(end: 8),
-              child: TextButton.icon(
-                onPressed: () async {
-                  final isFreelancer = sl<SharedPreferences>()
-                          .getBool(AppStorageKey.isFreelancer) ??
-                      true;
-                  if (!isFreelancer) {
-                    final allowed =
-                        await UserCompletionGuard.ensureCanAddProject(context);
-                    if (!allowed) return;
-                  }
-                  CustomNavigator.push(
-                    isFreelancer ? Routes.addYourProject : Routes.addProject,
-                  );
-                },
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('إضافة مشروع'),
-                style: TextButton.styleFrom(
-                  foregroundColor: Styles.PRIMARY_COLOR,
-                  textStyle: const TextStyle(fontWeight: FontWeight.w600),
+              child: Visibility(
+                visible: !(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false),
+                child: TextButton.icon(
+                  onPressed: () async {
+                    final isFreelancer = sl<SharedPreferences>()
+                            .getBool(AppStorageKey.isFreelancer) ??
+                        true;
+                    if (!isFreelancer) {
+                      final allowed =
+                          await UserCompletionGuard.ensureCanAddProject(context);
+                      if (!allowed) return;
+                    }
+                    CustomNavigator.push(
+                      isFreelancer ? Routes.addYourProject : Routes.addProject,
+                    );
+                  },
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('إضافة مشروع'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Styles.PRIMARY_COLOR,
+                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
             ),

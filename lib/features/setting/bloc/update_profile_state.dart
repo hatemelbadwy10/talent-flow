@@ -6,6 +6,8 @@ class UpdateProfileState extends Equatable {
   final String? lastName;
   final String? email;
   final String? phone;
+  final String? verifiedPhone;
+  final String? phoneVerifiedAt;
   final int? specializationId;
   final String? specializationName;
   final int? jobTitleId;
@@ -28,12 +30,13 @@ class UpdateProfileState extends Equatable {
   final String? dateOfBirth;
   final String? professionalTitle;
 
-
   const UpdateProfileState({
     this.firstName,
     this.lastName,
     this.email,
     this.phone,
+    this.verifiedPhone,
+    this.phoneVerifiedAt,
     this.specializationId,
     this.specializationName,
     this.jobTitleId,
@@ -62,6 +65,8 @@ class UpdateProfileState extends Equatable {
     String? lastName,
     String? email,
     String? phone,
+    String? verifiedPhone,
+    String? phoneVerifiedAt,
     int? specializationId,
     String? specializationName,
     int? jobTitleId,
@@ -83,12 +88,20 @@ class UpdateProfileState extends Equatable {
     String? gender,
     String? dateOfBirth,
     String? professionalTitle,
+    bool clearPhoneVerification = false,
+    bool clearErrorMessage = false,
+    bool clearSuccessMessage = false,
   }) {
     return UpdateProfileState(
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       email: email ?? this.email,
       phone: phone ?? this.phone,
+      verifiedPhone:
+          clearPhoneVerification ? null : verifiedPhone ?? this.verifiedPhone,
+      phoneVerifiedAt: clearPhoneVerification
+          ? null
+          : phoneVerifiedAt ?? this.phoneVerifiedAt,
       specializationId: specializationId ?? this.specializationId,
       specializationName: specializationName ?? this.specializationName,
       jobTitleId: jobTitleId ?? this.jobTitleId,
@@ -96,14 +109,16 @@ class UpdateProfileState extends Equatable {
       bio: bio ?? this.bio,
       newPassword: newPassword ?? this.newPassword,
       newPasswordConfirmation:
-      newPasswordConfirmation ?? this.newPasswordConfirmation,
+          newPasswordConfirmation ?? this.newPasswordConfirmation,
       skills: skills ?? this.skills,
       selectedSkills: selectedSkills ?? this.selectedSkills,
       image: image ?? this.image,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isSubmitted: isSubmitted ?? this.isSubmitted,
-      errorMessage: errorMessage ?? this.errorMessage,
-      successMessage: successMessage ?? this.successMessage,
+      errorMessage:
+          clearErrorMessage ? null : errorMessage ?? this.errorMessage,
+      successMessage:
+          clearSuccessMessage ? null : successMessage ?? this.successMessage,
       countryId: countryId ?? this.countryId,
       countryName: countryName ?? this.countryName,
       cityId: cityId ?? this.cityId,
@@ -116,30 +131,32 @@ class UpdateProfileState extends Equatable {
 
   @override
   List<Object?> get props => [
-    firstName,
-    lastName,
-    email,
-    phone,
-    specializationId,
-    specializationName,
-    jobTitleId,
-    jobTitleName,
-    bio,
-    newPassword,
-    newPasswordConfirmation,
-    skills,
-    selectedSkills,
-    image,
-    isSubmitting,
-    isSubmitted,
-    errorMessage,
-    successMessage,
-    countryId,
-    countryName,
-    cityId,
-    cityName,
-    gender,
-    dateOfBirth,
-    professionalTitle,
-  ];
+        firstName,
+        lastName,
+        email,
+        phone,
+        verifiedPhone,
+        phoneVerifiedAt,
+        specializationId,
+        specializationName,
+        jobTitleId,
+        jobTitleName,
+        bio,
+        newPassword,
+        newPasswordConfirmation,
+        skills,
+        selectedSkills,
+        image,
+        isSubmitting,
+        isSubmitted,
+        errorMessage,
+        successMessage,
+        countryId,
+        countryName,
+        cityId,
+        cityName,
+        gender,
+        dateOfBirth,
+        professionalTitle,
+      ];
 }

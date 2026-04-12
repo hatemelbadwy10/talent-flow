@@ -25,7 +25,7 @@ class ConfirmCodeScreen extends StatefulWidget {
 class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
   final _formKey = GlobalKey<FormState>();
   final List<TextEditingController> _controllers =
-  List.generate(6, (_) => TextEditingController());
+      List.generate(6, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   @override
@@ -124,7 +124,8 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
-              borderSide: const BorderSide(color: Colors.blueAccent, width: 2.0),
+              borderSide:
+                  const BorderSide(color: Colors.blueAccent, width: 2.0),
             ),
           ),
           onChanged: (value) {
@@ -162,14 +163,14 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
                   }
                 },
                 icon: const Icon(Icons.paste, size: 16),
-                label:  Text(
+                label: Text(
                   "paste".tr(),
-                  style: TextStyle(fontSize: 12,
-                  color: Styles.PRIMARY_COLOR
-                  ),
+                  style: const TextStyle(
+                      fontSize: 12, color: Styles.PRIMARY_COLOR),
                 ),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 ),
               ),
             ],
@@ -179,23 +180,25 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: isArabic
                 ? [
-              _buildCodeInput(5),
-              _buildCodeInput(4),
-              _buildCodeInput(3),
-              const Text('-', style: TextStyle(fontSize: 24, color: Colors.grey)),
-              _buildCodeInput(2),
-              _buildCodeInput(1),
-              _buildCodeInput(0),
-            ]
+                    _buildCodeInput(5),
+                    _buildCodeInput(4),
+                    _buildCodeInput(3),
+                    const Text('-',
+                        style: TextStyle(fontSize: 24, color: Colors.grey)),
+                    _buildCodeInput(2),
+                    _buildCodeInput(1),
+                    _buildCodeInput(0),
+                  ]
                 : [
-              _buildCodeInput(0),
-              _buildCodeInput(1),
-              _buildCodeInput(2),
-              const Text('-', style: TextStyle(fontSize: 24, color: Colors.grey)),
-              _buildCodeInput(3),
-              _buildCodeInput(4),
-              _buildCodeInput(5),
-            ],
+                    _buildCodeInput(0),
+                    _buildCodeInput(1),
+                    _buildCodeInput(2),
+                    const Text('-',
+                        style: TextStyle(fontSize: 24, color: Colors.grey)),
+                    _buildCodeInput(3),
+                    _buildCodeInput(4),
+                    _buildCodeInput(5),
+                  ],
           ),
         ],
       ),
@@ -204,6 +207,11 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final identifier =
+        (widget.argument["identifier"] ?? widget.argument["email"] ?? '')
+            .toString();
+    final isPhoneVerification = widget.argument["isPhoneVerification"] == true;
+
     return BlocProvider(
       create: (_) => ConfirmCodeBloc(sl<ConfirmCodeRepo>()),
       child: AuthBase(
@@ -214,7 +222,6 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
           const SizedBox(height: 40),
-
           Align(
             alignment: AlignmentDirectional.centerStart,
             child: Text(
@@ -223,10 +230,8 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
             ),
           ),
           const SizedBox(height: 10),
-
           _buildCodeInputRow(context),
           const SizedBox(height: 24),
-
           Builder(
             builder: (context) {
               return CustomButton(
@@ -234,20 +239,23 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
                 onTap: () {
                   final code = _controllers.map((c) => c.text).join();
                   if (code.length == 6) {
-                    final email = widget.argument["email"];
                     final isRegister = widget.argument["isRegister"] ?? false;
-                    log('email $email');
+                    log('identifier $identifier');
                     context.read<ConfirmCodeBloc>().add(
-                      Click(arguments: {
-                        "identifier": email,
-                        "otp": code,
-                        "isRegister": isRegister,
-                        "isFromLogin": widget.argument["isFromLogin"],
-                      }),
-                    );
+                          Click(arguments: {
+                            "identifier": identifier,
+                            "otp": code,
+                            if (isPhoneVerification) "is_phone": "true",
+                            if (isPhoneVerification)
+                              "isPhoneVerification": true,
+                            "isRegister": isRegister,
+                            "isFromLogin": widget.argument["isFromLogin"],
+                          }),
+                        );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("confirm_code.error_incomplete".tr())),
+                      SnackBar(
+                          content: Text("confirm_code.error_incomplete".tr())),
                     );
                   }
                 },

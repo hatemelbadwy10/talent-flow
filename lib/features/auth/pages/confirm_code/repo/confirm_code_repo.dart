@@ -82,4 +82,21 @@ class ConfirmCodeRepo extends BaseRepo {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
+
+  Future<Either<ServerFailure, Response>> verifyPhone(
+      Map<String, dynamic> data) async {
+    try {
+      final response = await dioClient.post(
+        uri: EndPoints.verifyOtp,
+        data: FormData.fromMap(data),
+      );
+      if (response.statusCode == 200) {
+        return Right(response);
+      } else {
+        return left(ServerFailure(response.data['message']));
+      }
+    } catch (error) {
+      return left(ApiErrorHandler.getServerFailure(error));
+    }
+  }
 }

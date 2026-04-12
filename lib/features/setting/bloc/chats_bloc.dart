@@ -10,13 +10,16 @@ import '../../../app/core/app_state.dart';
 class ChatsBloc extends Bloc<AppEvent, AppState> {
   final ChatsRepo _chatsRepo;
   Map<int, String> projectOptions = {};
+  List<ChatsModel> _currentChats = [];
 
   ChatsBloc(this._chatsRepo) : super(Start()) {
     on<Add>(_onGetChats);
     on<Click>(_onLoadProjectOptions);
+    on<Read>(_onMarkConversationRead);
   }
 
-  Future<void> _onLoadProjectOptions(Click event, Emitter<AppState> emit) async {
+  Future<void> _onLoadProjectOptions(
+      Click event, Emitter<AppState> emit) async {
     try {
       final result = await _chatsRepo.getProjectChatOptions();
       result.fold(
@@ -28,14 +31,14 @@ class ChatsBloc extends Bloc<AppEvent, AppState> {
             if (response.data is Map && response.data['payload'] is Map) {
               final payload = response.data['payload'] as Map;
               final options = <int, String>{};
-              
+
               payload.forEach((key, value) {
                 final id = int.tryParse(key.toString());
                 if (id != null && value is String) {
                   options[id] = value;
                 }
               });
-              
+
               projectOptions = options;
               // Emit current state to trigger UI rebuild with new project options
               emit(state);
@@ -86,6 +89,7 @@ class ChatsBloc extends Bloc<AppEvent, AppState> {
               .map(ChatsModel.fromJson)
               .toList();
 
+          _currentChats = chats;
           emit(Done(list: chats));
         },
       );
@@ -93,5 +97,32 @@ class ChatsBloc extends Bloc<AppEvent, AppState> {
       log("Exception in ChatsBloc", error: e, stackTrace: s);
       emit(Error());
     }
+  }
+
+  void _onMarkConversationRead(Read event, Emitter<AppState> emit) {
+    final rawId = event.arguments;
+    final int? conversationId =
+        rawId is int ? rawId : int.tryParse(rawId?.toString() ?? '');
+
+    if (conversationId == null || _currentChats.isEmpty) {
+      return;
+    }
+
+    var hasChanges = false;
+    final updatedChats = _currentChats.map((chat) {
+      if (chat.id != conversationId || (chat.unreadCount ?? 0) == 0) {
+        return chat;
+      }
+
+      hasChanges = true;
+      return chat.copyWith(unreadCount: 0);
+    }).toList();
+
+    if (!hasChanges) {
+      return;
+    }
+
+    _currentChats = updatedChats;
+    emit(Done(list: updatedChats));
   }
 }

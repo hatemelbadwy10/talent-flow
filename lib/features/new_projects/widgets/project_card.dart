@@ -33,6 +33,11 @@ class _ProjectCardState extends State<ProjectCard> {
   late MyProjectsModel _currentProjectModel;
   bool _isFavouriteLoading = false;
 
+  int? _currentUserId() {
+    final rawUserId = sl<SharedPreferences>().getString(AppStorageKey.userId);
+    return int.tryParse(rawUserId ?? '');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -73,6 +78,21 @@ class _ProjectCardState extends State<ProjectCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            _currentProjectModel.title?.trim().isNotEmpty == true
+                ? _currentProjectModel.title!
+                : "project_portfolio.default_title".tr(),
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1F2937),
+              height: 1.4,
+            ),
+            textAlign: TextAlign.start,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 16.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -224,14 +244,22 @@ class _ProjectCardState extends State<ProjectCard> {
                 final isFreelancer = sl<SharedPreferences>()
                         .getBool(AppStorageKey.isFreelancer) ??
                     false;
+                final currentUserId = _currentUserId();
+                final isMyEntrepreneurProject = !isFreelancer &&
+                    currentUserId != null &&
+                    _currentProjectModel.owner?.id == currentUserId;
 
                 if (isFreelancer) {
                   final allowed =
                       await UserCompletionGuard.ensureCanAddOffer(context);
                   if (!allowed) return;
-                  // Freelancer → Add Offer
                   CustomNavigator.push(
                     Routes.addOffer,
+                    arguments: {"id": _currentProjectModel.id},
+                  );
+                } else if (isMyEntrepreneurProject) {
+                  CustomNavigator.push(
+                    Routes.singleProjectDetails,
                     arguments: {"id": _currentProjectModel.id},
                   );
                 } else {

@@ -6,6 +6,7 @@ enum ProjectStatus {
   draft,
   rejected,
   canceled,
+  closed,
   open,
   inProgress,
   underReview,
@@ -26,6 +27,8 @@ class StatusChip extends StatelessWidget {
         return "project_status.rejected";
       case ProjectStatus.canceled:
         return "project_status.canceled";
+      case ProjectStatus.closed:
+        return "project_status.closed";
       case ProjectStatus.open:
         return "project_status.open";
       case ProjectStatus.inProgress:
@@ -45,6 +48,8 @@ class StatusChip extends StatelessWidget {
         return const Color(0xFFFEE4E2);
       case ProjectStatus.canceled:
         return const Color(0xFFF8F9FA);
+      case ProjectStatus.closed:
+        return const Color(0xFFE5E7EB);
       case ProjectStatus.open:
         return const Color(0xFFAED4D5);
       case ProjectStatus.inProgress:
@@ -64,6 +69,8 @@ class StatusChip extends StatelessWidget {
         return const Color(0xFFA82C29);
       case ProjectStatus.canceled:
         return const Color(0xFF6C757D);
+      case ProjectStatus.closed:
+        return const Color(0xFF374151);
       case ProjectStatus.open:
         return const Color(0xFF1388B5);
       case ProjectStatus.inProgress:
@@ -100,7 +107,14 @@ class ProjectStatusHelper {
       return ProjectStatus.draft;
     }
 
-    switch (statusString.toLowerCase().trim()) {
+    final normalizedStatus = statusString.toLowerCase().trim();
+
+    if (normalizedStatus.contains('مغلق') ||
+        normalizedStatus.contains('closed')) {
+      return ProjectStatus.closed;
+    }
+
+    switch (normalizedStatus) {
       case 'completed':
       case 'مكتمل':
         return ProjectStatus.completed;

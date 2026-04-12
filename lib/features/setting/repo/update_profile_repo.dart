@@ -12,6 +12,23 @@ import '../../../data/error/failures.dart';
 class UpdateProfileRepo extends BaseRepo {
   UpdateProfileRepo(
       {required super.sharedPreferences, required super.dioClient});
+
+  Future<Either<ServerFailure, Response>> sendPhoneVerificationOtp(
+      String phone) async {
+    try {
+      final response = await dioClient.post(
+        uri: EndPoints.verifyPhone,
+        data: FormData.fromMap({
+          'phone': phone,
+        }),
+      );
+      return Right(response);
+    } catch (error) {
+      log('sendPhoneVerificationOtp error $error');
+      return left(ApiErrorHandler.getServerFailure(error));
+    }
+  }
+
   Future<Either<ServerFailure, Response>> updateProfile(
       {required String firstName,
       required String email,

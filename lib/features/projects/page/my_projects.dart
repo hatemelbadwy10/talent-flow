@@ -23,8 +23,11 @@ class OwnerProjects extends StatelessWidget {
     log('categoryId $categoryId');
     return BlocProvider(
       create: (context) =>
-      MyProjectsBloc(sl())..add(Add(arguments: categoryId)),
-      child: _OwnerProjectsContent(categoryId: categoryId,categoryName: arguments?['categoryName'],),
+          MyProjectsBloc(sl())..add(Add(arguments: categoryId)),
+      child: _OwnerProjectsContent(
+        categoryId: categoryId,
+        categoryName: arguments?['categoryName'],
+      ),
     );
   }
 }
@@ -32,7 +35,7 @@ class OwnerProjects extends StatelessWidget {
 class _OwnerProjectsContent extends StatefulWidget {
   final int? categoryId;
   final String? categoryName;
-  const _OwnerProjectsContent({this.categoryId,this.categoryName});
+  const _OwnerProjectsContent({this.categoryId, this.categoryName});
 
   @override
   State<_OwnerProjectsContent> createState() => _OwnerProjectsContentState();
@@ -44,13 +47,14 @@ class _OwnerProjectsContentState extends State<_OwnerProjectsContent>
 
   final Map<String?, String> statuses = {
     null: "all".tr(),
-    "completed": "project_status.completed".tr(),
-    "draft": "project_status.draft".tr(),
-    "rejected": "project_status.rejected".tr(),
-    "canceled": "project_status.canceled".tr(),
-    "open": "project_status.open".tr(),
-    "in_progress": "project_status.in_progress".tr(),
-    "under_review": "project_status.under_review".tr(),
+    "Completed": "project_status.completed".tr(),
+    "Draft": "project_status.draft".tr(),
+    "Rejected": "project_status.rejected".tr(),
+    "Cancelled": "project_status.canceled".tr(),
+    "Closed": "project_status.closed".tr(),
+    "Open": "project_status.open".tr(),
+    "In Progress": "project_status.in_progress".tr(),
+    "Under Review": "project_status.under_review".tr(),
   };
 
   @override
@@ -80,24 +84,23 @@ class _OwnerProjectsContentState extends State<_OwnerProjectsContent>
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         centerTitle: true,
-        title: widget.categoryId==null?  Text('owner_projects.my_projects'.tr()):Text(widget.categoryName!),
-    
+        title: widget.categoryId == null
+            ? Text('owner_projects.my_projects'.tr())
+            : Text(widget.categoryName!),
+
         /// 👇 فقط لو مفيش categoryId
         bottom: widget.categoryId == null
             ? TabBar(
-          indicatorColor: Styles.PRIMARY_COLOR,
-          labelColor: Styles.PRIMARY_COLOR,
-          controller: _tabController,
-          isScrollable: true,
-          onTap: (index) {
-            final status = statuses.keys.elementAt(index);
-            context
-                .read<MyProjectsBloc>()
-                .add(Add(arguments: status));
-          },
-          tabs:
-          statuses.values.map((label) => Tab(text: label)).toList(),
-        )
+                indicatorColor: Styles.PRIMARY_COLOR,
+                labelColor: Styles.PRIMARY_COLOR,
+                controller: _tabController,
+                isScrollable: true,
+                onTap: (index) {
+                  final status = statuses.keys.elementAt(index);
+                  context.read<MyProjectsBloc>().add(Add(arguments: status));
+                },
+                tabs: statuses.values.map((label) => Tab(text: label)).toList(),
+              )
             : null,
       ),
       body: BlocBuilder<MyProjectsBloc, AppState>(
@@ -114,8 +117,7 @@ class _OwnerProjectsContentState extends State<_OwnerProjectsContent>
                     right: 16, left: 16, top: 8, bottom: 32),
                 child: GridView.builder(
                   itemCount: projects.length,
-                  gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 2,
                     mainAxisSpacing: 2,
