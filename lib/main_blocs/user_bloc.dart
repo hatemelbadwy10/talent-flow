@@ -19,6 +19,7 @@ class UserBloc extends Bloc<AppEvent, AppState> {
   UserBloc({required this.repo}) : super(Start()) {
     on<Click>(onClick);
     on<Update>(onUpdate);
+    on<SyncUnreadCounts>(onSyncUnreadCounts);
     on<Delete>(onDelete);
   }
 
@@ -29,7 +30,15 @@ class UserBloc extends Bloc<AppEvent, AppState> {
     try {
       emit(Loading());
 
-      Either<ServerFailure, UserModel> response = repo.getUser();
+      Either<ServerFailure, UserModel> response =
+          repo.isLogIn ? await repo.fetchUserProfile() : repo.getUser();
+
+      if (response.isLeft()) {
+        final localResponse = repo.getUser();
+        if (localResponse.isRight()) {
+          response = localResponse;
+        }
+      }
 
       response.fold((fail) {
         AppCore.showSnackBar(
@@ -58,7 +67,22 @@ class UserBloc extends Bloc<AppEvent, AppState> {
 
   onUpdate(Update event, Emitter<AppState> emit) async {
     repo.setUserData((event.arguments as UserModel).toJson());
-    emit(Done(model: event.arguments as UserModel));
+    user = event.arguments as UserModel;
+    emit(Done(model: user));
+  }
+
+  onSyncUnreadCounts(SyncUnreadCounts event, Emitter<AppState> emit) async {
+    final args = event.arguments;
+    final updatedUser = repo.updateUnreadCounts(
+      notifications: args is Map ? args['notifications'] as int? : null,
+      messages: args is Map ? args['messages'] as int? : null,
+    );
+    if (updatedUser == null) {
+      return;
+    }
+
+    user = updatedUser;
+    emit(Done(model: user));
   }
 
   onDelete(Delete event, Emitter<AppState> emit) async {

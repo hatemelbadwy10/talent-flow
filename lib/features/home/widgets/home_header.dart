@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,6 +12,8 @@ import 'package:talent_flow/app/core/svg_images.dart';
 
 import '../../../app/core/app_storage_keys.dart';
 import '../../../data/config/di.dart';
+import '../../../main_blocs/user_bloc.dart';
+import '../../../app/core/app_state.dart';
 
 class HomeHeaderSection extends StatelessWidget {
   final VoidCallback? onNotificationTap;
@@ -38,140 +41,158 @@ class HomeHeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = sl<SharedPreferences>();
-    final rawUserData = prefs.getString(AppStorageKey.userData);
-    String? storedJobTitle;
+    return BlocBuilder<UserBloc, AppState>(
+      builder: (context, state) {
+        final prefs = sl<SharedPreferences>();
+        final rawUserData = prefs.getString(AppStorageKey.userData);
+        String? storedJobTitle;
+        String? storedName;
+        String? storedImage;
+        int storedNotificationCount = 0;
+        int storedMessageCount = 0;
 
-    if ((rawUserData ?? '').isNotEmpty) {
-      try {
-        final decoded = jsonDecode(rawUserData!);
-        if (decoded is Map<String, dynamic>) {
-          storedJobTitle = decoded['job_title']?.toString();
+        if ((rawUserData ?? '').isNotEmpty) {
+          try {
+            final decoded = jsonDecode(rawUserData!);
+            if (decoded is Map<String, dynamic>) {
+              storedJobTitle = decoded['job_title']?.toString();
+              storedName = _resolveStoredName(decoded);
+              storedImage = decoded['profile_image']?.toString() ??
+                  decoded['image']?.toString();
+              storedNotificationCount =
+                  _toInt(decoded['unread_notifications_count']) ?? 0;
+              storedMessageCount =
+                  _toInt(decoded['unread_messages_count']) ?? 0;
+            }
+          } catch (_) {}
         }
-      } catch (_) {}
-    }
 
-    final resolvedUserName =
-        userName ?? prefs.getString(AppStorageKey.userName) ?? "Guest";
-    final resolvedJobTitle = jobTitle ?? storedJobTitle;
-    final resolvedUserImage =
-        userImage ?? prefs.getString(AppStorageKey.userImage);
+        final blocUser = UserBloc.instance.user;
+        final resolvedUserName = userName ??
+            blocUser?.name ??
+            storedName ??
+            prefs.getString(AppStorageKey.userName) ??
+            "Guest";
+        final resolvedJobTitle =
+            jobTitle ?? blocUser?.jobTitle ?? storedJobTitle;
+        final resolvedUserImage = userImage ??
+            blocUser?.profileImage ??
+            storedImage ??
+            prefs.getString(AppStorageKey.userImage);
+        final resolvedNotificationCount = notificationCount > 0
+            ? notificationCount
+            : (blocUser?.unreadNotificationsCount ?? storedNotificationCount);
+        final resolvedMessageCount = messageCount > 0
+            ? messageCount
+            : (blocUser?.unreadMessagesCount ?? storedMessageCount);
 
-    return SizedBox(
-      height: 216.h,
-      width: double.infinity,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // ── Background with teal gradient ──────────────────────────────
-          Container(
-            height: 160.h,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF0E8A8F),
-                  Color(0xFF0C7D81),
-                  Color(0xFF0A6E72),
-                ],
-              ),
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(28),
-              ),
-            ),
-            // Subtle wave/circle decoration
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(28),
-              ),
-              child: Stack(
-                children: [
-                  // Decorative circles for depth
-                  Positioned(
-                    top: -40,
-                    left: -40,
-                    child: Container(
-                      width: 160.w,
-                      height: 160.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.05),
-                      ),
-                    ),
+        return SizedBox(
+          height: 216.h,
+          width: double.infinity,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                height: 160.h,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF0E8A8F),
+                      Color(0xFF0C7D81),
+                      Color(0xFF0A6E72),
+                    ],
                   ),
-                  Positioned(
-                    bottom: -20,
-                    right: 60.w,
-                    child: Container(
-                      width: 120.w,
-                      height: 120.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.04),
-                      ),
-                    ),
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(28),
                   ),
-                ],
-              ),
-            ),
-          ),
-
-          // ── Content ────────────────────────────────────────────────────
-          SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: Dimensions.PADDING_SIZE_DEFAULT.w,
-                vertical: 16.h,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Right side: avatar + name (leading in RTL)
-                  _UserInfo(
-                    userName: resolvedUserName,
-                    jobTitle: resolvedJobTitle,
-                    userImage: resolvedUserImage,
+                ),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(28),
                   ),
-
-                  // Left side: action buttons (trailing in RTL)
-                  Row(
+                  child: Stack(
                     children: [
-                      _ActionButton(
-                        icon: SvgImages.notification,
-                        isIcon: false,
-                        badge: notificationCount,
-                        onTap: onNotificationTap,
+                      Positioned(
+                        top: -40,
+                        left: -40,
+                        child: Container(
+                          width: 160.w,
+                          height: 160.w,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withValues(alpha: 0.05),
+                          ),
+                        ),
                       ),
-                      SizedBox(width: 10.w),
-                      _ActionButton(
-                        icon: SvgImages.messageIcon,
-                        isIcon: false,
-                        badge: messageCount,
-                        onTap: onMessageTap,
+                      Positioned(
+                        bottom: -20,
+                        right: 60.w,
+                        child: Container(
+                          width: 120.w,
+                          height: 120.w,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withValues(alpha: 0.04),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+              SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Dimensions.PADDING_SIZE_DEFAULT.w,
+                    vertical: 16.h,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _UserInfo(
+                        userName: resolvedUserName,
+                        jobTitle: resolvedJobTitle,
+                        userImage: resolvedUserImage,
+                      ),
+                      Row(
+                        children: [
+                          _ActionButton(
+                            icon: SvgImages.notification,
+                            isIcon: false,
+                            badge: resolvedNotificationCount,
+                            onTap: onNotificationTap,
+                          ),
+                          SizedBox(width: 10.w),
+                          _ActionButton(
+                            icon: SvgImages.messageIcon,
+                            isIcon: false,
+                            badge: resolvedMessageCount,
+                            onTap: onMessageTap,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 16.h,
+                left: Dimensions.PADDING_SIZE_DEFAULT.w,
+                right: Dimensions.PADDING_SIZE_DEFAULT.w,
+                child: HomeSearchBar(
+                  controller: searchController,
+                  onSearch: onSearch,
+                ),
+              ),
+            ],
           ),
-
-          // ── Floating search bar ────────────────────────────────────────
-          Positioned(
-            bottom: 16.h,
-            left: Dimensions.PADDING_SIZE_DEFAULT.w,
-            right: Dimensions.PADDING_SIZE_DEFAULT.w,
-            child: HomeSearchBar(
-              controller: searchController,
-              onSearch: onSearch,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -421,4 +442,26 @@ class _ActionButton extends StatelessWidget {
       ),
     );
   }
+}
+
+String? _resolveStoredName(Map<String, dynamic> json) {
+  final directName = json['name']?.toString().trim();
+  if (directName?.isNotEmpty ?? false) {
+    return directName;
+  }
+
+  final firstName = json['first_name']?.toString().trim();
+  final lastName = json['last_name']?.toString().trim();
+  final combinedName = [firstName, lastName]
+      .whereType<String>()
+      .where((e) => e.isNotEmpty)
+      .join(' ');
+  return combinedName.isEmpty ? null : combinedName;
+}
+
+int? _toInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
 }

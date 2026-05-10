@@ -71,6 +71,10 @@ class Read extends AppEvent {
   Read({super.arguments});
 }
 
+class SyncUnreadCounts extends AppEvent {
+  SyncUnreadCounts({super.arguments});
+}
+
 class Send extends AppEvent {
   Send({super.arguments});
 }

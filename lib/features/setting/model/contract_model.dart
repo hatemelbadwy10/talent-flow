@@ -6,6 +6,7 @@ class ContractModel implements Mapper {
     required this.title,
     required this.status,
     required this.statusLabel,
+    this.files = const [],
     this.projectId,
     this.projectOwnerId,
     this.freelancerId,
@@ -30,6 +31,7 @@ class ContractModel implements Mapper {
   final String? title;
   final int? status;
   final String? statusLabel;
+  final List<String> files;
   final int? projectId;
   final int? projectOwnerId;
   final int? freelancerId;
@@ -70,6 +72,7 @@ class ContractModel implements Mapper {
           ? json['status'] as int
           : int.tryParse(json['status']?.toString() ?? ''),
       statusLabel: json['status_label']?.toString(),
+      files: _extractFiles(json['files'] ?? json['attachments']),
       projectId: json['project_id'] is int
           ? json['project_id'] as int
           : int.tryParse(json['project_id']?.toString() ?? ''),
@@ -105,6 +108,7 @@ class ContractModel implements Mapper {
       'title': title,
       'status': status,
       'status_label': statusLabel,
+      'files': files,
       'project_id': projectId,
       'project_owner_id': projectOwnerId,
       'freelancer_id': freelancerId,
@@ -137,4 +141,20 @@ bool _toBool(dynamic value) {
 
   final normalized = value?.toString().trim().toLowerCase() ?? '';
   return normalized == '1' || normalized == 'true' || normalized == 'yes';
+}
+
+List<String> _extractFiles(dynamic value) {
+  if (value is List) {
+    return value
+        .map((item) => item?.toString().trim() ?? '')
+        .where((item) => item.isNotEmpty)
+        .toList();
+  }
+
+  if (value is String) {
+    final normalized = value.trim();
+    return normalized.isEmpty ? const [] : [normalized];
+  }
+
+  return const [];
 }

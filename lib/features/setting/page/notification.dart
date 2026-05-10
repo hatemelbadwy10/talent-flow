@@ -6,10 +6,10 @@ import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
 import 'package:talent_flow/features/setting/model/notification_model.dart';
 import 'package:talent_flow/features/setting/widgets/notification_card.dart';
+import 'package:talent_flow/main_blocs/user_bloc.dart';
 
 import '../../../app/core/styles.dart';
 import '../../../components/animated_widget.dart';
-import '../../../data/config/di.dart';
 
 class Notification extends StatefulWidget {
   const Notification({super.key});
@@ -40,6 +40,9 @@ class _NotificationState extends State<Notification>
     _tabValues = _types.values.toList();
 
     _tabController = TabController(length: _tabTitles.length, vsync: this);
+    UserBloc.instance.add(
+      SyncUnreadCounts(arguments: {'notifications': 0}),
+    );
 
     // send first request when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -62,40 +65,37 @@ class _NotificationState extends State<Notification>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => NotificationBloc(sl())..add(Add(arguments: _tabValues[0])), // initial load
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                "assets/images/Talent Flow logo 1 1.png",
-                height: 28,
-                width: 28,
-              ),
-              const SizedBox(width: 10),
-              Text('notifications'.tr()),
-            ],
-          ),
-          bottom: TabBar(
-            labelColor: Styles.PRIMARY_COLOR,
-            controller: _tabController,
-            indicatorColor: Styles.PRIMARY_COLOR,
-            isScrollable: true,
-            tabs: List.generate(
-              _tabTitles.length,
-                  (index) => Tab(text: _tabTitles[index].tr()), // UI translated
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              "assets/images/Talent Flow logo 1 1.png",
+              height: 28,
+              width: 28,
             ),
+            const SizedBox(width: 10),
+            Text('notifications'.tr()),
+          ],
+        ),
+        bottom: TabBar(
+          labelColor: Styles.PRIMARY_COLOR,
+          controller: _tabController,
+          indicatorColor: Styles.PRIMARY_COLOR,
+          isScrollable: true,
+          tabs: List.generate(
+            _tabTitles.length,
+            (index) => Tab(text: _tabTitles[index].tr()),
           ),
         ),
-        body: TabBarView(
-          controller: _tabController,
-          children: List.generate(
-            _tabValues.length,
-                (index) => _buildNotificationList(type: _tabValues[index]), // request value
-          ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: List.generate(
+          _tabValues.length,
+          (index) => _buildNotificationList(type: _tabValues[index]),
         ),
       ),
     );

@@ -3,8 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
-import 'app/core/app_event.dart';
-import 'app/core/app_state.dart';
 import 'app/core/styles.dart';
 import 'app/notifications/notification_helper.dart';
 import 'data/config/di.dart' as di;
@@ -64,11 +62,6 @@ class MyApp extends StatelessWidget {
       ),
       builder: (context, child) {
         final userBloc = UserBloc.instance;
-        if (userBloc.isLogin &&
-            userBloc.user == null &&
-            userBloc.state is Start) {
-          userBloc.add(Click());
-        }
         return BlocProvider.value(
           value: userBloc,
           child: child!,

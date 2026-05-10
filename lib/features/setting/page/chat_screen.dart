@@ -11,6 +11,7 @@ import 'package:talent_flow/components/custom_text_form_field.dart';
 import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
 import 'package:talent_flow/features/setting/model/chats_model.dart';
 import 'package:talent_flow/features/setting/widgets/chat_list_item.dart';
+import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
@@ -30,6 +31,9 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     final chatsBloc = context.read<ChatsBloc>();
+    UserBloc.instance.add(
+      SyncUnreadCounts(arguments: {'messages': 0}),
+    );
     Future.microtask(() {
       chatsBloc.add(Click());
       chatsBloc.add(Add());

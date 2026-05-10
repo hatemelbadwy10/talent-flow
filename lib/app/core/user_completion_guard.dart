@@ -81,7 +81,8 @@ abstract class UserCompletionGuard {
     return UserCompletionStatus(
       isFreelancer: _resolveIsFreelancer(rawUser, storedRole),
       addedWorks: _toBool(rawUser['added_works']),
-      hasBankAccount: _toBool(rawUser['has_bank_account']),
+      hasBankAccount:
+          _toBool(rawUser['has_bank_account'] ?? rawUser['bank_account_added']),
       identityAuthenticated: _toBool(rawUser['identity_authenticated']),
     );
   }
@@ -100,6 +101,7 @@ abstract class UserCompletionGuard {
     }
     if (hasBankAccount != null) {
       rawUser['has_bank_account'] = hasBankAccount;
+      rawUser['bank_account_added'] = hasBankAccount;
     }
     if (identityAuthenticated != null) {
       rawUser['identity_authenticated'] = identityAuthenticated;
