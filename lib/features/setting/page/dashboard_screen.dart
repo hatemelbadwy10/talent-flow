@@ -46,7 +46,7 @@ class DashboardScreen extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.add, size: 18),
-                  label: const Text('إضافة مشروع'),
+                  label: Text('dashboard.add_project'.tr()),
                   style: TextButton.styleFrom(
                     foregroundColor: Styles.PRIMARY_COLOR,
                     textStyle: const TextStyle(fontWeight: FontWeight.w600),
@@ -93,15 +93,33 @@ class _DashboardBody extends StatelessWidget {
 
     final safeStatuses = statuses.isNotEmpty
         ? statuses
-        : const [
-            DashboardStatusModel(name: 'مسودة', count: 0, percentage: 0),
-            DashboardStatusModel(name: 'مفتوحة', count: 0, percentage: 0),
-            DashboardStatusModel(name: 'مكتملة', count: 0, percentage: 0),
-            DashboardStatusModel(name: 'ملغاة', count: 0, percentage: 0),
-            DashboardStatusModel(name: 'قيد المراجعة', count: 0, percentage: 0),
-            DashboardStatusModel(name: 'قيد التنفيذ', count: 0, percentage: 0),
-            DashboardStatusModel(name: 'مغلقة', count: 0, percentage: 0),
-            DashboardStatusModel(name: 'مرفوضة', count: 0, percentage: 0),
+        : [
+            DashboardStatusModel(
+                name: 'dashboard.status_draft'.tr(), count: 0, percentage: 0),
+            DashboardStatusModel(
+                name: 'dashboard.status_open'.tr(), count: 0, percentage: 0),
+            DashboardStatusModel(
+                name: 'dashboard.status_completed'.tr(),
+                count: 0,
+                percentage: 0),
+            DashboardStatusModel(
+                name: 'dashboard.status_canceled'.tr(),
+                count: 0,
+                percentage: 0),
+            DashboardStatusModel(
+                name: 'dashboard.status_under_review'.tr(),
+                count: 0,
+                percentage: 0),
+            DashboardStatusModel(
+                name: 'dashboard.status_in_progress'.tr(),
+                count: 0,
+                percentage: 0),
+            DashboardStatusModel(
+                name: 'dashboard.status_closed'.tr(), count: 0, percentage: 0),
+            DashboardStatusModel(
+                name: 'dashboard.status_rejected'.tr(),
+                count: 0,
+                percentage: 0),
           ];
 
     return SingleChildScrollView(
@@ -115,19 +133,20 @@ class _DashboardBody extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildBalanceCell(
-                        title: 'الرصيد الكلي',
+                        title: 'dashboard.total_balance'.tr(),
                         value: balances?.totalBalance ?? '00.00',
-                        subValue: '${balances?.totalBalance ?? '00.00'} ريال',
+                        subValue:
+                            '${balances?.totalBalance ?? '00.00'} ${'dashboard.currency'.tr()}',
                         titleColor: Styles.PRIMARY_COLOR,
                       ),
                     ),
                     _verticalDivider(),
                     Expanded(
                       child: _buildBalanceCell(
-                        title: 'الرصيد القابل للسحب',
+                        title: 'dashboard.withdrawable_balance'.tr(),
                         value: balances?.withdrawableBalance ?? '00.00',
                         subValue:
-                            '${balances?.withdrawableBalance ?? '00.00'} ريال',
+                            '${balances?.withdrawableBalance ?? '00.00'} ${'dashboard.currency'.tr()}',
                         titleColor: Colors.grey.shade700,
                       ),
                     ),
@@ -138,14 +157,14 @@ class _DashboardBody extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildSimpleBalance(
-                        title: 'الرصيد المعلق',
+                        title: 'dashboard.pending_balance'.tr(),
                         value: balances?.pendingBalance ?? '00.00',
                       ),
                     ),
                     _verticalDivider(),
                     Expanded(
                       child: _buildSimpleBalance(
-                        title: 'الرصيد الناتج',
+                        title: 'dashboard.outgoing_balance'.tr(),
                         value: balances?.outgoingBalance ?? '00.00',
                       ),
                     ),
@@ -158,12 +177,13 @@ class _DashboardBody extends StatelessWidget {
           _buildCard(
             child: Column(
               children: [
-                const Row(
+                Row(
                   children: [
-                    Expanded(child: _HeadText('مشاريعي')),
-                    Expanded(child: _HeadText('الرسائل الجديدة')),
-                    Expanded(child: _HeadText('الرسائل الواردة')),
-                    Expanded(child: _HeadText('العقود')),
+                    Expanded(child: _HeadText('dashboard.my_projects'.tr())),
+                    Expanded(child: _HeadText('dashboard.new_messages'.tr())),
+                    Expanded(
+                        child: _HeadText('dashboard.incoming_messages'.tr())),
+                    Expanded(child: _HeadText('dashboard.contracts'.tr())),
                   ],
                 ),
                 const Divider(height: 20, color: Color(0xFFE8E8E8)),
@@ -206,9 +226,9 @@ class _DashboardBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'أحدث المشاريع',
-                    style: TextStyle(
+                  Text(
+                    'dashboard.recent_projects'.tr(),
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF111827),
@@ -456,7 +476,8 @@ class _RecentProjectItem extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Text(
-          '${project.proposalsCount ?? 0} عرض',
+          'dashboard.proposals_count'
+              .tr(namedArgs: {'count': '${project.proposalsCount ?? 0}'}),
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,

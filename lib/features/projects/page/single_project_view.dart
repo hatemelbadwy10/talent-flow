@@ -68,6 +68,16 @@ class SingleProjectView extends StatelessWidget {
                     children: [
                       ProjectDetailsCard(
                         singleProjectModel: project,
+                        onOwnerTap: isFreelancer && project.owner?.id != null
+                            ? () {
+                                CustomNavigator.push(
+                                  Routes.entrepreneur,
+                                  arguments: {
+                                    'entrepreneurId': project.owner!.id,
+                                  },
+                                );
+                              }
+                            : null,
                       ),
                       ProjectDescription(
                         singleProjectModel: project,
@@ -129,8 +139,8 @@ class _OwnProposalSection extends StatelessWidget {
             TextButton.icon(
               onPressed: projectId == null
                   ? null
-                  : () {
-                      CustomNavigator.push(
+                  : () async {
+                      final didUpdate = await CustomNavigator.push(
                         Routes.addOffer,
                         arguments: {
                           'id': projectId,
@@ -138,6 +148,11 @@ class _OwnProposalSection extends StatelessWidget {
                           'initialDescription': proposal.description,
                         },
                       );
+                      if (didUpdate == true && context.mounted) {
+                        context.read<MyProjectsBloc>().add(
+                              Click(arguments: projectId),
+                            );
+                      }
                     },
               icon: const Icon(
                 Icons.edit_outlined,

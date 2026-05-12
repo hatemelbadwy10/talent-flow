@@ -524,7 +524,7 @@ class _OfficePreviewPageState extends State<_OfficePreviewPage> {
                     ),
                     SizedBox(height: 12.h),
                     Text(
-                      'تعذر عرض الملف داخل التطبيق',
+                      'cannot_view_file_inline'.tr(),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 15,
@@ -534,7 +534,7 @@ class _OfficePreviewPageState extends State<_OfficePreviewPage> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'يمكنك فتح الملف باستخدام تطبيق خارجي',
+                      'open_file_externally'.tr(),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 13,
@@ -544,7 +544,7 @@ class _OfficePreviewPageState extends State<_OfficePreviewPage> {
                     SizedBox(height: 16.h),
                     ElevatedButton(
                       onPressed: _openExternally,
-                      child: const Text('فتح الملف'),
+                      child: Text('open_file'.tr()),
                     ),
                   ],
                 ),

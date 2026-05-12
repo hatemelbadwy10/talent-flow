@@ -7,6 +7,7 @@ import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';
 import '../../../app/core/app_storage_keys.dart';
 import '../../../data/config/di.dart';
+import '../../../main_blocs/user_bloc.dart';
 import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
 import '../model/help_model.dart';
@@ -44,6 +45,7 @@ class SettingsBloc extends Bloc<AppEvent, AppState> {
         (response) {
           final isFirstTime =
               sl<SharedPreferences>().getBool(AppStorageKey.notFirstTime);
+          UserBloc.instance.add(Delete());
           sl<SharedPreferences>().clear();
           sl<SharedPreferences>()
               .setBool(AppStorageKey.notFirstTime, isFirstTime ?? true);

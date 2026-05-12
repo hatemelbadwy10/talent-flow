@@ -24,7 +24,7 @@ class FreelancerProfileModel extends SingleMapper {
   final String? bio;
   final List<String> skills;
   final Statistics? statistics;
-  final List<dynamic> reviews;
+  final List<FreelancerReview> reviews;
   final List<Work> works;
 
   factory FreelancerProfileModel.fromJson(Map<String, dynamic> json) {
@@ -44,7 +44,9 @@ class FreelancerProfileModel extends SingleMapper {
           : Statistics.fromJson(json["statistics"]),
       reviews: json["reviews"] == null
           ? []
-          : List<dynamic>.from(json["reviews"]!.map((x) => x)),
+          : List<FreelancerReview>.from(
+              json["reviews"]!.map((x) => FreelancerReview.fromJson(x)),
+            ),
       works: json["works"] == null
           ? []
           : List<Work>.from(json["works"]!.map((x) => Work.fromJson(x))),
@@ -60,6 +62,45 @@ class FreelancerProfileModel extends SingleMapper {
   Map<String, dynamic> toJson() {
     // TODO: implement toJson
     throw UnimplementedError();
+  }
+}
+
+class FreelancerReview {
+  FreelancerReview({
+    required this.id,
+    required this.raterId,
+    required this.image,
+    required this.name,
+    required this.jobTitle,
+    required this.rating,
+    required this.comment,
+    required this.date,
+  });
+
+  final int? id;
+  final int? raterId;
+  final String? image;
+  final String? name;
+  final String? jobTitle;
+  final double rating;
+  final String? comment;
+  final String? date;
+
+  factory FreelancerReview.fromJson(Map<String, dynamic> json) {
+    return FreelancerReview(
+      id: json["id"] is int
+          ? json["id"] as int
+          : int.tryParse(json["id"]?.toString() ?? ''),
+      raterId: json["rater_id"] is int
+          ? json["rater_id"] as int
+          : int.tryParse(json["rater_id"]?.toString() ?? ''),
+      image: json["image"]?.toString(),
+      name: json["name"]?.toString(),
+      jobTitle: json["job_title"]?.toString(),
+      rating: double.tryParse(json["rating"]?.toString() ?? '') ?? 0,
+      comment: json["comment"]?.toString(),
+      date: json["date"]?.toString(),
+    );
   }
 }
 

@@ -14,6 +14,7 @@ import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/data/error/failures.dart';
 import 'package:talent_flow/features/payment/model/contract_payment_args.dart';
+import 'package:talent_flow/features/projects/widgets/project_files_section.dart';
 import 'package:talent_flow/features/setting/bloc/contract_details_bloc.dart';
 import 'package:talent_flow/features/setting/model/contract_details_ui_model.dart';
 import 'package:talent_flow/features/setting/model/contract_model.dart';
@@ -22,7 +23,6 @@ import 'package:talent_flow/features/setting/widgets/contract_details/contract_d
 import 'package:talent_flow/features/setting/widgets/contract_details/contract_details_dialogs.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 typedef ContractActionRequest = Future<Either<ServerFailure, Response>>
     Function();
@@ -391,22 +391,15 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
             title: 'contract_details_screen.conflict_policy'.tr(),
             htmlContent: _contract.conflictPolicy,
           ),
-          if (_contract.files.isNotEmpty) ...[
+          if ((_contract.notes ?? '').trim().isNotEmpty) ...[
             const SizedBox(height: 12),
-            ContractDetailsInfoCard(
-              title: 'attachments'.tr(),
-              children: _contract.files
-                  .map(
-                    (file) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _ContractAttachmentTile(
-                        url: file,
-                        onTap: () => _openAttachment(file),
-                      ),
-                    ),
-                  )
-                  .toList(),
+            ContractDetailsTextCard(
+              title: 'contract_details_screen.notes'.tr(),
+              value: _contract.notes!,
             ),
+          ],
+          if (_contract.files.isNotEmpty) ...[
+            ProjectFilesSection(files: _contract.files),
           ],
           if (uiModel.shouldShowRejectWorkNotes()) ...[
             const SizedBox(height: 12),
@@ -417,9 +410,14 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
           ],
           if (uiModel.shouldShowRejectReason()) ...[
             const SizedBox(height: 12),
-            ContractDetailsTextCard(
-              title: 'contract_details_screen.sections.reject_reason'.tr(),
-              value: uiModel.rejectReasonText,
+            ContractDetailsMessageCard(
+              message:
+                  '${'contract_details_screen.sections.reject_reason'.tr()}: ${uiModel.rejectReasonText}',
+              backgroundColor: const Color(0xFFFFECEC),
+              borderColor: const Color(0xFFFFCACA),
+              iconColor: const Color(0xFFDB5353),
+              textColor: const Color(0xFF8E2E2E),
+              icon: Icons.cancel_outlined,
             ),
           ],
           if (complaintMessage != null) ...[
@@ -436,19 +434,6 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
         ],
       ),
     );
-  }
-
-  Future<void> _openAttachment(String url) async {
-    final uri = Uri.tryParse(url);
-    if (uri == null) {
-      _showError('something_went_wrong'.tr());
-      return;
-    }
-
-    final opened = await launchUrl(uri);
-    if (!opened && mounted) {
-      _showError('something_went_wrong'.tr());
-    }
   }
 
   List<Widget> _buildActionButtons(ContractDetailsUiModel uiModel) {
@@ -568,70 +553,5 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
     }
 
     return buttons;
-  }
-}
-
-class _ContractAttachmentTile extends StatelessWidget {
-  const _ContractAttachmentTile({
-    required this.url,
-    required this.onTap,
-  });
-
-  final String url;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final fileName = Uri.tryParse(url)?.pathSegments.last.isNotEmpty == true
-        ? Uri.tryParse(url)!.pathSegments.last
-        : url.split('/').last;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Styles.PRIMARY_COLOR.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.attach_file_rounded,
-                color: Styles.PRIMARY_COLOR,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                fileName,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1F2937),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(
-              Icons.open_in_new_rounded,
-              size: 18,
-              color: Color(0xFF6B7280),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

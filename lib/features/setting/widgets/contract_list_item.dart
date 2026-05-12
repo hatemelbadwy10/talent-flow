@@ -34,7 +34,7 @@ class _ContractListItemState extends State<ContractListItem> {
       _isDownloading = true;
     });
 
-    await ContractPdfDownloader.downloadTemplate();
+    await ContractPdfDownloader.downloadContract(widget.contract);
 
     if (!mounted) {
       return;

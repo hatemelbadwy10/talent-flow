@@ -150,7 +150,7 @@ class FileUploadSection extends StatelessWidget {
             children: [
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Take Photo'),
+                title: Text('take_photo'.tr()),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   _pickImageFromCamera(parentContext);
@@ -158,7 +158,7 @@ class FileUploadSection extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Choose from Gallery'),
+                title: Text('choose_from_gallery'.tr()),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   _pickImageFromGallery(parentContext,addProjectBloc);
@@ -185,7 +185,7 @@ class FileUploadSection extends StatelessWidget {
       }
     } catch (e) {
       ScaffoldMessenger.of(parentContext).showSnackBar(
-        SnackBar(content: Text('Error picking image: $e')),
+        SnackBar(content: Text('${'error_picking_image'.tr()}: $e')),
       );
     }
   }
@@ -204,7 +204,7 @@ class FileUploadSection extends StatelessWidget {
       }
     } catch (e) {
       ScaffoldMessenger.of(parentContext).showSnackBar(
-        SnackBar(content: Text('Error picking image: $e')),
+        SnackBar(content: Text('${'error_picking_image'.tr()}: $e')),
       );
     }
   }

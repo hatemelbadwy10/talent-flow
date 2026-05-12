@@ -1,4 +1,5 @@
 import 'package:app_settings/app_settings.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -50,19 +51,18 @@ abstract class LocationHelper {
     showDialog(
         context: CustomNavigator.navigatorState.currentContext!,
         builder: (_) => CupertinoAlertDialog(
-              title: const Text("هل تريد السماح لتطبيق “talent_flow” باستخدام موقعك؟"),
-              content: const Text(
-                  "لإجراء رحلة مضمونه، يجمع في طريقي بيانات الموقع بداءاً من وقت فتح التطبيق. ويعمل ذلك على تحسين عمليات الالتقاء بالكباتن، ونسب التوافق، وغير ذلك الكثير."),
+              title: Text("location_permission.title".tr()),
+              content: Text("location_permission.message".tr()),
               actions: [
                 CupertinoDialogAction(
-                    child: const Text("OK"),
+                    child: Text("ok".tr()),
                     onPressed: () async {
                       CustomNavigator.pop();
                       AppSettings.openAppSettings(
                           type: AppSettingsType.location);
                     }),
                 CupertinoDialogAction(
-                    child: const Text("Cancel"),
+                    child: Text("cancel".tr()),
                     onPressed: () async {
                       CustomNavigator.pop();
                     }),

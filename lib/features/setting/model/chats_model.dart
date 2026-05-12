@@ -5,6 +5,8 @@ class ChatsModel implements Mapper {
     required this.id,
     required this.projectId,
     required this.projectTitle,
+    required this.contractId,
+    required this.hasContract,
     required this.receiver,
     required this.unreadCount,
     required this.lastMessageSnippet,
@@ -15,6 +17,8 @@ class ChatsModel implements Mapper {
   final int? id;
   final int? projectId;
   final String? projectTitle;
+  final int? contractId;
+  final bool? hasContract;
   final Receiver? receiver;
   final int? unreadCount;
   final String? lastMessageSnippet;
@@ -25,6 +29,8 @@ class ChatsModel implements Mapper {
     int? id,
     int? projectId,
     String? projectTitle,
+    int? contractId,
+    bool? hasContract,
     Receiver? receiver,
     int? unreadCount,
     String? lastMessageSnippet,
@@ -35,6 +41,8 @@ class ChatsModel implements Mapper {
       id: id ?? this.id,
       projectId: projectId ?? this.projectId,
       projectTitle: projectTitle ?? this.projectTitle,
+      contractId: contractId ?? this.contractId,
+      hasContract: hasContract ?? this.hasContract,
       receiver: receiver ?? this.receiver,
       unreadCount: unreadCount ?? this.unreadCount,
       lastMessageSnippet: lastMessageSnippet ?? this.lastMessageSnippet,
@@ -48,6 +56,8 @@ class ChatsModel implements Mapper {
       id: json["id"],
       projectId: _parseInt(json["project_id"]),
       projectTitle: json["project_title"]?.toString(),
+      contractId: _parseInt(json["contract_id"]),
+      hasContract: _toBool(json["has_contract"]),
       receiver:
           json["receiver"] == null ? null : Receiver.fromJson(json["receiver"]),
       unreadCount: json["unread_count"],
@@ -63,6 +73,8 @@ class ChatsModel implements Mapper {
       "id": id,
       "project_id": projectId,
       "project_title": projectTitle,
+      "contract_id": contractId,
+      "has_contract": hasContract,
       "unread_count": unreadCount,
       "last_message_snippet": lastMessageSnippet,
       "since": since,
@@ -76,6 +88,20 @@ int? _parseInt(dynamic value) {
     return value;
   }
   return int.tryParse(value?.toString() ?? '');
+}
+
+bool? _toBool(dynamic value) {
+  if (value is bool) {
+    return value;
+  }
+  if (value is num) {
+    return value != 0;
+  }
+  final normalized = value?.toString().trim().toLowerCase() ?? '';
+  if (normalized.isEmpty) {
+    return null;
+  }
+  return normalized == '1' || normalized == 'true' || normalized == 'yes';
 }
 
 class Receiver {

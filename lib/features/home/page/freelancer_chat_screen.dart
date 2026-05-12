@@ -179,6 +179,7 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
     final freelancerId = widget.arguments?['freelancerId'];
     final fallbackProjectId = _parseInt(
         widget.arguments?['projectId'] ?? widget.arguments?['project_id']);
+    final fallbackHasContract = widget.arguments?['hasContract'] == true;
     final isFreelancer =
         sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
 
@@ -259,11 +260,18 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
             : [
                 BlocBuilder<FreelancerChatBloc, AppState>(
                   builder: (context, state) {
-                    final currentProjectId =
+                    final chatModel =
                         state is Done && state.data is ChatModel
-                            ? (state.data as ChatModel).projectId ??
-                                fallbackProjectId
-                            : fallbackProjectId;
+                            ? state.data as ChatModel
+                            : null;
+                    final currentProjectId =
+                        chatModel?.projectId ?? fallbackProjectId;
+                    final hasContract =
+                        chatModel?.hasContract == true || fallbackHasContract;
+
+                    if (hasContract) {
+                      return const SizedBox.shrink();
+                    }
 
                     return TextButton(
                       onPressed: () {

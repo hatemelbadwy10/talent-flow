@@ -60,11 +60,11 @@ class _HomeViewState extends State<HomeView> {
                 // Fix 1: Check if state.model is null first
                 if (state.model == null) {
                   log('state.model is null');
-                  return const Column(
+                  return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      HomeCommonHeader(),
-                      Center(child: Text("No data available - model is null")),
+                      const HomeCommonHeader(),
+                      Center(child: Text("no_data_available".tr())),
                     ],
                   );
                 }
@@ -226,10 +226,10 @@ class _HomeViewState extends State<HomeView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const HomeCommonHeader(),
-                    const Center(
+                    Center(
                         child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text("Failed to load data. Please try again."),
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text("failed_to_load_data".tr()),
                     )),
                     SizedBox(height: 24.h), // Spacing before Partners section
                     const PartnersSection(), // New Partners section

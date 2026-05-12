@@ -26,7 +26,7 @@ class TermsAndConditionsScreen extends StatelessWidget {
               if (state is Loading) {
                 return const ProjectCardShimmer();
               } else if (state is Error) {
-                return const Center(child: Text("حصل خطأ أثناء تحميل البيانات"));
+                return Center(child: Text("failed_to_load_data".tr()));
               } else if (state is Done) {
                 final termsHtml = state.data as String;
                 return SingleChildScrollView(

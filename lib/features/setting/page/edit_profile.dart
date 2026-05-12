@@ -22,6 +22,7 @@ import 'package:talent_flow/features/new_projects/model/selection_option_model.d
 import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/main_blocs/location_options_bloc.dart';
+import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
 import '../../../helpers/pickers/view/image_picker_helper.dart';
@@ -115,8 +116,14 @@ class _EditProfileFormState extends State<EditProfileForm> {
         if (state.isSubmitted && !_lastShownSuccessState) {
           _lastShownSuccessState = true;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.successMessage ?? 'تم التحديث بنجاح')),
+            SnackBar(
+              content: Text(
+                state.successMessage ?? "edit_profile.update_success".tr(),
+              ),
+            ),
           );
+          // Trigger UserBloc update to refresh profile card globally
+          context.read<UserBloc>().add(Click());
           Navigator.of(context).pop();
         }
 
@@ -391,7 +398,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
             locationState.countries.isEmpty) {
           return LoadingDropDown(
             label: "edit_profile.country".tr(),
-            loadingText: "Loading countries...",
+            loadingText: "edit_profile.loading_countries".tr(),
           );
         }
 
@@ -435,7 +442,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
         if (locationState.isLoadingCities) {
           return LoadingDropDown(
             label: "edit_profile.city".tr(),
-            loadingText: "Loading cities...",
+            loadingText: "edit_profile.loading_cities".tr(),
           );
         }
 
@@ -507,7 +514,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
               Expanded(
                 child: _buildNumberDropdown(
                   value: _datePart(state.dateOfBirth, 0) ?? '1990',
-                  label: 'Year',
+                  label: "edit_profile.year".tr(),
                   items: List.generate(
                       100, (i) => (DateTime.now().year - i).toString()),
                   onChanged: (value) {
@@ -519,7 +526,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
               Expanded(
                 child: _buildNumberDropdown(
                   value: _datePart(state.dateOfBirth, 1) ?? '01',
-                  label: 'Month',
+                  label: "edit_profile.month".tr(),
                   items: List.generate(
                       12, (i) => (i + 1).toString().padLeft(2, '0')),
                   onChanged: (value) {
@@ -531,7 +538,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
               Expanded(
                 child: _buildNumberDropdown(
                   value: _datePart(state.dateOfBirth, 2) ?? '01',
-                  label: 'Day',
+                  label: "edit_profile.day".tr(),
                   items: List.generate(
                       31, (i) => (i + 1).toString().padLeft(2, '0')),
                   onChanged: (value) {
@@ -665,7 +672,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
         if (selectionState is Loading || selectionState is Start) {
           return LoadingDropDown(
             label: "edit_profile.specialization".tr(),
-            loadingText: "Loading specializations...",
+            loadingText: "edit_profile.loading_specializations".tr(),
           );
         }
         if (selectionState is Done && selectionState.model is SelectionModel) {
@@ -685,7 +692,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
         }
         return ErrorDropDown(
           label: "edit_profile.specialization".tr(),
-          errorText: "Failed to load specializations.",
+          errorText: "edit_profile.failed_specializations".tr(),
         );
       },
     );
@@ -705,7 +712,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
         if (selectionState is Loading || selectionState is Start) {
           return LoadingDropDown(
             label: "edit_profile.job_title".tr(),
-            loadingText: "Loading job titles...",
+            loadingText: "edit_profile.loading_job_titles".tr(),
           );
         }
         if (selectionState is Done && selectionState.model is SelectionModel) {
@@ -724,7 +731,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
         }
         return ErrorDropDown(
           label: "edit_profile.job_title".tr(),
-          errorText: "Failed to load job titles.",
+          errorText: "edit_profile.failed_job_titles".tr(),
         );
       },
     );
@@ -950,12 +957,12 @@ class _EditProfileFormState extends State<EditProfileForm> {
 
   Widget _buildSkillsLoadingState() => LoadingDropDown(
         label: "edit_profile.skills".tr(),
-        loadingText: "Loading skills...",
+        loadingText: "edit_profile.loading_skills".tr(),
       );
 
   Widget _buildSkillsErrorState() => ErrorDropDown(
         label: "edit_profile.skills".tr(),
-        errorText: "Failed to load skills. Please try again.",
+        errorText: "edit_profile.failed_skills".tr(),
       );
 
   Widget _buildPasswordFields(BuildContext context, UpdateProfileState state) {

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/localization/language_constant.dart';
 import 'package:flutter/cupertino.dart';
@@ -78,23 +79,23 @@ abstract class ImagePickerHelper {
         builder: (_) {
           return CupertinoActionSheet(
             title: Text(
-              "choose_your_image",
+              "choose_your_image".tr(),
               style: const TextStyle(
                 fontSize: 16,
               ),
             ),
             actions: [
               CupertinoDialogAction(
-                  child: Text("gallery"),
+                  child: Text("gallery".tr()),
                   onPressed: () =>
                       openGallery(onGet: onGet, fromOptions: true)),
               CupertinoDialogAction(
-                  child: Text("camera"),
+                  child: Text("camera".tr()),
                   onPressed: () => openCamera(onGet: onGet, fromOptions: true)),
             ],
             cancelButton: CupertinoActionSheetAction(
               onPressed: () => CustomNavigator.pop(),
-              child: Text(("cancel"),
+              child: Text("cancel".tr(),
                   style: const TextStyle(color: Colors.red)),
             ),
           );

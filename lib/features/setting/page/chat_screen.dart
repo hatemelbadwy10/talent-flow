@@ -71,6 +71,8 @@ class _ChatScreenState extends State<ChatScreen> {
         'conversationId': chat.id,
         'project_id': chat.projectId,
         'projectId': chat.projectId,
+        'contractId': chat.contractId,
+        'hasContract': chat.hasContract == true,
         'freelancerId': chat.receiver?.id,
         'freelancerName': chat.receiver?.name,
         'freelancerJobTitle': chat.receiver?.jobTitle,
@@ -237,8 +239,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     }
 
                     if (state is Error) {
-                      return const Center(
-                        child: Text("Failed to load chats"),
+                      return Center(
+                        child: Text("failed_to_load_chats".tr()),
                       );
                     }
 
@@ -247,8 +249,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       final filteredChats = _filterChats(allChats);
 
                       if (filteredChats.isEmpty) {
-                        return const Center(
-                          child: Text("No chats found"),
+                        return Center(
+                          child: Text("no_chats_found".tr()),
                         );
                       }
 

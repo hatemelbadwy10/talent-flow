@@ -5,8 +5,13 @@ import 'package:talent_flow/features/new_projects/widgets/skills_section.dart';
 import 'package:talent_flow/features/projects/model/single_project_model.dart';
 
 class ProjectDetailsCard extends StatelessWidget {
-  const ProjectDetailsCard({super.key, this.singleProjectModel});
+  const ProjectDetailsCard({
+    super.key,
+    this.singleProjectModel,
+    this.onOwnerTap,
+  });
   final SingleProjectModel? singleProjectModel;
+  final VoidCallback? onOwnerTap;
 
   @override
   Widget build(BuildContext context) {
@@ -143,41 +148,53 @@ class ProjectDetailsCard extends StatelessWidget {
 
   /// Owner info
   Widget _buildUserInfo(Owner owner) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundImage: owner.image != null
-                  ? NetworkImage(owner.image!)
-                  : const AssetImage('assets/images/profile.jpg')
-                      as ImageProvider,
-            ),
-            const SizedBox(width: 12.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                    (owner.name ?? '').trim().isEmpty
-                        ? 'no_name'.tr()
-                        : owner.name!,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
-                Text(
-                    (owner.jobTitle ?? '').trim().isEmpty
-                        ? 'no_job_title'.tr()
-                        : owner.jobTitle!,
-                    style: const TextStyle(color: Colors.grey)),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (owner.signupDate != null)
-          _buildKeyValueRow('project_card_offer.registration_date'.tr(),
-              Text(owner.signupDate!)),
-      ],
+    return InkWell(
+      onTap: onOwnerTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundImage: owner.image != null
+                    ? NetworkImage(owner.image!)
+                    : const AssetImage('assets/images/profile.jpg')
+                        as ImageProvider,
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                        (owner.name ?? '').trim().isEmpty
+                            ? 'no_name'.tr()
+                            : owner.name!,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(
+                        (owner.jobTitle ?? '').trim().isEmpty
+                            ? 'no_job_title'.tr()
+                            : owner.jobTitle!,
+                        style: const TextStyle(color: Colors.grey)),
+                  ],
+                ),
+              ),
+              if (onOwnerTap != null)
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: Colors.grey.shade500,
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (owner.signupDate != null)
+            _buildKeyValueRow('project_card_offer.registration_date'.tr(),
+                Text(owner.signupDate!)),
+        ],
+      ),
     );
   }
 

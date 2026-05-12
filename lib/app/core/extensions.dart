@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:flutter/material.dart';
@@ -307,7 +308,7 @@ extension WidgetExtension on Widget {
       title: title,
       titlePadding: Dimensions.PADDING_SIZE_DEFAULT,
       titleStyle: AppTextStyles.w600.copyWith(fontSize: 16),
-      titleIcon: const Text('See all').clickable(onTap: () => onTap?.call(), style: AppTextStyles.w600.copyWith(fontSize: 12)),
+      titleIcon: Text('see_all'.tr()).clickable(onTap: () => onTap?.call(), style: AppTextStyles.w600.copyWith(fontSize: 12)),
     );
   }
 

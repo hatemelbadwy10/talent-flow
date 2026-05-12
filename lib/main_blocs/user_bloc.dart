@@ -66,8 +66,22 @@ class UserBloc extends Bloc<AppEvent, AppState> {
   }
 
   onUpdate(Update event, Emitter<AppState> emit) async {
-    repo.setUserData((event.arguments as UserModel).toJson());
-    user = event.arguments as UserModel;
+    final args = event.arguments;
+    if (args is UserModel) {
+      repo.setUserData(args.toJson());
+      user = args;
+    } else if (args is Map<String, dynamic>) {
+      repo.setUserData(args);
+      user = UserModel.fromJson(args);
+    } else if (args is Map) {
+      final normalized = args.map(
+        (key, value) => MapEntry(key.toString(), value),
+      );
+      repo.setUserData(normalized);
+      user = UserModel.fromJson(normalized);
+    } else {
+      return;
+    }
     emit(Done(model: user));
   }
 

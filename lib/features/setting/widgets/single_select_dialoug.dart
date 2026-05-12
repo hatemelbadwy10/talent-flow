@@ -72,7 +72,7 @@ class _SingleSelectDialogState extends State<SingleSelectDialog> {
               child: filteredOptions.isEmpty
                   ? Center(
                       child: Text(
-                        "No results",
+                        "no_results".tr(),
                         style: TextStyle(color: Colors.grey.shade600),
                       ),
                     )

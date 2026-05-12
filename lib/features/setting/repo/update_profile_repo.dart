@@ -45,30 +45,55 @@ class UpdateProfileRepo extends BaseRepo {
       String? newPasswordConfirmation,
       required List<int> skills,
       File? image}) async {
-    final Map<String, dynamic> data = {
-      'first_name': firstName,
-      'email': email,
-      'last_name': lastName,
-      'phone': phone,
-      if ((countryId ?? '').isNotEmpty) 'country_id': countryId,
-      if ((cityId ?? '').isNotEmpty) 'city_id': cityId,
-      if ((gender ?? '').isNotEmpty) 'gender': gender,
-      if ((dateOfBirth ?? '').isNotEmpty) 'date_of_birth': dateOfBirth,
-      'specialization_id': specializationId,
-      'job_title_id': jopTitleId,
-      'bio': bio,
-      'new_password': newPassword,
-      'new_password_confirmation': newPasswordConfirmation,
-      'skills': skills,
-      "image": image
-    };
-
-    if (image != null) {
-      data['image'] = await MultipartFile.fromFile(image.path);
-    }
     try {
-      final response =
-          await dioClient.post(data: data, uri: EndPoints.editProfile);
+      final formData = FormData();
+      formData.fields.addAll([
+        MapEntry('first_name', firstName),
+        MapEntry('email', email),
+        MapEntry('last_name', lastName),
+        MapEntry('phone', phone),
+        MapEntry('specialization_id', '$specializationId'),
+        MapEntry('job_title_id', '$jopTitleId'),
+      ]);
+
+      if ((countryId ?? '').isNotEmpty) {
+        formData.fields.add(MapEntry('country_id', countryId!));
+      }
+      if ((cityId ?? '').isNotEmpty) {
+        formData.fields.add(MapEntry('city_id', cityId!));
+      }
+      if ((gender ?? '').isNotEmpty) {
+        formData.fields.add(MapEntry('gender', gender!));
+      }
+      if ((dateOfBirth ?? '').isNotEmpty) {
+        formData.fields.add(MapEntry('date_of_birth', dateOfBirth!));
+      }
+      if ((bio ?? '').isNotEmpty) {
+        formData.fields.add(MapEntry('bio', bio!));
+      }
+      if ((newPassword ?? '').isNotEmpty) {
+        formData.fields.add(MapEntry('new_password', newPassword!));
+      }
+      if ((newPasswordConfirmation ?? '').isNotEmpty) {
+        formData.fields.add(
+          MapEntry('new_password_confirmation', newPasswordConfirmation!),
+        );
+      }
+
+      for (var i = 0; i < skills.length; i++) {
+        formData.fields.add(MapEntry('skills[$i]', '${skills[i]}'));
+      }
+
+      if (image != null) {
+        formData.files.add(
+          MapEntry('image', await MultipartFile.fromFile(image.path)),
+        );
+      }
+
+      final response = await dioClient.post(
+        data: formData,
+        uri: EndPoints.editProfile,
+      );
       return Right(response);
     } catch (error) {
       log('error $error');

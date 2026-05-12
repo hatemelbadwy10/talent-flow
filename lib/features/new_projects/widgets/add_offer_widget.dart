@@ -11,7 +11,6 @@ import 'package:talent_flow/navigation/custom_navigation.dart';
 import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';
 import '../../../components/custom_button.dart';
-import '../../../navigation/routes.dart'; // Add this import for navigation
 import '../bloc/new_projects_bloc.dart';
 
 class AddOfferWidget extends StatefulWidget {
@@ -108,7 +107,7 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
 
           Future.delayed(const Duration(milliseconds: 500), () {
             if (!mounted) return;
-            CustomNavigator.push(Routes.navBar, clean: true);
+            CustomNavigator.pop(result: true);
           });
         } else if (state is Error) {
           setState(() {

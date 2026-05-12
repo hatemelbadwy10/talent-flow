@@ -64,13 +64,13 @@ class NewProject extends StatelessWidget {
               if (state is Loading) {
                 return const ProjectCardShimmer();
               } else if (state is Error) {
-                return const Center(
-                    child: Text("حدث خطأ أثناء تحميل المشاريع"));
+                return Center(
+                    child: Text("failed_to_load_projects".tr()));
               } else if (state is Done) {
                 final projects = state.list as List<MyProjectsModel>;
 
                 if (projects.isEmpty) {
-                  return const Center(child: Text("لا توجد مشاريع حالياً"));
+                  return Center(child: Text("no_projects_available".tr()));
                 }
 
                 return ListAnimator(

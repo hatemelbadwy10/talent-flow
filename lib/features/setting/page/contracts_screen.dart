@@ -82,9 +82,9 @@ class _ContractsScreenState extends State<ContractsScreen> {
                   onRefresh: _refreshContracts,
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    children: const [
-                      SizedBox(height: 180),
-                      Center(child: Text('No contracts found')),
+                    children: [
+                      const SizedBox(height: 180),
+                      Center(child: Text('no_contracts_found'.tr())),
                     ],
                   ),
                 );

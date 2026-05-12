@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:talent_flow/features/setting/model/notification_model.dart';
 
@@ -18,7 +19,7 @@ class NotificationCard extends StatelessWidget {
       ),
       onDismissed: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("تم تعيين الإشعار كمقروء")),
+          SnackBar(content: Text("notification_marked_as_read".tr())),
         );
       },
       child: Container(

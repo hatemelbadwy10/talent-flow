@@ -54,7 +54,31 @@ class UserRepo extends BaseRepo {
 
   setUserData(json) {
     AppCurrency.cacheFromPayload(json);
+    sharedPreferences.setString(
+      AppStorageKey.userId,
+      json["id"]?.toString() ?? "",
+    );
     sharedPreferences.setString(AppStorageKey.userData, jsonEncode(json));
+    sharedPreferences.setString(
+      AppStorageKey.userName,
+      json["first_name"]?.toString() ?? json["name"]?.toString() ?? "",
+    );
+    sharedPreferences.setString(
+      AppStorageKey.userEmail,
+      json["email"]?.toString() ?? "",
+    );
+    sharedPreferences.setString(
+      AppStorageKey.userImage,
+      json["profile_image"]?.toString() ?? json["image"]?.toString() ?? "",
+    );
+    sharedPreferences.setBool(AppStorageKey.isLogin, true);
+
+    if (json['user_type'] != null) {
+      sl<SharedPreferences>().setBool(
+        AppStorageKey.isFreelancer,
+        json['user_type']?.toString() != "Entrepreneur",
+      );
+    }
   }
 
   UserModel? updateUnreadCounts({
@@ -121,6 +145,13 @@ class UserRepo extends BaseRepo {
 
   clearUserData() {
     sharedPreferences.remove(AppStorageKey.userData);
+    sharedPreferences.remove(AppStorageKey.userId);
+    sharedPreferences.remove(AppStorageKey.userName);
+    sharedPreferences.remove(AppStorageKey.userEmail);
+    sharedPreferences.remove(AppStorageKey.userImage);
+    sharedPreferences.remove(AppStorageKey.token);
+    sharedPreferences.remove(AppStorageKey.isLogin);
+    sharedPreferences.remove(AppStorageKey.isFreelancer);
   }
 }
 

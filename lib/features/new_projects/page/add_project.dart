@@ -106,12 +106,12 @@ class _AddProjectState extends State<AddProject> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Error: $selectOptionsState'),
+                      Text('${'error_label'.tr()}: $selectOptionsState'),
                       ElevatedButton(
                         onPressed: () {
                           context.read<SelectionOptionBloc>().add(Add());
                         },
-                        child: const Text('Retry'),
+                        child: Text('retry'.tr()),
                       ),
                     ],
                   ),

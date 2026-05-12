@@ -22,6 +22,7 @@ class ContractModel implements Mapper {
     this.budget,
     this.duration,
     this.terms,
+    this.notes,
     this.talentPercentageOfContracts,
     this.terminationConditions,
     this.conflictPolicy,
@@ -47,6 +48,7 @@ class ContractModel implements Mapper {
   final String? budget;
   final String? duration;
   final String? terms;
+  final String? notes;
   final String? talentPercentageOfContracts;
   final String? terminationConditions;
   final String? conflictPolicy;
@@ -94,6 +96,7 @@ class ContractModel implements Mapper {
       budget: json['budget']?.toString(),
       duration: json['duration']?.toString(),
       terms: json['terms']?.toString(),
+      notes: json['notes']?.toString(),
       talentPercentageOfContracts:
           json['talent_percentage_of_contracts']?.toString(),
       terminationConditions: json['termination_conditions']?.toString(),
@@ -124,6 +127,7 @@ class ContractModel implements Mapper {
       'budget': budget,
       'duration': duration,
       'terms': terms,
+      'notes': notes,
       'talent_percentage_of_contracts': talentPercentageOfContracts,
       'termination_conditions': terminationConditions,
       'conflict_policy': conflictPolicy,

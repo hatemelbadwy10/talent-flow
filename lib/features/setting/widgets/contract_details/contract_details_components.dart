@@ -260,35 +260,45 @@ class ContractDetailsMessageCard extends StatelessWidget {
   const ContractDetailsMessageCard({
     super.key,
     required this.message,
+    this.backgroundColor = const Color(0xFFF3F0FF),
+    this.borderColor = const Color(0xFFD9CCFF),
+    this.iconColor = const Color(0xFF7347D6),
+    this.textColor = const Color(0xFF3E2A7A),
+    this.icon = Icons.info_outline_rounded,
   });
 
   final String message;
+  final Color backgroundColor;
+  final Color borderColor;
+  final Color iconColor;
+  final Color textColor;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F0FF),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFD9CCFF)),
+        border: Border.all(color: borderColor),
       ),
       padding: const EdgeInsets.all(14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.info_outline_rounded,
-            color: Color(0xFF7347D6),
+          Icon(
+            icon,
+            color: iconColor,
             size: 20,
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF3E2A7A),
+                color: textColor,
                 height: 1.5,
               ),
             ),

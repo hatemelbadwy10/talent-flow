@@ -198,7 +198,7 @@ class FileUploadSection extends StatelessWidget {
       }
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Error picking image: $e')),
+        SnackBar(content: Text('${'error_picking_image'.tr()}: $e')),
       );
     }
   }
@@ -220,7 +220,7 @@ class FileUploadSection extends StatelessWidget {
       }
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Error picking image: $e')),
+        SnackBar(content: Text('${'error_picking_image'.tr()}: $e')),
       );
     }
   }
@@ -258,7 +258,7 @@ class FileUploadSection extends StatelessWidget {
       );
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Error picking files: $e')),
+        SnackBar(content: Text('${'error_picking_files'.tr()}: $e')),
       );
     }
   }

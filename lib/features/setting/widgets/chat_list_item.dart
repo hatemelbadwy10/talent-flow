@@ -160,6 +160,8 @@ class ChatListItem extends StatelessWidget {
                     'conversationId': chat.id,
                     'project_id': chat.projectId,
                     'projectId': chat.projectId,
+                    'contractId': chat.contractId,
+                    'hasContract': chat.hasContract == true,
                     'freelancerId': chat.receiver?.id,
                     'freelancerName': chat.receiver?.name,
                     'freelancerJobTitle': chat.receiver?.jobTitle,

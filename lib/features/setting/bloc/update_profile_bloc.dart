@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:talent_flow/app/core/app_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
+import 'package:talent_flow/main_blocs/user_bloc.dart';
 import '../repo/update_profile_repo.dart';
 import 'update_profile_event.dart';
 import 'update_profile_state.dart';
@@ -217,10 +219,7 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
             // Extract and save updated user payload
             if (responseData.containsKey('payload')) {
               final payload = responseData['payload'] as Map<String, dynamic>;
-
-              // Save updated user data to SharedPreferences
-              await prefs.setString(
-                  AppStorageKey.userData, jsonEncode(payload));
+              UserBloc.instance.add(Update(arguments: payload));
 
               log('Updated user data saved to SharedPreferences');
               log('Payload: $payload');

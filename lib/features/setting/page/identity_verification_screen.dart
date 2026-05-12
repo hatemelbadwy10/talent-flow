@@ -513,7 +513,7 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
                                 .read<LocationOptionsBloc>()
                                 .add(const LoadCountries());
                           },
-                          child: const Text('Retry'),
+                          child: Text('retry'.tr()),
                         ),
                       ],
                     ),

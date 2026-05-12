@@ -84,7 +84,8 @@ class ContractDetailsUiModel {
       status == ContractStatus.inProgress && _hasRejectWorkNotes;
 
   bool shouldShowRejectReason() =>
-      status == ContractStatus.rejected && isEntrepreneur;
+      status == ContractStatus.rejected &&
+      (contract.rejectReason?.trim().isNotEmpty ?? false);
 
   String? complaintMessage() {
     if (status != ContractStatus.disagreement) {

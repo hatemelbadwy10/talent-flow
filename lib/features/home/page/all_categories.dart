@@ -30,7 +30,7 @@ class ServiceCategoryView extends StatelessWidget {
             if (state is Loading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is Error) {
-              return const Center(child: Text('Error loading categories'));
+              return Center(child: Text('error_loading_categories'.tr()));
             } else if (state is Done) {
               final category = state.list as List<Category>;
               return ListView.builder(
@@ -58,7 +58,7 @@ class ServiceCategoryView extends StatelessWidget {
                 },
               );
             } else {
-              return const Center(child: Text('No categories found'));
+              return Center(child: Text('no_categories_found'.tr()));
             }
           },
         ),

@@ -216,18 +216,94 @@ class _ReviewsTab extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       itemCount: model.reviews.length,
       itemBuilder: (context, index) {
+        final review = model.reviews[index];
         return Container(
           margin: EdgeInsets.only(bottom: 16.h),
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
-            color: Styles.PRIMARY_COLOR,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Styles.BORDER_COLOR),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("user_review".tr()),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundColor: const Color(0xFFF3F4F6),
+                    backgroundImage: (review.image ?? '').trim().isNotEmpty
+                        ? NetworkImage(review.image!)
+                        : null,
+                    child: (review.image ?? '').trim().isEmpty
+                        ? const Icon(Icons.person, color: Color(0xFF6B7280))
+                        : null,
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          (review.name ?? '').trim().isNotEmpty
+                              ? review.name!
+                              : '-',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Styles.HEADER,
+                          ),
+                        ),
+                        if ((review.jobTitle ?? '').trim().isNotEmpty) ...[
+                          SizedBox(height: 4.h),
+                          Text(
+                            review.jobTitle!,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Styles.HINT_COLOR,
+                            ),
+                          ),
+                        ],
+                        SizedBox(height: 8.h),
+                        Row(
+                          children: List.generate(
+                            5,
+                            (starIndex) => Icon(
+                              starIndex < review.rating.round()
+                                  ? Icons.star_rounded
+                                  : Icons.star_border_rounded,
+                              size: 18,
+                              color: const Color(0xFFFFB800),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(
+                    (review.date ?? '').trim().isNotEmpty ? review.date! : '-',
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Styles.HINT_COLOR,
+                    ),
+                  ),
+                ],
+              ),
+              if ((review.comment ?? '').trim().isNotEmpty) ...[
+                SizedBox(height: 12.h),
+                Text(
+                  review.comment!,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    height: 1.6,
+                    color: Styles.SUBTITLE,
+                  ),
+                ),
+              ],
             ],
           ),
         );
