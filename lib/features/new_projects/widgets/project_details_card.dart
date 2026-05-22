@@ -272,6 +272,7 @@ class ProjectDetailsCard extends StatelessWidget {
     final statusKey =
         switch (ProjectStatusHelper.fromString(normalizedStatus)) {
       ProjectStatus.completed => 'project_status.completed',
+      ProjectStatus.accepted => 'project_status.accepted',
       ProjectStatus.draft => 'project_status.draft',
       ProjectStatus.rejected => 'project_status.rejected',
       ProjectStatus.canceled => 'project_status.canceled',

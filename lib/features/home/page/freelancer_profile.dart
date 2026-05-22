@@ -122,14 +122,15 @@ class _FreelancerHeader extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(model.name ?? "no_name".tr()),
-            SizedBox(width: 8.w),
-            Container(
-              width: 12.w,
-              height: 12.h,
-              decoration: const BoxDecoration(
-                color: Colors.green,
-                shape: BoxShape.circle,
+            Flexible(
+              child: Text(
+                model.name ?? "no_name".tr(),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Styles.HEADER,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
           ],
@@ -145,6 +146,28 @@ class _FreelancerHeader extends StatelessWidget {
                 color: Styles.PRIMARY_COLOR, size: 16),
             SizedBox(width: 8.w),
             Text(model.jobTitle ?? "no_job_title".tr()),
+          ],
+        ),
+
+        SizedBox(height: 16.h),
+
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            _StatusBadge(
+              label: 'profile.identity_verified'.tr(),
+              value: model.identityAuthenticated,
+            ),
+            _StatusBadge(
+              label: 'profile.bank_account'.tr(),
+              value: model.bankAccountAdded,
+            ),
+            _StatusBadge(
+              label: 'profile.added_works'.tr(),
+              value: model.addedWorks,
+            ),
           ],
         ),
       ],
@@ -165,18 +188,61 @@ class _BioTab extends StatelessWidget {
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
-          color: Colors.grey.shade200,
+          color: Colors.white,
+          border: Border.all(color: Styles.BORDER_COLOR),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (model.bio != null && model.bio!.isNotEmpty) ...[
-              Text("bio".tr()),
+              Text(
+                "bio".tr(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Styles.HEADER,
+                ),
+              ),
               Divider(color: Colors.grey.shade400, thickness: .5),
               SizedBox(height: 12.h),
-              Text(model.bio!),
+              Text(
+                model.bio!,
+                style: const TextStyle(
+                  fontSize: 14,
+                  height: 1.6,
+                  color: Styles.SUBTITLE,
+                ),
+              ),
               SizedBox(height: 24.h),
             ],
+            _ProfileInfoRow(
+              title: 'profile.country'.tr(),
+              value: model.country?.toString(),
+            ),
+            _ProfileInfoRow(
+              title: 'profile.specialization'.tr(),
+              value: model.specialization,
+            ),
+            _ProfileInfoRow(
+              title: 'profile.city'.tr(),
+              value: model.statistics?.city,
+            ),
+            _ProfileInfoRow(
+              title: 'profile.registration_date'.tr(),
+              value: model.statistics?.registrationDate,
+            ),
+            _ProfileInfoRow(
+              title: 'profile.last_seen'.tr(),
+              value: model.statistics?.lastSeen,
+            ),
+            _ProfileInfoRow(
+              title: 'profile.completed_projects'.tr(),
+              value: model.statistics?.completedProjects?.toString(),
+            ),
+            _ProfileInfoRow(
+              title: 'profile.in_progress_projects'.tr(),
+              value: model.statistics?.inProgressProjects?.toString(),
+            ),
             Divider(color: Colors.grey.shade400, thickness: .5),
             if (model.skills.isNotEmpty) ...[
               SkillsSection(skills: model.skills),
@@ -191,6 +257,92 @@ class _BioTab extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final bool value;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = value ? Styles.ACTIVE : Styles.IN_ACTIVE;
+    final icon = value ? Icons.check_circle : Icons.cancel;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          SizedBox(width: 6.w),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileInfoRow extends StatelessWidget {
+  const _ProfileInfoRow({
+    required this.title,
+    required this.value,
+  });
+
+  final String title;
+  final String? value;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = (value ?? '').trim();
+    if (text.isEmpty || text.toLowerCase() == 'null') {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 130,
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Styles.HEADER,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.5,
+                color: Styles.SUBTITLE,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -36,6 +36,7 @@ class Routes {
   static const contractPaymentConfirm = "CONTRACT_PAYMENT_CONFIRM";
   static const createContract = "CREATE_CONTRACT";
   static const identityVerification = "IDENTITY_VERIFICATION";
+  static const acceptanceTestQuestions = "ACCEPTANCE_TEST_QUESTIONS";
   static const services = "CATEGORIES";
   static const brands = "BRANDS";
   static const news = "news";

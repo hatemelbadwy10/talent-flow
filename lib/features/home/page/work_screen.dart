@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/app_event.dart';
@@ -206,6 +207,12 @@ class _WorkContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = ProjectStatusHelper.fromString(work.status);
+    final localeTag = context.locale.toLanguageTag();
+    final formattedViews =
+        NumberFormat.decimalPattern(localeTag).format(work.views ?? 0);
+    final formattedLikes =
+        NumberFormat.decimalPattern(localeTag).format(work.likes ?? 0);
+    final formattedDate = _formatDate(context, work.date);
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(16.w),
@@ -265,20 +272,20 @@ class _WorkContent extends StatelessWidget {
                     _MetricCard(
                       icon: Icons.visibility_outlined,
                       label: 'project_portfolio.views'.tr(),
-                      value: '${work.views ?? 0}',
+                      value: formattedViews,
                     ),
                     SizedBox(width: 12.w),
                     _MetricCard(
                       icon: Icons.thumb_up_alt_outlined,
                       label: 'project_portfolio.likes'.tr(),
-                      value: '${work.likes ?? 0}',
+                      value: formattedLikes,
                     ),
                   ],
                 ),
-                if ((work.date ?? '').trim().isNotEmpty) ...[
+                if (formattedDate != null) ...[
                   SizedBox(height: 12.h),
                   Text(
-                    '${'account_statement_screen.date'.tr()}: ${work.date}',
+                    '${'account_statement_screen.date'.tr()}: $formattedDate',
                     style: const TextStyle(
                       fontSize: 13,
                       color: Styles.HINT_COLOR,
@@ -288,7 +295,9 @@ class _WorkContent extends StatelessWidget {
                 ],
                 SizedBox(height: 18.h),
                 Text(
-                  work.description ?? '-',
+                  (work.description ?? '').trim().isEmpty
+                      ? 'work_details.no_description'.tr()
+                      : work.description!,
                   style: const TextStyle(
                     fontSize: 14,
                     height: 1.7,
@@ -332,6 +341,25 @@ class _WorkContent extends StatelessWidget {
                           ),
                         )
                         .toList(),
+                  ),
+                ] else ...[
+                  SizedBox(height: 20.h),
+                  Text(
+                    'project_card_offer.skills'.tr(),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Styles.HEADER,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    'work_details.no_skills'.tr(),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Styles.HINT_COLOR,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
                 if ((work.previewLink ?? '').trim().isNotEmpty) ...[
@@ -401,6 +429,20 @@ class _WorkContent extends StatelessWidget {
     final uri = Uri.tryParse(url);
     if (uri == null) return;
     await launchUrl(uri);
+  }
+
+  String? _formatDate(BuildContext context, String? rawDate) {
+    final value = rawDate?.trim();
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+
+    final parsedDate = DateTime.tryParse(value);
+    if (parsedDate == null) {
+      return value;
+    }
+
+    return DateFormat.yMMMMd(context.locale.toLanguageTag()).format(parsedDate);
   }
 }
 
@@ -477,6 +519,8 @@ class _PreviewLinkTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final displayUrl = _prettyUrl(url);
+
     return Material(
       color: const Color(0xFFF5FAFA),
       borderRadius: BorderRadius.circular(14),
@@ -503,7 +547,7 @@ class _PreviewLinkTile extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  url,
+                  displayUrl,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -524,6 +568,25 @@ class _PreviewLinkTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _prettyUrl(String value) {
+    final uri = Uri.tryParse(value);
+    if (uri == null) {
+      return value;
+    }
+
+    final host = uri.host.trim();
+    final path = uri.path.trim();
+    if (host.isEmpty) {
+      return value;
+    }
+
+    if (path.isEmpty || path == '/') {
+      return host;
+    }
+
+    return '$host$path';
   }
 }
 

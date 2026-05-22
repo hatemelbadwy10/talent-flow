@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'dart:developer';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -65,18 +66,24 @@ class _ChatScreenState extends State<ChatScreen> {
       context.read<ChatsBloc>().add(Read(arguments: conversationId));
     }
 
+    final arguments = {
+      'conversationId': chat.id,
+      'project_id': chat.projectId,
+      'projectId': chat.projectId,
+      'contractId': chat.contractId,
+      'hasContract': chat.hasContract == true,
+      'freelancerId': chat.receiver?.id,
+      'freelancerName': chat.receiver?.name,
+      'freelancerJobTitle': chat.receiver?.jobTitle,
+    };
+    log(
+      '[ChatScreen] opening Routes.chat from chat list | $arguments',
+      name: 'ChatScreen',
+    );
+
     await CustomNavigator.push(
       Routes.chat,
-      arguments: {
-        'conversationId': chat.id,
-        'project_id': chat.projectId,
-        'projectId': chat.projectId,
-        'contractId': chat.contractId,
-        'hasContract': chat.hasContract == true,
-        'freelancerId': chat.receiver?.id,
-        'freelancerName': chat.receiver?.name,
-        'freelancerJobTitle': chat.receiver?.jobTitle,
-      },
+      arguments: arguments,
     );
   }
 

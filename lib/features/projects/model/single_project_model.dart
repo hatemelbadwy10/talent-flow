@@ -15,6 +15,7 @@ class SingleProjectModel extends SingleMapper {
     required this.similarProjects,
     required this.requiredToBeReceived,
     required this.proposals,
+    required this.questions,
     required this.files,
   });
 
@@ -31,6 +32,7 @@ class SingleProjectModel extends SingleMapper {
   final dynamic similarProjects;
   final dynamic requiredToBeReceived;
   final List<ProjectProposal> proposals;
+  final List<ProjectQuestion> questions;
   final List<dynamic> files;
 
   factory SingleProjectModel.fromJson(Map<String, dynamic> json) {
@@ -53,6 +55,11 @@ class SingleProjectModel extends SingleMapper {
           ? []
           : List<ProjectProposal>.from(
               json["proposals"]!.map((x) => ProjectProposal.fromJson(x)),
+            ),
+      questions: json["questions"] == null
+          ? []
+          : List<ProjectQuestion>.from(
+              json["questions"]!.map((x) => ProjectQuestion.fromJson(x)),
             ),
       files: _extractFiles(json["files"] ?? json["attachments"]),
     );
@@ -84,6 +91,26 @@ class SingleProjectModel extends SingleMapper {
     }
 
     return [normalizedValue];
+  }
+}
+
+class ProjectQuestion {
+  ProjectQuestion({
+    required this.id,
+    required this.question,
+    required this.isRequired,
+  });
+
+  final int? id;
+  final String? question;
+  final bool isRequired;
+
+  factory ProjectQuestion.fromJson(Map<String, dynamic> json) {
+    return ProjectQuestion(
+      id: _parseInt(json["id"]),
+      question: json["question"]?.toString(),
+      isRequired: _toBool(json["required"]),
+    );
   }
 }
 
@@ -158,4 +185,25 @@ class Owner {
       ongoingCommunications: json["ongoing_communications"],
     );
   }
+}
+
+int? _parseInt(dynamic value) {
+  if (value is int) {
+    return value;
+  }
+  if (value is num) {
+    return value.toInt();
+  }
+  return int.tryParse(value?.toString() ?? '');
+}
+
+bool _toBool(dynamic value) {
+  if (value is bool) {
+    return value;
+  }
+  if (value is num) {
+    return value != 0;
+  }
+  final normalized = value?.toString().trim().toLowerCase() ?? '';
+  return normalized == '1' || normalized == 'true' || normalized == 'yes';
 }

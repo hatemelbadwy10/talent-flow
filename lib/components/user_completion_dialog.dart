@@ -111,9 +111,19 @@ class UserCompletionDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
-            Row(
+            Column(
               children: [
-                Expanded(
+                SizedBox(
+                  width: double.infinity,
+                  child: CustomButton(
+                    text: primaryLabelKey.tr(),
+                    radius: 16,
+                    onTap: onPrimaryTap,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
                   child: CustomButton(
                     text: 'user_completion.cancel'.tr(),
                     backgroundColor: Colors.white,
@@ -122,14 +132,6 @@ class UserCompletionDialog extends StatelessWidget {
                     withBorderColor: true,
                     radius: 16,
                     onTap: () => Navigator.of(context).pop(),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: CustomButton(
-                    text: primaryLabelKey.tr(),
-                    radius: 16,
-                    onTap: onPrimaryTap,
                   ),
                 ),
               ],

@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:open_filex/open_filex.dart';
@@ -85,7 +87,7 @@ class ContractPdfDownloader {
 
   static Future<List<int>> _buildPdf(ContractModel contract) async {
     final document = PdfDocument();
-    final page = document.pages.add();
+    final firstPage = document.pages.add();
     final fontData = await rootBundle.load(_fontPath);
     final baseFont = PdfTrueTypeFont(
       fontData.buffer.asUint8List(),
@@ -102,60 +104,78 @@ class ContractPdfDownloader {
       style: PdfFontStyle.bold,
     );
 
-    double top = 20;
-    final width = page.getClientSize().width - 40;
+    var cursor = _PdfCursor(document: document, page: firstPage, top: 20);
+    final width = firstPage.getClientSize().width - 40;
 
-    top = _drawTextBlock(
-      page: page,
+    cursor = _drawTextBlock(
+      cursor: cursor,
       text: contract.title?.trim().isNotEmpty == true
           ? contract.title!
           : 'عقد عمل',
       font: boldFont,
-      bounds: Rect.fromLTWH(20, top, width, 40),
+      bounds: Rect.fromLTWH(20, cursor.top, width, 40),
       format: _rtlFormat(PdfTextAlignment.center),
     );
 
-    top += 12;
-    top = _drawInfoRow(page, 'رقم العقد', '#${contract.id ?? '-'}', baseFont, top);
-    top = _drawInfoRow(page, 'عنوان المشروع', contract.projectTitle, baseFont, top);
-    top = _drawInfoRow(page, 'صاحب المشروع', contract.projectOwner, baseFont, top);
-    top = _drawInfoRow(page, 'المستقل', contract.freelancer, baseFont, top);
-    top = _drawInfoRow(page, 'التاريخ', contract.date, baseFont, top);
-    top = _drawInfoRow(page, 'الميزانية', contract.budget, baseFont, top);
-    top = _drawInfoRow(page, 'المدة', contract.duration, baseFont, top);
-    top = _drawInfoRow(page, 'نسبة Talent Flow', contract.talentPercentageOfContracts,
-        baseFont, top);
+    cursor = cursor.copyWith(top: cursor.top + 12);
+    cursor =
+        _drawInfoRow(cursor, 'رقم العقد', '#${contract.id ?? '-'}', baseFont);
+    cursor = _drawInfoRow(cursor, 'عنوان المشروع', contract.projectTitle, baseFont);
+    cursor = _drawInfoRow(cursor, 'صاحب المشروع', contract.projectOwner, baseFont);
+    cursor = _drawInfoRow(cursor, 'المستقل', contract.freelancer, baseFont);
+    cursor = _drawInfoRow(cursor, 'التاريخ', contract.date, baseFont);
+    cursor = _drawInfoRow(cursor, 'الميزانية', contract.budget, baseFont);
+    cursor = _drawInfoRow(cursor, 'المدة', contract.duration, baseFont);
+    cursor = _drawInfoRow(
+      cursor,
+      'نسبة Talent Flow',
+      contract.talentPercentageOfContracts,
+      baseFont,
+    );
 
-    top += 14;
-    top = _drawSection(page, 'وصف المشروع', contract.projectDescription, sectionFont,
-        baseFont, top);
-    top = _drawSection(page, 'الشروط', contract.terms, sectionFont, baseFont, top);
-    top = _drawSection(page, 'الملاحظات', contract.notes, sectionFont, baseFont, top);
-    top = _drawSection(
-      page,
+    cursor = cursor.copyWith(top: cursor.top + 14);
+    cursor = _drawSection(
+      cursor,
+      'وصف المشروع',
+      contract.projectDescription,
+      sectionFont,
+      baseFont,
+    );
+    cursor = _drawSection(
+      cursor,
+      'الشروط',
+      contract.terms,
+      sectionFont,
+      baseFont,
+    );
+    cursor = _drawSection(
+      cursor,
+      'الملاحظات',
+      contract.notes,
+      sectionFont,
+      baseFont,
+    );
+    cursor = _drawSection(
+      cursor,
       'شروط الإنهاء',
       _stripHtml(contract.terminationConditions),
       sectionFont,
       baseFont,
-      top,
     );
-    top = _drawSection(
-      page,
+    cursor = _drawSection(
+      cursor,
       'سياسة النزاعات',
       _stripHtml(contract.conflictPolicy),
       sectionFont,
       baseFont,
-      top,
     );
 
     if (contract.files.isNotEmpty) {
-      top = _drawSection(
-        page,
-        'المرفقات',
-        contract.files.map(_fileNameFromUrl).join('\n'),
+      cursor = await _drawAttachmentsSection(
+        cursor,
+        contract.files,
         sectionFont,
         baseFont,
-        top,
       );
     }
 
@@ -164,53 +184,140 @@ class ContractPdfDownloader {
     return bytes;
   }
 
-  static double _drawInfoRow(
-    PdfPage page,
+  static _PdfCursor _drawInfoRow(
+    _PdfCursor cursor,
     String label,
     String? value,
     PdfFont font,
-    double top,
   ) {
     return _drawTextBlock(
-          page: page,
+          cursor: cursor,
           text: '$label: ${value?.trim().isNotEmpty == true ? value! : '-'}',
           font: font,
-          bounds: Rect.fromLTWH(20, top, page.getClientSize().width - 40, 40),
+          bounds: Rect.fromLTWH(
+            20,
+            cursor.top,
+            cursor.page.getClientSize().width - 40,
+            40,
+          ),
           format: _rtlFormat(PdfTextAlignment.right),
-        ) +
-        8;
+        )
+        .copyWithSpacing(8);
   }
 
-  static double _drawSection(
-    PdfPage page,
+  static _PdfCursor _drawSection(
+    _PdfCursor cursor,
     String title,
     String? value,
     PdfFont titleFont,
     PdfFont bodyFont,
-    double top,
   ) {
     final resolvedValue = value?.trim().isNotEmpty == true ? value! : '-';
-    top = _drawTextBlock(
-          page: page,
+    cursor = _drawTextBlock(
+          cursor: cursor,
           text: title,
           font: titleFont,
-          bounds: Rect.fromLTWH(20, top, page.getClientSize().width - 40, 30),
+          bounds: Rect.fromLTWH(
+            20,
+            cursor.top,
+            cursor.page.getClientSize().width - 40,
+            30,
+          ),
           format: _rtlFormat(PdfTextAlignment.right),
-        ) +
-        6;
-    top = _drawTextBlock(
-          page: page,
+        )
+        .copyWithSpacing(6);
+    cursor = _drawTextBlock(
+          cursor: cursor,
           text: resolvedValue,
           font: bodyFont,
-          bounds: Rect.fromLTWH(20, top, page.getClientSize().width - 40, 200),
+          bounds: Rect.fromLTWH(
+            20,
+            cursor.top,
+            cursor.page.getClientSize().width - 40,
+            cursor.page.getClientSize().height - cursor.top - 20,
+          ),
           format: _rtlFormat(PdfTextAlignment.right),
-        ) +
-        14;
-    return top;
+        )
+        .copyWithSpacing(14);
+    return cursor;
   }
 
-  static double _drawTextBlock({
-    required PdfPage page,
+  static Future<_PdfCursor> _drawAttachmentsSection(
+    _PdfCursor cursor,
+    List<String> files,
+    PdfFont titleFont,
+    PdfFont bodyFont,
+  ) async {
+    cursor = _drawTextBlock(
+          cursor: cursor,
+          text: 'المرفقات',
+          font: titleFont,
+          bounds: Rect.fromLTWH(
+            20,
+            cursor.top,
+            cursor.page.getClientSize().width - 40,
+            30,
+          ),
+          format: _rtlFormat(PdfTextAlignment.right),
+        )
+        .copyWithSpacing(10);
+
+    for (final file in files) {
+      final fileName = _fileNameFromUrl(file);
+      cursor = _drawTextBlock(
+            cursor: cursor,
+            text: fileName,
+            font: bodyFont,
+            bounds: Rect.fromLTWH(
+              20,
+              cursor.top,
+              cursor.page.getClientSize().width - 40,
+              30,
+            ),
+            format: _rtlFormat(PdfTextAlignment.right),
+          )
+          .copyWithSpacing(8);
+
+      if (!_isImageUrl(file)) {
+        continue;
+      }
+
+      final bytes = await _downloadAttachmentBytes(file);
+      if (bytes == null || bytes.isEmpty) {
+        continue;
+      }
+
+      try {
+        final image = PdfBitmap(bytes);
+        final contentWidth = cursor.page.getClientSize().width - 40;
+        const maxImageHeight = 220.0;
+        final widthScale = contentWidth / image.width;
+        final heightScale = maxImageHeight / image.height;
+        final scale = math.min(widthScale, heightScale);
+        final imageWidth = image.width * scale;
+        final imageHeight = image.height * scale;
+
+        cursor = _ensureSpace(cursor, imageHeight + 12);
+        cursor.page.graphics.drawImage(
+          image,
+          Rect.fromLTWH(
+            20 + (contentWidth - imageWidth),
+            cursor.top,
+            imageWidth,
+            imageHeight,
+          ),
+        );
+        cursor = cursor.copyWithSpacing(imageHeight + 14);
+      } catch (_) {
+        // Keep the filename visible even if the image bytes cannot be decoded.
+      }
+    }
+
+    return cursor;
+  }
+
+  static _PdfCursor _drawTextBlock({
+    required _PdfCursor cursor,
     required String text,
     required PdfFont font,
     required Rect bounds,
@@ -221,8 +328,38 @@ class ContractPdfDownloader {
       font: font,
       format: format,
     );
-    final result = element.draw(page: page, bounds: bounds);
-    return result?.bounds.bottom ?? bounds.bottom;
+    final result = element.draw(
+      page: cursor.page,
+      bounds: bounds,
+      format: PdfLayoutFormat(
+        layoutType: PdfLayoutType.paginate,
+        breakType: PdfLayoutBreakType.fitPage,
+        paginateBounds: Rect.fromLTWH(
+          20,
+          20,
+          cursor.page.getClientSize().width - 40,
+          cursor.page.getClientSize().height - 40,
+        ),
+      ),
+    );
+    final resolvedPage = result?.page ?? cursor.page;
+    final resolvedTop = result?.bounds.bottom ?? bounds.bottom;
+    return _PdfCursor(
+      document: cursor.document,
+      page: resolvedPage,
+      top: resolvedTop,
+    );
+  }
+
+  static _PdfCursor _ensureSpace(_PdfCursor cursor, double requiredHeight) {
+    final remainingHeight =
+        cursor.page.getClientSize().height - cursor.top - 20;
+    if (remainingHeight >= requiredHeight) {
+      return cursor;
+    }
+
+    final nextPage = cursor.document.pages.add();
+    return _PdfCursor(document: cursor.document, page: nextPage, top: 20);
   }
 
   static PdfStringFormat _rtlFormat(PdfTextAlignment alignment) {
@@ -258,6 +395,37 @@ class ContractPdfDownloader {
     return Uri.decodeComponent(segment);
   }
 
+  static bool _isImageUrl(String url) {
+    final extension = path.extension(Uri.tryParse(url)?.path ?? url)
+        .toLowerCase()
+        .replaceFirst('.', '');
+    return extension == 'jpg' ||
+        extension == 'jpeg' ||
+        extension == 'png' ||
+        extension == 'webp';
+  }
+
+  static Future<List<int>?> _downloadAttachmentBytes(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      return null;
+    }
+
+    final client = HttpClient();
+    try {
+      final request = await client.getUrl(uri);
+      final response = await request.close();
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        return null;
+      }
+      return await consolidateHttpClientResponseBytes(response);
+    } catch (_) {
+      return null;
+    } finally {
+      client.close();
+    }
+  }
+
   static void _showSuccess(String message) {
     AppCore.showSnackBar(
       notification: AppNotification(
@@ -277,5 +445,33 @@ class ContractPdfDownloader {
         isFloating: true,
       ),
     );
+  }
+}
+
+class _PdfCursor {
+  const _PdfCursor({
+    required this.document,
+    required this.page,
+    required this.top,
+  });
+
+  final PdfDocument document;
+  final PdfPage page;
+  final double top;
+
+  _PdfCursor copyWith({
+    PdfDocument? document,
+    PdfPage? page,
+    double? top,
+  }) {
+    return _PdfCursor(
+      document: document ?? this.document,
+      page: page ?? this.page,
+      top: top ?? this.top,
+    );
+  }
+
+  _PdfCursor copyWithSpacing(double spacing) {
+    return copyWith(top: top + spacing);
   }
 }

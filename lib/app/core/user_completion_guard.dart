@@ -41,7 +41,7 @@ class UserCompletionStatus {
     if (isFreelancer && !addedWorks) {
       requirements.add(MissingRequirement.addedWorks);
     }
-    if (!isFreelancer && !hasBankAccount) {
+    if (!hasBankAccount) {
       requirements.add(MissingRequirement.bankAccount);
     }
     if (!identityAuthenticated) {
@@ -50,7 +50,11 @@ class UserCompletionStatus {
     return requirements;
   }
 
-  bool get canAddOffer => isFreelancer && addedWorks && identityAuthenticated;
+  bool get canAddOffer =>
+      isFreelancer &&
+      addedWorks &&
+      hasBankAccount &&
+      identityAuthenticated;
 
   bool get canAddProject =>
       !isFreelancer && hasBankAccount && identityAuthenticated;
@@ -131,14 +135,8 @@ abstract class UserCompletionGuard {
         return;
       }
 
-      if (!currentStatus.identityAuthenticated) {
-        CustomNavigator.push(
-          Routes.identityVerification,
-          clean: true,
-          arguments: {'fromOnboarding': true},
-        );
-        return;
-      }
+      CustomNavigator.push(Routes.acceptanceTestQuestions, clean: true);
+      return;
     }
 
     CustomNavigator.push(Routes.navBar, clean: true);

@@ -1,5 +1,6 @@
 {
   "next": "Next",
+  "continue": "Continue",
   "start": "Start",
   "talent_flow_core": "One place\nfor freelancers and those\nlooking to implement their services",
   "onboarding": {
@@ -145,7 +146,12 @@
 
   },
   "new_project": {
-    "title": "New Projects"
+    "title": "New Projects",
+    "filter_specialization": "Filter by specialization",
+    "sort_by": "Sort by",
+    "latest": "Latest",
+    "oldest": "Oldest",
+    "reset": "Reset"
   },
   "add_project": {
     "add_project": "Add Project",
@@ -524,6 +530,11 @@
     "submit_success": "Identity verification submitted successfully",
     "submit_processing": "Identity verification submitted and is now under review",
     "submit_error": "Failed to submit identity verification",
+    "accepted_title": "Identity Verification Accepted",
+    "accepted_message": "Your identity has been verified successfully and the submitted data is shown below.",
+    "show_form": "Show Form",
+    "saved_data": "Saved Information",
+    "documents": "Uploaded Documents",
     "under_review_title": "Identity Verification Under Review",
     "under_review_message": "Your identity verification request is currently under review. Please wait until the team responds."
   },
@@ -599,7 +610,7 @@
   "confirm_terms": "Confirm Terms",
   "term_one": "All works are my own and I have the rights to publish them.",
   "term_two": "I understand my account will be suspended if I use copyrighted works.",
-  "work_number": "Work {0} of 3",
+  "work_number": "Work {} of 3",
   "work_title": "Work Title",
   "work_title_hint": "Enter the work name",
   "thumbnail": "Thumbnail",
@@ -633,12 +644,29 @@
     "skills": "Skills",
     "works": "Works",
     "reviews": "Reviews",
+    "identity_verified": "Identity verified",
+    "bank_account": "Bank account",
+    "added_works": "Added works",
+    "country": "Country",
+    "specialization": "Specialization",
+    "job_title": "Job title",
+    "city": "City",
+    "registration_date": "Registration date",
+    "last_seen": "Last seen",
+    "completed_projects": "Completed projects",
+    "in_progress_projects": "In progress projects",
     "projects_status": "Project Status",
     "total_projects": "Total Projects",
     "no_projects": "No projects available",
     "no_works": "No works available",
     "no_reviews": "No reviews available",
     "contact_me": "Contact Me"
+  },
+  "acceptance_test": {
+    "title": "Acceptance Test",
+    "load_failed": "Failed to load acceptance test",
+    "empty": "No acceptance test content available",
+    "answer_all_questions": "Please answer all questions"
   },
   "help": {
     "title": "Support",
@@ -716,6 +744,7 @@
 
   "project_status": {
     "completed": "Completed",
+    "accepted": "Accepted",
     "draft": "Draft",
     "rejected": "Rejected",
     "canceled": "Canceled",
@@ -728,6 +757,10 @@
     "default_title": "Hospital management system with clinics",
     "likes": "Likes",
     "views": "Views"
+  },
+  "work_details": {
+    "no_description": "No description has been added for this work yet",
+    "no_skills": "No skills have been added for this work yet"
   },
   "project_proposals": {
     "title": "Proposals",

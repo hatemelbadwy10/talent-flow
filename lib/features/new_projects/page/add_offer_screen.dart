@@ -12,6 +12,8 @@ import '../../../data/config/di.dart';
 import '../../projects/bloc/my_projects_bloc.dart';
 import '../../projects/model/single_project_model.dart';
 import '../widgets/project_details_card.dart';
+import '../../../navigation/custom_navigation.dart';
+import '../../../navigation/routes.dart';
 
 class AddOfferScreen extends StatelessWidget {
   final Map<String, dynamic>? argument;
@@ -69,6 +71,16 @@ class AddOfferScreen extends StatelessWidget {
                     children: [
                       ProjectDetailsCard(
                         singleProjectModel: project,
+                        onOwnerTap: isFreelancer && project.owner?.id != null
+                            ? () {
+                                CustomNavigator.push(
+                                  Routes.entrepreneur,
+                                  arguments: {
+                                    'entrepreneurId': project.owner!.id,
+                                  },
+                                );
+                              }
+                            : null,
                       ),
                       ProjectDescription(
                         singleProjectModel: project,
@@ -81,6 +93,7 @@ class AddOfferScreen extends StatelessWidget {
                               initialDescription:
                                   argument?['initialDescription'] as String? ??
                                       myProposal?.description,
+                              questions: project.questions,
                             )
                           : const SizedBox(),
                       const SizedBox(

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
@@ -16,6 +17,13 @@ class ChatRepo extends BaseRepo {
     int? projectId,
   }) async {
     try {
+      _logChatRepo(
+        'startConversation request',
+        {
+          'userId': userId,
+          'projectId': projectId,
+        },
+      );
       final response = await dioClient.post(
         uri: EndPoints.startConversation(userId),
         data: FormData.fromMap({
@@ -25,6 +33,13 @@ class ChatRepo extends BaseRepo {
 
       final dynamic data = response.data;
       final int? conversationId = _extractConversationId(data);
+      _logChatRepo(
+        'startConversation response',
+        {
+          'conversationId': conversationId,
+          'responseKeys': _mapKeys(data),
+        },
+      );
       if (conversationId == null) {
         final message =
             data is Map<String, dynamic> ? data['message']?.toString() : null;
@@ -41,22 +56,49 @@ class ChatRepo extends BaseRepo {
     int conversationId,
   ) async {
     try {
+      _logChatRepo(
+        'getConversationMessages request',
+        {'conversationId': conversationId},
+      );
       final Response response = await dioClient.get(
         uri: EndPoints.conversationMessages(conversationId),
       );
 
       final data = response.data;
       if (data is! Map<String, dynamic>) {
+        _logChatRepo(
+          'getConversationMessages invalid response',
+          {'runtimeType': data.runtimeType.toString()},
+        );
         return left(ServerFailure('Invalid response format'));
       }
 
       final payload = data['payload'];
       if (payload is Map<String, dynamic>) {
-        return Right(ChatModel.fromJson(payload));
+        final chat = ChatModel.fromJson(payload);
+        _logConversationSummary(
+          requestedConversationId: conversationId,
+          source: 'payload',
+          chat: chat,
+        );
+        return Right(chat);
       }
 
-      return Right(ChatModel.fromJson(data));
+      final chat = ChatModel.fromJson(data);
+      _logConversationSummary(
+        requestedConversationId: conversationId,
+        source: 'root',
+        chat: chat,
+      );
+      return Right(chat);
     } catch (error) {
+      _logChatRepo(
+        'getConversationMessages error',
+        {
+          'conversationId': conversationId,
+          'error': error.toString(),
+        },
+      );
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
@@ -66,6 +108,14 @@ class ChatRepo extends BaseRepo {
     required String body,
   }) async {
     try {
+      _logChatRepo(
+        'sendConversationMessage request',
+        {
+          'conversationId': conversationId,
+          'bodyLength': body.length,
+          'bodyPreview': body.length > 80 ? '${body.substring(0, 80)}…' : body,
+        },
+      );
       final response = await dioClient.post(
         uri: EndPoints.sendConversationMessage,
         data: {
@@ -73,8 +123,19 @@ class ChatRepo extends BaseRepo {
           'body': body,
         },
       );
+      _logSendResponse(
+        label: 'sendConversationMessage response',
+        responseData: response.data,
+      );
       return Right(response);
     } catch (error) {
+      _logChatRepo(
+        'sendConversationMessage error',
+        {
+          'conversationId': conversationId,
+          'error': error.toString(),
+        },
+      );
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
@@ -84,6 +145,15 @@ class ChatRepo extends BaseRepo {
     required File file,
   }) async {
     try {
+      _logChatRepo(
+        'sendConversationFileMessage request',
+        {
+          'conversationId': conversationId,
+          'filePath': file.path,
+          'exists': file.existsSync(),
+          'fileLength': file.existsSync() ? file.lengthSync() : null,
+        },
+      );
       final response = await dioClient.post(
         uri: EndPoints.sendConversationMessage,
         data: FormData.fromMap(
@@ -93,8 +163,20 @@ class ChatRepo extends BaseRepo {
           },
         ),
       );
+      _logSendResponse(
+        label: 'sendConversationFileMessage response',
+        responseData: response.data,
+      );
       return Right(response);
     } catch (error) {
+      _logChatRepo(
+        'sendConversationFileMessage error',
+        {
+          'conversationId': conversationId,
+          'filePath': file.path,
+          'error': error.toString(),
+        },
+      );
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
@@ -126,4 +208,93 @@ class ChatRepo extends BaseRepo {
     }
     return int.tryParse(value?.toString() ?? '');
   }
+}
+
+void _logChatRepo(String message, [Map<String, Object?> details = const {}]) {
+  final suffix = details.isEmpty ? '' : ' | $details';
+  log('[ChatRepo] $message$suffix', name: 'ChatRepo');
+}
+
+void _logConversationSummary({
+  required int requestedConversationId,
+  required String source,
+  required ChatModel chat,
+}) {
+  final latestMessage = chat.messages.isNotEmpty ? chat.messages.last : null;
+  _logChatRepo(
+    'getConversationMessages summary',
+    {
+      'requestedConversationId': requestedConversationId,
+      'source': source,
+      'returnedChatId': chat.id,
+      'messageCount': chat.messages.length,
+      'receiverId': chat.receiver?.id,
+      'receiverName': chat.receiver?.name,
+      'latestMessageId': latestMessage?.id,
+      'latestMessageTime': latestMessage?.time,
+      'latestMessageType': latestMessage?.messageType,
+    },
+  );
+}
+
+void _logSendResponse({
+  required String label,
+  required dynamic responseData,
+}) {
+  final messageJson = _extractMessageMap(responseData);
+  _logChatRepo(
+    label,
+    {
+      'responseKeys': _mapKeys(responseData),
+      'messageId': messageJson?['id'],
+      'messageBody': messageJson?['message'],
+      'messageType': messageJson?['message_type'],
+    },
+  );
+}
+
+List<String> _mapKeys(dynamic value) {
+  if (value is Map<String, dynamic>) {
+    return value.keys.toList();
+  }
+  if (value is Map) {
+    return value.keys.map((key) => key.toString()).toList();
+  }
+  return const [];
+}
+
+Map<String, dynamic>? _extractMessageMap(dynamic raw) {
+  final map = _normalizeMap(raw);
+  if (map == null) return null;
+
+  final candidates = <dynamic>[
+    map,
+    map['message'],
+    map['data'],
+    map['payload'],
+    (map['data'] is Map ? (map['data'] as Map)['message'] : null),
+    (map['payload'] is Map ? (map['payload'] as Map)['message'] : null),
+  ];
+
+  for (final candidate in candidates) {
+    final json = _normalizeMap(candidate);
+    if (json == null) continue;
+    if (json.containsKey('id') ||
+        json.containsKey('message') ||
+        json.containsKey('message_type')) {
+      return json;
+    }
+  }
+
+  return null;
+}
+
+Map<String, dynamic>? _normalizeMap(dynamic value) {
+  if (value is Map<String, dynamic>) {
+    return value;
+  }
+  if (value is Map) {
+    return value.map((key, value) => MapEntry(key.toString(), value));
+  }
+  return null;
 }

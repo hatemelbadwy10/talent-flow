@@ -43,12 +43,14 @@ class NotificationModel extends SingleMapper {
 
 class Data {
   Data({
+    required this.id,
     required this.type,
     required this.extra,
     required this.amount,
     required this.freelancerId,
   });
 
+  final int? id;
   final String? type;
   final String? extra;
   final String? amount;
@@ -56,11 +58,22 @@ class Data {
 
   factory Data.fromJson(Map<String, dynamic> json){
     return Data(
+      id: _toInt(json["id"]),
       type: json["type"],
       extra: json["extra"],
       amount: json["amount"],
-      freelancerId: json["freelancer_id"],
+      freelancerId: _toInt(json["freelancer_id"]),
     );
   }
 
+}
+
+int? _toInt(dynamic value) {
+  if (value is int) {
+    return value;
+  }
+  if (value is num) {
+    return value.toInt();
+  }
+  return int.tryParse(value?.toString() ?? '');
 }

@@ -80,6 +80,7 @@ class AddWorkRepo extends BaseRepo {
   // ===================== Method using WorkItem list =====================
   Future<Either<ServerFailure, Response>> addWorks({
     required List<WorkItem> works,
+    Map<String, String>? answers,
   }) async {
     try {
       final formData = FormData();
@@ -116,6 +117,12 @@ class AddWorkRepo extends BaseRepo {
               await MultipartFile.fromFile(work.files![fileIndex].path),
             ));
           }
+        }
+      }
+
+      if (answers != null && answers.isNotEmpty) {
+        for (final entry in answers.entries) {
+          formData.fields.add(MapEntry(entry.key, entry.value));
         }
       }
 

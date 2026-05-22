@@ -2,20 +2,26 @@ import 'dart:developer';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
+import 'package:talent_flow/components/custom_network_image.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/setting/bloc/identity_verification_bloc.dart';
+import 'package:talent_flow/features/setting/model/identity_verification_details.dart';
 import 'package:talent_flow/features/setting/mixins/identity_verification_form_mixin.dart';
 import 'package:talent_flow/features/setting/model/identity_verification_request.dart';
+import 'package:talent_flow/features/setting/repo/settings_repo.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/helpers/date_time_picker.dart';
 import 'package:talent_flow/helpers/pickers/view/image_picker_helper.dart';
@@ -39,15 +45,23 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
     with IdentityVerificationFormMixin {
   late final IdentityVerificationBloc _identityVerificationBloc;
   late final LocationOptionsBloc _locationOptionsBloc;
+  late final SettingsRepo _settingsRepo;
+  late final Dio _dio;
   bool _isUnderReview = false;
+  bool _isLoadingExistingRequest = true;
+  bool _showEditForm = false;
+  IdentityVerificationDetails? _acceptedVerification;
 
   @override
   void initState() {
     super.initState();
     _identityVerificationBloc = IdentityVerificationBloc(sl());
+    _settingsRepo = sl();
+    _dio = sl();
     _locationOptionsBloc = LocationOptionsBloc(sl())
       ..add(const LoadCountries());
     _isUnderReview = _readIdentityVerifyStatus().toLowerCase() == 'processing';
+    _loadExistingIdentityVerification();
   }
 
   @override
@@ -251,6 +265,132 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
     return '';
   }
 
+  Future<void> _loadExistingIdentityVerification() async {
+    final result = await _settingsRepo.getIdentityVerification();
+    if (!mounted) return;
+
+    IdentityVerificationDetails? details;
+    final failed = result.fold(
+      (_) => true,
+      (response) {
+        details = response;
+        return false;
+      },
+    );
+
+    if (failed) {
+      setState(() {
+        _isLoadingExistingRequest = false;
+      });
+      return;
+    }
+
+    final normalizedStatus = details?.status.trim().toLowerCase() ?? '';
+    final isAccepted = normalizedStatus == 'accepted';
+    final isPending = _isPendingStatus(normalizedStatus);
+    final shouldShowForm =
+        normalizedStatus.isEmpty ||
+        normalizedStatus == 'rejected' ||
+        normalizedStatus == 'declined';
+
+    if (details != null) {
+      await _populateFormFromExistingRequest(details!);
+    }
+
+    await UserCompletionGuard.updateStoredFlags(
+      identityAuthenticated: isAccepted,
+      identityVerifyStatus: details?.status,
+    );
+    if (!mounted) return;
+
+    setState(() {
+      _acceptedVerification = isAccepted ? details : null;
+      _isUnderReview = isPending;
+      _isLoadingExistingRequest = false;
+      _showEditForm = false;
+
+      if (shouldShowForm) {
+        _isUnderReview = false;
+      }
+    });
+  }
+
+  bool _isPendingStatus(String status) {
+    return status == 'processing' ||
+        status == 'pending' ||
+        status == 'waiting' ||
+        status == 'under review' ||
+        status == 'under_review' ||
+        status == 'in review' ||
+        status == 'in_review';
+  }
+
+  Future<void> _populateFormFromExistingRequest(
+    IdentityVerificationDetails details,
+  ) async {
+    arabicFirstNameController.text = details.firstNameAr;
+    arabicFamilyNameController.text = details.lastNameAr;
+    englishFirstNameController.text = details.firstNameEn;
+    englishFamilyNameController.text = details.lastNameEn;
+    birthDateController.text = details.dateOfBirth;
+    acknowledgedNotifier.value = true;
+
+    if (details.dateOfBirth.isNotEmpty) {
+      birthDateNotifier.value = DateTime.tryParse(details.dateOfBirth);
+    }
+    if (details.countryId != null) {
+      selectedCountryIdNotifier.value = details.countryId.toString();
+    }
+
+    await _hydrateExistingImages(details);
+  }
+
+  Future<void> _hydrateExistingImages(
+    IdentityVerificationDetails details,
+  ) async {
+    final downloads = await Future.wait([
+      _downloadImageToTempFile(details.idCardFrontFace, 'front'),
+      _downloadImageToTempFile(details.idCardBackFace, 'back'),
+      _downloadImageToTempFile(details.selfieWithIdCard, 'selfie'),
+    ]);
+
+    final updated = Map<int, File>.from(uploadedTabImagesNotifier.value);
+    if (downloads[0] != null) updated[1] = downloads[0]!;
+    if (downloads[1] != null) updated[2] = downloads[1]!;
+    if (downloads[2] != null) updated[3] = downloads[2]!;
+    uploadedTabImagesNotifier.value = updated;
+  }
+
+  Future<File?> _downloadImageToTempFile(String url, String prefix) async {
+    if (url.trim().isEmpty) return null;
+
+    try {
+      final response = await _dio.get<List<int>>(
+        url,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      final bytes = response.data;
+      if (bytes == null || bytes.isEmpty) return null;
+
+      final tempDir = await getTemporaryDirectory();
+      final uri = Uri.tryParse(url);
+      final extension = path.extension(uri?.path ?? '');
+      final safeExtension = extension.isEmpty ? '.png' : extension;
+      final file = File(
+        '${tempDir.path}/identity_${prefix}_${DateTime.now().microsecondsSinceEpoch}$safeExtension',
+      );
+      await file.writeAsBytes(bytes, flush: true);
+      return file;
+    } catch (error, stackTrace) {
+      log(
+        'Failed to hydrate identity verification image',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -303,6 +443,14 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
               body: AnimatedBuilder(
                 animation: screenListenable,
                 builder: (context, _) {
+                  if (_isLoadingExistingRequest) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (_acceptedVerification != null && !_showEditForm) {
+                    return _buildAcceptedState(_acceptedVerification!);
+                  }
+
                   if (_isUnderReview) {
                     return _buildUnderReviewState();
                   }
@@ -600,6 +748,237 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildAcceptedState(IdentityVerificationDetails details) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEAF8EE),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  const CircleAvatar(
+                    radius: 22,
+                    backgroundColor: Color(0xFF2E7D32),
+                    child: Icon(Icons.check, color: Colors.white),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'identity_verification_screen.accepted_title'.tr(),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'identity_verification_screen.accepted_message'.tr(),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            height: 1.5,
+                            color: Color(0xFF4E5A54),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildAcceptedInfoCard(details),
+            const SizedBox(height: 16),
+            _buildAcceptedImages(details),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _showEditForm = true;
+                    currentTabNotifier.value = 0;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Styles.PRIMARY_COLOR,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'identity_verification_screen.show_form'.tr(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAcceptedInfoCard(IdentityVerificationDetails details) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE7E7E7)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'identity_verification_screen.saved_data'.tr(),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildInfoRow(
+            'identity_verification_screen.ar_first_name'.tr(),
+            details.firstNameAr,
+          ),
+          _buildInfoRow(
+            'identity_verification_screen.ar_family_name'.tr(),
+            details.lastNameAr,
+          ),
+          _buildInfoRow(
+            'identity_verification_screen.en_first_name'.tr(),
+            details.firstNameEn,
+          ),
+          _buildInfoRow(
+            'identity_verification_screen.en_family_name'.tr(),
+            details.lastNameEn,
+          ),
+          _buildInfoRow(
+            'identity_verification_screen.country'.tr(),
+            details.country,
+          ),
+          _buildInfoRow(
+            'identity_verification_screen.birth_date'.tr(),
+            details.dateOfBirth,
+            isLast: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, {bool isLast = false}) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF666666),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value.isEmpty ? '-' : value,
+              textAlign: TextAlign.end,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAcceptedImages(IdentityVerificationDetails details) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'identity_verification_screen.documents'.tr(),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 12),
+        _buildDocumentPreview(
+          title: 'identity_verification_screen.tab_front'.tr(),
+          imageUrl: details.idCardFrontFace,
+        ),
+        const SizedBox(height: 12),
+        _buildDocumentPreview(
+          title: 'identity_verification_screen.tab_back'.tr(),
+          imageUrl: details.idCardBackFace,
+        ),
+        const SizedBox(height: 12),
+        _buildDocumentPreview(
+          title: 'identity_verification_screen.tab_selfie'.tr(),
+          imageUrl: details.selfieWithIdCard,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDocumentPreview({
+    required String title,
+    required String imageUrl,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE7E7E7)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: CustomNetworkImage.containerNewWorkImage(
+              image: imageUrl,
+              height: 220,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              radius: 12,
+            ),
+          ),
+        ],
       ),
     );
   }

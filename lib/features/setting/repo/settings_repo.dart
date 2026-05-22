@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:talent_flow/data/error/failures.dart';
 import 'package:talent_flow/features/setting/model/help_model.dart';
+import 'package:talent_flow/features/setting/model/identity_verification_details.dart';
 import 'package:talent_flow/features/setting/model/identity_verification_request.dart';
 import 'package:talent_flow/main_repos/base_repo.dart';
 
@@ -60,6 +61,24 @@ class SettingsRepo extends BaseRepo {
         }),
       );
       return Right(response);
+    } catch (error) {
+      return left(ApiErrorHandler.getServerFailure(error));
+    }
+  }
+
+  Future<Either<ServerFailure, IdentityVerificationDetails?>>
+      getIdentityVerification() async {
+    try {
+      final response = await dioClient.get(uri: EndPoints.identityVerification);
+      final payload = response.data is Map<String, dynamic>
+          ? response.data['payload']
+          : null;
+
+      if (payload is Map<String, dynamic>) {
+        return Right(IdentityVerificationDetails.fromJson(payload));
+      }
+
+      return const Right(null);
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }

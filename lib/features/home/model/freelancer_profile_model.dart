@@ -8,6 +8,9 @@ class FreelancerProfileModel extends SingleMapper {
     required this.country,
     required this.specialization,
     required this.jobTitle,
+    required this.addedWorks,
+    required this.identityAuthenticated,
+    required this.bankAccountAdded,
     required this.bio,
     required this.skills,
     required this.statistics,
@@ -21,6 +24,9 @@ class FreelancerProfileModel extends SingleMapper {
   final dynamic country;
   final String? specialization;
   final String? jobTitle;
+  final bool addedWorks;
+  final bool identityAuthenticated;
+  final bool bankAccountAdded;
   final String? bio;
   final List<String> skills;
   final Statistics? statistics;
@@ -35,6 +41,9 @@ class FreelancerProfileModel extends SingleMapper {
       country: json["country"],
       specialization: json["specialization"],
       jobTitle: json["job_title"],
+      addedWorks: _toBool(json["added_works"]),
+      identityAuthenticated: _toBool(json["identity_authenticated"]),
+      bankAccountAdded: _toBool(json["bank_account_added"]),
       bio: json["bio"],
       skills: json["skills"] == null
           ? []
@@ -63,6 +72,13 @@ class FreelancerProfileModel extends SingleMapper {
     // TODO: implement toJson
     throw UnimplementedError();
   }
+}
+
+bool _toBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  final normalized = value?.toString().trim().toLowerCase();
+  return normalized == 'true' || normalized == '1';
 }
 
 class FreelancerReview {
@@ -107,6 +123,11 @@ class FreelancerReview {
 class Statistics {
   Statistics({
     required this.rating,
+    required this.identityAuthenticated,
+    required this.bankAccountAdded,
+    required this.completedProjects,
+    required this.inProgressProjects,
+    required this.city,
     required this.projectsCompletion,
     required this.deliverOnDate,
     required this.reEmployee,
@@ -117,6 +138,11 @@ class Statistics {
   });
 
   final int? rating;
+  final bool identityAuthenticated;
+  final bool bankAccountAdded;
+  final int? completedProjects;
+  final int? inProgressProjects;
+  final String? city;
   final String? projectsCompletion;
   final String? deliverOnDate;
   final String? reEmployee;
@@ -128,6 +154,15 @@ class Statistics {
   factory Statistics.fromJson(Map<String, dynamic> json) {
     return Statistics(
       rating: json["rating"],
+      identityAuthenticated: _toBool(json["identity_authenticated"]),
+      bankAccountAdded: _toBool(json["bank_account_added"]),
+      completedProjects: json["completed_projects"] is int
+          ? json["completed_projects"] as int
+          : int.tryParse(json["completed_projects"]?.toString() ?? ''),
+      inProgressProjects: json["in_progress_projects"] is int
+          ? json["in_progress_projects"] as int
+          : int.tryParse(json["in_progress_projects"]?.toString() ?? ''),
+      city: json["city"]?.toString(),
       projectsCompletion: json["projects_completion"],
       deliverOnDate: json["deliver_on_date"],
       reEmployee: json["re_employee"],

@@ -82,13 +82,18 @@ Future<void> handlePathByRoute(Map notify) async {
           break;
         case 'conversation':
           if (id != null) {
+            final arguments = {
+              'conversationId': id,
+              if (projectId != null) 'project_id': projectId,
+              if (projectId != null) 'projectId': projectId,
+            };
+            log(
+              '[NotificationOperation] opening Routes.chat from notification | $arguments',
+              name: 'NotificationOperation',
+            );
             CustomNavigator.push(
               Routes.chat,
-              arguments: {
-                'conversationId': id,
-                if (projectId != null) 'project_id': projectId,
-                if (projectId != null) 'projectId': projectId,
-              },
+              arguments: arguments,
             );
             return;
           }

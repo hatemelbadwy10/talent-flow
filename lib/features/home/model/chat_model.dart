@@ -96,19 +96,104 @@ class Message {
         );
     }
 
-    factory Message.fromJson(Map<String, dynamic> json){ 
+    factory Message.fromJson(Map<String, dynamic> json){
+        final createdAt = DateTime.tryParse(
+            _firstNonEmptyText([
+                json["created_at"],
+                json["updated_at"],
+            ]) ?? "",
+        );
+
         return Message(
-            id: json["id"],
-            messageType: json["message_type"],
-            message: json["message"],
-            isSent: json["is_sent"],
-            sender: json["sender"] == null ? null : Receiver.fromJson(json["sender"]),
-            createdAt: DateTime.tryParse(json["created_at"] ?? ""),
-            time: json["time"],
-            status: json["status"],
+            id: _parseInt(json["id"]),
+            messageType: _firstNonEmptyText([
+                json["message_type"],
+                json["type"],
+                _looksLikeTextPayload(json) ? "text" : null,
+            ]),
+            message: _firstNonEmptyText([
+                json["message"],
+                json["body"],
+                json["text"],
+                json["content"],
+            ]),
+            isSent: _toBool(json["is_sent"]),
+            sender: _parseReceiver(json),
+            createdAt: createdAt,
+            time: _firstNonEmptyText([
+                json["time"],
+                json["created_at"],
+                json["updated_at"],
+            ]),
+            status: _firstNonEmptyText([
+                json["status"],
+                json["state"],
+            ]),
         );
     }
 
+}
+
+Receiver? _parseReceiver(Map<String, dynamic> json) {
+    final rawSender = json["sender"];
+    if (rawSender is Map<String, dynamic>) {
+        return Receiver.fromJson(rawSender);
+    }
+    if (rawSender is Map) {
+        return Receiver.fromJson(rawSender.map(
+            (key, value) => MapEntry(key.toString(), value),
+        ));
+    }
+
+    final senderId = _parseInt(json["sender_id"]);
+    if (senderId == null) {
+        return null;
+    }
+
+    return Receiver(
+        id: senderId,
+        name: null,
+        image: null,
+        jobTitle: null,
+    );
+}
+
+String? _firstNonEmptyText(List<dynamic> values) {
+    for (final value in values) {
+        final text = value?.toString().trim() ?? "";
+        if (text.isNotEmpty && text.toLowerCase() != "null") {
+            return text;
+        }
+    }
+    return null;
+}
+
+bool _toBool(dynamic value) {
+    if (value is bool) {
+        return value;
+    }
+    if (value is num) {
+        return value != 0;
+    }
+
+    final normalized = value?.toString().trim().toLowerCase() ?? "";
+    if (normalized.isEmpty) {
+        return false;
+    }
+
+    return normalized == "1" ||
+        normalized == "true" ||
+        normalized == "yes";
+}
+
+bool _looksLikeTextPayload(Map<String, dynamic> json) {
+    return _firstNonEmptyText([
+            json["message"],
+            json["body"],
+            json["text"],
+            json["content"],
+        ]) !=
+        null;
 }
 
 class Receiver {

@@ -8,6 +8,7 @@ import '../app/core/app_state.dart';
 import '../app/core/styles.dart';
 import '../data/config/di.dart';
 import '../data/error/failures.dart';
+import '../data/realtime/user_channel_realtime_service.dart';
 import '../main_models/user_model.dart';
 import '../main_repos/user_repo.dart';
 
@@ -101,6 +102,7 @@ class UserBloc extends Bloc<AppEvent, AppState> {
 
   onDelete(Delete event, Emitter<AppState> emit) async {
     user = null;
+    await sl<UserChannelRealtimeService>().clearSubscription();
     repo.clearUserData();
     emit(Start());
   }

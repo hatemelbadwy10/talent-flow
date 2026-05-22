@@ -1,5 +1,6 @@
 {
   "next": "التالي",
+  "continue": "متابعة",
   "start": "ابدأ الآن",
   "talent_flow_core": "مكان واحد يضم الفريلانسر والباحثين عن تنفيذ خدماتهم",
 
@@ -151,7 +152,12 @@
     "read_project": "قراءة بيانات المشروع"
   },
   "new_project": {
-    "title": "مشاريع جديدة"
+    "title": "مشاريع جديدة",
+    "filter_specialization": "فلترة حسب التخصص",
+    "sort_by": "الترتيب",
+    "latest": "الأحدث",
+    "oldest": "الأقدم",
+    "reset": "إعادة"
   },
 "add_project": {
   "add_project": "إضافة مشروع",
@@ -521,6 +527,11 @@
     "submit_success": "تم إرسال طلب التحقق بنجاح",
     "submit_processing": "تم إرسال طلب التحقق وهو الآن قيد المراجعة",
     "submit_error": "فشل إرسال طلب التحقق",
+    "accepted_title": "تم قبول التحقق من الهوية",
+    "accepted_message": "تم التحقق من هويتك بنجاح، والبيانات المرسلة ظاهرة بالأسفل.",
+    "show_form": "عرض النموذج",
+    "saved_data": "البيانات المحفوظة",
+    "documents": "المستندات المرفوعة",
     "under_review_title": "التحقق من الهوية قيد المراجعة",
     "under_review_message": "طلب التحقق من الهوية الخاص بك قيد المراجعة حالياً. يرجى الانتظار حتى يتم الرد عليك."
   },
@@ -596,7 +607,7 @@
   "confirm_terms": "تأكيد الشروط",
   "term_one": "جميع الأعمال من تنفيذي ولدي صلاحية لنشرها.",
   "term_two": "أعلم أنه سيتم إيقاف حسابي إذا استخدمت أعمال تنتهك حقوق الآخرين.",
-  "work_number": "العمل {0} من 3",
+  "work_number": "العمل {} من 3",
   "work_title": "عنوان العمل",
   "work_title_hint": "اكتب هنا اسم العمل",
   "thumbnail": "صورة مصغرة",
@@ -630,12 +641,29 @@
     "skills": "المهارات",
     "works": "الأعمال",
     "reviews": "التقييمات",
+    "identity_verified": "تم التحقق من الهوية",
+    "bank_account": "الحساب البنكي",
+    "added_works": "الأعمال المضافة",
+    "country": "الدولة",
+    "specialization": "التخصص",
+    "job_title": "المسمى الوظيفي",
+    "city": "المدينة",
+    "registration_date": "تاريخ التسجيل",
+    "last_seen": "آخر ظهور",
+    "completed_projects": "المشاريع المكتملة",
+    "in_progress_projects": "المشاريع قيد التنفيذ",
     "projects_status": "حالات المشاريع",
     "total_projects": "إجمالي المشاريع",
     "no_projects": "لا توجد مشاريع",
     "no_works": "لا توجد أعمال",
     "no_reviews": "لا توجد تقييمات",
     "contact_me": "اتصل بي"
+  },
+  "acceptance_test": {
+    "title": "اختبار القبول",
+    "load_failed": "فشل تحميل اختبار القبول",
+    "empty": "لا يوجد محتوى متاح لاختبار القبول",
+    "answer_all_questions": "يرجى الإجابة على جميع الأسئلة"
   },
   "edit_profile": {
     "title": "تعديل الحساب",
@@ -700,6 +728,7 @@
     "day": "اليوم"
   },  "project_status": {
     "completed": "مكتملة",
+    "accepted": "مقبول",
     "draft": "مسودة",
     "rejected": "مرفوضة",
     "canceled": "ملغاة",
@@ -712,6 +741,10 @@
     "default_title": "موقع لإدارة مستشفى بداخلها عيادات",
     "likes": "إعجابات",
     "views": "مشاهدات"
+  },
+  "work_details": {
+    "no_description": "لا يوجد وصف لهذا العمل حتى الآن",
+    "no_skills": "لم تتم إضافة مهارات لهذا العمل بعد"
   },
   "project_proposals": {
     "title": "العروض المقدمة",

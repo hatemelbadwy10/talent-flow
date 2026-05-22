@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
+import 'package:talent_flow/data/realtime/user_channel_realtime_service.dart'
+    as data_realtime;
 import 'app/core/styles.dart';
 import 'app/notifications/notification_helper.dart';
 import 'data/config/di.dart' as di;
@@ -64,9 +66,62 @@ class MyApp extends StatelessWidget {
         final userBloc = UserBloc.instance;
         return BlocProvider.value(
           value: userBloc,
-          child: child!,
+          child: _RealtimeSessionBootstrap(child: child!),
         );
       },
     );
+  }
+}
+
+class _RealtimeSessionBootstrap extends StatefulWidget {
+  const _RealtimeSessionBootstrap({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_RealtimeSessionBootstrap> createState() =>
+      _RealtimeSessionBootstrapState();
+}
+
+class _RealtimeSessionBootstrapState extends State<_RealtimeSessionBootstrap>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _scheduleSync();
+  }
+
+  @override
+  void didUpdateWidget(covariant _RealtimeSessionBootstrap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _scheduleSync();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _scheduleSync();
+    }
+  }
+
+  void _scheduleSync() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      sl<data_realtime.UserChannelRealtimeService>()
+          .syncSessionSubscription();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _scheduleSync();
+    return widget.child;
   }
 }

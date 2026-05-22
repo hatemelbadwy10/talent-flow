@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -326,15 +327,20 @@ class _ProposalCardState extends State<_ProposalCard> {
         );
       },
       (conversationId) {
+        final arguments = {
+          'conversationId': conversationId,
+          'freelancerId': freelancerId,
+          'freelancerName': widget.proposal.freelancerName,
+          'freelancerJobTitle': widget.proposal.freelancerJobTitle,
+          'projectId': widget.projectId,
+        };
+        log(
+          '[SingleProjectView] opening Routes.chat from project details | $arguments',
+          name: 'SingleProjectView',
+        );
         CustomNavigator.push(
           Routes.chat,
-          arguments: {
-            'conversationId': conversationId,
-            'freelancerId': freelancerId,
-            'freelancerName': widget.proposal.freelancerName,
-            'freelancerJobTitle': widget.proposal.freelancerJobTitle,
-            'projectId': widget.projectId,
-          },
+          arguments: arguments,
         );
       },
     );

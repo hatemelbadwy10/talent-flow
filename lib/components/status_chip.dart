@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 enum ProjectStatus {
   completed,
+  accepted,
   draft,
   rejected,
   canceled,
@@ -21,6 +22,8 @@ class StatusChip extends StatelessWidget {
     switch (status) {
       case ProjectStatus.completed:
         return "project_status.completed";
+      case ProjectStatus.accepted:
+        return "project_status.accepted";
       case ProjectStatus.draft:
         return "project_status.draft";
       case ProjectStatus.rejected:
@@ -42,6 +45,8 @@ class StatusChip extends StatelessWidget {
     switch (status) {
       case ProjectStatus.completed:
         return const Color(0xFFDEFBE8);
+      case ProjectStatus.accepted:
+        return const Color(0xFFDDF7E8);
       case ProjectStatus.draft:
         return const Color(0xFFFEDF89);
       case ProjectStatus.rejected:
@@ -63,6 +68,8 @@ class StatusChip extends StatelessWidget {
     switch (status) {
       case ProjectStatus.completed:
         return const Color(0xFF22C55E);
+      case ProjectStatus.accepted:
+        return const Color(0xFF15803D);
       case ProjectStatus.draft:
         return const Color(0xFFF59E0B);
       case ProjectStatus.rejected:
@@ -118,6 +125,12 @@ class ProjectStatusHelper {
       case 'completed':
       case 'مكتمل':
         return ProjectStatus.completed;
+      case 'accepted':
+      case 'approve':
+      case 'approved':
+      case 'مقبول':
+      case 'مقبولة':
+        return ProjectStatus.accepted;
       case 'draft':
       case 'مسودة':
         return ProjectStatus.draft;

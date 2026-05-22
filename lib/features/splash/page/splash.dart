@@ -87,22 +87,12 @@ class _SplashState extends State<Splash> with WidgetsBindingObserver {
                       ),
                       Align(
                         alignment: const Alignment(0, 0.1),
-                        child: Container(
-                          width: circleSize,
-                          height: circleSize,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color:
-                                const Color(0xFFE9E1D6).withValues(alpha: 0.72),
-                          ),
-                          alignment: Alignment.center,
-                          child: Image.asset(
-                            Images.appLogo,
-                            width: logoWidth,
-                            fit: BoxFit.contain,
-                            color: Styles.PRIMARY_COLOR,
-                            colorBlendMode: BlendMode.srcIn,
-                          ),
+                        child: Image.asset(
+                          Images.appLogo,
+                          width: logoWidth,
+                          fit: BoxFit.contain,
+                          color: Styles.PRIMARY_COLOR,
+                          colorBlendMode: BlendMode.srcIn,
                         ),
                       )
                           .animate()

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -34,6 +35,7 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
   final AudioRecorder _audioRecorder = AudioRecorder();
 
   bool _isRecording = false;
+  String? _lastRenderSummary;
 
   int? _parseInt(dynamic value) {
     if (value is int) {
@@ -48,11 +50,24 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
       return;
     }
 
+    final conversationId = widget.arguments?['conversationId'];
+    final freelancerId = widget.arguments?['freelancerId'];
+    final usedFallback = conversationId == null && freelancerId != null;
+    _logChatScreen(
+      'send text from UI',
+      {
+        'conversationId': conversationId?.toString(),
+        'freelancerId': freelancerId?.toString(),
+        'usedFreelancerFallback': usedFallback,
+        'bodyLength': body.length,
+        'bodyPreview': _preview(body),
+      },
+    );
+
     context.read<FreelancerChatBloc>().add(
           SendMessage(
             arguments: {
-              'conversationId': widget.arguments?['conversationId'] ??
-                  widget.arguments?['freelancerId'],
+              'conversationId': conversationId ?? freelancerId,
               'body': body,
             },
           ),
@@ -63,6 +78,14 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
   @override
   void initState() {
     super.initState();
+    _logChatScreen(
+      'initState route arguments',
+      {
+        'arguments': _summarizeMap(widget.arguments),
+        'hasConversationId': widget.arguments?['conversationId'] != null,
+        'hasFreelancerId': widget.arguments?['freelancerId'] != null,
+      },
+    );
     _messageController.addListener(_onComposerChanged);
   }
 
@@ -145,6 +168,17 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
               },
             ),
           );
+      _logChatScreen(
+        'send voice/file from UI',
+        {
+          'conversationId': widget.arguments?['conversationId']?.toString(),
+          'freelancerId': widget.arguments?['freelancerId']?.toString(),
+          'usedFreelancerFallback':
+              widget.arguments?['conversationId'] == null &&
+                  widget.arguments?['freelancerId'] != null,
+          'filePath': filePath,
+        },
+      );
     } catch (_) {
       if (!mounted) {
         return;
@@ -330,6 +364,22 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
                   if (state is Done && state.data is ChatModel) {
                     final chat = state.data as ChatModel;
                     final messages = chat.messages;
+                    final lastMessage =
+                        messages.isNotEmpty ? messages.last : null;
+                    final renderSummary =
+                        'count=${messages.length}|lastId=${lastMessage?.id}|chatId=${chat.id}';
+                    if (_lastRenderSummary != renderSummary) {
+                      _lastRenderSummary = renderSummary;
+                      _logChatScreen(
+                        'builder render summary',
+                        {
+                          'messageCount': messages.length,
+                          'lastMessageId': lastMessage?.id,
+                          'lastMessageType': lastMessage?.messageType,
+                          'chatId': chat.id,
+                        },
+                      );
+                    }
 
                     if (messages.isEmpty) {
                       return Center(
@@ -479,4 +529,29 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
       ),
     );
   }
+}
+
+void _logChatScreen(String message, [Map<String, Object?> details = const {}]) {
+  final suffix = details.isEmpty ? '' : ' | $details';
+  log('[FreelancerChatScreen] $message$suffix', name: 'FreelancerChatScreen');
+}
+
+Map<String, Object?> _summarizeMap(Map<String, dynamic>? source) {
+  if (source == null) {
+    return const {};
+  }
+  final summary = <String, Object?>{};
+  for (final entry in source.entries) {
+    summary[entry.key] =
+        entry.value is String ? _preview(entry.value) : entry.value?.toString();
+  }
+  return summary;
+}
+
+String _preview(dynamic value, {int max = 120}) {
+  final text = value?.toString() ?? 'null';
+  if (text.length <= max) {
+    return text;
+  }
+  return '${text.substring(0, max)}…';
 }

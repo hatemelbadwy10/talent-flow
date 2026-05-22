@@ -13,6 +13,7 @@ import 'package:talent_flow/features/new_projects/repo/selection_option_repo.dar
 import 'package:talent_flow/features/payment/repo/pay_ment_repo.dart';
 import 'package:talent_flow/features/projects/repo/projects_repo.dart';
 import 'package:talent_flow/features/setting/repo/about_repo.dart';
+import 'package:talent_flow/features/setting/repo/acceptance_test_repo.dart';
 import 'package:talent_flow/features/setting/repo/account_statement_repo.dart';
 import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
 import 'package:talent_flow/features/setting/repo/bank_accounts_repo.dart';
@@ -37,6 +38,7 @@ import '../../features/splash/repo/splash_repo.dart';
 import '../../helpers/social_media_login_helper.dart';
 import '../api/end_points.dart';
 import '../realtime/pusher_service.dart';
+import '../realtime/user_channel_realtime_service.dart';
 import '../internet_connection/internet_connection.dart';
 import '../local_data/local_database.dart';
 import '../dio/dio_client.dart';
@@ -56,7 +58,13 @@ Future<void> init() async {
       ));
   sl.registerLazySingleton(() => SocialMediaLoginHelper());
   sl.registerLazySingleton(() => InternetConnection(connectivity: sl()));
-  sl.registerLazySingleton(() => PusherService());
+  sl.registerLazySingleton(() => PusherService(sharedPreferences: sl()));
+  sl.registerLazySingleton(
+    () => UserChannelRealtimeService(
+      sharedPreferences: sl(),
+      pusherService: sl(),
+    ),
+  );
 
   // /// Repository
   // sl.registerLazySingleton(() => LocalizationRepo(sharedPreferences: sl(), dioClient: sl()));
@@ -70,6 +78,8 @@ Future<void> init() async {
       () => TermsAndConditionRepo(sharedPreferences: sl(), dioClient: sl()));
   sl.registerLazySingleton(
       () => AboutRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton(
+      () => AcceptanceTestRepo(sharedPreferences: sl(), dioClient: sl()));
   sl.registerLazySingleton(
       () => ProjectRepository(dioClient: sl(), sharedPreferences: sl()));
   sl.registerLazySingleton(
