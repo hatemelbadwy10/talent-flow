@@ -26,8 +26,16 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Talent Flow uses the camera to take profile, portfolio, project, and identity verification photos.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Talent Flow uses your location to provide location-based services and help you select your current location.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Talent Flow uses your location while you use the app to provide location-based services and help you select your current location.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>We use microphone access to record and send voice messages.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Talent Flow uses your photo library so you can upload profile, portfolio, project, and identity verification images.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

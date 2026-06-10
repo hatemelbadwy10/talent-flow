@@ -12,7 +12,6 @@ import 'package:talent_flow/features/home/bloc/home_bloc.dart';
 import 'package:talent_flow/features/home/widgets/freelancer_work_card.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/main_models/user_model.dart';
-import 'package:talent_flow/features/new_projects/widgets/skills_section.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
@@ -23,11 +22,11 @@ class MyFreelancerProfileView extends StatefulWidget {
   const MyFreelancerProfileView({super.key});
 
   @override
-  State<MyFreelancerProfileView> createState() => _MyFreelancerProfileViewState();
+  State<MyFreelancerProfileView> createState() =>
+      _MyFreelancerProfileViewState();
 }
 
 class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
-
   @override
   Widget build(BuildContext context) {
     final userId = int.tryParse(
@@ -71,15 +70,15 @@ class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
           builder: (context, state) {
             final userBloc = context.read<UserBloc>();
             final user = userBloc.user;
-            
+
             if (user == null) {
               return const Center(
                 child: CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
               );
             }
-            
+
             return DefaultTabController(
-              length: 2,
+              length: 3,
               child: Column(
                 children: [
                   Expanded(
@@ -88,15 +87,13 @@ class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
                         return [
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding:
-                                  EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+                              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
                               child: _ProfileHero(user: user),
                             ),
                           ),
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding:
-                                  EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
+                              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.white,
@@ -110,6 +107,7 @@ class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
                                   tabs: [
                                     Tab(text: 'profile.about_me'.tr()),
                                     Tab(text: 'profile.reviews'.tr()),
+                                    Tab(text: 'profile.works'.tr()),
                                   ],
                                 ),
                               ),
@@ -125,8 +123,29 @@ class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
                               if (homeState is Done &&
                                   homeState.model is FreelancerProfileModel) {
                                 return _ReviewsTab(
-                                  model: homeState.model
-                                      as FreelancerProfileModel,
+                                  model:
+                                      homeState.model as FreelancerProfileModel,
+                                );
+                              }
+                              if (homeState is Error) {
+                                return Center(
+                                  child: Text('profile.load_failed'.tr()),
+                                );
+                              }
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  color: Styles.PRIMARY_COLOR,
+                                ),
+                              );
+                            },
+                          ),
+                          BlocBuilder<HomeBloc, AppState>(
+                            builder: (context, homeState) {
+                              if (homeState is Done &&
+                                  homeState.model is FreelancerProfileModel) {
+                                return _WorksTab(
+                                  model:
+                                      homeState.model as FreelancerProfileModel,
                                 );
                               }
                               if (homeState is Error) {
@@ -447,70 +466,6 @@ class _InfoPill extends StatelessWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-  });
-
-  final String title;
-  final String value;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: Colors.white, size: 20),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.88),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _ReviewCard extends StatelessWidget {
   const _ReviewCard({
     required this.review,
@@ -555,7 +510,9 @@ class _ReviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      (review.name ?? '').trim().isNotEmpty ? review.name! : '-',
+                      (review.name ?? '').trim().isNotEmpty
+                          ? review.name!
+                          : '-',
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,

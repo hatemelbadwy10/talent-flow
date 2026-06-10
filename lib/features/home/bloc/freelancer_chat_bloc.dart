@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/data/realtime/pusher_service.dart';
@@ -36,9 +35,8 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
     _latestArgs = mapArgs;
 
     final dynamic idRaw = mapArgs['conversationId'] ?? mapArgs['freelancerId'];
-    final int? conversationId = idRaw is int
-        ? idRaw
-        : int.tryParse(idRaw?.toString() ?? '');
+    final int? conversationId =
+        idRaw is int ? idRaw : int.tryParse(idRaw?.toString() ?? '');
 
     if (conversationId == null) {
       log('FreelancerChatBloc: conversationId is null, emitting Empty');
@@ -66,11 +64,12 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
       return;
     }
 
-    final dynamic rawId =
-        mapArgs['conversationId'] ?? _conversationId ?? _latestArgs['conversationId'] ?? _latestArgs['freelancerId'];
-    final int? conversationId = rawId is int
-        ? rawId
-        : int.tryParse(rawId?.toString() ?? '');
+    final dynamic rawId = mapArgs['conversationId'] ??
+        _conversationId ??
+        _latestArgs['conversationId'] ??
+        _latestArgs['freelancerId'];
+    final int? conversationId =
+        rawId is int ? rawId : int.tryParse(rawId?.toString() ?? '');
 
     if (conversationId == null) {
       log('FreelancerChatBloc: conversationId is null on send, emitting Error');
@@ -145,21 +144,22 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
         emit(Error());
       },
       (chat) {
-        _chat = chat;
-        _seedKnownMessages(chat.messages);
+        final List<Message> updatedMessages = List<Message>.from(chat.messages);
+        _seedKnownMessages(updatedMessages);
 
         // Flush any messages that arrived before the conversation was loaded
         if (_pendingMessages.isNotEmpty) {
           log('FreelancerChatBloc: flushing ${_pendingMessages.length} pending messages');
-          final List<Message> updatedMessages = List<Message>.from(chat.messages);
           for (final pending in _pendingMessages) {
             if (!_isDuplicateMessage(pending)) {
               updatedMessages.add(pending);
             }
           }
           _pendingMessages.clear();
-          _chat = chat.copyWith(messages: updatedMessages);
         }
+
+        _sortMessagesNewestFirst(updatedMessages);
+        _chat = chat.copyWith(messages: updatedMessages);
 
         log('FreelancerChatBloc: loaded conversation with ${_chat!.messages.length} messages');
         emit(Done(data: _chat));
@@ -207,9 +207,26 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
 
     final List<Message> updatedMessages = List<Message>.from(current.messages)
       ..add(message);
+    _sortMessagesNewestFirst(updatedMessages);
     _chat = current.copyWith(messages: updatedMessages);
     log('FreelancerChatBloc: emitting Done with ${updatedMessages.length} messages');
     emit(Done(data: _chat));
+  }
+
+  void _sortMessagesNewestFirst(List<Message> messages) {
+    messages.sort((a, b) {
+      final aDate = a.createdAt;
+      final bDate = b.createdAt;
+      if (aDate != null && bDate != null) {
+        return bDate.compareTo(aDate);
+      }
+      if (aDate != null) return -1;
+      if (bDate != null) return 1;
+
+      final aId = a.id ?? 0;
+      final bId = b.id ?? 0;
+      return bId.compareTo(aId);
+    });
   }
 
   bool _isDuplicateMessage(Message message) {

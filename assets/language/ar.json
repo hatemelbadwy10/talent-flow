@@ -165,7 +165,7 @@
   "description_helper": "أدخل وصفاً مفصلاً لمشروعك وأرفق أمثلة لما تريد إن أمكن.",
   "skills": "المهارات",
   "budget": "الميزانية المتوقعة",
-  "select_budget": "اختر الميزانية",
+  "select_budget": "اختر الميزانية {currency}",
   "budget_validation": "الرجاء اختيار الميزانية",
   "budget_helper": "اختر ميزانية مناسبة لتحصل على عروض جيدة.",
   "duration": "المدة المتوقعة للتسليم",
@@ -191,7 +191,7 @@
   "select_specialization": "اختر التخصص",
   "specialization_validation": "الرجاء اختيار التخصص",
   "select_skill": "اختر المهارة",
-  "budget_hint": "250 - 500",
+  "budget_hint": "اختر الميزانية",
   "duration_hint": " المده",
   "files_description_hint": "اوصف الملف",
   "choose_from_gallery": "اختر من المعرض",
@@ -203,7 +203,16 @@
   "add": "اضافة",
   "similar_projects_hint": " مشاريع مشابهة",
   "success": "تمت إضافة المشروع بنجاح",
-  "budget_options": ["250 - 500", "500 - 1000", "1000 - 2500"],
+  "budget_options": [
+    "25 - 50",
+    "50 - 100",
+    "100 - 250",
+    "250 - 500",
+    "500 - 1000",
+    "1000 - 2500",
+    "2500 - 5000",
+    "+5000"
+  ],
   "duration_options": ["أقل من أسبوع", "أسبوع - أسبوعين", "أسبوعين - شهر", "أكثر من شهر"]
 },
   "submit_offer_title": "تقدم للمشروع",
@@ -635,6 +644,9 @@
     "no_projects": "لا توجد مشاريع",
     "no_works": "لا توجد أعمال",
     "no_reviews": "لا توجد تقييمات",
+    "identity_verified": "تم توثيق الهوية",
+    "bank_account": "الحساب البنكي موثق",
+    "added_works": "تمت إضافة الأعمال",
     "contact_me": "اتصل بي"
   },
   "edit_profile": {

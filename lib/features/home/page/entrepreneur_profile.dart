@@ -9,9 +9,8 @@ import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/home_bloc.dart';
-import 'package:talent_flow/main_models/user_model.dart';
+import 'package:talent_flow/features/home/model/entrepreneur_profile_model.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
-import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
@@ -21,11 +20,11 @@ class EntrepreneurProfileView extends StatefulWidget {
   final Map<String, dynamic>? arguments;
 
   @override
-  State<EntrepreneurProfileView> createState() => _EntrepreneurProfileViewState();
+  State<EntrepreneurProfileView> createState() =>
+      _EntrepreneurProfileViewState();
 }
 
 class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
-
   @override
   Widget build(BuildContext context) {
     final prefs = sl<SharedPreferences>();
@@ -53,87 +52,99 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
     return BlocProvider(
       create: (_) => HomeBloc(homeRepo: sl())
         ..add(EntrepreneurProfileEvent(arguments: entrepreneurId)),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF7F9FB),
-        appBar: CustomAppBar(
-          title: 'profile.title'.tr(),
-          centerTitle: true,
-          actions: isCurrentUser && isEntrepreneurAccount
-              ? [
-                  IconButton(
-                    onPressed: () async {
-                      await CustomNavigator.push(Routes.editProfile);
-                      // Refresh profile data on return
-                      if (mounted) {
-                        context.read<HomeBloc>().add(
-                          EntrepreneurProfileEvent(arguments: entrepreneurId),
-                        );
-                      }
-                    },
-                    icon: const Icon(
-                      Icons.edit_outlined,
-                      color: Styles.PRIMARY_COLOR,
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                ]
-              : null,
-        ),
-        body: BlocBuilder<UserBloc, AppState>(
-          builder: (context, state) {
-            final userBloc = context.read<UserBloc>();
-            final user = userBloc.user;
-            
-            if (user == null) {
-              return const Center(
-                child: CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
-              );
-            }
-            
-            return DefaultTabController(
-              length: 2,
-              child: NestedScrollView(
-                headerSliverBuilder: (context, innerBoxIsScrolled) {
-                  return [
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-                        child: _EntrepreneurHero(user: user),
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: TabBar(
-                            labelColor: Styles.PRIMARY_COLOR,
-                            unselectedLabelColor: Styles.HINT_COLOR,
-                            indicatorColor: Styles.PRIMARY_COLOR,
-                            indicatorSize: TabBarIndicatorSize.label,
-                            tabs: [
-                              Tab(text: 'profile.about_me'.tr()),
-                              Tab(text: 'profile.projects_status'.tr()),
-                            ],
-                          ),
+      child: Builder(
+        builder: (profileContext) {
+          return Scaffold(
+            backgroundColor: const Color(0xFFF7F9FB),
+            appBar: CustomAppBar(
+              title: 'profile.title'.tr(),
+              centerTitle: true,
+              actions: isCurrentUser && isEntrepreneurAccount
+                  ? [
+                      IconButton(
+                        onPressed: () async {
+                          await CustomNavigator.push(Routes.editProfile);
+                          if (!profileContext.mounted) return;
+                          profileContext.read<HomeBloc>().add(
+                                EntrepreneurProfileEvent(
+                                    arguments: entrepreneurId),
+                              );
+                        },
+                        icon: const Icon(
+                          Icons.edit_outlined,
+                          color: Styles.PRIMARY_COLOR,
                         ),
                       ),
+                      SizedBox(width: 8.w),
+                    ]
+                  : null,
+            ),
+            body: BlocBuilder<HomeBloc, AppState>(
+              builder: (context, state) {
+                if (state is Loading) {
+                  return const Center(
+                    child:
+                        CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
+                  );
+                }
+
+                if (state is Error) {
+                  return Center(child: Text('profile.load_failed'.tr()));
+                }
+
+                if (state is! Done ||
+                    state.model is! EntrepreneurProfileModel) {
+                  return const SizedBox.shrink();
+                }
+
+                final model = state.model as EntrepreneurProfileModel;
+
+                return DefaultTabController(
+                  length: 2,
+                  child: NestedScrollView(
+                    headerSliverBuilder: (context, innerBoxIsScrolled) {
+                      return [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+                            child: _EntrepreneurHero(model: model),
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: TabBar(
+                                labelColor: Styles.PRIMARY_COLOR,
+                                unselectedLabelColor: Styles.HINT_COLOR,
+                                indicatorColor: Styles.PRIMARY_COLOR,
+                                indicatorSize: TabBarIndicatorSize.label,
+                                tabs: [
+                                  Tab(text: 'profile.about_me'.tr()),
+                                  Tab(text: 'profile.projects_status'.tr()),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ];
+                    },
+                    body: TabBarView(
+                      children: [
+                        _EntrepreneurAboutTab(model: model),
+                        _EntrepreneurProjectsTab(model: model),
+                      ],
                     ),
-                  ];
-                },
-                body: TabBarView(
-                  children: [
-                    _EntrepreneurAboutTab(user: user),
-                    _EntrepreneurProjectsTab(user: user),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
@@ -141,10 +152,10 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
 
 class _EntrepreneurHero extends StatelessWidget {
   const _EntrepreneurHero({
-    required this.user,
+    required this.model,
   });
 
-  final UserModel user;
+  final EntrepreneurProfileModel model;
 
   @override
   Widget build(BuildContext context) {
@@ -175,9 +186,9 @@ class _EntrepreneurHero extends StatelessWidget {
                   border: Border.all(color: Colors.white, width: 3),
                 ),
                 child: ClipOval(
-                  child: (user.profileImage ?? '').trim().isNotEmpty
+                  child: (model.image ?? '').trim().isNotEmpty
                       ? Image.network(
-                          user.profileImage!,
+                          model.image!,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => _fallbackAvatar(),
                         )
@@ -190,7 +201,7 @@ class _EntrepreneurHero extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user.name ?? '-',
+                      (model.name ?? '').trim().isNotEmpty ? model.name! : '-',
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
@@ -199,8 +210,8 @@ class _EntrepreneurHero extends StatelessWidget {
                     ),
                     SizedBox(height: 6.h),
                     Text(
-                      (user.jobTitle ?? '').trim().isNotEmpty
-                          ? user.jobTitle!
+                      (model.jobTitle ?? '').trim().isNotEmpty
+                          ? model.jobTitle!
                           : 'settings_screen.account_type_entrepreneur'.tr(),
                       style: TextStyle(
                         fontSize: 14,
@@ -218,9 +229,9 @@ class _EntrepreneurHero extends StatelessWidget {
           ),
           SizedBox(height: 18.h),
           Text(
-            (user.bio ?? '').trim().isEmpty
+            (model.bio ?? '').trim().isEmpty
                 ? 'no_info_available'.tr()
-                : user.bio!,
+                : model.bio!,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -228,6 +239,26 @@ class _EntrepreneurHero extends StatelessWidget {
               height: 1.6,
               color: Colors.white.withValues(alpha: 0.92),
             ),
+          ),
+          SizedBox(height: 18.h),
+          Row(
+            children: [
+              Expanded(
+                child: _StatusBadge(
+                  label: 'profile.identity_verified'.tr(),
+                  value: model.identityAuthenticated,
+                  icon: Icons.verified_user_outlined,
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: _StatusBadge(
+                  label: 'profile.bank_account'.tr(),
+                  value: model.bankAccountAdded,
+                  icon: Icons.account_balance_outlined,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -244,10 +275,10 @@ class _EntrepreneurHero extends StatelessWidget {
 
 class _EntrepreneurAboutTab extends StatelessWidget {
   const _EntrepreneurAboutTab({
-    required this.user,
+    required this.model,
   });
 
-  final UserModel user;
+  final EntrepreneurProfileModel model;
 
   @override
   Widget build(BuildContext context) {
@@ -268,9 +299,9 @@ class _EntrepreneurAboutTab extends StatelessWidget {
           ],
         ),
         child: Text(
-          (user.bio ?? '').trim().isEmpty
+          (model.bio ?? '').trim().isEmpty
               ? 'no_info_available'.tr()
-              : user.bio!,
+              : model.bio!,
           style: const TextStyle(
             fontSize: 14,
             height: 1.7,
@@ -284,15 +315,310 @@ class _EntrepreneurAboutTab extends StatelessWidget {
 
 class _EntrepreneurProjectsTab extends StatelessWidget {
   const _EntrepreneurProjectsTab({
-    required this.user,
+    required this.model,
   });
 
-  final UserModel user;
+  final EntrepreneurProfileModel model;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('profile.no_projects'.tr()),
+    if (model.projects.isEmpty) {
+      return Center(
+        child: Text('profile.no_projects'.tr()),
+      );
+    }
+
+    return Padding(
+      padding: EdgeInsets.all(16.w),
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Container(
+              padding: EdgeInsets.all(18.w),
+              decoration: BoxDecoration(
+                color: Styles.PRIMARY_COLOR,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48.w,
+                    height: 48.w,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.16),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.folder_copy_outlined,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(width: 14.w),
+                  Expanded(
+                    child: Text(
+                      'profile.total_projects'.tr(),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    model.totalProjects.toString(),
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(child: SizedBox(height: 14.h)),
+          SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1.45,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final project = model.projects[index];
+                final presentation = _projectStatusPresentation(project.status);
+
+                return Container(
+                  padding: EdgeInsets.all(14.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: presentation.color.withValues(alpha: 0.18),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 42.w,
+                        height: 42.w,
+                        decoration: BoxDecoration(
+                          color: presentation.color.withValues(alpha: 0.11),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          presentation.icon,
+                          color: presentation.color,
+                          size: 22,
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              (project.count ?? 0).toString(),
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                color: Styles.HEADER,
+                              ),
+                            ),
+                            Text(
+                              presentation.label,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                height: 1.25,
+                                color: Styles.SUBTITLE,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              childCount: model.projects.length,
+            ),
+          ),
+          SliverToBoxAdapter(child: SizedBox(height: 16.h)),
+        ],
+      ),
+    );
+  }
+
+  _ProjectStatusPresentation _projectStatusPresentation(String? status) {
+    final normalized = (status ?? '').trim().toLowerCase();
+
+    if (normalized == 'مسودة' || normalized == 'draft') {
+      return _ProjectStatusPresentation(
+        label: 'project_status.draft'.tr(),
+        icon: Icons.edit_note_outlined,
+        color: const Color(0xFF64748B),
+      );
+    }
+    if (normalized == 'قيد المراجعة' || normalized == 'under review') {
+      return _ProjectStatusPresentation(
+        label: 'project_status.under_review'.tr(),
+        icon: Icons.fact_check_outlined,
+        color: const Color(0xFFD97706),
+      );
+    }
+    if (normalized == 'مفتوحة' || normalized == 'open') {
+      return _ProjectStatusPresentation(
+        label: 'project_status.open'.tr(),
+        icon: Icons.lock_open_outlined,
+        color: const Color(0xFF0E9F6E),
+      );
+    }
+    if (normalized == 'قيد التنفيذ' || normalized == 'in progress') {
+      return _ProjectStatusPresentation(
+        label: 'project_status.in_progress'.tr(),
+        icon: Icons.pending_actions_outlined,
+        color: const Color(0xFF2563EB),
+      );
+    }
+    if (normalized == 'مكتملة' || normalized == 'completed') {
+      return _ProjectStatusPresentation(
+        label: 'project_status.completed'.tr(),
+        icon: Icons.task_alt_outlined,
+        color: const Color(0xFF059669),
+      );
+    }
+    if (normalized == 'مغلقة' || normalized == 'closed') {
+      return _ProjectStatusPresentation(
+        label: 'project_status.closed'.tr(),
+        icon: Icons.lock_outline,
+        color: const Color(0xFF475569),
+      );
+    }
+    if (normalized == 'ملغاة' || normalized == 'canceled') {
+      return _ProjectStatusPresentation(
+        label: 'project_status.canceled'.tr(),
+        icon: Icons.cancel_outlined,
+        color: const Color(0xFFDC2626),
+      );
+    }
+    if (normalized == 'مرفوض' ||
+        normalized == 'مرفوضة' ||
+        normalized == 'rejected') {
+      return _ProjectStatusPresentation(
+        label: 'project_status.rejected'.tr(),
+        icon: Icons.block_outlined,
+        color: const Color(0xFFB91C1C),
+      );
+    }
+
+    return _ProjectStatusPresentation(
+      label: normalized.isEmpty ? 'profile.projects_status'.tr() : status!,
+      icon: Icons.work_outline,
+      color: Styles.PRIMARY_COLOR,
+    );
+  }
+}
+
+class _ProjectStatusPresentation {
+  const _ProjectStatusPresentation({
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color color;
+}
+
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final bool value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = value ? const Color(0xFF0E9F6E) : Styles.IN_ACTIVE;
+    final statusIcon = value ? Icons.check_rounded : Icons.close_rounded;
+
+    return Container(
+      constraints: BoxConstraints(minHeight: 58.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.55)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32.w,
+            height: 32.w,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(icon, size: 18, color: color),
+                PositionedDirectional(
+                  end: 3.w,
+                  bottom: 3.w,
+                  child: Container(
+                    width: 12.w,
+                    height: 12.w,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.4),
+                    ),
+                    child: Icon(statusIcon, size: 8, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 9.w),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12,
+                height: 1.2,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF20313A),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

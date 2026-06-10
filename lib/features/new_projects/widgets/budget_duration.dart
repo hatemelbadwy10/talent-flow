@@ -14,6 +14,17 @@ import 'helper_text_widget.dart';
 class BudgetField extends StatelessWidget {
   final TextEditingController controller;
 
+  static const List<String> _budgetOptions = [
+    '25 - 50',
+    '50 - 100',
+    '100 - 250',
+    '250 - 500',
+    '500 - 1000',
+    '1000 - 2500',
+    '2500 - 5000',
+    '+5000',
+  ];
+
   const BudgetField({
     super.key,
     required this.controller,
@@ -29,30 +40,66 @@ class BudgetField extends StatelessWidget {
           isRequired: true,
         ),
         const SizedBox(height: 8),
-        CustomTextField(
-          controller: controller,
-          hint: 'add_project.budget_hint'.tr(),
-          inputType: TextInputType.number,
-          formattedType: [
-            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}$')),
-          ],
-          sufWidget: Padding(
-            padding: const EdgeInsetsDirectional.only(end: 4),
-            child: Text(
-              AppCurrency.code,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Styles.HINT_COLOR,
+        DropdownButtonFormField<String>(
+          initialValue: _budgetOptions.contains(controller.text.trim())
+              ? controller.text.trim()
+              : null,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+          hint: Text(
+            'add_project.select_budget'.tr(
+              namedArgs: {'currency': AppCurrency.code},
+            ),
+          ),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Styles.BORDER_COLOR),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Styles.BORDER_COLOR),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Styles.PRIMARY_COLOR,
+                width: 1.4,
               ),
             ),
           ),
+          items: _budgetOptions
+              .map(
+                (option) => DropdownMenuItem<String>(
+                  value: option,
+                  child: Text(
+                    option,
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Styles.HEADER,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
           onChanged: (value) {
+            if (value == null) {
+              return;
+            }
+            controller.text = value;
             context.read<AddProjectBloc>().add(UpdateBudget(budget: value));
           },
-          validate: (value) {
+          validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'add_project.field_required'.tr();
+              return 'add_project.budget_validation'.tr();
             }
             return null;
           },

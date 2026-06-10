@@ -9,6 +9,9 @@ class FreelancerProfileModel extends SingleMapper {
     required this.specialization,
     required this.jobTitle,
     required this.bio,
+    required this.addedWorks,
+    required this.identityAuthenticated,
+    required this.bankAccountAdded,
     required this.skills,
     required this.statistics,
     required this.reviews,
@@ -22,6 +25,9 @@ class FreelancerProfileModel extends SingleMapper {
   final String? specialization;
   final String? jobTitle;
   final String? bio;
+  final bool addedWorks;
+  final bool identityAuthenticated;
+  final bool bankAccountAdded;
   final List<String> skills;
   final Statistics? statistics;
   final List<FreelancerReview> reviews;
@@ -36,6 +42,19 @@ class FreelancerProfileModel extends SingleMapper {
       specialization: json["specialization"],
       jobTitle: json["job_title"],
       bio: json["bio"],
+      addedWorks: _toBool(json["added_works"]),
+      identityAuthenticated: _toBool(
+        json["identity_authenticated"] ??
+            (json["statistics"] is Map
+                ? (json["statistics"] as Map)["identity_authenticated"]
+                : null),
+      ),
+      bankAccountAdded: _toBool(
+        json["bank_account_added"] ??
+            (json["statistics"] is Map
+                ? (json["statistics"] as Map)["bank_account_added"]
+                : null),
+      ),
       skills: json["skills"] == null
           ? []
           : List<String>.from(json["skills"]!.map((x) => x)),
@@ -63,6 +82,17 @@ class FreelancerProfileModel extends SingleMapper {
     // TODO: implement toJson
     throw UnimplementedError();
   }
+}
+
+bool _toBool(dynamic value) {
+  if (value is bool) {
+    return value;
+  }
+  if (value is num) {
+    return value != 0;
+  }
+  final normalized = value?.toString().trim().toLowerCase() ?? '';
+  return normalized == '1' || normalized == 'true' || normalized == 'yes';
 }
 
 class FreelancerReview {

@@ -159,7 +159,7 @@
     "description_helper": "Provide a detailed description of your project and attach examples if possible.",
     "skills": "Skills",
     "budget": "Expected Budget",
-    "select_budget": "Select Budget",
+    "select_budget": "Select Budget {currency}",
     "budget_validation": "Please select a budget",
     "budget_helper": "Choose a suitable budget to receive good offers.",
     "duration": "Expected Delivery Time",
@@ -183,7 +183,7 @@
     "select_specialization": "Select Specialization",
     "specialization_validation": "Please select a specialization",
     "select_skill": "Select Skill",
-    "budget_hint": "250 - 500",
+    "budget_hint": "Select budget",
     "duration_hint": " Less than a week",
     "files_description_hint": "Upload up to 20 attachments",
     "choose_from_gallery": "Choose from Gallery",
@@ -198,9 +198,14 @@
     "success": "Project added successfully",
     "similar_projects_hint": "Similar Projects",
     "budget_options": [
+      "25 - 50",
+      "50 - 100",
+      "100 - 250",
       "250 - 500",
       "500 - 1000",
-      "1000 - 2500"
+      "1000 - 2500",
+      "2500 - 5000",
+      "+5000"
     ],
     "duration_options": [
       "Less than a week",
@@ -638,6 +643,9 @@
     "no_projects": "No projects available",
     "no_works": "No works available",
     "no_reviews": "No reviews available",
+    "identity_verified": "Identity verified",
+    "bank_account": "Bank account verified",
+    "added_works": "Works added",
     "contact_me": "Contact Me"
   },
   "help": {

@@ -122,7 +122,17 @@ class _FreelancerHeader extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(model.name ?? "no_name".tr()),
+            Flexible(
+              child: Text(
+                model.name ?? "no_name".tr(),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Styles.HEADER,
+                ),
+              ),
+            ),
             SizedBox(width: 8.w),
             Container(
               width: 12.w,
@@ -147,7 +157,108 @@ class _FreelancerHeader extends StatelessWidget {
             Text(model.jobTitle ?? "no_job_title".tr()),
           ],
         ),
+        SizedBox(height: 16.h),
+        Row(
+          children: [
+            Expanded(
+              child: _StatusBadge(
+                label: 'profile.identity_verified'.tr(),
+                value: model.identityAuthenticated,
+                icon: Icons.verified_user_outlined,
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: _StatusBadge(
+                label: 'profile.bank_account'.tr(),
+                value: model.bankAccountAdded,
+                icon: Icons.account_balance_outlined,
+              ),
+            ),
+          ],
+        ),
       ],
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final bool value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = value ? const Color(0xFF0E9F6E) : Styles.IN_ACTIVE;
+    final statusIcon = value ? Icons.check_rounded : Icons.close_rounded;
+
+    return Container(
+      constraints: BoxConstraints(minHeight: 58.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32.w,
+            height: 32.w,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(icon, size: 18, color: color),
+                PositionedDirectional(
+                  end: 3.w,
+                  bottom: 3.w,
+                  child: Container(
+                    width: 12.w,
+                    height: 12.w,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.4),
+                    ),
+                    child: Icon(statusIcon, size: 8, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 9.w),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12,
+                height: 1.2,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF20313A),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

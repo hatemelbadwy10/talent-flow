@@ -20,20 +20,31 @@ class NotificationBloc extends Bloc<AppEvent, AppState> {
       final result = await _notificationRepo.getNotification(type: type);
 
       result.fold(
-            (failure) {
+        (failure) {
           log("Notification error: $failure");
           emit(Error());
         },
-            (response) {
+        (response) {
           if (response.data == null || response.data['payload'] == null) {
             emit(Error());
             return;
           }
 
           final List<NotificationModel> notifications =
-          (response.data['payload'] as List)
-              .map((e) => NotificationModel.fromJson(e))
-              .toList();
+              (response.data['payload'] as List)
+                  .map((e) => NotificationModel.fromJson(e))
+                  .toList();
+          notifications.sort((a, b) {
+            final aDate = a.date;
+            final bDate = b.date;
+            if (aDate != null && bDate != null) {
+              return bDate.compareTo(aDate);
+            }
+            if (aDate != null) return -1;
+            if (bDate != null) return 1;
+
+            return (b.id ?? 0).compareTo(a.id ?? 0);
+          });
 
           log("Fetched ${notifications.length} notifications of type: $type");
 

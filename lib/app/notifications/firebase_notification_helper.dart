@@ -18,7 +18,9 @@ FirebaseMessaging? _firebaseMessaging;
 class FirebaseNotifications {
   static FirebaseNotifications? _instance;
   static bool _isInitialized = false;
-  static const bool _disableFcmOnIos = true;
+  static const bool _disableFcmOnIos = false;
+  static const int _apnsTokenWaitAttempts = 10;
+  static const Duration _apnsTokenWaitDelay = Duration(milliseconds: 300);
 
   FirebaseNotifications._internal();
 
@@ -57,7 +59,7 @@ class FirebaseNotifications {
       sound: true,
     );
     await localNotification();
-    await _cacheFcmToken(await _firebaseMessaging!.getToken());
+    await _fetchAndCacheFcmToken();
     _firebaseMessaging!.onTokenRefresh.listen(_cacheFcmToken);
     await firebaseCloudMessagingListeners();
     _isInitialized = true;
@@ -70,11 +72,8 @@ class FirebaseNotifications {
     }
 
     _firebaseMessaging ??= FirebaseMessaging.instance;
-    final token = forceRefresh
-        ? await _firebaseMessaging!.getToken()
-        : (await _firebaseMessaging!.getToken()) ?? cachedFcmToken;
-    await _cacheFcmToken(token);
-    return token;
+    return (await _fetchAndCacheFcmToken(forceRefresh: forceRefresh)) ??
+        cachedFcmToken;
   }
 
   static String? get cachedFcmToken =>
@@ -87,6 +86,44 @@ class FirebaseNotifications {
     }
     await sl<SharedPreferences>().setString(AppStorageKey.fcmToken, token);
     log('FCM token: $token');
+  }
+
+  static Future<String?> _fetchAndCacheFcmToken({
+    bool forceRefresh = false,
+  }) async {
+    if (Platform.isIOS && !await _waitForApnsToken()) {
+      return cachedFcmToken;
+    }
+
+    try {
+      final token = await _firebaseMessaging!.getToken();
+      await _cacheFcmToken(token);
+      return token;
+    } on FirebaseException catch (error) {
+      if (error.code == 'apns-token-not-set') {
+        log('Skipping FCM token fetch because APNs token is not ready yet.');
+        return cachedFcmToken;
+      }
+      rethrow;
+    }
+  }
+
+  static Future<bool> _waitForApnsToken() async {
+    for (var attempt = 0; attempt < _apnsTokenWaitAttempts; attempt++) {
+      final apnsToken = await _firebaseMessaging!.getAPNSToken();
+      final hasToken = apnsToken != null && apnsToken.isNotEmpty;
+      log('APNs token available: $hasToken');
+      if (hasToken) {
+        return true;
+      }
+
+      if (attempt < _apnsTokenWaitAttempts - 1) {
+        await Future.delayed(_apnsTokenWaitDelay);
+      }
+    }
+
+    log('APNs token is not ready; FCM token fetch will be skipped for now.');
+    return false;
   }
 
   static Future<void> firebaseCloudMessagingListeners() async {

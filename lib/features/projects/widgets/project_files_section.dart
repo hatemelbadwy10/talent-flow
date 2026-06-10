@@ -9,6 +9,7 @@ import '../../../app/core/app_notification.dart';
 import '../../../app/core/dimensions.dart';
 import '../../../app/core/styles.dart';
 import '../../../components/image_pop_up_viewer.dart';
+import '../../../data/api/end_points.dart';
 
 class ProjectFilesSection extends StatelessWidget {
   const ProjectFilesSection({
@@ -627,9 +628,19 @@ class _ProjectAttachment {
       final map = Map<String, dynamic>.from(value);
       final url = _pickFirstNonEmpty([
         map['file'],
+        map['file_url'],
+        map['fileUrl'],
         map['url'],
         map['path'],
+        map['image'],
+        map['image_url'],
+        map['imageUrl'],
+        map['media'],
+        map['media_url'],
+        map['mediaUrl'],
         map['attachment'],
+        map['attachment_url'],
+        map['attachmentUrl'],
         map['download_url'],
         map['downloadUrl'],
         map['full_path'],
@@ -666,6 +677,7 @@ class _ProjectAttachment {
         map['content_type'],
         map['contentType'],
         map['type'],
+        map['mime'],
       ]);
 
       return _fromUrl(
@@ -685,7 +697,7 @@ class _ProjectAttachment {
     String? extension,
     String? mimeType,
   }) {
-    final normalizedUrl = _normalizeRawValue(url);
+    final normalizedUrl = _resolveUrl(_normalizeRawValue(url));
     if (normalizedUrl.isEmpty) {
       return null;
     }
@@ -741,6 +753,20 @@ class _ProjectAttachment {
     return normalized;
   }
 
+  static String _resolveUrl(String url) {
+    if (url.isEmpty) {
+      return url;
+    }
+
+    final uri = Uri.tryParse(url);
+    if (uri != null && uri.hasScheme) {
+      return url;
+    }
+
+    final cleanedUrl = url.startsWith('/') ? url.substring(1) : url;
+    return Uri.parse(EndPoints.baseUrl).resolve(cleanedUrl).toString();
+  }
+
   static String _extractFileName(String url) {
     final uri = Uri.tryParse(url);
     final path = uri?.path ?? url;
@@ -770,7 +796,9 @@ class _ProjectAttachment {
       return true;
     }
 
-    return mimeType.toLowerCase().startsWith('image/');
+    final normalizedMimeType = mimeType.toLowerCase();
+    return normalizedMimeType == 'image' ||
+        normalizedMimeType.startsWith('image/');
   }
 
   static const Set<String> _imageExtensions = {

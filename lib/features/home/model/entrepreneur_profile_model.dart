@@ -7,6 +7,8 @@ class EntrepreneurProfileModel extends SingleMapper {
     required this.image,
     required this.jobTitle,
     required this.bio,
+    required this.identityAuthenticated,
+    required this.bankAccountAdded,
     required this.projects,
   });
 
@@ -15,6 +17,8 @@ class EntrepreneurProfileModel extends SingleMapper {
   final String? image;
   final String? jobTitle;
   final String? bio;
+  final bool identityAuthenticated;
+  final bool bankAccountAdded;
   final List<EntrepreneurProjectStatus> projects;
 
   int get totalProjects =>
@@ -27,6 +31,10 @@ class EntrepreneurProfileModel extends SingleMapper {
       image: json['image']?.toString(),
       jobTitle: json['job_title']?.toString(),
       bio: json['bio']?.toString(),
+      identityAuthenticated: _toBool(json['identity_authenticated']),
+      bankAccountAdded: _toBool(
+        json['bank_account_added'] ?? json['has_bank_account'],
+      ),
       projects: json['projects'] is List
           ? (json['projects'] as List)
               .whereType<Map<String, dynamic>>()
@@ -45,6 +53,17 @@ class EntrepreneurProfileModel extends SingleMapper {
   Map<String, dynamic> toJson() {
     throw UnimplementedError();
   }
+}
+
+bool _toBool(dynamic value) {
+  if (value is bool) {
+    return value;
+  }
+  if (value is num) {
+    return value != 0;
+  }
+  final normalized = value?.toString().trim().toLowerCase() ?? '';
+  return normalized == '1' || normalized == 'true' || normalized == 'yes';
 }
 
 class EntrepreneurProjectStatus {

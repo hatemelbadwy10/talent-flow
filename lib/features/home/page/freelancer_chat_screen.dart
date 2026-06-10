@@ -260,10 +260,9 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
             : [
                 BlocBuilder<FreelancerChatBloc, AppState>(
                   builder: (context, state) {
-                    final chatModel =
-                        state is Done && state.data is ChatModel
-                            ? state.data as ChatModel
-                            : null;
+                    final chatModel = state is Done && state.data is ChatModel
+                        ? state.data as ChatModel
+                        : null;
                     final currentProjectId =
                         chatModel?.projectId ?? fallbackProjectId;
                     final hasContract =
@@ -338,12 +337,11 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
                     }
 
                     return ListView.separated(
-                      reverse: true,
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                       itemCount: messages.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (context, index) {
-                        final message = messages[messages.length - 1 - index];
+                        final message = messages[index];
                         final isSent = message.isSent ?? false;
                         return Align(
                           alignment: isSent

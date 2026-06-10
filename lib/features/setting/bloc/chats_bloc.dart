@@ -88,6 +88,17 @@ class ChatsBloc extends Bloc<AppEvent, AppState> {
               .whereType<Map<String, dynamic>>()
               .map(ChatsModel.fromJson)
               .toList();
+          chats.sort((a, b) {
+            final aDate = a.date;
+            final bDate = b.date;
+            if (aDate != null && bDate != null) {
+              return bDate.compareTo(aDate);
+            }
+            if (aDate != null) return -1;
+            if (bDate != null) return 1;
+
+            return (b.id ?? 0).compareTo(a.id ?? 0);
+          });
 
           _currentChats = chats;
           emit(Done(list: chats));

@@ -9,6 +9,8 @@ import 'package:talent_flow/features/new_projects/widgets/project_description.da
 import '../../../app/core/app_event.dart';
 import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
+import '../../../navigation/custom_navigation.dart';
+import '../../../navigation/routes.dart';
 import '../../projects/bloc/my_projects_bloc.dart';
 import '../../projects/model/single_project_model.dart';
 import '../widgets/project_details_card.dart';
@@ -36,10 +38,9 @@ class AddOfferScreen extends StatelessWidget {
           preferredSize: const Size.fromHeight(kToolbarHeight),
           child: BlocBuilder<MyProjectsBloc, AppState>(
             builder: (context, state) {
-              final project = state is Done ? state.model as SingleProjectModel : null;
-              final myProposal = isFreelancer
-                  ? _findMyProposal(project)
-                  : null;
+              final project =
+                  state is Done ? state.model as SingleProjectModel : null;
+              final myProposal = isFreelancer ? _findMyProposal(project) : null;
               final hasEditArguments = argument?['proposalId'] != null;
               final title = !isFreelancer
                   ? 'projectData'.tr()
@@ -69,6 +70,16 @@ class AddOfferScreen extends StatelessWidget {
                     children: [
                       ProjectDetailsCard(
                         singleProjectModel: project,
+                        onOwnerTap: isFreelancer && project.owner?.id != null
+                            ? () {
+                                CustomNavigator.push(
+                                  Routes.entrepreneur,
+                                  arguments: {
+                                    'entrepreneurId': project.owner!.id,
+                                  },
+                                );
+                              }
+                            : null,
                       ),
                       ProjectDescription(
                         singleProjectModel: project,
@@ -76,8 +87,8 @@ class AddOfferScreen extends StatelessWidget {
                       isFreelancer
                           ? AddOfferWidget(
                               id: argument?['id'],
-                              proposalId:
-                                  argument?['proposalId'] as int? ?? myProposal?.id,
+                              proposalId: argument?['proposalId'] as int? ??
+                                  myProposal?.id,
                               initialDescription:
                                   argument?['initialDescription'] as String? ??
                                       myProposal?.description,
