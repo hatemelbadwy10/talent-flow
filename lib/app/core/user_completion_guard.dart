@@ -118,22 +118,27 @@ abstract class UserCompletionGuard {
     return _readUserData()['identity_verify_status']?.toString();
   }
 
-  static Future<void> handlePostAuthNavigation() async {
+  static Future<void> handlePostAuthNavigation({
+    bool skipIdentityVerification = false,
+  }) async {
     final currentStatus = status;
+    final verificationStatus = identityVerifyStatus?.trim().toLowerCase() ?? '';
+
+    if (!skipIdentityVerification &&
+        !currentStatus.identityAuthenticated &&
+        (verificationStatus.isEmpty || verificationStatus == 'null')) {
+      CustomNavigator.push(
+        Routes.identityVerification,
+        clean: true,
+        arguments: {'fromOnboarding': true},
+      );
+      return;
+    }
 
     if (currentStatus.isFreelancer) {
       if (!currentStatus.addedWorks) {
         CustomNavigator.push(
           Routes.addYourProject,
-          clean: true,
-          arguments: {'fromOnboarding': true},
-        );
-        return;
-      }
-
-      if (!currentStatus.identityAuthenticated) {
-        CustomNavigator.push(
-          Routes.identityVerification,
           clean: true,
           arguments: {'fromOnboarding': true},
         );

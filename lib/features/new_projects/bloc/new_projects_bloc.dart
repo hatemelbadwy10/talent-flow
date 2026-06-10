@@ -20,7 +20,13 @@ class NewProjectsBloc extends Bloc<AppEvent, AppState> {
   Future<void> _onGetProjects(Add event, Emitter<AppState> emit) async {
     emit(Loading());
     try {
-      final result = await _projectsRepo.getProjects();
+      final arguments = event.arguments is Map
+          ? Map<String, dynamic>.from(event.arguments as Map)
+          : const <String, dynamic>{};
+      final result = await _projectsRepo.getProjects(
+        specializationId: arguments['specialization'] as int?,
+        sortBy: arguments['sortBy'] as String?,
+      );
       result.fold(
         (failure) => emit(Error()),
         (response) {
@@ -50,13 +56,21 @@ class NewProjectsBloc extends Bloc<AppEvent, AppState> {
       final projectId = args["projectId"] as int;
       final description = args["description"] as String;
       final proposalId = args["proposalId"] as int?;
+      final questionAnswers =
+          (args["questionAnswers"] as Map?)?.cast<int, String>() ??
+              const <int, String>{};
 
       final result = proposalId == null
-          ? await _projectsRepo.addOffer(projectId, description)
+          ? await _projectsRepo.addOffer(
+              projectId,
+              description,
+              questionAnswers: questionAnswers,
+            )
           : await _projectsRepo.updateOffer(
               proposalId: proposalId,
               projectId: projectId,
               offer: description,
+              questionAnswers: questionAnswers,
             );
 
       result.fold(

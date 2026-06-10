@@ -137,6 +137,9 @@ class FreelancerReview {
 class Statistics {
   Statistics({
     required this.rating,
+    required this.completedProjects,
+    required this.inProgressProjects,
+    required this.city,
     required this.projectsCompletion,
     required this.deliverOnDate,
     required this.reEmployee,
@@ -147,6 +150,9 @@ class Statistics {
   });
 
   final int? rating;
+  final int? completedProjects;
+  final int? inProgressProjects;
+  final String? city;
   final String? projectsCompletion;
   final String? deliverOnDate;
   final String? reEmployee;
@@ -158,6 +164,9 @@ class Statistics {
   factory Statistics.fromJson(Map<String, dynamic> json) {
     return Statistics(
       rating: json["rating"],
+      completedProjects: _toInt(json["completed_projects"]),
+      inProgressProjects: _toInt(json["in_progress_projects"]),
+      city: json["city"]?.toString(),
       projectsCompletion: json["projects_completion"],
       deliverOnDate: json["deliver_on_date"],
       reEmployee: json["re_employee"],
@@ -167,6 +176,11 @@ class Statistics {
       lastSeen: json["last_seen"],
     );
   }
+}
+
+int? _toInt(dynamic value) {
+  if (value is int) return value;
+  return int.tryParse(value?.toString() ?? '');
 }
 
 class Work {

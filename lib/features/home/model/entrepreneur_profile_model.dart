@@ -10,6 +10,7 @@ class EntrepreneurProfileModel extends SingleMapper {
     required this.identityAuthenticated,
     required this.bankAccountAdded,
     required this.projects,
+    required this.reviews,
   });
 
   final int? id;
@@ -20,9 +21,16 @@ class EntrepreneurProfileModel extends SingleMapper {
   final bool identityAuthenticated;
   final bool bankAccountAdded;
   final List<EntrepreneurProjectStatus> projects;
+  final List<EntrepreneurReview> reviews;
 
   int get totalProjects =>
       projects.fold<int>(0, (sum, item) => sum + (item.count ?? 0));
+
+  double get averageRating {
+    if (reviews.isEmpty) return 0;
+    final total = reviews.fold<double>(0, (sum, review) => sum + review.rating);
+    return total / reviews.length;
+  }
 
   factory EntrepreneurProfileModel.fromJson(Map<String, dynamic> json) {
     return EntrepreneurProfileModel(
@@ -39,6 +47,12 @@ class EntrepreneurProfileModel extends SingleMapper {
           ? (json['projects'] as List)
               .whereType<Map<String, dynamic>>()
               .map(EntrepreneurProjectStatus.fromJson)
+              .toList()
+          : const [],
+      reviews: json['reviews'] is List
+          ? (json['reviews'] as List)
+              .whereType<Map<String, dynamic>>()
+              .map(EntrepreneurReview.fromJson)
               .toList()
           : const [],
     );
@@ -84,6 +98,48 @@ class EntrepreneurProjectStatus {
             json['projects_count'] ??
             json['total'],
       ),
+    );
+  }
+
+  static int? _toInt(dynamic value) {
+    if (value is int) {
+      return value;
+    }
+    return int.tryParse(value?.toString() ?? '');
+  }
+}
+
+class EntrepreneurReview {
+  const EntrepreneurReview({
+    required this.id,
+    required this.raterId,
+    required this.image,
+    required this.name,
+    required this.jobTitle,
+    required this.rating,
+    required this.comment,
+    required this.date,
+  });
+
+  final int? id;
+  final int? raterId;
+  final String? image;
+  final String? name;
+  final String? jobTitle;
+  final double rating;
+  final String? comment;
+  final String? date;
+
+  factory EntrepreneurReview.fromJson(Map<String, dynamic> json) {
+    return EntrepreneurReview(
+      id: _toInt(json['id']),
+      raterId: _toInt(json['rater_id']),
+      image: json['image']?.toString(),
+      name: json['name']?.toString(),
+      jobTitle: json['job_title']?.toString(),
+      rating: double.tryParse(json['rating']?.toString() ?? '') ?? 0,
+      comment: json['comment']?.toString(),
+      date: json['date']?.toString(),
     );
   }
 

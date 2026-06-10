@@ -88,7 +88,30 @@ class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
                           SliverToBoxAdapter(
                             child: Padding(
                               padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-                              child: _ProfileHero(user: user),
+                              child: BlocBuilder<HomeBloc, AppState>(
+                                builder: (context, homeState) {
+                                  final profile = homeState is Done &&
+                                          homeState.model
+                                              is FreelancerProfileModel
+                                      ? homeState.model
+                                          as FreelancerProfileModel
+                                      : null;
+                                  return _ProfileHero(
+                                    user: user,
+                                    identityAuthenticated:
+                                        profile?.identityAuthenticated ??
+                                            user.identityAuthenticated ??
+                                            false,
+                                    bankAccountAdded:
+                                        profile?.bankAccountAdded ??
+                                            user.bankAccountAdded ??
+                                            false,
+                                    addedWorks: profile?.addedWorks ??
+                                        user.addedWorks ??
+                                        false,
+                                  );
+                                },
+                              ),
                             ),
                           ),
                           SliverToBoxAdapter(
@@ -117,7 +140,27 @@ class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
                       },
                       body: TabBarView(
                         children: [
-                          _AboutTab(user: user),
+                          BlocBuilder<HomeBloc, AppState>(
+                            builder: (context, homeState) {
+                              if (homeState is Done &&
+                                  homeState.model is FreelancerProfileModel) {
+                                return _AboutTab(
+                                  model:
+                                      homeState.model as FreelancerProfileModel,
+                                );
+                              }
+                              if (homeState is Error) {
+                                return Center(
+                                  child: Text('profile.load_failed'.tr()),
+                                );
+                              }
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  color: Styles.PRIMARY_COLOR,
+                                ),
+                              );
+                            },
+                          ),
                           BlocBuilder<HomeBloc, AppState>(
                             builder: (context, homeState) {
                               if (homeState is Done &&
@@ -177,9 +220,15 @@ class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
 class _ProfileHero extends StatelessWidget {
   const _ProfileHero({
     required this.user,
+    required this.identityAuthenticated,
+    required this.bankAccountAdded,
+    required this.addedWorks,
   });
 
   final UserModel user;
+  final bool identityAuthenticated;
+  final bool bankAccountAdded;
+  final bool addedWorks;
 
   @override
   Widget build(BuildContext context) {
@@ -249,6 +298,12 @@ class _ProfileHero extends StatelessWidget {
               ),
             ],
           ),
+          SizedBox(height: 10.h),
+          _StatusBadge(
+            label: 'profile.added_works'.tr(),
+            value: addedWorks,
+            icon: Icons.work_history_outlined,
+          ),
           SizedBox(height: 18.h),
           if ((user.bio ?? '').trim().isNotEmpty)
             Text(
@@ -261,6 +316,26 @@ class _ProfileHero extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.92),
               ),
             ),
+          SizedBox(height: 18.h),
+          Row(
+            children: [
+              Expanded(
+                child: _StatusBadge(
+                  label: 'profile.identity_verified'.tr(),
+                  value: identityAuthenticated,
+                  icon: Icons.verified_user_outlined,
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: _StatusBadge(
+                  label: 'profile.bank_account'.tr(),
+                  value: bankAccountAdded,
+                  icon: Icons.account_balance_outlined,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -274,12 +349,93 @@ class _ProfileHero extends StatelessWidget {
   }
 }
 
-class _AboutTab extends StatelessWidget {
-  const _AboutTab({
-    required this.user,
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({
+    required this.label,
+    required this.value,
+    required this.icon,
   });
 
-  final UserModel user;
+  final String label;
+  final bool value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = value ? const Color(0xFF0E9F6E) : Styles.IN_ACTIVE;
+    final statusIcon = value ? Icons.check_rounded : Icons.close_rounded;
+
+    return Container(
+      constraints: BoxConstraints(minHeight: 58.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.55)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32.w,
+            height: 32.w,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(icon, size: 18, color: color),
+                PositionedDirectional(
+                  end: 3.w,
+                  bottom: 3.w,
+                  child: Container(
+                    width: 12.w,
+                    height: 12.w,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.4),
+                    ),
+                    child: Icon(statusIcon, size: 8, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 9.w),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12,
+                height: 1.2,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF20313A),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AboutTab extends StatelessWidget {
+  const _AboutTab({
+    required this.model,
+  });
+
+  final FreelancerProfileModel model;
 
   @override
   Widget build(BuildContext context) {
@@ -302,18 +458,52 @@ class _AboutTab extends StatelessWidget {
                 ),
               ],
             ),
-            child: Text(
-              (user.bio ?? '').trim().isEmpty
-                  ? 'no_info_available'.tr()
-                  : user.bio!,
-              style: const TextStyle(
-                fontSize: 14,
-                height: 1.7,
-                color: Styles.SUBTITLE,
-              ),
+            child: Column(
+              children: [
+                if ((model.bio ?? '').trim().isNotEmpty) ...[
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      model.bio!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.7,
+                        color: Styles.SUBTITLE,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                  const Divider(),
+                ],
+                _ProfileDetailRow(
+                    label: 'profile.country'.tr(),
+                    value: model.country?.toString()),
+                _ProfileDetailRow(
+                    label: 'profile.specialization'.tr(),
+                    value: model.specialization),
+                _ProfileDetailRow(
+                    label: 'profile.job_title'.tr(), value: model.jobTitle),
+                _ProfileDetailRow(
+                    label: 'profile.city'.tr(), value: model.statistics?.city),
+                _ProfileDetailRow(
+                    label: 'profile.registration_date'.tr(),
+                    value: model.statistics?.registrationDate),
+                _ProfileDetailRow(
+                    label: 'profile.last_seen'.tr(),
+                    value: model.statistics?.lastSeen),
+                _ProfileDetailRow(
+                    label: 'profile.completed_projects'.tr(),
+                    value: model.statistics?.completedProjects?.toString()),
+                _ProfileDetailRow(
+                    label: 'profile.in_progress_projects'.tr(),
+                    value: model.statistics?.inProgressProjects?.toString()),
+                _ProfileDetailRow(
+                    label: 'profile.rating'.tr(),
+                    value: model.statistics?.rating?.toString()),
+              ],
             ),
           ),
-          if ((user.specialization ?? '').trim().isNotEmpty) ...[
+          if (model.skills.isNotEmpty) ...[
             SizedBox(height: 16.h),
             Container(
               width: double.infinity,
@@ -329,30 +519,59 @@ class _AboutTab extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'profile.specialization'.tr(),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Styles.HEADER,
-                    ),
-                  ),
-                  SizedBox(height: 12.h),
-                  Text(
-                    user.specialization!,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      height: 1.6,
-                      color: Styles.SUBTITLE,
-                    ),
-                  ),
-                ],
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: model.skills
+                    .map(
+                      (skill) => Chip(
+                        label: Text(skill),
+                        backgroundColor:
+                            Styles.PRIMARY_COLOR.withValues(alpha: 0.1),
+                        side: BorderSide.none,
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileDetailRow extends StatelessWidget {
+  const _ProfileDetailRow({required this.label, required this.value});
+
+  final String label;
+  final String? value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 7.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Styles.HEADER,
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              (value ?? '').trim().isEmpty ? '-' : value!,
+              textAlign: TextAlign.end,
+              style: const TextStyle(fontSize: 13, color: Styles.SUBTITLE),
+            ),
+          ),
         ],
       ),
     );

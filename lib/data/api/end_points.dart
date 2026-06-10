@@ -131,6 +131,8 @@ class EndPoints {
   static const String privacyPolicy = 'privacy-policy';
   static const String termsConditions = 'api/pages/terms';
   static const String aboutUs = 'api/pages/about';
+  static const String acceptanceTestQuestions =
+      'api/pages/acceptance-test-questions';
   static const String associationObjectives = 'goals';
   static const String whoUs = 'who-us';
   static const String contactUs = 'contact-us';

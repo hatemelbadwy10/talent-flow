@@ -3,11 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
-import 'package:talent_flow/app/core/app_core.dart';
-import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/styles.dart';
-import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
@@ -27,7 +24,7 @@ class AddYourProjects extends StatelessWidget {
   Widget build(BuildContext context) {
     final isFreelancer =
         sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? true;
-    final canSkipToIdentity = !UserCompletionGuard.status.identityAuthenticated;
+    final canSkipToNextStep = _fromOnboarding;
 
     return Scaffold(
       appBar: AppBar(
@@ -39,13 +36,12 @@ class AddYourProjects extends StatelessWidget {
           height: 35,
         ),
         actions: [
-          if (isFreelancer && canSkipToIdentity)
+          if (isFreelancer && canSkipToNextStep)
             TextButton(
               onPressed: () {
                 CustomNavigator.push(
-                  Routes.identityVerification,
-                  replace: true,
-                  arguments: {'fromOnboarding': _fromOnboarding},
+                  Routes.acceptanceTestQuestions,
+                  clean: true,
                 );
               },
               child: Text(
@@ -88,31 +84,13 @@ class AddYourProjects extends StatelessWidget {
                         return;
                       }
 
-                      await UserCompletionGuard.updateStoredFlags(
-                        addedWorks: true,
-                      );
-
-                      AppCore.showSnackBar(
-                        notification: AppNotification(
-                          message: 'user_completion.work_completed'.tr(),
-                          backgroundColor: Styles.ACTIVE,
-                          isFloating: true,
-                        ),
-                      );
-
-                      if (UserCompletionGuard.status.identityAuthenticated) {
-                        if (_fromOnboarding) {
-                          CustomNavigator.push(Routes.navBar, clean: true);
-                        } else {
-                          CustomNavigator.pop(result: true);
-                        }
-                        return;
-                      }
-
                       CustomNavigator.push(
-                        Routes.identityVerification,
-                        replace: true,
-                        arguments: {'fromOnboarding': _fromOnboarding},
+                        Routes.acceptanceTestQuestions,
+                        arguments: {
+                          'fromOnboarding': _fromOnboarding,
+                          'pendingWorks':
+                              (state.data as PortfolioFormsState).forms,
+                        },
                       );
                     },
                     child: const PortfolioUploadForm(),

@@ -1,5 +1,6 @@
 {
   "next": "التالي",
+  "continue": "متابعة",
   "start": "ابدأ الآن",
   "talent_flow_core": "مكان واحد يضم الفريلانسر والباحثين عن تنفيذ خدماتهم",
 
@@ -151,7 +152,14 @@
     "read_project": "قراءة بيانات المشروع"
   },
   "new_project": {
-    "title": "مشاريع جديدة"
+    "title": "مشاريع جديدة",
+    "filter_specialization": "التخصص",
+    "all_specializations": "كل التخصصات",
+    "sort_by": "الترتيب",
+    "default_sort": "الافتراضي",
+    "latest": "الأحدث",
+    "oldest": "الأقدم",
+    "reset": "إعادة تعيين"
   },
 "add_project": {
   "add_project": "إضافة مشروع",
@@ -265,6 +273,8 @@
     "title": "تقدم للمشروع",
     "update_title": "تعديل عرضك",
     "hint": "اكتب هنا",
+    "questions_title": "أسئلة المشروع",
+    "answer_hint": "اكتب إجابتك هنا",
     "empty_description": "الرجاء إدخال تفاصيل العرض",
     "success": "تم إرسال العرض بنجاح",
     "update_success": "تم تحديث العرض بنجاح",
@@ -605,7 +615,7 @@
   "confirm_terms": "تأكيد الشروط",
   "term_one": "جميع الأعمال من تنفيذي ولدي صلاحية لنشرها.",
   "term_two": "أعلم أنه سيتم إيقاف حسابي إذا استخدمت أعمال تنتهك حقوق الآخرين.",
-  "work_number": "العمل {0} من 3",
+  "work_number": "العمل {} من 3",
   "work_title": "عنوان العمل",
   "work_title_hint": "اكتب هنا اسم العمل",
   "thumbnail": "صورة مصغرة",
@@ -647,7 +657,28 @@
     "identity_verified": "تم توثيق الهوية",
     "bank_account": "الحساب البنكي موثق",
     "added_works": "تمت إضافة الأعمال",
+    "country": "الدولة",
+    "specialization": "التخصص",
+    "job_title": "المسمى الوظيفي",
+    "city": "المدينة",
+    "registration_date": "تاريخ التسجيل",
+    "last_seen": "آخر ظهور",
+    "completed_projects": "المشاريع المكتملة",
+    "in_progress_projects": "المشاريع قيد التنفيذ",
+    "rating": "التقييم",
+    "account_type": "نوع الحساب",
+    "reviews_count": "عدد التقييمات",
+    "average_rating": "متوسط التقييم",
+    "verified": "موثق",
+    "not_verified": "غير موثق",
     "contact_me": "اتصل بي"
+  },
+  "acceptance_test": {
+    "title": "اختبار القبول",
+    "load_failed": "فشل تحميل اختبار القبول",
+    "empty": "لا توجد أسئلة متاحة لاختبار القبول",
+    "answer_all_questions": "يرجى الإجابة على جميع الأسئلة",
+    "submit_success": "تم إرسال اختبار القبول بنجاح"
   },
   "edit_profile": {
     "title": "تعديل الحساب",

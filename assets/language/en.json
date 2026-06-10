@@ -1,5 +1,6 @@
 {
   "next": "Next",
+  "continue": "Continue",
   "start": "Start",
   "talent_flow_core": "One place\nfor freelancers and those\nlooking to implement their services",
   "onboarding": {
@@ -145,7 +146,14 @@
 
   },
   "new_project": {
-    "title": "New Projects"
+    "title": "New Projects",
+    "filter_specialization": "Specialization",
+    "all_specializations": "All specializations",
+    "sort_by": "Sort by",
+    "default_sort": "Default",
+    "latest": "Latest",
+    "oldest": "Oldest",
+    "reset": "Reset"
   },
   "add_project": {
     "add_project": "Add Project",
@@ -262,6 +270,8 @@
     "title": "Submit an Offer",
     "update_title": "Update Your Offer",
     "hint": "Type here",
+    "questions_title": "Project Questions",
+    "answer_hint": "Type your answer here",
     "empty_description": "Please enter your offer details",
     "success": "Offer submitted successfully",
     "update_success": "Offer updated successfully",
@@ -604,7 +614,7 @@
   "confirm_terms": "Confirm Terms",
   "term_one": "All works are my own and I have the rights to publish them.",
   "term_two": "I understand my account will be suspended if I use copyrighted works.",
-  "work_number": "Work {0} of 3",
+  "work_number": "Work {} of 3",
   "work_title": "Work Title",
   "work_title_hint": "Enter the work name",
   "thumbnail": "Thumbnail",
@@ -646,7 +656,28 @@
     "identity_verified": "Identity verified",
     "bank_account": "Bank account verified",
     "added_works": "Works added",
+    "country": "Country",
+    "specialization": "Specialization",
+    "job_title": "Job title",
+    "city": "City",
+    "registration_date": "Registration date",
+    "last_seen": "Last seen",
+    "completed_projects": "Completed projects",
+    "in_progress_projects": "In progress projects",
+    "rating": "Rating",
+    "account_type": "Account type",
+    "reviews_count": "Reviews count",
+    "average_rating": "Average rating",
+    "verified": "Verified",
+    "not_verified": "Not verified",
     "contact_me": "Contact Me"
+  },
+  "acceptance_test": {
+    "title": "Acceptance Test",
+    "load_failed": "Failed to load acceptance test",
+    "empty": "No acceptance test questions available",
+    "answer_all_questions": "Please answer all questions",
+    "submit_success": "Acceptance test submitted successfully"
   },
   "help": {
     "title": "Support",

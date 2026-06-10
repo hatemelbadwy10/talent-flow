@@ -299,6 +299,24 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
             return Scaffold(
               appBar: CustomAppBar(
                 title: 'settings_screen.identity_verification'.tr(),
+                actions: _fromOnboarding
+                    ? [
+                        TextButton(
+                          onPressed: () {
+                            UserCompletionGuard.handlePostAuthNavigation(
+                              skipIdentityVerification: true,
+                            );
+                          },
+                          child: Text(
+                            'user_completion.skip'.tr(),
+                            style: const TextStyle(
+                              color: Styles.PRIMARY_COLOR,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ]
+                    : null,
               ),
               body: AnimatedBuilder(
                 animation: screenListenable,

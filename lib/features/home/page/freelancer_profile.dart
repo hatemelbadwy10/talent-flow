@@ -177,6 +177,12 @@ class _FreelancerHeader extends StatelessWidget {
             ),
           ],
         ),
+        SizedBox(height: 10.h),
+        _StatusBadge(
+          label: 'profile.added_works'.tr(),
+          value: model.addedWorks,
+          icon: Icons.work_history_outlined,
+        ),
       ],
     );
   }
@@ -272,36 +278,132 @@ class _BioTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(16.w),
-      child: Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          color: Colors.grey.shade200,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (model.bio != null && model.bio!.isNotEmpty) ...[
-              Text("bio".tr()),
-              Divider(color: Colors.grey.shade400, thickness: .5),
-              SizedBox(height: 12.h),
-              Text(model.bio!),
-              SizedBox(height: 24.h),
-            ],
-            Divider(color: Colors.grey.shade400, thickness: .5),
-            if (model.skills.isNotEmpty) ...[
-              SkillsSection(skills: model.skills),
-            ],
-            if ((model.bio == null || model.bio!.isEmpty) &&
-                model.skills.isEmpty)
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.only(top: 50.h),
-                  child: Text("no_info_available".tr()),
-                ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _FreelancerDetailsCard(model: model),
+          if (model.skills.isNotEmpty) ...[
+            SizedBox(height: 16.h),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
               ),
+              child: SkillsSection(skills: model.skills),
+            ),
           ],
-        ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FreelancerDetailsCard extends StatelessWidget {
+  const _FreelancerDetailsCard({required this.model});
+
+  final FreelancerProfileModel model;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(18.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Styles.BORDER_COLOR),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if ((model.bio ?? '').trim().isNotEmpty) ...[
+            Text(
+              model.bio!,
+              style: const TextStyle(
+                fontSize: 14,
+                height: 1.7,
+                color: Styles.SUBTITLE,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            const Divider(),
+          ],
+          _ProfileInfoRow(
+            label: 'profile.country'.tr(),
+            value: model.country?.toString(),
+          ),
+          _ProfileInfoRow(
+            label: 'profile.specialization'.tr(),
+            value: model.specialization,
+          ),
+          _ProfileInfoRow(
+            label: 'profile.job_title'.tr(),
+            value: model.jobTitle,
+          ),
+          _ProfileInfoRow(
+            label: 'profile.city'.tr(),
+            value: model.statistics?.city,
+          ),
+          _ProfileInfoRow(
+            label: 'profile.registration_date'.tr(),
+            value: model.statistics?.registrationDate,
+          ),
+          _ProfileInfoRow(
+            label: 'profile.last_seen'.tr(),
+            value: model.statistics?.lastSeen,
+          ),
+          _ProfileInfoRow(
+            label: 'profile.completed_projects'.tr(),
+            value: model.statistics?.completedProjects?.toString(),
+          ),
+          _ProfileInfoRow(
+            label: 'profile.in_progress_projects'.tr(),
+            value: model.statistics?.inProgressProjects?.toString(),
+          ),
+          _ProfileInfoRow(
+            label: 'profile.rating'.tr(),
+            value: model.statistics?.rating?.toString(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileInfoRow extends StatelessWidget {
+  const _ProfileInfoRow({required this.label, required this.value});
+
+  final String label;
+  final String? value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 7.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Styles.HEADER,
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              (value ?? '').trim().isEmpty ? '-' : value!,
+              textAlign: TextAlign.end,
+              style: const TextStyle(fontSize: 13, color: Styles.SUBTITLE),
+            ),
+          ),
+        ],
       ),
     );
   }

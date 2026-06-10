@@ -92,6 +92,14 @@ class AddOfferScreen extends StatelessWidget {
                               initialDescription:
                                   argument?['initialDescription'] as String? ??
                                       myProposal?.description,
+                              questions: project.questions,
+                              initialQuestionAnswers: {
+                                for (final answer
+                                    in myProposal?.questionsAnswers ??
+                                        const <ProjectQuestionAnswer>[])
+                                  if (answer.questionId != null)
+                                    answer.questionId!: answer.answer ?? '',
+                              },
                             )
                           : const SizedBox(),
                       const SizedBox(

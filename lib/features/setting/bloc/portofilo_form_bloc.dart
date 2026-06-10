@@ -262,22 +262,6 @@ class PortfolioFormBloc extends Bloc<AppEvent, AppState> {
       return;
     }
 
-    emit(Loading());
-
-    // Convert SinglePortfolioData → WorkItem
-    final works = currentState.forms.map((form) => form.toWorkItem()).toList();
-
-    final response = await workRepo.addWorks(works: works);
-
-    response.fold(
-      (failure) {
-        log("Error: $failure");
-        emit(Done(data: currentState, reload: false));
-      },
-      (success) {
-        log("All forms submitted successfully!");
-        emit(Done(data: currentState, reload: true));
-      },
-    );
+    emit(Done(data: currentState, reload: true));
   }
 }

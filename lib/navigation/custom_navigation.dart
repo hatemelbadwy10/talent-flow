@@ -47,6 +47,7 @@ import '../features/projects/page/my_projects.dart';
 import '../features/setting/page/about_talent_flow.dart';
 import '../features/setting/page/account_statement_details_screen.dart';
 import '../features/setting/page/account_statement_screen.dart';
+import '../features/setting/page/acceptance_test_questions_screen.dart';
 import '../features/setting/page/bank_accounts_screen.dart';
 import '../features/setting/page/chat_screen.dart';
 import '../features/setting/page/contract_details_screen.dart';
@@ -260,6 +261,12 @@ abstract class CustomNavigator {
         ));
       case Routes.bankAccounts:
         return _pageRoute(const BankAccountsScreen());
+      case Routes.acceptanceTestQuestions:
+        return _pageRoute(
+          AcceptanceTestQuestionsScreen(
+            arguments: settings.arguments as Map<String, dynamic>?,
+          ),
+        );
       case Routes.accountStatement:
         return _pageRoute(const AccountStatementScreen());
       case Routes.accountStatementDetails:

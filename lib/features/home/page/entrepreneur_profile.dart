@@ -100,7 +100,7 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
                 final model = state.model as EntrepreneurProfileModel;
 
                 return DefaultTabController(
-                  length: 2,
+                  length: 3,
                   child: NestedScrollView(
                     headerSliverBuilder: (context, innerBoxIsScrolled) {
                       return [
@@ -126,6 +126,7 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
                                 tabs: [
                                   Tab(text: 'profile.about_me'.tr()),
                                   Tab(text: 'profile.projects_status'.tr()),
+                                  Tab(text: 'profile.reviews'.tr()),
                                 ],
                               ),
                             ),
@@ -137,6 +138,7 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
                       children: [
                         _EntrepreneurAboutTab(model: model),
                         _EntrepreneurProjectsTab(model: model),
+                        _EntrepreneurReviewsTab(model: model),
                       ],
                     ),
                   ),
@@ -298,16 +300,107 @@ class _EntrepreneurAboutTab extends StatelessWidget {
             ),
           ],
         ),
-        child: Text(
-          (model.bio ?? '').trim().isEmpty
-              ? 'no_info_available'.tr()
-              : model.bio!,
-          style: const TextStyle(
-            fontSize: 14,
-            height: 1.7,
-            color: Styles.SUBTITLE,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if ((model.bio ?? '').trim().isNotEmpty) ...[
+              Text(
+                model.bio!,
+                style: const TextStyle(
+                  fontSize: 14,
+                  height: 1.7,
+                  color: Styles.SUBTITLE,
+                ),
+              ),
+              SizedBox(height: 14.h),
+              const Divider(),
+            ],
+            _EntrepreneurInfoRow(
+              label: 'profile.job_title'.tr(),
+              value: model.jobTitle,
+            ),
+            _EntrepreneurInfoRow(
+              label: 'profile.account_type'.tr(),
+              value: 'settings_screen.account_type_entrepreneur'.tr(),
+            ),
+            _EntrepreneurInfoRow(
+              label: 'profile.total_projects'.tr(),
+              value: model.totalProjects.toString(),
+            ),
+            _EntrepreneurInfoRow(
+              label: 'profile.reviews_count'.tr(),
+              value: model.reviews.length.toString(),
+            ),
+            _EntrepreneurInfoRow(
+              label: 'profile.average_rating'.tr(),
+              value: model.averageRating.toStringAsFixed(1),
+            ),
+            _EntrepreneurInfoRow(
+              label: 'profile.identity_verified'.tr(),
+              value: model.identityAuthenticated
+                  ? 'profile.verified'.tr()
+                  : 'profile.not_verified'.tr(),
+              valueColor: model.identityAuthenticated
+                  ? const Color(0xFF0E9F6E)
+                  : Styles.IN_ACTIVE,
+            ),
+            _EntrepreneurInfoRow(
+              label: 'profile.bank_account'.tr(),
+              value: model.bankAccountAdded
+                  ? 'profile.verified'.tr()
+                  : 'profile.not_verified'.tr(),
+              valueColor: model.bankAccountAdded
+                  ? const Color(0xFF0E9F6E)
+                  : Styles.IN_ACTIVE,
+            ),
+          ],
         ),
+      ),
+    );
+  }
+}
+
+class _EntrepreneurInfoRow extends StatelessWidget {
+  const _EntrepreneurInfoRow({
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  final String label;
+  final String? value;
+  final Color? valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 7.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Styles.HEADER,
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              (value ?? '').trim().isEmpty ? '-' : value!,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: valueColor ?? Styles.SUBTITLE,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -526,6 +619,140 @@ class _EntrepreneurProjectsTab extends StatelessWidget {
       label: normalized.isEmpty ? 'profile.projects_status'.tr() : status!,
       icon: Icons.work_outline,
       color: Styles.PRIMARY_COLOR,
+    );
+  }
+}
+
+class _EntrepreneurReviewsTab extends StatelessWidget {
+  const _EntrepreneurReviewsTab({
+    required this.model,
+  });
+
+  final EntrepreneurProfileModel model;
+
+  @override
+  Widget build(BuildContext context) {
+    if (model.reviews.isEmpty) {
+      return Center(
+        child: Text('profile.no_reviews'.tr()),
+      );
+    }
+
+    return ListView.separated(
+      padding: EdgeInsets.all(16.w),
+      itemCount: model.reviews.length,
+      separatorBuilder: (_, __) => SizedBox(height: 12.h),
+      itemBuilder: (context, index) {
+        return _EntrepreneurReviewCard(review: model.reviews[index]);
+      },
+    );
+  }
+}
+
+class _EntrepreneurReviewCard extends StatelessWidget {
+  const _EntrepreneurReviewCard({
+    required this.review,
+  });
+
+  final EntrepreneurReview review;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Styles.BORDER_COLOR),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: const Color(0xFFF3F4F6),
+                backgroundImage: (review.image ?? '').trim().isNotEmpty
+                    ? NetworkImage(review.image!)
+                    : null,
+                child: (review.image ?? '').trim().isEmpty
+                    ? const Icon(Icons.person, color: Color(0xFF6B7280))
+                    : null,
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      (review.name ?? '').trim().isNotEmpty
+                          ? review.name!
+                          : '-',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Styles.HEADER,
+                      ),
+                    ),
+                    if ((review.jobTitle ?? '').trim().isNotEmpty) ...[
+                      SizedBox(height: 4.h),
+                      Text(
+                        review.jobTitle!,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Styles.HINT_COLOR,
+                        ),
+                      ),
+                    ],
+                    SizedBox(height: 8.h),
+                    Row(
+                      children: List.generate(
+                        5,
+                        (index) => Icon(
+                          index < review.rating.round()
+                              ? Icons.star_rounded
+                              : Icons.star_border_rounded,
+                          size: 18,
+                          color: const Color(0xFFFFB800),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                (review.date ?? '').trim().isNotEmpty ? review.date! : '-',
+                textAlign: TextAlign.end,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: Styles.HINT_COLOR,
+                ),
+              ),
+            ],
+          ),
+          if ((review.comment ?? '').trim().isNotEmpty) ...[
+            SizedBox(height: 14.h),
+            Text(
+              review.comment!,
+              style: const TextStyle(
+                fontSize: 14,
+                height: 1.6,
+                color: Styles.SUBTITLE,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

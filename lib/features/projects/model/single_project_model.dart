@@ -15,6 +15,7 @@ class SingleProjectModel extends SingleMapper {
     required this.similarProjects,
     required this.requiredToBeReceived,
     required this.proposals,
+    required this.questions,
     required this.files,
   });
 
@@ -31,6 +32,7 @@ class SingleProjectModel extends SingleMapper {
   final dynamic similarProjects;
   final dynamic requiredToBeReceived;
   final List<ProjectProposal> proposals;
+  final List<ProjectQuestionDetail> questions;
   final List<dynamic> files;
 
   factory SingleProjectModel.fromJson(Map<String, dynamic> json) {
@@ -53,6 +55,11 @@ class SingleProjectModel extends SingleMapper {
           ? []
           : List<ProjectProposal>.from(
               json["proposals"]!.map((x) => ProjectProposal.fromJson(x)),
+            ),
+      questions: json["questions"] == null
+          ? []
+          : List<ProjectQuestionDetail>.from(
+              json["questions"]!.map((x) => ProjectQuestionDetail.fromJson(x)),
             ),
       files: _extractFiles(json["files"] ?? json["attachments"]),
     );
@@ -97,6 +104,7 @@ class ProjectProposal {
     required this.freelancerRating,
     required this.since,
     required this.description,
+    required this.questionsAnswers,
   });
 
   final int? id;
@@ -107,6 +115,7 @@ class ProjectProposal {
   final double? freelancerRating;
   final String? since;
   final String? description;
+  final List<ProjectQuestionAnswer> questionsAnswers;
 
   factory ProjectProposal.fromJson(Map<String, dynamic> json) {
     return ProjectProposal(
@@ -118,6 +127,54 @@ class ProjectProposal {
       freelancerRating: (json["freelancer_rating"] as num?)?.toDouble(),
       since: json["since"],
       description: json["description"],
+      questionsAnswers: json["questions_answers"] == null
+          ? []
+          : List<ProjectQuestionAnswer>.from(
+              json["questions_answers"]!
+                  .map((x) => ProjectQuestionAnswer.fromJson(x)),
+            ),
+    );
+  }
+}
+
+class ProjectQuestionDetail {
+  const ProjectQuestionDetail({
+    required this.id,
+    required this.question,
+    required this.isRequired,
+  });
+
+  final int? id;
+  final String? question;
+  final bool isRequired;
+
+  factory ProjectQuestionDetail.fromJson(Map<String, dynamic> json) {
+    return ProjectQuestionDetail(
+      id: _toInt(json["id"]),
+      question: json["question"]?.toString(),
+      isRequired: _toBool(json["required"]),
+    );
+  }
+}
+
+class ProjectQuestionAnswer {
+  const ProjectQuestionAnswer({
+    required this.questionId,
+    required this.answer,
+  });
+
+  final int? questionId;
+  final String? answer;
+
+  factory ProjectQuestionAnswer.fromJson(Map<String, dynamic> json) {
+    final question = json["question"];
+    return ProjectQuestionAnswer(
+      questionId: _toInt(
+        json["question_id"] ??
+            (question is Map ? question["id"] : null) ??
+            json["id"],
+      ),
+      answer: json["answer"]?.toString(),
     );
   }
 }
@@ -158,4 +215,22 @@ class Owner {
       ongoingCommunications: json["ongoing_communications"],
     );
   }
+}
+
+int? _toInt(dynamic value) {
+  if (value is int) {
+    return value;
+  }
+  return int.tryParse(value?.toString() ?? '');
+}
+
+bool _toBool(dynamic value) {
+  if (value is bool) {
+    return value;
+  }
+  if (value is num) {
+    return value != 0;
+  }
+  final normalized = value?.toString().trim().toLowerCase() ?? '';
+  return normalized == '1' || normalized == 'true' || normalized == 'yes';
 }
