@@ -22,7 +22,8 @@ class EntrepreneurProfileView extends StatefulWidget {
   final Map<String, dynamic>? arguments;
 
   @override
-  State<EntrepreneurProfileView> createState() => _EntrepreneurProfileViewState();
+  State<EntrepreneurProfileView> createState() =>
+      _EntrepreneurProfileViewState();
 }
 
 class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
@@ -38,9 +39,12 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
     final prefs = sl<SharedPreferences>();
     _currentUserId = int.tryParse(prefs.getString(AppStorageKey.userId) ?? '');
     _useCurrentProfile = widget.arguments?['useCurrentProfile'] == true;
-    _entrepreneurId = widget.arguments?['entrepreneurId'] as int? ?? _currentUserId;
-    _isCurrentUser = _entrepreneurId != null && _entrepreneurId == _currentUserId;
-    _isEntrepreneurAccount = !(prefs.getBool(AppStorageKey.isFreelancer) ?? false);
+    _entrepreneurId =
+        widget.arguments?['entrepreneurId'] as int? ?? _currentUserId;
+    _isCurrentUser =
+        _entrepreneurId != null && _entrepreneurId == _currentUserId;
+    _isEntrepreneurAccount =
+        !(prefs.getBool(AppStorageKey.isFreelancer) ?? false);
 
     if (_useCurrentProfile) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -124,7 +128,8 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
                           await CustomNavigator.push(Routes.editProfile);
                           if (!context.mounted) return;
                           context.read<HomeBloc>().add(
-                                EntrepreneurProfileEvent(arguments: _entrepreneurId),
+                                EntrepreneurProfileEvent(
+                                    arguments: _entrepreneurId),
                               );
                         },
                         icon: const Icon(
@@ -140,13 +145,15 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
               builder: (context, state) {
                 if (state is Loading) {
                   return const Center(
-                    child: CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
+                    child:
+                        CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
                   );
                 }
                 if (state is Error) {
                   return Center(child: Text('profile.load_failed'.tr()));
                 }
-                if (state is! Done || state.model is! EntrepreneurProfileModel) {
+                if (state is! Done ||
+                    state.model is! EntrepreneurProfileModel) {
                   return const SizedBox.shrink();
                 }
 
@@ -238,9 +245,8 @@ class _EntrepreneurHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalReviews = model.noOfReviews > 0
-        ? model.noOfReviews
-        : model.reviews.length;
+    final totalReviews =
+        model.noOfReviews > 0 ? model.noOfReviews : model.reviews.length;
 
     return Container(
       width: double.infinity,
@@ -307,7 +313,8 @@ class _EntrepreneurHero extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         _InfoPill(
-                          text: 'settings_screen.account_type_entrepreneur'.tr(),
+                          text:
+                              'settings_screen.account_type_entrepreneur'.tr(),
                         ),
                         if (model.rating > 0 || totalReviews > 0)
                           _InfoPill(
@@ -334,6 +341,26 @@ class _EntrepreneurHero extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.92),
             ),
           ),
+          SizedBox(height: 18.h),
+          Row(
+            children: [
+              Expanded(
+                child: _StatusBadge(
+                  label: 'profile.identity_verified'.tr(),
+                  value: model.identityAuthenticated,
+                  icon: Icons.verified_user_outlined,
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: _StatusBadge(
+                  label: 'profile.bank_account'.tr(),
+                  value: model.bankAccountAdded,
+                  icon: Icons.account_balance_outlined,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -357,16 +384,49 @@ class _EntrepreneurAboutTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final infoRows = <MapEntry<String, String>>[
+      MapEntry(
+        'profile.job_title'.tr(),
+        (model.jobTitle ?? '').trim().isEmpty ? '-' : model.jobTitle!,
+      ),
+      MapEntry(
+        'profile.account_type'.tr(),
+        'settings_screen.account_type_entrepreneur'.tr(),
+      ),
+      MapEntry('profile.total_projects'.tr(), model.totalProjects.toString()),
+      MapEntry(
+        'profile.reviews_count'.tr(),
+        (model.noOfReviews > 0 ? model.noOfReviews : model.reviews.length)
+            .toString(),
+      ),
+      MapEntry(
+        'profile.average_rating'.tr(),
+        model.averageRating.toStringAsFixed(1),
+      ),
+      MapEntry(
+        'profile.identity_verified'.tr(),
+        model.identityAuthenticated
+            ? 'profile.verified'.tr()
+            : 'profile.not_verified'.tr(),
+      ),
+      MapEntry(
+        'profile.bank_account'.tr(),
+        model.bankAccountAdded
+            ? 'profile.verified'.tr()
+            : 'profile.not_verified'.tr(),
+      ),
       if ((model.specialization ?? '').trim().isNotEmpty)
-        MapEntry('Specialization', model.specialization!),
+        MapEntry('profile.specialization'.tr(), model.specialization!),
       if ((model.country ?? '').trim().isNotEmpty)
-        MapEntry('Country', model.country!),
+        MapEntry('profile.country'.tr(), model.country!),
       if ((model.statistics?.city ?? '').trim().isNotEmpty)
-        MapEntry('City', model.statistics!.city!),
+        MapEntry('profile.city'.tr(), model.statistics!.city!),
       if ((model.statistics?.registrationDate ?? '').trim().isNotEmpty)
-        MapEntry('Joined', model.statistics!.registrationDate!),
+        MapEntry(
+          'profile.registration_date'.tr(),
+          model.statistics!.registrationDate!,
+        ),
       if ((model.statistics?.lastSeen ?? '').trim().isNotEmpty)
-        MapEntry('Last seen', model.statistics!.lastSeen!),
+        MapEntry('profile.last_seen'.tr(), model.statistics!.lastSeen!),
     ];
 
     return SingleChildScrollView(
@@ -706,6 +766,66 @@ class _InfoPill extends StatelessWidget {
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final bool value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = value ? const Color(0xFF0E9F6E) : Styles.IN_ACTIVE;
+    final statusIcon = value ? Icons.check_rounded : Icons.close_rounded;
+
+    return Container(
+      constraints: BoxConstraints(minHeight: 58.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(icon, size: 28, color: color),
+              PositionedDirectional(
+                end: 0,
+                bottom: 0,
+                child: CircleAvatar(
+                  radius: 6,
+                  backgroundColor: color,
+                  child: Icon(statusIcon, size: 8, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(width: 9.w),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12,
+                height: 1.2,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF20313A),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

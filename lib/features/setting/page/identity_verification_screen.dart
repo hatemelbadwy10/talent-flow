@@ -288,8 +288,7 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
     final normalizedStatus = details?.status.trim().toLowerCase() ?? '';
     final isAccepted = normalizedStatus == 'accepted';
     final isPending = _isPendingStatus(normalizedStatus);
-    final shouldShowForm =
-        normalizedStatus.isEmpty ||
+    final shouldShowForm = normalizedStatus.isEmpty ||
         normalizedStatus == 'rejected' ||
         normalizedStatus == 'declined';
 
@@ -439,6 +438,24 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
             return Scaffold(
               appBar: CustomAppBar(
                 title: 'settings_screen.identity_verification'.tr(),
+                actions: _fromOnboarding
+                    ? [
+                        TextButton(
+                          onPressed: () {
+                            UserCompletionGuard.handlePostAuthNavigation(
+                              skipIdentityVerification: true,
+                            );
+                          },
+                          child: Text(
+                            'user_completion.skip'.tr(),
+                            style: const TextStyle(
+                              color: Styles.PRIMARY_COLOR,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ]
+                    : null,
               ),
               body: AnimatedBuilder(
                 animation: screenListenable,

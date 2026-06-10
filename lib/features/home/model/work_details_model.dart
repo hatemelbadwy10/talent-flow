@@ -40,7 +40,7 @@ class WorkDetailsModel extends SingleMapper {
       views: _toInt(json['views']),
       likes: _toInt(json['likes']),
       status: _asString(json['status']) ?? _asString(json['status_text']),
-      date: _asString(json['date']) ?? _asString(json['created_at']),
+      date: _normalizeDate(json['date'] ?? json['created_at']),
       previewLink:
           _asString(json['preview_link']) ?? _asString(json['previewLink']),
       files: _extractFiles(json['files'] ?? json['attachments']),
@@ -78,6 +78,19 @@ class WorkDetailsModel extends SingleMapper {
     if (value == null) return null;
     final stringValue = value.toString().trim();
     return stringValue.isEmpty ? null : stringValue;
+  }
+
+  static String? _normalizeDate(dynamic value) {
+    final rawDate = _asString(value);
+    if (rawDate == null) return null;
+
+    final parsedDate = DateTime.tryParse(rawDate);
+    if (parsedDate == null) return rawDate;
+
+    final year = parsedDate.year.toString().padLeft(4, '0');
+    final month = parsedDate.month.toString().padLeft(2, '0');
+    final day = parsedDate.day.toString().padLeft(2, '0');
+    return '$year-$month-$day';
   }
 
   static List<String> _extractFiles(dynamic value) {

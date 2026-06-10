@@ -11,6 +11,8 @@ class EntrepreneurProfileModel extends SingleMapper {
     required this.specialization,
     required this.rating,
     required this.noOfReviews,
+    required this.identityAuthenticated,
+    required this.bankAccountAdded,
     required this.statistics,
     required this.reviews,
     required this.projects,
@@ -25,12 +27,20 @@ class EntrepreneurProfileModel extends SingleMapper {
   final String? specialization;
   final double rating;
   final int noOfReviews;
+  final bool identityAuthenticated;
+  final bool bankAccountAdded;
   final EntrepreneurStatistics? statistics;
   final List<EntrepreneurReview> reviews;
   final List<EntrepreneurProjectStatus> projects;
 
   int get totalProjects =>
       projects.fold<int>(0, (sum, item) => sum + (item.count ?? 0));
+
+  double get averageRating {
+    if (reviews.isEmpty) return rating;
+    final total = reviews.fold<double>(0, (sum, review) => sum + review.rating);
+    return total / reviews.length;
+  }
 
   factory EntrepreneurProfileModel.fromJson(Map<String, dynamic> json) {
     return EntrepreneurProfileModel(
@@ -51,6 +61,11 @@ class EntrepreneurProfileModel extends SingleMapper {
                 json['reviews']?.length,
           ) ??
           0,
+      identityAuthenticated:
+          _entrepreneurToBool(json['identity_authenticated']),
+      bankAccountAdded: _entrepreneurToBool(
+        json['bank_account_added'] ?? json['has_bank_account'],
+      ),
       statistics: json['statistics'] is Map<String, dynamic>
           ? EntrepreneurStatistics.fromJson(
               json['statistics'] as Map<String, dynamic>,
@@ -80,6 +95,13 @@ class EntrepreneurProfileModel extends SingleMapper {
   Map<String, dynamic> toJson() {
     throw UnimplementedError();
   }
+}
+
+bool _entrepreneurToBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  final normalized = value?.toString().trim().toLowerCase() ?? '';
+  return normalized == '1' || normalized == 'true' || normalized == 'yes';
 }
 
 class EntrepreneurReview {
