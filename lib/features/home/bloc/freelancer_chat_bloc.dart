@@ -290,6 +290,7 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
           }
         }
         _pendingMessages.clear();
+        updatedMessages.sort(Message.compareChronologically);
 
         _chat = chat.copyWith(messages: updatedMessages);
         _logChatBloc(
@@ -419,7 +420,8 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
     }
 
     final List<Message> updatedMessages = List<Message>.from(current.messages)
-      ..add(message);
+      ..add(message)
+      ..sort(Message.compareChronologically);
     _chat = current.copyWith(messages: updatedMessages);
     _logChatBloc(
       '_appendMessage emitting Done',

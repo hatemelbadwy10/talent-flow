@@ -25,6 +25,32 @@ class ChatsModel implements Mapper {
   final String? since;
   final DateTime? date;
 
+  static int compareNewestFirst(ChatsModel a, ChatsModel b) {
+    final aDate = a.date;
+    final bDate = b.date;
+    if (aDate != null && bDate != null) {
+      final dateComparison = bDate.compareTo(aDate);
+      if (dateComparison != 0) return dateComparison;
+    } else if (aDate != null) {
+      return -1;
+    } else if (bDate != null) {
+      return 1;
+    }
+
+    final aAge = _parseRelativeAge(a.since);
+    final bAge = _parseRelativeAge(b.since);
+    if (aAge != null && bAge != null) {
+      final ageComparison = aAge.compareTo(bAge);
+      if (ageComparison != 0) return ageComparison;
+    } else if (aAge != null) {
+      return -1;
+    } else if (bAge != null) {
+      return 1;
+    }
+
+    return (b.id ?? -1).compareTo(a.id ?? -1);
+  }
+
   ChatsModel copyWith({
     int? id,
     int? projectId,
@@ -63,7 +89,7 @@ class ChatsModel implements Mapper {
       unreadCount: json["unread_count"],
       lastMessageSnippet: json["last_message_snippet"],
       since: json["since"],
-      date: DateTime.tryParse(json["date"] ?? ""),
+      date: _parseLastMessageDate(json),
     );
   }
 
@@ -81,6 +107,85 @@ class ChatsModel implements Mapper {
       "date": date?.toIso8601String(),
     };
   }
+}
+
+DateTime? _parseLastMessageDate(Map<String, dynamic> json) {
+  final lastMessage = json["last_message"];
+  final candidates = [
+    json["last_message_at"],
+    if (lastMessage is Map) lastMessage["created_at"],
+    if (lastMessage is Map) lastMessage["updated_at"],
+    json["updated_at"],
+    json["date"],
+  ];
+
+  for (final candidate in candidates) {
+    final parsed = DateTime.tryParse(candidate?.toString() ?? "");
+    if (parsed != null) return parsed;
+  }
+  return null;
+}
+
+Duration? _parseRelativeAge(String? value) {
+  var text = value?.trim().toLowerCase() ?? "";
+  if (text.isEmpty) return null;
+
+  text = _normalizeArabicDigits(text);
+  if (text.contains("الآن") ||
+      text.contains("لحظ") ||
+      text.contains("now") ||
+      text.contains("just")) {
+    return Duration.zero;
+  }
+
+  final number = int.tryParse(RegExp(r"\d+").firstMatch(text)?.group(0) ?? "");
+  final quantity = number ?? _relativeWordQuantity(text);
+
+  if (text.contains("دقيق") || text.contains("minute")) {
+    return Duration(minutes: quantity);
+  }
+  if (text.contains("ساع") || text.contains("hour")) {
+    return Duration(hours: quantity);
+  }
+  if (text.contains("يوم") || text.contains("day")) {
+    return Duration(days: quantity);
+  }
+  if (text.contains("أسبوع") ||
+      text.contains("اسبوع") ||
+      text.contains("أسابيع") ||
+      text.contains("اسابيع") ||
+      text.contains("week")) {
+    return Duration(days: quantity * 7);
+  }
+  if (text.contains("شهر") ||
+      text.contains("أشهر") ||
+      text.contains("اشهر") ||
+      text.contains("month")) {
+    return Duration(days: quantity * 30);
+  }
+  if (text.contains("سن") || text.contains("year")) {
+    return Duration(days: quantity * 365);
+  }
+  return null;
+}
+
+int _relativeWordQuantity(String text) {
+  if (text.contains("ين") || text.contains("two") || text.contains("couple")) {
+    return 2;
+  }
+  return 1;
+}
+
+String _normalizeArabicDigits(String value) {
+  const arabicDigits = "٠١٢٣٤٥٦٧٨٩";
+  const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
+  var result = value;
+  for (var index = 0; index < 10; index++) {
+    result = result
+        .replaceAll(arabicDigits[index], "$index")
+        .replaceAll(persianDigits[index], "$index");
+  }
+  return result;
 }
 
 int? _parseInt(dynamic value) {

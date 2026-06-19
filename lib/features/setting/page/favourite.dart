@@ -186,7 +186,7 @@ class Favourite extends StatelessWidget {
           name: freelancer.name ?? '-',
           jopTitle:
               jobTitle.isNotEmpty ? jobTitle : "home.job_title_not_set".tr(),
-          rating: freelancer.rating?.toDouble(),
+          rating: freelancer.rating,
           imageUrl: freelancer.image,
           cardWidth: double.infinity,
           isInFavorites: true,

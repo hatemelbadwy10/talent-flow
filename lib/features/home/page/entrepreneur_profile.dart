@@ -609,6 +609,18 @@ class _EntrepreneurProjectsTab extends StatelessWidget {
           value: stats!.underImplementationCount.toString(),
           icon: Icons.timelapse_outlined,
         ),
+      if (stats?.completedProjects != null)
+        _ProjectMetric(
+          label: 'profile.completed_projects'.tr(),
+          value: stats!.completedProjects.toString(),
+          icon: Icons.task_alt_outlined,
+        ),
+      if (stats?.inProgressProjects != null)
+        _ProjectMetric(
+          label: 'profile.in_progress_projects'.tr(),
+          value: stats!.inProgressProjects.toString(),
+          icon: Icons.timelapse_outlined,
+        ),
       if (stats?.ongoingCommunications != null)
         _ProjectMetric(
           label: 'Communications',

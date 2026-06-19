@@ -551,7 +551,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                               jopTitle: jobTitle.isNotEmpty
                                   ? jobTitle
                                   : "home.job_title_not_set".tr(),
-                              rating: freelancer.rating?.toDouble(),
+                              rating: freelancer.rating,
                               imageUrl: freelancer.image,
                               cardWidth: double.infinity,
                               isInFavorites: freelancer.isInFavorites ?? false,

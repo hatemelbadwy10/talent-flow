@@ -33,8 +33,12 @@ class EntrepreneurProfileModel extends SingleMapper {
   final List<EntrepreneurReview> reviews;
   final List<EntrepreneurProjectStatus> projects;
 
-  int get totalProjects =>
-      projects.fold<int>(0, (sum, item) => sum + (item.count ?? 0));
+  int get totalProjects => projects.isNotEmpty
+      ? projects.fold<int>(0, (sum, item) => sum + (item.count ?? 0))
+      : (statistics?.completedProjects ?? statistics?.openProjectsCount ?? 0) +
+          (statistics?.inProgressProjects ??
+              statistics?.underImplementationCount ??
+              0);
 
   double get averageRating {
     if (reviews.isEmpty) return rating;
@@ -146,6 +150,8 @@ class EntrepreneurStatistics {
     required this.lastSeen,
     required this.openProjectsCount,
     required this.underImplementationCount,
+    required this.completedProjects,
+    required this.inProgressProjects,
     required this.ongoingCommunications,
     required this.city,
   });
@@ -155,6 +161,8 @@ class EntrepreneurStatistics {
   final String? lastSeen;
   final int? openProjectsCount;
   final int? underImplementationCount;
+  final int? completedProjects;
+  final int? inProgressProjects;
   final int? ongoingCommunications;
   final String? city;
 
@@ -163,12 +171,11 @@ class EntrepreneurStatistics {
       rating: double.tryParse(json['rating']?.toString() ?? '') ?? 0,
       registrationDate: json['registration_date']?.toString(),
       lastSeen: json['last_seen']?.toString(),
-      openProjectsCount: _entrepreneurToInt(
-        json['open_projects_count'] ?? json['completed_projects'],
-      ),
-      underImplementationCount: _entrepreneurToInt(
-        json['under_implementation_count'] ?? json['in_progress_projects'],
-      ),
+      openProjectsCount: _entrepreneurToInt(json['open_projects_count']),
+      underImplementationCount:
+          _entrepreneurToInt(json['under_implementation_count']),
+      completedProjects: _entrepreneurToInt(json['completed_projects']),
+      inProgressProjects: _entrepreneurToInt(json['in_progress_projects']),
       ongoingCommunications: _entrepreneurToInt(json['ongoing_communications']),
       city: json['city']?.toString(),
     );

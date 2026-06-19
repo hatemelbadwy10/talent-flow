@@ -29,7 +29,7 @@ class FreelancersModel extends SingleMapper {
   final String? image;
   final String? jobTitle;
   final String? bio;
-  final int? rating;
+  final double? rating;
   final int? noOfReviews;
   final String? email;
   final String? country;
@@ -47,28 +47,26 @@ class FreelancersModel extends SingleMapper {
 
   factory FreelancersModel.fromJson(Map<String, dynamic> json) {
     return FreelancersModel(
-      id: json["id"],
-      name: json["name"],
-      image: json["image"],
-      jobTitle: json["job_title"],
-      bio: json["bio"],
-      rating: json["rating"],
-      noOfReviews: json["no_of_reviews"],
-      email: json["email"],
-      country: json["country"],
-      lang: json["lang"],
-      gender: json["gender"],
-      phone: json["phone"],
-      dateOfBirth: DateTime.tryParse(json["date_of_birth"] ?? ""),
+      id: _toInt(json["id"]),
+      name: json["name"]?.toString(),
+      image: json["image"]?.toString(),
+      jobTitle: json["job_title"]?.toString(),
+      bio: json["bio"]?.toString(),
+      rating: _toDouble(json["rating"]),
+      noOfReviews: _toInt(json["no_of_reviews"]),
+      email: json["email"]?.toString(),
+      country: json["country"]?.toString(),
+      lang: json["lang"]?.toString(),
+      gender: json["gender"]?.toString(),
+      phone: json["phone"]?.toString(),
+      dateOfBirth: _toDateTime(json["date_of_birth"]),
       googleId: json["google_id"],
       facebookId: json["facebook_id"],
-      lastLoginAt: DateTime.tryParse(json["last_login_at"] ?? ""),
-      loggedIn: json["logged_in"],
-      emailVerifiedAt: DateTime.tryParse(json["email_verified_at"] ?? ""),
+      lastLoginAt: _toDateTime(json["last_login_at"]),
+      loggedIn: _toBool(json["logged_in"]),
+      emailVerifiedAt: _toDateTime(json["email_verified_at"]),
       phoneVerifiedAt: json["phone_verified_at"],
-      isInFavorites: json["is_in_favorites"] == true ||
-          json["is_in_favorites"] == 1 ||
-          json["is_in_favorites"]?.toString() == "1",
+      isInFavorites: _toBool(json["is_in_favorites"]),
     );
   }
 
@@ -82,4 +80,26 @@ class FreelancersModel extends SingleMapper {
     // TODO: implement toJson
     throw UnimplementedError();
   }
+}
+
+int? _toInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? "");
+}
+
+double? _toDouble(dynamic value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? "");
+}
+
+bool _toBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  final normalized = value?.toString().trim().toLowerCase() ?? "";
+  return normalized == "1" || normalized == "true" || normalized == "yes";
+}
+
+DateTime? _toDateTime(dynamic value) {
+  return DateTime.tryParse(value?.toString() ?? "");
 }

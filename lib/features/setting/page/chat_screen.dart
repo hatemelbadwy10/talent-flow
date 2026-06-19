@@ -85,6 +85,13 @@ class _ChatScreenState extends State<ChatScreen> {
       Routes.chat,
       arguments: arguments,
     );
+    if (!mounted) return;
+    context.read<ChatsBloc>().add(
+          Add(arguments: {
+            'search': _searchController.text.trim(),
+            'project_id': _selectedProjectId,
+          }),
+        );
   }
 
   void _onSearchChanged(String query) {

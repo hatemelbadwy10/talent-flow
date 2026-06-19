@@ -32,7 +32,6 @@ class _AddProjectState extends State<AddProject> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _filesDescriptionController = TextEditingController();
-  final _budgetController = TextEditingController();
   final _durationController = TextEditingController();
   final _requiredToBeRecivedController = TextEditingController();
 
@@ -41,7 +40,6 @@ class _AddProjectState extends State<AddProject> {
     _titleController.dispose();
     _descriptionController.dispose();
     _filesDescriptionController.dispose();
-    _budgetController.dispose();
     _durationController.dispose();
     super.dispose();
   }
@@ -148,7 +146,7 @@ class _AddProjectState extends State<AddProject> {
                               availableSkills: selectionModel.skills,
                             ),
                             const SizedBox(height: 24),
-                            BudgetField(controller: _budgetController),
+                            const BudgetField(),
                             const SizedBox(height: 24),
                             DurationField(controller: _durationController),
                             const SizedBox(height: 24),

@@ -12,10 +12,14 @@ class UserModel extends SingleMapper {
   String? userType;
   String? bio;
   String? specialization;
+  String? country;
   String? identityVerifyStatus;
   bool? addedWorks;
   bool? identityAuthenticated;
   bool? bankAccountAdded;
+  Map<String, dynamic>? statistics;
+  List<Map<String, dynamic>> reviews;
+  List<Map<String, dynamic>> projects;
   int? unreadNotificationsCount;
   int? unreadMessagesCount;
 
@@ -31,15 +35,21 @@ class UserModel extends SingleMapper {
     this.userType,
     this.bio,
     this.specialization,
+    this.country,
     this.identityVerifyStatus,
     this.addedWorks,
     this.identityAuthenticated,
     this.bankAccountAdded,
+    this.statistics,
+    this.reviews = const [],
+    this.projects = const [],
     this.unreadNotificationsCount,
     this.unreadMessagesCount,
   });
 
-  UserModel.fromJson(Map<String, dynamic> json) {
+  UserModel.fromJson(Map<String, dynamic> json)
+      : reviews = const [],
+        projects = const [] {
     id = json['id'];
     final firstName = json['first_name']?.toString().trim();
     final lastName = json['last_name']?.toString().trim();
@@ -60,13 +70,16 @@ class UserModel extends SingleMapper {
     userType = json['user_type']?.toString();
     bio = json['bio']?.toString();
     specialization = json['specialization']?.toString();
+    country = json['country']?.toString();
     identityVerifyStatus = json['identity_verify_status']?.toString();
     addedWorks = _toBool(json['added_works']);
     identityAuthenticated = _toBool(json['identity_authenticated']);
     bankAccountAdded =
         _toBool(json['bank_account_added'] ?? json['has_bank_account']);
-    unreadNotificationsCount =
-        _toInt(json['unread_notifications_count']) ?? 0;
+    statistics = _toStringKeyedMap(json['statistics']);
+    reviews = _toStringKeyedMapList(json['reviews']);
+    projects = _toStringKeyedMapList(json['projects']);
+    unreadNotificationsCount = _toInt(json['unread_notifications_count']) ?? 0;
     unreadMessagesCount = _toInt(json['unread_messages_count']) ?? 0;
   }
 
@@ -86,11 +99,15 @@ class UserModel extends SingleMapper {
     data['user_type'] = userType;
     data['bio'] = bio;
     data['specialization'] = specialization;
+    data['country'] = country;
     data['identity_verify_status'] = identityVerifyStatus;
     data['added_works'] = addedWorks;
     data['identity_authenticated'] = identityAuthenticated;
     data['bank_account_added'] = bankAccountAdded;
     data['has_bank_account'] = bankAccountAdded;
+    data['statistics'] = statistics;
+    data['reviews'] = reviews;
+    data['projects'] = projects;
     data['unread_notifications_count'] = unreadNotificationsCount;
     data['unread_messages_count'] = unreadMessagesCount;
 
@@ -119,4 +136,17 @@ int? _toInt(dynamic value) {
   if (value is num) return value.toInt();
   if (value is String) return int.tryParse(value);
   return null;
+}
+
+Map<String, dynamic>? _toStringKeyedMap(dynamic value) {
+  if (value is! Map) return null;
+  return value.map((key, value) => MapEntry(key.toString(), value));
+}
+
+List<Map<String, dynamic>> _toStringKeyedMapList(dynamic value) {
+  if (value is! List) return const [];
+  return value
+      .whereType<Map>()
+      .map((item) => item.map((key, value) => MapEntry(key.toString(), value)))
+      .toList();
 }

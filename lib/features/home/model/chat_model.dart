@@ -74,6 +74,21 @@ class Message {
     final String? time;
     final String? status;
 
+    static int compareChronologically(Message a, Message b) {
+        final aDate = a.createdAt;
+        final bDate = b.createdAt;
+        if (aDate != null && bDate != null) {
+            final dateComparison = aDate.compareTo(bDate);
+            if (dateComparison != 0) return dateComparison;
+        } else if (aDate != null) {
+            return -1;
+        } else if (bDate != null) {
+            return 1;
+        }
+
+        return (a.id ?? -1).compareTo(b.id ?? -1);
+    }
+
     Message copyWith({
         int? id,
         String? messageType,

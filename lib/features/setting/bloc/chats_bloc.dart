@@ -87,7 +87,8 @@ class ChatsBloc extends Bloc<AppEvent, AppState> {
           final List<ChatsModel> chats = payload
               .whereType<Map<String, dynamic>>()
               .map(ChatsModel.fromJson)
-              .toList();
+              .toList()
+            ..sort(ChatsModel.compareNewestFirst);
 
           _currentChats = chats;
           emit(Done(list: chats));
