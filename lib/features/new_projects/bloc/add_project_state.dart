@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 
-import '../repo/add_project_repo.dart';
+import '../model/project_question.dart';
 
 class AddProjectState extends Equatable {
   final int? specializationId;

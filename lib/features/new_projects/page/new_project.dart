@@ -49,7 +49,7 @@ class _NewProjectState extends State<NewProject> {
     super.initState();
     _projectsBloc = NewProjectsBloc(repository: sl<NewProjectsRepo>())
       ..add(const ProjectFeedRequested());
-    _selectionFuture = sl<SelectionOptionRepo>().getSelectionOption().then(
+    _selectionFuture = sl<SelectionOptionRepo>().getSelectionOptions().then(
           (result) => result.fold((failure) => throw failure, (model) => model),
         );
   }

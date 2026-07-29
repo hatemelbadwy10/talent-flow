@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/styles.dart';
-import '../../../app/core/app_event.dart';
 import '../../../data/config/di.dart';
 import '../bloc/add_project_bloc.dart';
 import '../bloc/add_project_state.dart';
 import '../bloc/selection_option_bloc.dart';
-import '../model/selection_option_model.dart';
+import '../bloc/selection_option_event.dart';
+import '../bloc/selection_option_state.dart';
 import '../widgets/advanced_widget.dart';
 import '../widgets/budget_duration.dart';
 import '../widgets/description_widget.dart';
@@ -52,7 +51,8 @@ class _AddProjectState extends State<AddProject> {
           create: (context) => AddProjectBloc(repository: sl()),
         ),
         BlocProvider(
-          create: (context) => SelectionOptionBloc(sl())..add(Add()),
+          create: (context) => SelectionOptionBloc(repository: sl())
+            ..add(const SelectionOptionsRequested()),
         ),
       ],
       child: MultiBlocListener(
@@ -93,21 +93,25 @@ class _AddProjectState extends State<AddProject> {
             foregroundColor: Colors.black,
             elevation: 1,
           ),
-          body: BlocBuilder<SelectionOptionBloc, AppState>(
+          body: BlocBuilder<SelectionOptionBloc, SelectionOptionState>(
             builder: (context, selectOptionsState) {
-              if (selectOptionsState is Loading) {
+              if (selectOptionsState is SelectionOptionLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (selectOptionsState is Error) {
+              if (selectOptionsState is SelectionOptionFailed) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('${'error_label'.tr()}: $selectOptionsState'),
+                      Text(
+                        '${'error_label'.tr()}: ${selectOptionsState.message}',
+                      ),
                       ElevatedButton(
                         onPressed: () {
-                          context.read<SelectionOptionBloc>().add(Add());
+                          context
+                              .read<SelectionOptionBloc>()
+                              .add(const SelectionOptionsRequested());
                         },
                         child: Text('retry'.tr()),
                       ),
@@ -116,14 +120,13 @@ class _AddProjectState extends State<AddProject> {
                 );
               }
 
-              if (selectOptionsState is! Done) {
+              if (selectOptionsState is! SelectionOptionLoaded) {
                 return const SizedBox.shrink();
               }
 
               return BlocBuilder<AddProjectBloc, AddProjectState>(
                 builder: (context, projectState) {
-                  final selectionModel =
-                      (selectOptionsState).model as SelectionModel;
+                  final selectionModel = selectOptionsState.options;
 
                   return SingleChildScrollView(
                     child: Padding(

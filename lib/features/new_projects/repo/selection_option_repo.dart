@@ -5,15 +5,24 @@ import '../../../data/api/end_points.dart';
 import '../../../data/error/api_error_handler.dart';
 import '../../../data/error/failures.dart';
 import '../../../main_repos/base_repo.dart';
+import 'selection_options_repository.dart';
 
-class SelectionOptionRepo extends BaseRepo{
-  SelectionOptionRepo({required super.sharedPreferences, required super.dioClient});
-Future<Either<Failure,SelectionModel>>getSelectionOption()async{
-  try{
-    final response=await dioClient.get(uri: EndPoints.selectionOption);
-    return Right(SelectionModel.fromJson(response.data['payload']));
-  }catch(error){
-    return left(ApiErrorHandler.getServerFailure(error));
+class SelectionOptionRepo extends BaseRepo
+    implements SelectionOptionsRepository {
+  SelectionOptionRepo({
+    required super.sharedPreferences,
+    required super.dioClient,
+  });
+
+  @override
+  Future<Either<ServerFailure, SelectionModel>> getSelectionOptions() async {
+    try {
+      final response = await dioClient.get(uri: EndPoints.selectionOption);
+      final data = Map<String, dynamic>.from(response.data as Map);
+      final payload = Map<String, dynamic>.from(data['payload'] as Map);
+      return Right(SelectionModel.fromJson(payload));
+    } catch (error) {
+      return left(ApiErrorHandler.getServerFailure(error));
+    }
   }
-}
 }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
+import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_button.dart';
@@ -18,9 +19,8 @@ import 'package:talent_flow/features/setting/widgets/single_select_dialoug.dart'
 import 'package:talent_flow/app/core/images.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:talent_flow/features/new_projects/bloc/selection_option_bloc.dart';
-import 'package:talent_flow/features/new_projects/model/selection_option_model.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
+import 'package:talent_flow/features/new_projects/bloc/selection_option_event.dart';
+import 'package:talent_flow/features/new_projects/bloc/selection_option_state.dart';
 import 'package:talent_flow/main_blocs/location_options_bloc.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/navigation/routes.dart';
@@ -36,7 +36,8 @@ class EditProfileScreen extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => SelectionOptionBloc(sl())..add(Add()),
+          create: (context) => SelectionOptionBloc(repository: sl())
+            ..add(const SelectionOptionsRequested()),
         ),
         BlocProvider(
           create: (context) => UpdateProfileBloc(
@@ -659,23 +660,24 @@ class _EditProfileFormState extends State<EditProfileForm> {
 
   Widget _buildSpecializationField(
       BuildContext context, UpdateProfileState state) {
-    return BlocConsumer<SelectionOptionBloc, AppState>(
+    return BlocConsumer<SelectionOptionBloc, SelectionOptionState>(
       listener: (context, selectionState) {
-        if (selectionState is Done && selectionState.model is SelectionModel) {
-          final selectionModel = selectionState.model as SelectionModel;
+        if (selectionState is SelectionOptionLoaded) {
+          final selectionModel = selectionState.options;
           setState(() {
             _allAvailableSpecializations = selectionModel.specializations;
           });
         }
       },
       builder: (context, selectionState) {
-        if (selectionState is Loading || selectionState is Start) {
+        if (selectionState is SelectionOptionLoading ||
+            selectionState is SelectionOptionInitial) {
           return LoadingDropDown(
             label: "edit_profile.specialization".tr(),
             loadingText: "edit_profile.loading_specializations".tr(),
           );
         }
-        if (selectionState is Done && selectionState.model is SelectionModel) {
+        if (selectionState is SelectionOptionLoaded) {
           return _buildSingleSelectDropdownField(
             label: "edit_profile.specialization".tr(),
             hintText: state.specializationName ??
@@ -699,23 +701,24 @@ class _EditProfileFormState extends State<EditProfileForm> {
   }
 
   Widget _buildJobTitleField(BuildContext context, UpdateProfileState state) {
-    return BlocConsumer<SelectionOptionBloc, AppState>(
+    return BlocConsumer<SelectionOptionBloc, SelectionOptionState>(
       listener: (context, selectionState) {
-        if (selectionState is Done && selectionState.model is SelectionModel) {
-          final selectionModel = selectionState.model as SelectionModel;
+        if (selectionState is SelectionOptionLoaded) {
+          final selectionModel = selectionState.options;
           setState(() {
             _allAvailableJobTitles = selectionModel.jobTitles;
           });
         }
       },
       builder: (context, selectionState) {
-        if (selectionState is Loading || selectionState is Start) {
+        if (selectionState is SelectionOptionLoading ||
+            selectionState is SelectionOptionInitial) {
           return LoadingDropDown(
             label: "edit_profile.job_title".tr(),
             loadingText: "edit_profile.loading_job_titles".tr(),
           );
         }
-        if (selectionState is Done && selectionState.model is SelectionModel) {
+        if (selectionState is SelectionOptionLoaded) {
           return _buildSingleSelectDropdownField(
             label: "edit_profile.job_title".tr(),
             hintText: state.jobTitleName ?? "edit_profile.job_title_hint".tr(),
@@ -824,20 +827,21 @@ class _EditProfileFormState extends State<EditProfileForm> {
   }
 
   Widget _buildSkillsField(BuildContext context, UpdateProfileState state) {
-    return BlocConsumer<SelectionOptionBloc, AppState>(
+    return BlocConsumer<SelectionOptionBloc, SelectionOptionState>(
       listener: (context, selectionState) {
-        if (selectionState is Done && selectionState.model is SelectionModel) {
-          final selectionModel = selectionState.model as SelectionModel;
+        if (selectionState is SelectionOptionLoaded) {
+          final selectionModel = selectionState.options;
           setState(() {
             _allAvailableSkills = selectionModel.skills;
           });
         }
       },
       builder: (context, selectionState) {
-        if (selectionState is Loading || selectionState is Start) {
+        if (selectionState is SelectionOptionLoading ||
+            selectionState is SelectionOptionInitial) {
           return _buildSkillsLoadingState();
         }
-        if (selectionState is Done && selectionState.model is SelectionModel) {
+        if (selectionState is SelectionOptionLoaded) {
           return _buildSkillsSelectionField(
             context,
             state,

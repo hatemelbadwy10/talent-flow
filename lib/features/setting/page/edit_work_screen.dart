@@ -4,8 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
+import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
@@ -13,7 +13,8 @@ import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/work_details_bloc.dart';
 import 'package:talent_flow/features/home/model/work_details_model.dart';
 import 'package:talent_flow/features/new_projects/bloc/selection_option_bloc.dart';
-import 'package:talent_flow/features/new_projects/model/selection_option_model.dart';
+import 'package:talent_flow/features/new_projects/bloc/selection_option_event.dart';
+import 'package:talent_flow/features/new_projects/bloc/selection_option_state.dart';
 import 'package:talent_flow/features/setting/bloc/edit_work_bloc.dart';
 import 'package:talent_flow/features/setting/model/edit_work_request_model.dart';
 import 'package:talent_flow/features/setting/widgets/multi_select_skills_dialog.dart';
@@ -40,7 +41,8 @@ class EditWorkScreen extends StatelessWidget {
             ..add(WorkDetailsRequested(workId)),
         ),
         BlocProvider(
-          create: (_) => SelectionOptionBloc(sl())..add(Add()),
+          create: (_) => SelectionOptionBloc(repository: sl())
+            ..add(const SelectionOptionsRequested()),
         ),
         BlocProvider(
           create: (_) => EditWorkBloc(sl()),
@@ -96,10 +98,10 @@ class _EditWorkViewState extends State<_EditWorkView> {
             }
           },
         ),
-        BlocListener<SelectionOptionBloc, AppState>(
+        BlocListener<SelectionOptionBloc, SelectionOptionState>(
           listener: (context, state) {
-            if (state is Done && state.model is SelectionModel) {
-              final model = state.model as SelectionModel;
+            if (state is SelectionOptionLoaded) {
+              final model = state.options;
               setState(() {
                 _allAvailableSkills = model.skills;
                 _syncSelectedSkillIds();

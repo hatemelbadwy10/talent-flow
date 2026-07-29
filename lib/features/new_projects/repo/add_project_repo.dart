@@ -6,12 +6,15 @@ import '../../../data/api/end_points.dart';
 import '../../../data/error/api_error_handler.dart';
 import '../../../data/error/failures.dart';
 import '../../../main_repos/base_repo.dart';
+import '../model/project_question.dart';
+import 'add_project_repository.dart';
 
-class ProjectRepository extends BaseRepo {
+class ProjectRepository extends BaseRepo implements AddProjectRepository {
   ProjectRepository(
       {required super.sharedPreferences, required super.dioClient});
 
-  Future<Either<ServerFailure, Response>> addProject({
+  @override
+  Future<Either<ServerFailure, String>> addProject({
     required int specializationId,
     required String title,
     required String description,
@@ -133,33 +136,12 @@ class ProjectRepository extends BaseRepo {
         );
       }
 
-      return Right(response);
+      final responseData = response.data;
+      final message =
+          responseData is Map ? responseData['message']?.toString() ?? '' : '';
+      return Right(message);
     } catch (error) {
       return Left(ApiErrorHandler.getServerFailure(error));
     }
-  }
-}
-
-class ProjectQuestion {
-  final String question;
-  final bool isRequired;
-
-  ProjectQuestion({
-    required this.question,
-    required this.isRequired,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'question': question,
-      'required': isRequired ? 1 : 0,
-    };
-  }
-
-  factory ProjectQuestion.fromJson(Map<String, dynamic> json) {
-    return ProjectQuestion(
-      question: json['question'] ?? '',
-      isRequired: (json['required'] == 1) || (json['required'] == true),
-    );
   }
 }
