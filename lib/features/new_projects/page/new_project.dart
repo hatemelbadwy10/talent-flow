@@ -4,18 +4,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/components/animated_widget.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/new_projects/bloc/new_projects_bloc.dart';
+import 'package:talent_flow/features/new_projects/bloc/new_projects_event.dart';
+import 'package:talent_flow/features/new_projects/bloc/new_projects_state.dart';
 import 'package:talent_flow/features/new_projects/model/selection_option_model.dart';
 import 'package:talent_flow/features/new_projects/repo/new_projects_repo.dart';
 import 'package:talent_flow/features/new_projects/repo/selection_option_repo.dart';
-import 'package:talent_flow/features/projects/model/my_projects_model.dart';
 import 'package:talent_flow/features/projects/widgets/projects_shimmer.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/features/setting/widgets/single_select_dialoug.dart';
@@ -48,7 +47,8 @@ class _NewProjectState extends State<NewProject> {
   @override
   void initState() {
     super.initState();
-    _projectsBloc = NewProjectsBloc(sl<NewProjectsRepo>())..add(Add());
+    _projectsBloc = NewProjectsBloc(repository: sl<NewProjectsRepo>())
+      ..add(const ProjectFeedRequested());
     _selectionFuture = sl<SelectionOptionRepo>().getSelectionOption().then(
           (result) => result.fold((failure) => throw failure, (model) => model),
         );
@@ -64,12 +64,10 @@ class _NewProjectState extends State<NewProject> {
 
   void _fetchProjects() {
     _projectsBloc.add(
-      Add(
-        arguments: {
-          'specialization': _selectedSpecializationId,
-          'sortBy': _selectedSortBy,
-          'search': _searchController.text.trim(),
-        },
+      ProjectFeedRequested(
+        specializationId: _selectedSpecializationId,
+        sortBy: _selectedSortBy,
+        search: _searchController.text.trim(),
       ),
     );
   }
@@ -229,16 +227,20 @@ class _NewProjectState extends State<NewProject> {
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: BlocBuilder<NewProjectsBloc, AppState>(
+                child: BlocBuilder<NewProjectsBloc, NewProjectsState>(
+                  buildWhen: (_, current) =>
+                      current is ProjectFeedLoading ||
+                      current is ProjectFeedLoaded ||
+                      current is ProjectFeedFailed,
                   builder: (context, state) {
-                    if (state is Loading) {
+                    if (state is ProjectFeedLoading) {
                       return const ProjectCardShimmer();
-                    } else if (state is Error) {
+                    } else if (state is ProjectFeedFailed) {
                       return Center(
                         child: Text('failed_to_load_projects'.tr()),
                       );
-                    } else if (state is Done) {
-                      final projects = state.list as List<MyProjectsModel>;
+                    } else if (state is ProjectFeedLoaded) {
+                      final projects = state.projects;
 
                       if (projects.isEmpty) {
                         return Center(

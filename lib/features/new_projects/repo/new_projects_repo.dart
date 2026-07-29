@@ -5,11 +5,17 @@ import '../../../data/api/end_points.dart';
 import '../../../data/error/api_error_handler.dart';
 import '../../../data/error/failures.dart';
 import '../../../main_repos/base_repo.dart';
+import '../../projects/model/my_projects_model.dart';
+import 'new_projects_repository.dart';
 
-class NewProjectsRepo extends BaseRepo {
-  NewProjectsRepo({required super.sharedPreferences, required super.dioClient});
+class NewProjectsRepo extends BaseRepo implements NewProjectsRepository {
+  NewProjectsRepo({
+    required super.sharedPreferences,
+    required super.dioClient,
+  });
 
-  Future<Either<ServerFailure, Response>> getProjects({
+  @override
+  Future<Either<ServerFailure, List<MyProjectsModel>>> getProjectFeed({
     int? specializationId,
     String? sortBy,
     String? search,
@@ -19,106 +25,111 @@ class NewProjectsRepo extends BaseRepo {
       if (specializationId != null) {
         queryParameters['specialization'] = specializationId;
       }
-      if (sortBy != null && sortBy.trim().isNotEmpty) {
-        queryParameters['sortBy'] = sortBy.trim();
+      if (sortBy?.trim().isNotEmpty == true) {
+        queryParameters['sortBy'] = sortBy!.trim();
       }
-      if (search != null && search.trim().isNotEmpty) {
-        queryParameters['search'] = search.trim();
+      if (search?.trim().isNotEmpty == true) {
+        queryParameters['search'] = search!.trim();
       }
-
       final response = await dioClient.get(
         uri: EndPoints.projects,
         queryParameters: queryParameters.isEmpty ? null : queryParameters,
       );
-      return Right(response);
+      final data = Map<String, dynamic>.from(response.data as Map);
+      final payload = data['payload'];
+      if (payload is! List) {
+        return left(ServerFailure('Projects payload is invalid'));
+      }
+      return right(
+        payload
+            .map((item) => MyProjectsModel.fromJson(
+                  Map<String, dynamic>.from(item as Map),
+                ))
+            .toList(growable: false),
+      );
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> addOffer(int id, String offer) async {
-    return addOfferWithAnswers(
-      projectId: id,
-      offer: offer,
-      answers: const [],
-    );
-  }
-
-  Future<Either<ServerFailure, Response>> addOfferWithAnswers({
+  @override
+  Future<Either<ServerFailure, String>> submitOffer({
     required int projectId,
-    required String offer,
+    required String description,
     required List<Map<String, dynamic>> answers,
+    int? proposalId,
   }) async {
     try {
-      final formData = FormData();
-      formData.fields.add(MapEntry('project_id', '$projectId'));
-      formData.fields.add(MapEntry('description', offer));
-      for (var i = 0; i < answers.length; i++) {
-        final questionId = answers[i]['question_id'];
-        final answer = answers[i]['answer']?.toString() ?? '';
-        formData.fields.add(
-          MapEntry('questions_answers[$i][question_id]', '$questionId'),
-        );
-        formData.fields.add(
-          MapEntry('questions_answers[$i][answer]', answer),
-        );
-      }
-      final response = await dioClient.post(
-        uri: EndPoints.addOffer,
+      final formData = _offerFormData(
+        projectId: projectId,
+        description: description,
+        answers: answers,
+      );
+      final response = proposalId == null
+          ? await dioClient.post(uri: EndPoints.addOffer, data: formData)
+          : await _updateOffer(proposalId, formData);
+      return right(_messageFrom(response.data));
+    } catch (error) {
+      return left(ApiErrorHandler.getServerFailure(error));
+    }
+  }
+
+  @override
+  Future<Either<ServerFailure, String>> toggleProjectFavorite(
+    int projectId,
+  ) async {
+    try {
+      final response = await dioClient.get(
+        uri: '${EndPoints.projects}/$projectId/favourite',
+      );
+      return right(_messageFrom(response.data));
+    } catch (error) {
+      return left(ApiErrorHandler.getServerFailure(error));
+    }
+  }
+
+  FormData _offerFormData({
+    required int projectId,
+    required String description,
+    required List<Map<String, dynamic>> answers,
+  }) {
+    final formData = FormData()
+      ..fields.add(MapEntry('project_id', '$projectId'))
+      ..fields.add(MapEntry('description', description));
+    for (var index = 0; index < answers.length; index++) {
+      formData.fields.add(MapEntry(
+        'questions_answers[$index][question_id]',
+        '${answers[index]['question_id']}',
+      ));
+      formData.fields.add(MapEntry(
+        'questions_answers[$index][answer]',
+        answers[index]['answer']?.toString() ?? '',
+      ));
+    }
+    return formData;
+  }
+
+  Future<Response<dynamic>> _updateOffer(
+    int proposalId,
+    FormData formData,
+  ) async {
+    try {
+      return await dioClient.put(
+        uri: EndPoints.projectProposal(proposalId),
         data: formData,
       );
-      return Right(response);
-    } catch (error) {
-      return left(ApiErrorHandler.getServerFailure(error));
+    } catch (_) {
+      return dioClient.post(
+        uri: EndPoints.projectProposal(proposalId),
+        data: formData,
+      );
     }
   }
 
-  Future<Either<ServerFailure, Response>> updateOffer({
-    required int proposalId,
-    required int projectId,
-    required String offer,
-    List<Map<String, dynamic>> answers = const [],
-  }) async {
-    try {
-      final formData = FormData();
-      formData.fields.add(MapEntry('project_id', '$projectId'));
-      formData.fields.add(MapEntry('description', offer));
-      for (var i = 0; i < answers.length; i++) {
-        final questionId = answers[i]['question_id'];
-        final answer = answers[i]['answer']?.toString() ?? '';
-        formData.fields.add(
-          MapEntry('questions_answers[$i][question_id]', '$questionId'),
-        );
-        formData.fields.add(
-          MapEntry('questions_answers[$i][answer]', answer),
-        );
-      }
-
-      try {
-        final response = await dioClient.put(
-          uri: EndPoints.projectProposal(proposalId),
-          data: formData,
-        );
-        return Right(response);
-      } catch (_) {
-        final response = await dioClient.post(
-          uri: EndPoints.projectProposal(proposalId),
-          data: formData,
-        );
-        return Right(response);
-      }
-    } catch (error) {
-      return left(ApiErrorHandler.getServerFailure(error));
+  String _messageFrom(Object? data) {
+    if (data is Map && data['message'] != null) {
+      return data['message'].toString();
     }
-  }
-
-  Future<Either<Failure, dynamic>> addRemoveFavorite(int id) async {
-    try {
-      final response =
-          await dioClient.get(uri: "${EndPoints.projects}/$id/favourite");
-      return Right(response);
-    } catch (error) {
-      return left(ApiErrorHandler.getServerFailure(error));
-    }
+    return '';
   }
 }

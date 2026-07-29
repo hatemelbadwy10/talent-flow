@@ -8,10 +8,10 @@ import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../components/custom_button.dart';
 import '../bloc/new_projects_bloc.dart';
+import '../bloc/new_projects_event.dart';
+import '../bloc/new_projects_state.dart';
 import '../../projects/model/single_project_model.dart';
 
 class AddOfferWidget extends StatefulWidget {
@@ -126,41 +126,40 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
     final answers = widget.questions
         .where((question) => question.id != null)
         .map((question) {
-          final answer =
-              _questionControllers[question.id!]!.text.trim();
+          final answer = _questionControllers[question.id!]!.text.trim();
           return {
             'question_id': question.id,
             'answer': answer,
           };
         })
-        .where((answer) => (answer['answer']?.toString().trim().isNotEmpty ?? false))
+        .where((answer) =>
+            (answer['answer']?.toString().trim().isNotEmpty ?? false))
         .toList();
 
     context.read<NewProjectsBloc>().add(
-          Click(arguments: {
-            "projectId": widget.id,
-            "description": description,
-            "proposalId": widget.proposalId,
-            "answers": answers,
-          }),
+          OfferSubmitted(
+            projectId: widget.id,
+            description: description,
+            proposalId: widget.proposalId,
+            answers: answers,
+          ),
         );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<NewProjectsBloc, AppState>(
+    return BlocListener<NewProjectsBloc, NewProjectsState>(
       listener: (context, state) {
-        if (state is Loading) {
+        if (state is OfferSubmitting) {
           setState(() {
             _isLoading = true;
           });
-        } else if (state is Done) {
-          final successMessage =
-              state.data?.toString().trim().isNotEmpty == true
-                  ? state.data.toString()
-                  : (_isEditing
-                      ? 'add_offer.update_success'.tr()
-                      : 'add_offer.success'.tr());
+        } else if (state is OfferSubmissionSucceeded) {
+          final successMessage = state.message.trim().isNotEmpty
+              ? state.message
+              : (_isEditing
+                  ? 'add_offer.update_success'.tr()
+                  : 'add_offer.success'.tr());
           setState(() {
             _isLoading = false;
           });
@@ -170,7 +169,7 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
             if (!mounted) return;
             CustomNavigator.pop(result: true);
           });
-        } else if (state is Error) {
+        } else if (state is OfferSubmissionFailed) {
           setState(() {
             _isLoading = false;
           });
@@ -191,7 +190,9 @@ class _AddOfferWidgetState extends State<AddOfferWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              _isEditing ? 'add_offer.update_title'.tr() : 'add_offer.title'.tr(),
+              _isEditing
+                  ? 'add_offer.update_title'.tr()
+                  : 'add_offer.title'.tr(),
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             SizedBox(height: 16.h),
