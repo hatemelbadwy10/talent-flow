@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/work_details_bloc.dart';
 import 'package:talent_flow/features/home/model/work_details_model.dart';
 import 'package:talent_flow/features/new_projects/bloc/selection_option_bloc.dart';
@@ -17,36 +16,44 @@ import 'package:talent_flow/features/setting/bloc/edit_work_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/edit_work_event.dart';
 import 'package:talent_flow/features/setting/bloc/edit_work_state.dart';
 import 'package:talent_flow/features/setting/model/edit_work_request_model.dart';
-import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
+import 'package:talent_flow/features/setting/repo/edit_work_repository.dart';
 import 'package:talent_flow/features/setting/widgets/multi_select_skills_dialog.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/helpers/date_time_picker.dart';
 import 'package:talent_flow/helpers/pickers/view/image_picker_helper.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
-import 'package:talent_flow/features/home/repo/home_repo.dart';
+import 'package:talent_flow/features/home/repo/work_details_repository.dart';
+import 'package:talent_flow/features/new_projects/repo/selection_options_repository.dart';
 
 class EditWorkScreen extends StatelessWidget {
   const EditWorkScreen({
     super.key,
     required this.workId,
+    required this.workDetailsRepository,
+    required this.selectionOptionsRepository,
+    required this.workRepository,
   });
 
   final int workId;
+  final WorkDetailsRepository workDetailsRepository;
+  final SelectionOptionsRepository selectionOptionsRepository;
+  final EditWorkRepository workRepository;
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => WorkDetailsBloc(repository: sl<HomeRepo>())
+          create: (_) => WorkDetailsBloc(repository: workDetailsRepository)
             ..add(WorkDetailsRequested(workId)),
         ),
         BlocProvider(
-          create: (_) => SelectionOptionBloc(repository: sl())
-            ..add(const SelectionOptionsRequested()),
+          create: (_) =>
+              SelectionOptionBloc(repository: selectionOptionsRepository)
+                ..add(const SelectionOptionsRequested()),
         ),
         BlocProvider(
-          create: (_) => EditWorkBloc(repository: sl<AddWorkRepo>()),
+          create: (_) => EditWorkBloc(repository: workRepository),
         ),
       ],
       child: _EditWorkView(workId: workId),

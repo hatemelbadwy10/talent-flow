@@ -289,7 +289,14 @@ abstract class CustomNavigator {
         if (workId == null) {
           return _pageRoute(_homeView());
         }
-        return _pageRoute(EditWorkScreen(workId: workId));
+        return _pageRoute(
+          EditWorkScreen(
+            workId: workId,
+            workDetailsRepository: sl<HomeRepo>(),
+            selectionOptionsRepository: sl<SelectionOptionRepo>(),
+            workRepository: sl<AddWorkRepo>(),
+          ),
+        );
 
       case Routes.profile:
         final isFreelancer =
