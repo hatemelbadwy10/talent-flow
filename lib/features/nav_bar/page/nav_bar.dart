@@ -7,8 +7,6 @@ import 'package:talent_flow/features/projects/page/my_projects.dart';
 import 'package:talent_flow/features/setting/page/setting.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../app/core/styles.dart';
 import '../../home/page/home_view.dart';
 import '../../new_projects/page/new_project.dart';
@@ -50,13 +48,9 @@ class NavBar extends StatelessWidget {
 
     return BlocProvider(
       create: (context) => NavBarBloc(),
-      child: BlocBuilder<NavBarBloc, AppState>(
+      child: BlocBuilder<NavBarBloc, NavBarState>(
         builder: (context, state) {
-          int selectedIndex = 2;
-
-          if (state is Done) {
-            selectedIndex = state.data;
-          }
+          var selectedIndex = state.selectedIndex;
 
           if (selectedIndex >= widgetOptions.length) {
             selectedIndex = 2;
@@ -122,7 +116,9 @@ class NavBar extends StatelessWidget {
                 );
               }),
               onTap: (index) {
-                context.read<NavBarBloc>().add(Click(arguments: index));
+                context.read<NavBarBloc>().add(
+                      NavBarSelectionChanged(index),
+                    );
               },
             ),
           );

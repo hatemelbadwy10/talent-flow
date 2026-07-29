@@ -1,12 +1,21 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 
+final class NavBarSelectionChanged {
+  const NavBarSelectionChanged(this.index);
 
-class NavBarBloc extends Bloc<AppEvent, AppState> {
-  NavBarBloc() : super(Done(data: 2)) {
-    on<Click>((event, emit) {
-      emit(Done(data: event.arguments));
+  final int index;
+}
+
+final class NavBarState {
+  const NavBarState(this.selectedIndex);
+
+  final int selectedIndex;
+}
+
+class NavBarBloc extends Bloc<NavBarSelectionChanged, NavBarState> {
+  NavBarBloc() : super(const NavBarState(2)) {
+    on<NavBarSelectionChanged>((event, emit) {
+      emit(NavBarState(event.index));
     });
   }
 }

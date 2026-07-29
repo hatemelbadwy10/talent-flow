@@ -11,8 +11,8 @@ import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
 
 class UserTypeSelectionScreen extends StatelessWidget {
-  const UserTypeSelectionScreen({super.key,this.arguments});
-  final Map<String,dynamic>? arguments;
+  const UserTypeSelectionScreen({super.key, this.arguments});
+  final Map<String, dynamic>? arguments;
 
   @override
   Widget build(BuildContext context) {
@@ -38,16 +38,16 @@ class UserTypeSelectionScreen extends StatelessWidget {
             left: 0,
             right: 0,
             child: Center(
-              child: Image.asset(Images.onBoardingPhoto, height: 300, width: 300),
+              child:
+                  Image.asset(Images.onBoardingPhoto, height: 300, width: 300),
             ),
           ),
-
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
               height: MediaQuery.of(context).size.height * 0.3116,
               width: double.infinity,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
                     Styles.PRIMARY_COLOR,
@@ -56,14 +56,13 @@ class UserTypeSelectionScreen extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
-                borderRadius: const BorderRadius.only(
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(32),
                   topRight: Radius.circular(32),
                 ),
               ),
             ),
           ),
-
           Positioned(
             bottom: MediaQuery.of(context).size.height * 0.2,
             left: 24,
@@ -75,33 +74,30 @@ class UserTypeSelectionScreen extends StatelessWidget {
                   iconPath: Images.jopSearcher,
                   text: 'user_selection.find_service_card'.tr(),
                   onTap: () {
-                    sl<SharedPreferences>().setBool(AppStorageKey.isFreelancer, false);
+                    sl<SharedPreferences>()
+                        .setBool(AppStorageKey.isFreelancer, false);
                     log('arguments?["from_login"]${arguments?["from_login"]}');
-                    if(arguments?["from_login"] == true){
+                    if (arguments?["from_login"] == true) {
                       CustomNavigator.push(Routes.register);
+                    } else {
+                      CustomNavigator.push(Routes.login, clean: true);
                     }
-                    else{
-                      CustomNavigator.push(Routes.login,clean: true);
-                    }
-
                   },
                 ),
                 const SizedBox(width: 16),
                 _buildChoiceCard(
-                  iconPath: Images.penIcon,
-                  text: 'user_selection.freelancer_card'.tr(),
-                  onTap: () {
-
-                    sl<SharedPreferences>().setBool(AppStorageKey.isFreelancer, true);
-                    log('arguments?["from_login"]${arguments?["from_login"]}');
-                    if(arguments?["from_login"] == true){
-                    CustomNavigator.push(Routes.register);
-                  }
-                    else{
-                      CustomNavigator.push(Routes.login,clean: true);
-                    }
-    }
-                ),
+                    iconPath: Images.penIcon,
+                    text: 'user_selection.freelancer_card'.tr(),
+                    onTap: () {
+                      sl<SharedPreferences>()
+                          .setBool(AppStorageKey.isFreelancer, true);
+                      log('arguments?["from_login"]${arguments?["from_login"]}');
+                      if (arguments?["from_login"] == true) {
+                        CustomNavigator.push(Routes.register);
+                      } else {
+                        CustomNavigator.push(Routes.login, clean: true);
+                      }
+                    }),
               ],
             ),
           ),
