@@ -8,11 +8,11 @@ import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/features/home/repo/home_repo.dart';
 import 'package:talent_flow/features/home/widgets/new_list_item.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
 import '../../../navigation/routes.dart';
-import '../bloc/home_bloc.dart';
+import '../bloc/home_dashboard_bloc.dart';
+import '../bloc/home_dashboard_event.dart';
+import '../bloc/home_dashboard_state.dart';
 import '../model/home_model.dart';
 import '../widgets/freelancer_listview_item.dart';
 import '../widgets/jop_offer_listview_item.dart';
@@ -32,17 +32,19 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HomeBloc(homeRepo: sl<HomeRepo>())..add(Add()),
+      create: (context) => HomeDashboardBloc(
+        repository: sl<HomeRepo>(),
+      )..add(const HomeDashboardRequested()),
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
-          child: BlocBuilder<HomeBloc, AppState>(
+          child: BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
             builder: (context, state) {
               final isFreelancer =
                   sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
                       false;
 
-              if (state is Loading) {
+              if (state is HomeDashboardLoading) {
                 log('Showing loading state');
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,41 +56,9 @@ class _HomeViewState extends State<HomeView> {
                     ),
                   ],
                 );
-              } else if (state is Done) {
+              } else if (state case HomeDashboardLoaded(:final dashboard)) {
                 log('Showing done state');
-
-                // Fix 1: Check if state.model is null first
-                if (state.model == null) {
-                  log('state.model is null');
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const HomeCommonHeader(),
-                      Center(child: Text("no_data_available".tr())),
-                    ],
-                  );
-                }
-
-                HomeModel? homeModel;
-                try {
-                  if (state.model is HomeModel) {
-                    homeModel = state.model as HomeModel;
-                  } else {
-                    return const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        HomeCommonHeader(),
-                      ],
-                    );
-                  }
-                } catch (e) {
-                  return const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      HomeCommonHeader(),
-                    ],
-                  );
-                }
+                final HomeModel homeModel = dashboard;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -117,12 +87,12 @@ class _HomeViewState extends State<HomeView> {
                                     scrollDirection: Axis.horizontal,
                                     itemCount: homeModel.cards.length,
                                     itemBuilder: (context, index) {
-                                      final card = homeModel?.cards[index];
+                                      final card = homeModel.cards[index];
                                       return Padding(
                                         padding: EdgeInsets.only(right: 12.w),
                                         child: NewListItem(
-                                          title: card?.title ?? 'No Title',
-                                          imageUrl: card?.image ?? '',
+                                          title: card.title ?? 'No Title',
+                                          imageUrl: card.image ?? '',
                                         ),
                                       );
                                     },
@@ -150,7 +120,7 @@ class _HomeViewState extends State<HomeView> {
                                 scrollDirection: Axis.horizontal,
                                 itemCount: homeModel.top!.items.length,
                                 itemBuilder: (context, index) {
-                                  final item = homeModel?.top!.items[index];
+                                  final item = homeModel.top!.items[index];
                                   final parsedEntrepreneurTitle =
                                       item?['job_title']?.toString().trim() ??
                                           item?['jop_title']
@@ -223,7 +193,7 @@ class _HomeViewState extends State<HomeView> {
                     ),
                   ],
                 );
-              } else if (state is Error) {
+              } else if (state is HomeDashboardFailed) {
                 log('Showing error state');
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

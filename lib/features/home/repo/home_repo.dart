@@ -4,8 +4,10 @@ import 'package:talent_flow/data/api/end_points.dart';
 import 'package:talent_flow/main_repos/base_repo.dart';
 
 import '../../../data/error/failures.dart';
+import '../model/home_model.dart';
+import 'home_dashboard_repository.dart';
 
-class HomeRepo extends BaseRepo {
+class HomeRepo extends BaseRepo implements HomeDashboardRepository {
   HomeRepo({required super.sharedPreferences, required super.dioClient});
 
   Future<Either<ServerFailure, Response>> getHome() async {
@@ -18,6 +20,29 @@ class HomeRepo extends BaseRepo {
     } catch (e) {
       // Catch any other general errors
       return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ServerFailure, HomeModel>> getDashboard() async {
+    try {
+      final response = await dioClient.get(uri: EndPoints.home);
+      final data = Map<String, dynamic>.from(response.data as Map);
+      final payload = data['payload'];
+      if (payload is! Map) {
+        return left(ServerFailure('Home payload is invalid'));
+      }
+      return right(
+        HomeModel.fromJson(Map<String, dynamic>.from(payload)),
+      );
+    } on DioException catch (error) {
+      return left(
+        ServerFailure(error.message ?? 'An unexpected Dio error occurred'),
+      );
+    } on FormatException catch (error) {
+      return left(ServerFailure(error.message));
+    } catch (error) {
+      return left(ServerFailure(error.toString()));
     }
   }
 
