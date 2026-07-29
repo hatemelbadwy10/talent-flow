@@ -24,6 +24,7 @@ import 'package:talent_flow/features/payment/page/contract_payment_request_scree
 import 'package:talent_flow/features/payment/page/payment_page.dart';
 import 'package:talent_flow/features/payment/repo/pay_ment_repo.dart';
 import 'package:talent_flow/features/projects/page/single_project_view.dart';
+import 'package:talent_flow/features/projects/model/project_route_args.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
 import 'package:talent_flow/features/setting/repo/chats_repo.dart';
@@ -143,7 +144,7 @@ abstract class CustomNavigator {
         );
       case Routes.singleProjectDetails:
         return _pageRoute(SingleProjectView(
-          arguments: settings.arguments as Map<String, dynamic>,
+          arguments: ProjectDetailsRouteArgs.fromRoute(settings.arguments),
           projectRepository: sl<ProjectsRepo>(),
           chatRepository: sl<ChatRepo>(),
           currentUserId: int.tryParse(
@@ -189,7 +190,7 @@ abstract class CustomNavigator {
             repository: sl<NewProjectsRepo>(),
           ),
           child: AddOfferScreen(
-            argument: settings.arguments as Map<String, dynamic>,
+            argument: OfferRouteArgs.fromRoute(settings.arguments),
             projectRepository: sl<ProjectsRepo>(),
             currentUserId: int.tryParse(
               sl<SharedPreferences>().getString(AppStorageKey.userId) ?? '',
@@ -242,7 +243,7 @@ abstract class CustomNavigator {
         );
       case Routes.ownerProjects:
         return _pageRoute(OwnerProjects(
-          arguments: settings.arguments as Map<String, dynamic>?,
+          arguments: ProjectListRouteArgs.fromRoute(settings.arguments),
           repository: sl<ProjectsRepo>(),
         ));
       case Routes.entrepreneur:

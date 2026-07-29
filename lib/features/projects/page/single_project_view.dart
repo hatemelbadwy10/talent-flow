@@ -13,12 +13,13 @@ import '../../new_projects/widgets/project_description.dart';
 import '../../new_projects/widgets/project_details_card.dart';
 import '../bloc/project_details_bloc.dart';
 import '../model/single_project_model.dart';
+import '../model/project_route_args.dart';
 import '../repo/projects_repository.dart';
 import '../widgets/project_files_section.dart';
 import '../widgets/single_project_shimmer.dart';
 
 class SingleProjectView extends StatelessWidget {
-  final Map<String, dynamic> arguments;
+  final ProjectDetailsRouteArgs arguments;
   final ProjectsRepository projectRepository;
   final ChatRepo chatRepository;
   final int? currentUserId;
@@ -38,7 +39,7 @@ class SingleProjectView extends StatelessWidget {
     return BlocProvider(
       create: (context) => ProjectDetailsBloc(
         repository: projectRepository,
-      )..add(ProjectDetailsRequested(arguments['id'] as int)),
+      )..add(ProjectDetailsRequested(arguments.projectId)),
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -88,12 +89,12 @@ class SingleProjectView extends StatelessWidget {
                       if (isFreelancer && myProposal != null)
                         _OwnProposalSection(
                           proposal: myProposal,
-                          projectId: arguments['id'] as int?,
+                          projectId: arguments.projectId,
                         ),
                       if (!isFreelancer)
                         _ProjectProposalsSection(
                           proposals: project.proposals,
-                          projectId: arguments['id'] as int?,
+                          projectId: arguments.projectId,
                           chatRepository: chatRepository,
                         ),
                       const SizedBox(height: 100),

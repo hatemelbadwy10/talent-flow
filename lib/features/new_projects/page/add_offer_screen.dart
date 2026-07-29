@@ -6,6 +6,7 @@ import 'package:talent_flow/features/new_projects/widgets/project_description.da
 
 import '../../projects/bloc/project_details_bloc.dart';
 import '../../projects/model/single_project_model.dart';
+import '../../projects/model/project_route_args.dart';
 import '../../projects/repo/projects_repository.dart';
 import '../../projects/widgets/project_files_section.dart';
 import '../widgets/project_details_card.dart';
@@ -13,14 +14,14 @@ import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
 
 class AddOfferScreen extends StatelessWidget {
-  final Map<String, dynamic>? argument;
+  final OfferRouteArgs argument;
   final ProjectsRepository projectRepository;
   final int? currentUserId;
   final bool isFreelancer;
 
   const AddOfferScreen({
     super.key,
-    this.argument,
+    required this.argument,
     required this.projectRepository,
     required this.currentUserId,
     required this.isFreelancer,
@@ -31,7 +32,7 @@ class AddOfferScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => ProjectDetailsBloc(
         repository: projectRepository,
-      )..add(ProjectDetailsRequested(argument?['id'] as int)),
+      )..add(ProjectDetailsRequested(argument.projectId)),
       child: Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -40,7 +41,7 @@ class AddOfferScreen extends StatelessWidget {
               final project =
                   state is ProjectDetailsLoaded ? state.project : null;
               final myProposal = isFreelancer ? _findMyProposal(project) : null;
-              final hasEditArguments = argument?['proposalId'] != null;
+              final hasEditArguments = argument.proposalId != null;
               final title = !isFreelancer
                   ? 'projectData'.tr()
                   : (hasEditArguments || myProposal != null
@@ -88,12 +89,10 @@ class AddOfferScreen extends StatelessWidget {
                         ProjectFilesSection(files: project.files),
                       isFreelancer
                           ? AddOfferWidget(
-                              id: argument?['id'],
-                              proposalId: argument?['proposalId'] as int? ??
-                                  myProposal?.id,
-                              initialDescription:
-                                  argument?['initialDescription'] as String? ??
-                                      myProposal?.description,
+                              id: argument.projectId,
+                              proposalId: argument.proposalId ?? myProposal?.id,
+                              initialDescription: argument.initialDescription ??
+                                  myProposal?.description,
                               questions: project.questions,
                             )
                           : const SizedBox(),

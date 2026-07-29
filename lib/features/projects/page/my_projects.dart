@@ -8,30 +8,31 @@ import '../../../app/core/styles.dart';
 import '../bloc/my_projects_bloc.dart';
 import '../bloc/my_projects_event.dart';
 import '../bloc/my_projects_state.dart';
+import '../model/project_route_args.dart';
 import '../repo/projects_repository.dart';
 import '../widgets/my_projects_card.dart';
 import '../widgets/projects_shimmer.dart';
 
 class OwnerProjects extends StatelessWidget {
-  final Map<String, dynamic>? arguments;
+  final ProjectListRouteArgs arguments;
   final ProjectsRepository repository;
 
   const OwnerProjects({
     super.key,
-    this.arguments,
+    required this.arguments,
     required this.repository,
   });
 
   @override
   Widget build(BuildContext context) {
-    final categoryId = arguments?['categoryId'] as int?;
+    final categoryId = arguments.categoryId;
     log('categoryId $categoryId');
     return BlocProvider(
       create: (context) => MyProjectsBloc(repository: repository)
         ..add(MyProjectsRequested(categoryId: categoryId)),
       child: _OwnerProjectsContent(
         categoryId: categoryId,
-        categoryName: arguments?['categoryName'],
+        categoryName: arguments.categoryName,
       ),
     );
   }
