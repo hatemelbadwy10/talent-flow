@@ -15,7 +15,9 @@ void main() {
       ],
       'top': {
         'type': 'projects',
-        'items': [1, 'two'],
+        'items': [
+          {'id': 1, 'name': 'Top project'},
+        ],
       },
       'categories': [
         {'id': 2, 'name': 'Design', 'description': 'UI', 'icon': 'ui.svg'},
@@ -31,7 +33,10 @@ void main() {
     });
 
     expect((home.toJson()['cards'] as List).single['title'], 'Welcome');
-    expect((home.toJson()['top'] as Map)['items'], [1, 'two']);
+    expect(
+      ((home.toJson()['top'] as Map)['items'] as List).single['name'],
+      'Top project',
+    );
     expect((payment.toJson()['items'] as List).single['id'], 4);
   });
 

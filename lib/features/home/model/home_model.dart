@@ -122,14 +122,19 @@ class Top extends SingleMapper {
   });
 
   final String? type;
-  final List<Object?> items;
+  final List<TopItem> items;
 
   factory Top.fromJson(Map<String, dynamic> json) {
     return Top(
       type: json["type"],
-      items: json["items"] == null
-          ? []
-          : List<Object?>.from(json["items"] as List),
+      items: json["items"] is List
+          ? (json["items"] as List)
+              .whereType<Map>()
+              .map((item) => TopItem.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ))
+              .toList(growable: false)
+          : const [],
     );
   }
 
@@ -141,6 +146,59 @@ class Top extends SingleMapper {
   @override
   Map<String, dynamic> toJson() => {
         'type': type,
-        'items': items,
+        'items': items.map((item) => item.toJson()).toList(growable: false),
       };
+}
+
+final class TopItem {
+  const TopItem({
+    required this.id,
+    required this.name,
+    required this.jobTitle,
+    required this.image,
+    required this.rating,
+    required this.isInFavorites,
+  });
+
+  final int? id;
+  final String? name;
+  final String? jobTitle;
+  final String? image;
+  final double? rating;
+  final bool isInFavorites;
+
+  factory TopItem.fromJson(Map<String, dynamic> json) {
+    return TopItem(
+      id: _toInt(json['id']),
+      name: json['name']?.toString(),
+      jobTitle: (json['job_title'] ?? json['jop_title'])?.toString(),
+      image: json['image']?.toString(),
+      rating: double.tryParse(json['rating']?.toString() ?? ''),
+      isInFavorites: _toBool(
+        json['is_in_favorites'] ?? json['is_fav'],
+      ),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'job_title': jobTitle,
+        'image': image,
+        'rating': rating,
+        'is_in_favorites': isInFavorites,
+      };
+}
+
+int? _toInt(Object? value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '');
+}
+
+bool _toBool(Object? value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  final normalized = value?.toString().trim().toLowerCase() ?? '';
+  return normalized == 'true' || normalized == '1' || normalized == 'yes';
 }

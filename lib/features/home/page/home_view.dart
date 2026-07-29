@@ -128,66 +128,47 @@ class _HomeViewState extends State<HomeView> {
                                 itemCount: homeModel.top!.items.length,
                                 itemBuilder: (context, index) {
                                   final item = homeModel.top!.items[index];
-                                  final parsedEntrepreneurTitle =
-                                      item?['job_title']?.toString().trim() ??
-                                          item?['jop_title']
-                                              ?.toString()
-                                              .trim() ??
-                                          '';
                                   final parsedJobTitle =
-                                      item?['job_title']?.toString().trim() ??
-                                          '';
+                                      item.jobTitle?.trim() ?? '';
                                   log("item: $item");
-                                  log("jop_title: ${item?['job_title']}");
+                                  log("job_title: ${item.jobTitle}");
                                   return Padding(
                                     padding: EdgeInsets.only(right: 12.w),
                                     child: isFreelancer
                                         ? JobOffererListItem(
-                                            name: item['name'] ?? 'N/A',
-                                            industry: parsedEntrepreneurTitle
-                                                    .isNotEmpty
-                                                ? parsedEntrepreneurTitle
+                                            name: item.name ?? 'N/A',
+                                            industry: parsedJobTitle.isNotEmpty
+                                                ? parsedJobTitle
                                                 : 'home.job_title_not_set'.tr(),
-                                            imageUrl: item['image'],
-                                            onTap: item['id'] == null
+                                            imageUrl: item.image,
+                                            onTap: item.id == null
                                                 ? null
                                                 : () {
                                                     CustomNavigator.push(
                                                       Routes.entrepreneur,
                                                       arguments: {
                                                         'entrepreneurId':
-                                                            item['id'],
+                                                            item.id,
                                                       },
                                                     );
                                                   },
                                           )
                                         : FreelancerListItem(
-                                            id: item['id'],
-                                            name: item['name'] ?? 'N/A',
+                                            id: item.id ?? 0,
+                                            name: item.name ?? 'N/A',
                                             jopTitle: parsedJobTitle.isNotEmpty
                                                 ? parsedJobTitle
                                                 : 'home.job_title_not_set'.tr(),
-                                            rating: item['rating'] != null
-                                                ? double.tryParse(
-                                                    item['rating'].toString())
-                                                : null,
-                                            imageUrl: item['image'],
-                                            isInFavorites:
-                                                (item['is_in_favorites'] ??
-                                                            item['is_fav']) ==
-                                                        true ||
-                                                    (item['is_in_favorites'] ??
-                                                            item['is_fav']) ==
-                                                        1 ||
-                                                    (item['is_in_favorites'] ??
-                                                                item['is_fav'])
-                                                            ?.toString() ==
-                                                        '1',
+                                            rating: item.rating,
+                                            imageUrl: item.image,
+                                            isInFavorites: item.isInFavorites,
                                             onToggleFavourite: () async {
+                                              final itemId = item.id;
+                                              if (itemId == null) return false;
                                               final result = await widget
                                                   .favouritesRepository
                                                   .toggleFreelancerFavourite(
-                                                item['id'],
+                                                itemId,
                                               );
                                               return result.isRight();
                                             },

@@ -105,6 +105,10 @@ class ServiceCategoryTile extends StatelessWidget {
               ),
               child: Image.network(
                 icon,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.category_outlined,
+                  color: Colors.grey,
+                ),
               ),
             ),
             const SizedBox(width: 16.0),
