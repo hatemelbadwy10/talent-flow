@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/images.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../app/core/styles.dart';
 import '../../../data/config/di.dart' show sl;
 import '../bloc/my_projects_bloc.dart';
-import '../model/my_projects_model.dart';
+import '../bloc/my_projects_event.dart';
+import '../bloc/my_projects_state.dart';
+import '../repo/projects_repo.dart';
 import '../widgets/my_projects_card.dart';
 import '../widgets/projects_shimmer.dart';
 
@@ -22,8 +22,8 @@ class OwnerProjects extends StatelessWidget {
     final categoryId = arguments?['categoryId'] as int?;
     log('categoryId $categoryId');
     return BlocProvider(
-      create: (context) =>
-          MyProjectsBloc(sl())..add(Add(arguments: categoryId)),
+      create: (context) => MyProjectsBloc(repository: sl<ProjectsRepo>())
+        ..add(MyProjectsRequested(categoryId: categoryId)),
       child: _OwnerProjectsContent(
         categoryId: categoryId,
         categoryName: arguments?['categoryName'],
@@ -97,21 +97,22 @@ class _OwnerProjectsContentState extends State<_OwnerProjectsContent>
                 isScrollable: true,
                 onTap: (index) {
                   final status = statuses.keys.elementAt(index);
-                  context.read<MyProjectsBloc>().add(Add(arguments: status));
+                  context
+                      .read<MyProjectsBloc>()
+                      .add(MyProjectsRequested(status: status));
                 },
                 tabs: statuses.values.map((label) => Tab(text: label)).toList(),
               )
             : null,
       ),
-      body: BlocBuilder<MyProjectsBloc, AppState>(
+      body: BlocBuilder<MyProjectsBloc, MyProjectsState>(
         builder: (context, state) {
-          if (state is Loading) {
+          if (state is MyProjectsLoading) {
             return const ProjectCardShimmer();
-          } else if (state is Error) {
+          } else if (state is MyProjectsFailed) {
             return Center(child: Text("error.loading".tr()));
-          } else if (state is Done) {
-            final projects = state.list?.cast<MyProjectsModel>();
-            if (projects != null && projects.isNotEmpty) {
+          } else if (state case MyProjectsLoaded(:final projects)) {
+            if (projects.isNotEmpty) {
               return Padding(
                 padding: const EdgeInsets.only(
                     right: 16, left: 16, top: 8, bottom: 32),

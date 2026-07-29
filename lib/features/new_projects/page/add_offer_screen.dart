@@ -6,11 +6,10 @@ import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/features/new_projects/widgets/add_offer_widget.dart';
 import 'package:talent_flow/features/new_projects/widgets/project_description.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
-import '../../projects/bloc/my_projects_bloc.dart';
+import '../../projects/bloc/project_details_bloc.dart';
 import '../../projects/model/single_project_model.dart';
+import '../../projects/repo/projects_repo.dart';
 import '../../projects/widgets/project_files_section.dart';
 import '../widgets/project_details_card.dart';
 import '../../../navigation/custom_navigation.dart';
@@ -32,15 +31,16 @@ class AddOfferScreen extends StatelessWidget {
         sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? true;
 
     return BlocProvider(
-      create: (context) =>
-          MyProjectsBloc(sl())..add(Click(arguments: argument?['id'])),
+      create: (context) => ProjectDetailsBloc(
+        repository: sl<ProjectsRepo>(),
+      )..add(ProjectDetailsRequested(argument?['id'] as int)),
       child: Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(kToolbarHeight),
-          child: BlocBuilder<MyProjectsBloc, AppState>(
+          child: BlocBuilder<ProjectDetailsBloc, ProjectDetailsState>(
             builder: (context, state) {
               final project =
-                  state is Done ? state.model as SingleProjectModel : null;
+                  state is ProjectDetailsLoaded ? state.project : null;
               final myProposal = isFreelancer ? _findMyProposal(project) : null;
               final hasEditArguments = argument?['proposalId'] != null;
               final title = !isFreelancer
@@ -58,10 +58,10 @@ class AddOfferScreen extends StatelessWidget {
             },
           ),
         ),
-        body: BlocBuilder<MyProjectsBloc, AppState>(
+        body: BlocBuilder<ProjectDetailsBloc, ProjectDetailsState>(
           builder: (context, state) {
-            if (state is Done) {
-              final project = state.model as SingleProjectModel;
+            if (state is ProjectDetailsLoaded) {
+              final project = state.project;
               final myProposal = isFreelancer ? _findMyProposal(project) : null;
 
               return Padding(
@@ -106,9 +106,9 @@ class AddOfferScreen extends StatelessWidget {
                   ),
                 ),
               );
-            } else if (state is Loading) {
+            } else if (state is ProjectDetailsLoading) {
               return const Center(child: CircularProgressIndicator());
-            } else if (state is Error) {
+            } else if (state is ProjectDetailsFailed) {
               return Center(child: Text("error.loading".tr()));
             }
             return Container();

@@ -11,7 +11,6 @@ import 'package:talent_flow/features/payment/model/contract_payment_args.dart';
 import 'package:talent_flow/features/payment/page/contract_payment_confirm_screen.dart';
 import 'package:talent_flow/features/payment/page/contract_payment_request_screen.dart';
 import 'package:talent_flow/features/payment/page/payment_page.dart';
-import 'package:talent_flow/features/projects/bloc/my_projects_bloc.dart';
 import 'package:talent_flow/features/projects/page/single_project_view.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
@@ -152,11 +151,8 @@ abstract class CustomNavigator {
         return _pageRoute(AllFreelancersView(
             arguments: settings.arguments as Map<String, dynamic>?));
       case Routes.ownerProjects:
-        return _pageRoute(BlocProvider(
-          create: (context) => MyProjectsBloc(sl())..add(Add()),
-          child: OwnerProjects(
-            arguments: settings.arguments as Map<String, dynamic>?,
-          ),
+        return _pageRoute(OwnerProjects(
+          arguments: settings.arguments as Map<String, dynamic>?,
         ));
       case Routes.entrepreneur:
         return _pageRoute(EntrepreneurProfileView(

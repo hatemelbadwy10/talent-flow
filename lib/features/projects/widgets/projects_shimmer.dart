@@ -41,7 +41,8 @@ class _ShimmerProjectCard extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: Colors.grey.shade300,
       highlightColor: Colors.grey.shade50,
-      period: Duration(milliseconds: 1500 + (index * 200)), // Staggered animation
+      period:
+          Duration(milliseconds: 1500 + (index * 200)), // Staggered animation
       child: Container(
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
@@ -50,7 +51,7 @@ class _ShimmerProjectCard extends StatelessWidget {
           border: Border.all(color: Colors.grey.shade200, width: 1.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.08),
+              color: Colors.grey.withValues(alpha: 0.08),
               spreadRadius: 1,
               blurRadius: 8,
               offset: const Offset(0, 2),
@@ -279,7 +280,8 @@ class _WaveProjectCardShimmerState extends State<WaveProjectCardShimmer>
           animation: _waveAnimation,
           builder: (context, child) {
             final delay = index * 0.1;
-            final animationValue = (_waveAnimation.value - delay).clamp(0.0, 1.0);
+            final animationValue =
+                (_waveAnimation.value - delay).clamp(0.0, 1.0);
 
             return Transform.translate(
               offset: Offset(0, sin(animationValue * pi * 2) * 2),
