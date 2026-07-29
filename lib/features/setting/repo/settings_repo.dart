@@ -11,8 +11,10 @@ import 'package:talent_flow/main_repos/base_repo.dart';
 import '../../../data/api/end_points.dart';
 import '../../../data/error/api_error_handler.dart';
 import 'settings_repository.dart';
+import 'identity_verification_repository.dart';
 
-class SettingsRepo extends BaseRepo implements SettingsRepository {
+class SettingsRepo extends BaseRepo
+    implements SettingsRepository, IdentityVerificationRepository {
   SettingsRepo({required super.sharedPreferences, required super.dioClient});
 
   @override
@@ -46,7 +48,8 @@ class SettingsRepo extends BaseRepo implements SettingsRepository {
     }
   }
 
-  Future<Either<ServerFailure, Response>> submitIdentityVerification(
+  @override
+  Future<Either<ServerFailure, String>> submitIdentityVerification(
     IdentityVerificationRequest request,
   ) async {
     try {
@@ -73,12 +76,13 @@ class SettingsRepo extends BaseRepo implements SettingsRepository {
           ),
         }),
       );
-      return Right(response);
+      return Right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
+  @override
   Future<Either<ServerFailure, IdentityVerificationDetails?>>
       getIdentityVerification() async {
     try {

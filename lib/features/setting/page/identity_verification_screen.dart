@@ -10,14 +10,14 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/components/custom_network_image.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/setting/bloc/identity_verification_bloc.dart';
+import 'package:talent_flow/features/setting/bloc/identity_verification_event.dart';
+import 'package:talent_flow/features/setting/bloc/identity_verification_state.dart';
 import 'package:talent_flow/features/setting/model/identity_verification_details.dart';
 import 'package:talent_flow/features/setting/mixins/identity_verification_form_mixin.dart';
 import 'package:talent_flow/features/setting/model/identity_verification_request.dart';
@@ -55,7 +55,9 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
   @override
   void initState() {
     super.initState();
-    _identityVerificationBloc = IdentityVerificationBloc(sl());
+    _identityVerificationBloc = IdentityVerificationBloc(
+      repository: sl<SettingsRepo>(),
+    );
     _settingsRepo = sl();
     _dio = sl();
     _locationOptionsBloc = LocationOptionsBloc(sl())
@@ -203,8 +205,8 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
     log('Submitting identity verification with countryId: $countryId, front: ${front.path}, back: ${back.path}, selfie: ${selfie.path}');
 
     _identityVerificationBloc.add(
-      Add(
-        arguments: IdentityVerificationRequest(
+      IdentityVerificationSubmitted(
+        IdentityVerificationRequest(
           countryId: countryId,
           firstNameAr: arabicFirstNameController.text.trim(),
           lastNameAr: arabicFamilyNameController.text.trim(),
@@ -397,9 +399,9 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
         BlocProvider.value(value: _identityVerificationBloc),
         BlocProvider.value(value: _locationOptionsBloc),
       ],
-      child: BlocListener<IdentityVerificationBloc, AppState>(
+      child: BlocListener<IdentityVerificationBloc, IdentityVerificationState>(
         listener: (context, state) async {
-          if (state is Done) {
+          if (state is IdentityVerificationSucceeded) {
             final messenger = ScaffoldMessenger.of(context);
             final navigator = Navigator.of(context);
 
@@ -425,7 +427,7 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
             } else {
               navigator.pop(true);
             }
-          } else if (state is Error) {
+          } else if (state is IdentityVerificationFailed) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('identity_verification_screen.submit_error'.tr()),
@@ -433,7 +435,7 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
             );
           }
         },
-        child: BlocBuilder<IdentityVerificationBloc, AppState>(
+        child: BlocBuilder<IdentityVerificationBloc, IdentityVerificationState>(
           builder: (context, state) {
             return Scaffold(
               appBar: CustomAppBar(
@@ -473,7 +475,7 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
                   }
 
                   final currentTab = currentTabNotifier.value;
-                  final isSubmitting = state is Loading;
+                  final isSubmitting = state is IdentityVerificationSubmitting;
 
                   return SafeArea(
                     child: Column(
