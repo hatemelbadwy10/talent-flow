@@ -1,27 +1,31 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/setting/bloc/dashboard_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/dashboard_event.dart';
 import 'package:talent_flow/features/setting/bloc/dashboard_state.dart';
 import 'package:talent_flow/features/setting/model/dashboard_response_model.dart';
-import 'package:talent_flow/features/setting/repo/dashboard_repo.dart';
+import 'package:talent_flow/features/setting/repo/dashboard_repository.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+  final DashboardRepository repository;
+  final bool isFreelancer;
+
+  const DashboardScreen({
+    super.key,
+    required this.repository,
+    required this.isFreelancer,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => DashboardBloc(repository: sl<DashboardRepo>())
+      create: (_) => DashboardBloc(repository: repository)
         ..add(const DashboardRequested()),
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F6F6),
@@ -32,14 +36,9 @@ class DashboardScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsetsDirectional.only(end: 8),
               child: Visibility(
-                visible: !(sl<SharedPreferences>()
-                        .getBool(AppStorageKey.isFreelancer) ??
-                    false),
+                visible: !isFreelancer,
                 child: TextButton.icon(
                   onPressed: () async {
-                    final isFreelancer = sl<SharedPreferences>()
-                            .getBool(AppStorageKey.isFreelancer) ??
-                        true;
                     if (!isFreelancer) {
                       final allowed =
                           await UserCompletionGuard.ensureCanAddProject(

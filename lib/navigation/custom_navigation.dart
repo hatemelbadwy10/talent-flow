@@ -56,6 +56,7 @@ import '../features/setting/repo/about_repo.dart';
 import '../features/setting/repo/account_statement_repo.dart';
 import '../features/setting/repo/terms_condation_repo.dart';
 import '../features/setting/repo/contracts_repo.dart';
+import '../features/setting/repo/dashboard_repo.dart';
 import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
 import '../features/projects/page/my_projects.dart';
@@ -319,7 +320,14 @@ abstract class CustomNavigator {
           child: const Notification(),
         ));
       case Routes.dashboard:
-        return _pageRoute(const DashboardScreen());
+        return _pageRoute(
+          DashboardScreen(
+            repository: sl<DashboardRepo>(),
+            isFreelancer:
+                sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                    false,
+          ),
+        );
       case Routes.work:
         final argument = settings.arguments;
         final mapArgument = argument is Map<String, dynamic> ? argument : null;
