@@ -1,23 +1,23 @@
-import 'dart:developer';
-
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../data/error/failures.dart';
 import '../model/bank_accounts_response_model.dart';
-import '../repo/bank_accounts_repo.dart';
+import '../repo/bank_accounts_repository.dart';
 import 'bank_accounts_event.dart';
 import 'bank_accounts_state.dart';
 
 class BankAccountsBloc extends Bloc<BankAccountsEvent, BankAccountsState> {
-  BankAccountsBloc(this._repo) : super(const BankAccountsState()) {
+  BankAccountsBloc({required BankAccountsRepository repository})
+      : _repository = repository,
+        super(const BankAccountsState()) {
     on<FetchBankAccounts>(_onFetchBankAccounts);
     on<AddBankAccount>(_onAddBankAccount);
     on<UpdateBankAccount>(_onUpdateBankAccount);
     on<DeleteBankAccount>(_onDeleteBankAccount);
   }
 
-  final BankAccountsRepo _repo;
+  final BankAccountsRepository _repository;
 
   Future<void> _onFetchBankAccounts(
     FetchBankAccounts event,
@@ -33,12 +33,11 @@ class BankAccountsBloc extends Bloc<BankAccountsEvent, BankAccountsState> {
       );
     }
 
-    final accountsResult = await _repo.getBankAccounts();
-    final banksResult = await _repo.getBanksOptions();
+    final accountsResult = await _repository.getBankAccounts();
+    final banksResult = await _repository.getBanksOptions();
 
     accountsResult.fold(
       (failure) {
-        log('Bank accounts fetch error: ${failure.error}');
         emit(
           state.copyWith(
             isLoading: false,
@@ -51,7 +50,6 @@ class BankAccountsBloc extends Bloc<BankAccountsEvent, BankAccountsState> {
       (accountsResponse) {
         banksResult.fold(
           (failure) {
-            log('Bank options fetch error: ${failure.error}');
             emit(
               state.copyWith(
                 accounts: accountsResponse.items,
@@ -85,7 +83,7 @@ class BankAccountsBloc extends Bloc<BankAccountsEvent, BankAccountsState> {
   ) async {
     await _mutate(
       emit: emit,
-      mutation: () => _repo.addBankAccount(request: event.request),
+      mutation: () => _repository.addBankAccount(request: event.request),
       fallbackSuccessMessage: 'Bank account added successfully',
     );
   }
@@ -96,7 +94,7 @@ class BankAccountsBloc extends Bloc<BankAccountsEvent, BankAccountsState> {
   ) async {
     await _mutate(
       emit: emit,
-      mutation: () => _repo.updateBankAccount(request: event.request),
+      mutation: () => _repository.updateBankAccount(request: event.request),
       fallbackSuccessMessage: 'Bank account updated successfully',
     );
   }
@@ -107,7 +105,7 @@ class BankAccountsBloc extends Bloc<BankAccountsEvent, BankAccountsState> {
   ) async {
     await _mutate(
       emit: emit,
-      mutation: () => _repo.deleteBankAccount(id: event.id),
+      mutation: () => _repository.deleteBankAccount(id: event.id),
       fallbackSuccessMessage: 'Bank account deleted successfully',
     );
   }
@@ -130,7 +128,6 @@ class BankAccountsBloc extends Bloc<BankAccountsEvent, BankAccountsState> {
     final result = await mutation();
     await result.fold(
       (failure) async {
-        log('Bank accounts mutation error: ${failure.error}');
         emit(
           state.copyWith(
             isSubmitting: false,
@@ -140,10 +137,9 @@ class BankAccountsBloc extends Bloc<BankAccountsEvent, BankAccountsState> {
         );
       },
       (response) async {
-        final refreshResult = await _repo.getBankAccounts();
+        final refreshResult = await _repository.getBankAccounts();
         refreshResult.fold(
           (failure) {
-            log('Bank accounts refresh error: ${failure.error}');
             emit(
               state.copyWith(
                 isSubmitting: false,

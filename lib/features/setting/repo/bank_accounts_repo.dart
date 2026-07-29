@@ -6,8 +6,9 @@ import '../../../main_repos/base_repo.dart';
 import '../model/bank_accounts_request_model.dart';
 import '../model/bank_accounts_response_model.dart';
 import 'bank_accounts_service.dart';
+import 'bank_accounts_repository.dart';
 
-class BankAccountsRepo extends BaseRepo {
+class BankAccountsRepo extends BaseRepo implements BankAccountsRepository {
   BankAccountsRepo({
     required super.sharedPreferences,
     required super.dioClient,
@@ -15,6 +16,7 @@ class BankAccountsRepo extends BaseRepo {
 
   final BankAccountsService _service;
 
+  @override
   Future<Either<ServerFailure, BankAccountsResponseModel>>
       getBankAccounts() async {
     try {
@@ -41,6 +43,7 @@ class BankAccountsRepo extends BaseRepo {
     }
   }
 
+  @override
   Future<Either<ServerFailure, BankOptionsResponseModel>>
       getBanksOptions() async {
     try {
@@ -67,6 +70,7 @@ class BankAccountsRepo extends BaseRepo {
     }
   }
 
+  @override
   Future<Either<ServerFailure, BankAccountMutationResponseModel>>
       addBankAccount({
     required BankAccountUpsertRequestModel request,
@@ -93,6 +97,7 @@ class BankAccountsRepo extends BaseRepo {
     }
   }
 
+  @override
   Future<Either<ServerFailure, BankAccountMutationResponseModel>>
       updateBankAccount({
     required BankAccountUpsertRequestModel request,
@@ -119,6 +124,7 @@ class BankAccountsRepo extends BaseRepo {
     }
   }
 
+  @override
   Future<Either<ServerFailure, BankAccountMutationResponseModel>>
       deleteBankAccount({
     required int id,

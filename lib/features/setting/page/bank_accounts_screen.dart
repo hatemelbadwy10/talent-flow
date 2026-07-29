@@ -13,6 +13,7 @@ import '../bloc/bank_accounts_event.dart';
 import '../bloc/bank_accounts_state.dart';
 import '../model/bank_accounts_request_model.dart';
 import '../model/bank_accounts_response_model.dart';
+import '../repo/bank_accounts_repo.dart';
 import '../widgets/setting_app_bar.dart';
 
 class BankAccountsScreen extends StatefulWidget {
@@ -28,7 +29,8 @@ class _BankAccountsScreenState extends State<BankAccountsScreen> {
   @override
   void initState() {
     super.initState();
-    _bloc = BankAccountsBloc(sl())..add(const FetchBankAccounts());
+    _bloc = BankAccountsBloc(repository: sl<BankAccountsRepo>())
+      ..add(const FetchBankAccounts());
   }
 
   @override
