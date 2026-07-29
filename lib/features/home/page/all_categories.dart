@@ -6,11 +6,10 @@ import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
-import '../bloc/home_bloc.dart';
-import '../model/home_model.dart';
+import '../bloc/categories_bloc.dart';
+import '../bloc/categories_event.dart';
+import '../bloc/categories_state.dart';
 import '../repo/home_repo.dart';
 
 class ServiceCategoryView extends StatelessWidget {
@@ -21,37 +20,42 @@ class ServiceCategoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HomeBloc(homeRepo: sl<HomeRepo>())..add(Click()),
+      create: (context) => CategoriesBloc(
+        repository: sl<HomeRepo>(),
+      )..add(const CategoriesRequested()),
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: CustomAppBar(title: 'all_categories'.tr()),
-        body: BlocBuilder<HomeBloc, AppState>(
+        body: BlocBuilder<CategoriesBloc, CategoriesState>(
           builder: (context, state) {
-            if (state is Loading) {
+            if (state is CategoriesLoading) {
               return const Center(child: CircularProgressIndicator());
-            } else if (state is Error) {
+            } else if (state is CategoriesFailed) {
               return Center(child: Text('error_loading_categories'.tr()));
-            } else if (state is Done) {
-              final category = state.list as List<Category>;
+            } else if (state case CategoriesLoaded(:final categories)) {
+              if (categories.isEmpty) {
+                return Center(child: Text('no_categories_found'.tr()));
+              }
               return ListView.builder(
-                itemCount: category.length,
+                itemCount: categories.length,
                 itemBuilder: (context, index) {
+                  final category = categories[index];
                   return ServiceCategoryTile(
-                      icon: category[index].icon!,
-                      title: category[index].name ?? "",
-                      subtitle: category[index].description ?? "",
+                      icon: category.icon ?? '',
+                      title: category.name ?? "",
+                      subtitle: category.description ?? "",
                       onTap: () {
                         if (sl<SharedPreferences>()
                                 .getBool(AppStorageKey.isFreelancer) ??
                             false) {
                           CustomNavigator.push(Routes.ownerProjects,
                               arguments: {
-                                "categoryName": category[index].name,
-                                "categoryId": category[index].id,
+                                "categoryName": category.name,
+                                "categoryId": category.id,
                               });
                         } else {
                           CustomNavigator.push(Routes.freelancers, arguments: {
-                            "categoryId": category[index].id,
+                            "categoryId": category.id,
                           });
                         }
                       });

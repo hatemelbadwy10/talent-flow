@@ -6,8 +6,10 @@ import 'package:talent_flow/main_repos/base_repo.dart';
 import '../../../data/error/failures.dart';
 import '../model/home_model.dart';
 import 'home_dashboard_repository.dart';
+import 'categories_repository.dart';
 
-class HomeRepo extends BaseRepo implements HomeDashboardRepository {
+class HomeRepo extends BaseRepo
+    implements HomeDashboardRepository, CategoriesRepository {
   HomeRepo({required super.sharedPreferences, required super.dioClient});
 
   Future<Either<ServerFailure, Response>> getHome() async {
@@ -57,6 +59,33 @@ class HomeRepo extends BaseRepo implements HomeDashboardRepository {
     } catch (e) {
       // Catch any other general errors
       return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ServerFailure, List<Category>>> getCategoryList() async {
+    try {
+      final response = await dioClient.get(uri: EndPoints.categories);
+      final data = Map<String, dynamic>.from(response.data as Map);
+      final payload = data['payload'];
+      if (payload is! List) {
+        return left(ServerFailure('Categories payload is invalid'));
+      }
+      return right(
+        payload
+            .map((item) => Category.fromJson(
+                  Map<String, dynamic>.from(item as Map),
+                ))
+            .toList(growable: false),
+      );
+    } on DioException catch (error) {
+      return left(
+        ServerFailure(error.message ?? 'An unexpected Dio error occurred'),
+      );
+    } on FormatException catch (error) {
+      return left(ServerFailure(error.message));
+    } catch (error) {
+      return left(ServerFailure(error.toString()));
     }
   }
 
