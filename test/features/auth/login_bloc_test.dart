@@ -83,6 +83,30 @@ void main() {
       expect(repository.verificationEmail, 'pending@example.com');
       await bloc.close();
     });
+
+    test('keeps the session untouched when the device is offline', () async {
+      final repository = _FakeLoginRepository(
+        loginResult: left(ServerFailure('No internet connection')),
+      );
+      final sessionStore = _FakeAuthSessionStore();
+      final bloc = LoginBloc(
+        repository: repository,
+        sessionStore: sessionStore,
+      );
+
+      bloc.add(const LoginSubmitted(
+        email: 'user@example.com',
+        password: 'secret',
+      ));
+      final state = await bloc.stream.firstWhere(
+        (state) => state is LoginFailed,
+      ) as LoginFailed;
+
+      expect(state.message, 'No internet connection');
+      expect(sessionStore.savedCredentials, isFalse);
+      expect(sessionStore.persistedSession, isFalse);
+      await bloc.close();
+    });
   });
 }
 
