@@ -11,23 +11,26 @@ class SelectionModel extends SingleMapper {
   final Map<String, String> jobTitles;
   final Map<String, String> skills;
 
-  factory SelectionModel.fromJson(Map<String, dynamic> json){
+  factory SelectionModel.fromJson(Map<String, dynamic> json) {
     return SelectionModel(
-      specializations: Map.from(json["specializations"]).map((k, v) => MapEntry<String, String>(k, v)),
-      jobTitles: Map.from(json["job_titles"]).map((k, v) => MapEntry<String, String>(k, v)),
-      skills: Map.from(json["skills"]).map((k, v) => MapEntry<String, String>(k, v)),
+      specializations: Map.from(json["specializations"])
+          .map((k, v) => MapEntry<String, String>(k, v)),
+      jobTitles: Map.from(json["job_titles"])
+          .map((k, v) => MapEntry<String, String>(k, v)),
+      skills: Map.from(json["skills"])
+          .map((k, v) => MapEntry<String, String>(k, v)),
     );
   }
 
   @override
   Mapper fromJson(Map<String, dynamic> json) {
-return SelectionModel.fromJson(json);
+    return SelectionModel.fromJson(json);
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    // TODO: implement toJson
-    throw UnimplementedError();
-  }
-
+  Map<String, dynamic> toJson() => {
+        'specializations': specializations,
+        'job_titles': jobTitles,
+        'skills': skills,
+      };
 }

@@ -21,7 +21,7 @@ class FreelancerProfileModel extends SingleMapper {
   final int? id;
   final String? name;
   final String? image;
-  final dynamic country;
+  final String? country;
   final String? specialization;
   final String? jobTitle;
   final bool addedWorks;
@@ -38,7 +38,7 @@ class FreelancerProfileModel extends SingleMapper {
       id: json["id"],
       name: json["name"],
       image: json["image"],
-      country: json["country"],
+      country: json["country"]?.toString(),
       specialization: json["specialization"],
       jobTitle: json["job_title"],
       addedWorks: _toBool(json["added_works"]),
@@ -68,10 +68,22 @@ class FreelancerProfileModel extends SingleMapper {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    // TODO: implement toJson
-    throw UnimplementedError();
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'image': image,
+        'country': country,
+        'specialization': specialization,
+        'job_title': jobTitle,
+        'added_works': addedWorks,
+        'identity_authenticated': identityAuthenticated,
+        'bank_account_added': bankAccountAdded,
+        'bio': bio,
+        'skills': skills,
+        'statistics': statistics?.toJson(),
+        'reviews': reviews.map((item) => item.toJson()).toList(growable: false),
+        'works': works.map((item) => item.toJson()).toList(growable: false),
+      };
 }
 
 bool _toBool(dynamic value) {
@@ -118,6 +130,17 @@ class FreelancerReview {
       date: json["date"]?.toString(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'rater_id': raterId,
+        'image': image,
+        'name': name,
+        'job_title': jobTitle,
+        'rating': rating,
+        'comment': comment,
+        'date': date,
+      };
 }
 
 class Statistics {
@@ -172,6 +195,22 @@ class Statistics {
       lastSeen: json["last_seen"],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'rating': rating,
+        'identity_authenticated': identityAuthenticated,
+        'bank_account_added': bankAccountAdded,
+        'completed_projects': completedProjects,
+        'in_progress_projects': inProgressProjects,
+        'city': city,
+        'projects_completion': projectsCompletion,
+        'deliver_on_date': deliverOnDate,
+        're_employee': reEmployee,
+        'ontime_success': ontimeSuccess,
+        'replay_speed_average': replaySpeedAverage,
+        'registration_date': registrationDate,
+        'last_seen': lastSeen,
+      };
 }
 
 class Work {
@@ -207,4 +246,15 @@ class Work {
       isInFavorites: _toBool(json["is_in_favorites"] ?? json["is_fav"]),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'image': image,
+        'title': title,
+        'description': description,
+        'views': views,
+        'likes': likes,
+        'status': status,
+        'is_in_favorites': isInFavorites,
+      };
 }

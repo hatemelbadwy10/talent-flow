@@ -37,12 +37,12 @@ class FreelancersModel extends SingleMapper {
   final String? gender;
   final String? phone;
   final DateTime? dateOfBirth;
-  final dynamic googleId;
-  final dynamic facebookId;
+  final String? googleId;
+  final String? facebookId;
   final DateTime? lastLoginAt;
   final bool? loggedIn;
   final DateTime? emailVerifiedAt;
-  final dynamic phoneVerifiedAt;
+  final DateTime? phoneVerifiedAt;
   final bool? isInFavorites;
 
   factory FreelancersModel.fromJson(Map<String, dynamic> json) {
@@ -60,12 +60,12 @@ class FreelancersModel extends SingleMapper {
       gender: json["gender"]?.toString(),
       phone: json["phone"]?.toString(),
       dateOfBirth: _toDateTime(json["date_of_birth"]),
-      googleId: json["google_id"],
-      facebookId: json["facebook_id"],
+      googleId: json["google_id"]?.toString(),
+      facebookId: json["facebook_id"]?.toString(),
       lastLoginAt: _toDateTime(json["last_login_at"]),
       loggedIn: _toBool(json["logged_in"]),
       emailVerifiedAt: _toDateTime(json["email_verified_at"]),
-      phoneVerifiedAt: json["phone_verified_at"],
+      phoneVerifiedAt: _toDateTime(json["phone_verified_at"]),
       isInFavorites: _toBool(json["is_in_favorites"] ?? json["is_fav"]),
     );
   }
@@ -76,10 +76,28 @@ class FreelancersModel extends SingleMapper {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    // TODO: implement toJson
-    throw UnimplementedError();
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'image': image,
+        'job_title': jobTitle,
+        'bio': bio,
+        'rating': rating,
+        'no_of_reviews': noOfReviews,
+        'email': email,
+        'country': country,
+        'lang': lang,
+        'gender': gender,
+        'phone': phone,
+        'date_of_birth': dateOfBirth?.toIso8601String(),
+        'google_id': googleId,
+        'facebook_id': facebookId,
+        'last_login_at': lastLoginAt?.toIso8601String(),
+        'logged_in': loggedIn,
+        'email_verified_at': emailVerifiedAt?.toIso8601String(),
+        'phone_verified_at': phoneVerifiedAt?.toIso8601String(),
+        'is_in_favorites': isInFavorites,
+      };
 }
 
 int? _toInt(dynamic value) {

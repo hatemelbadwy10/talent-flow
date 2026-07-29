@@ -37,10 +37,14 @@ class HomeModel extends SingleMapper {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    // TODO: implement toJson
-    throw UnimplementedError();
-  }
+  Map<String, dynamic> toJson() => {
+        'cards': cards.map((item) => item.toJson()).toList(growable: false),
+        'top': top?.toJson(),
+        'categories':
+            categories.map((item) => item.toJson()).toList(growable: false),
+        'partners':
+            partners.map((item) => item.toJson()).toList(growable: false),
+      };
 }
 
 class Card extends SingleMapper {
@@ -68,10 +72,11 @@ class Card extends SingleMapper {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    // TODO: implement toJson
-    throw UnimplementedError();
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'image': image,
+      };
 }
 
 class Category extends SingleMapper {
@@ -102,10 +107,12 @@ class Category extends SingleMapper {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    // TODO: implement toJson
-    throw UnimplementedError();
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'description': description,
+        'icon': icon,
+      };
 }
 
 class Top extends SingleMapper {
@@ -115,14 +122,14 @@ class Top extends SingleMapper {
   });
 
   final String? type;
-  final List<dynamic> items;
+  final List<Object?> items;
 
   factory Top.fromJson(Map<String, dynamic> json) {
     return Top(
       type: json["type"],
       items: json["items"] == null
           ? []
-          : List<dynamic>.from(json["items"]!.map((x) => x)),
+          : List<Object?>.from(json["items"] as List),
     );
   }
 
@@ -132,8 +139,8 @@ class Top extends SingleMapper {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    // TODO: implement toJson
-    throw UnimplementedError();
-  }
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'items': items,
+      };
 }

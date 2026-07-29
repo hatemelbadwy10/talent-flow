@@ -96,9 +96,23 @@ class EntrepreneurProfileModel extends SingleMapper {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    throw UnimplementedError();
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'image': image,
+        'job_title': jobTitle,
+        'bio': bio,
+        'country': country,
+        'specialization': specialization,
+        'rating': rating,
+        'no_of_reviews': noOfReviews,
+        'identity_authenticated': identityAuthenticated,
+        'bank_account_added': bankAccountAdded,
+        'statistics': statistics?.toJson(),
+        'reviews': reviews.map((item) => item.toJson()).toList(growable: false),
+        'projects':
+            projects.map((item) => item.toJson()).toList(growable: false),
+      };
 }
 
 bool _entrepreneurToBool(dynamic value) {
@@ -141,6 +155,17 @@ class EntrepreneurReview {
       date: json['date']?.toString(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'rater_id': raterId,
+        'image': image,
+        'name': name,
+        'job_title': jobTitle,
+        'rating': rating,
+        'comment': comment,
+        'date': date,
+      };
 }
 
 class EntrepreneurStatistics {
@@ -180,6 +205,18 @@ class EntrepreneurStatistics {
       city: json['city']?.toString(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'rating': rating,
+        'registration_date': registrationDate,
+        'last_seen': lastSeen,
+        'open_projects_count': openProjectsCount,
+        'under_implementation_count': underImplementationCount,
+        'completed_projects': completedProjects,
+        'in_progress_projects': inProgressProjects,
+        'ongoing_communications': ongoingCommunications,
+        'city': city,
+      };
 }
 
 class EntrepreneurProjectStatus {
@@ -202,6 +239,11 @@ class EntrepreneurProjectStatus {
       ),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'status': status,
+        'count': count,
+      };
 }
 
 int? _entrepreneurToInt(dynamic value) {
