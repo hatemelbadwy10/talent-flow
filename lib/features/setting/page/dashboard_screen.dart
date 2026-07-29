@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/setting/bloc/dashboard_bloc.dart';
+import 'package:talent_flow/features/setting/bloc/dashboard_event.dart';
+import 'package:talent_flow/features/setting/bloc/dashboard_state.dart';
 import 'package:talent_flow/features/setting/model/dashboard_response_model.dart';
+import 'package:talent_flow/features/setting/repo/dashboard_repo.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
@@ -20,7 +21,8 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => DashboardBloc(sl())..add(Add()),
+      create: (_) => DashboardBloc(repository: sl<DashboardRepo>())
+        ..add(const DashboardRequested()),
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F6F6),
         appBar: CustomAppBar(
@@ -30,7 +32,9 @@ class DashboardScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsetsDirectional.only(end: 8),
               child: Visibility(
-                visible: !(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false),
+                visible: !(sl<SharedPreferences>()
+                        .getBool(AppStorageKey.isFreelancer) ??
+                    false),
                 child: TextButton.icon(
                   onPressed: () async {
                     final isFreelancer = sl<SharedPreferences>()
@@ -38,7 +42,8 @@ class DashboardScreen extends StatelessWidget {
                         true;
                     if (!isFreelancer) {
                       final allowed =
-                          await UserCompletionGuard.ensureCanAddProject(context);
+                          await UserCompletionGuard.ensureCanAddProject(
+                              context);
                       if (!allowed) return;
                     }
                     CustomNavigator.push(
@@ -56,20 +61,19 @@ class DashboardScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: BlocBuilder<DashboardBloc, AppState>(
+        body: BlocBuilder<DashboardBloc, DashboardState>(
           builder: (context, state) {
-            if (state is Loading) {
+            if (state is DashboardLoading) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (state is Error) {
+            if (state is DashboardFailed) {
               return Center(
                 child: Text('something_went_wrong'.tr()),
               );
             }
 
-            final model =
-                state is Done ? state.model as DashboardResponseModel? : null;
+            final model = state is DashboardLoaded ? state.dashboard : null;
             return _DashboardBody(model: model);
           },
         ),

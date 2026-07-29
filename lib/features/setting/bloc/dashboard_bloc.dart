@@ -1,34 +1,27 @@
-import 'dart:developer';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
-import '../repo/dashboard_repo.dart';
+import '../repo/dashboard_repository.dart';
+import 'dashboard_event.dart';
+import 'dashboard_state.dart';
 
-class DashboardBloc extends Bloc<AppEvent, AppState> {
-  DashboardBloc(this._repo) : super(Start()) {
-    on<Add>(_onGetDashboard);
+class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
+  DashboardBloc({required DashboardRepository repository})
+      : _repository = repository,
+        super(const DashboardInitial()) {
+    on<DashboardRequested>(_onRequested);
   }
 
-  final DashboardRepo _repo;
+  final DashboardRepository _repository;
 
-  Future<void> _onGetDashboard(Add event, Emitter<AppState> emit) async {
-    emit(Loading());
-    try {
-      final result = await _repo.getProfileDashboard();
-      result.fold(
-        (failure) {
-          log('Dashboard error: $failure');
-          emit(Error());
-        },
-        (response) {
-          emit(Done(model: response));
-        },
-      );
-    } catch (e, s) {
-      log('Exception in DashboardBloc', error: e, stackTrace: s);
-      emit(Error());
-    }
+  Future<void> _onRequested(
+    DashboardRequested event,
+    Emitter<DashboardState> emit,
+  ) async {
+    emit(const DashboardLoading());
+    final result = await _repository.getProfileDashboard();
+    result.fold(
+      (failure) => emit(DashboardFailed(failure.error)),
+      (dashboard) => emit(DashboardLoaded(dashboard)),
+    );
   }
 }

@@ -6,8 +6,9 @@ import '../../../main_repos/base_repo.dart';
 import '../model/dashboard_request_model.dart';
 import '../model/dashboard_response_model.dart';
 import 'dashboard_service.dart';
+import 'dashboard_repository.dart';
 
-class DashboardRepo extends BaseRepo {
+class DashboardRepo extends BaseRepo implements DashboardRepository {
   DashboardRepo({
     required super.sharedPreferences,
     required super.dioClient,
@@ -15,6 +16,7 @@ class DashboardRepo extends BaseRepo {
 
   final DashboardService _service;
 
+  @override
   Future<Either<ServerFailure, DashboardResponseModel>> getProfileDashboard({
     DashboardRequestModel request = const DashboardRequestModel(),
   }) async {
