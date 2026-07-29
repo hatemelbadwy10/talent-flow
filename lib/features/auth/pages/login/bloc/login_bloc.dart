@@ -1,191 +1,77 @@
-import 'dart:developer';
-
-import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/material.dart';
 
-import '../../../../../app/core/app_core.dart';
 import '../../../../../app/core/app_event.dart';
-import '../../../../../app/core/app_notification.dart';
-import '../../../../../app/core/app_state.dart';
-import '../../../../../app/core/styles.dart';
-import '../../../../../app/core/user_completion_guard.dart';
-import '../../../../../navigation/custom_navigation.dart';
-import '../../../../../navigation/routes.dart';
-import '../../../../../data/error/failures.dart';
-import '../repo/login_repo.dart';
+import '../../../data/auth_session_store.dart';
+import '../repo/login_repository.dart';
+import 'login_event.dart';
+import 'login_state.dart';
 
-class SocialLoginClick extends AppEvent {
+// Kept temporarily for RegisterBloc compatibility. Registration owns this
+// event after its migration and this shim can then be removed.
+final class SocialLoginClick extends AppEvent {
+  SocialLoginClick({
+    required this.provider,
+    required this.token,
+    this.userType,
+  });
+
   final String provider;
   final String token;
   final String? userType;
-  SocialLoginClick(
-      {required this.provider, required this.token, this.userType});
 }
 
-class LoginBloc extends Bloc<AppEvent, AppState> {
-  final LoginRepo repo;
-
-  LoginBloc({required this.repo}) : super(Start()) {
-    on<Click>((event, emit) async {
-      try {
-        emit(Loading());
-
-        final Map<String, dynamic> data =
-            event.arguments as Map<String, dynamic>;
-
-        Either<ServerFailure, Response> response = await repo.logIn(data);
-
-        await response.fold<Future<void>>(
-          (fail) async {
-            log("fail: ${fail.error}");
-
-            // ✅ Check for unverified account - multiple conditions
-            bool isUnverifiedAccount = _isAccountUnverified(fail);
-
-            if (isUnverifiedAccount) {
-              final message = fail.error;
-
-              AppCore.showSnackBar(
-                notification: AppNotification(
-                  message: message,
-                  isFloating: true,
-                  backgroundColor: Styles.IN_ACTIVE,
-                  borderColor: Colors.transparent,
-                ),
-              );
-              log("Unverified account message: $message");
-
-              // Send verification code
-              final resendResult =
-                  await repo.resendVerificationEmail(data['email']);
-
-              resendResult.fold(
-                (resendFail) {
-                  log("Failed to resend verification email: ${resendFail.error}");
-                  // Still navigate to code screen even if resend fails
-                },
-                (resendSuccess) {
-                  log("Verification email sent successfully");
-                },
-              );
-
-              // Navigate to code verification screen
-              log("data${data['email']}");
-              CustomNavigator.push(
-                Routes.sendCodeScreen,
-                arguments: {
-                  "email": data['email'],
-                  "isFromLogin": true,
-                },
-              );
-
-              if (emit.isDone) return;
-              emit(Error());
-              return;
-            }
-
-            // ✅ Handle other errors (network/server/credentials)
-            AppCore.showSnackBar(
-              notification: AppNotification(
-                message: fail.error,
-                isFloating: true,
-                backgroundColor: Styles.IN_ACTIVE,
-                borderColor: Colors.transparent,
-              ),
-            );
-            if (emit.isDone) return;
-            emit(Error());
-          },
-          (success) async {
-            log('Request data: $data');
-            log("Response success: ${success.data}");
-
-            final responseData = success.data;
-
-            // ✅ Handle successful login
-            await repo.saveCredentials(data);
-            await repo.saveUserData(responseData);
-            await UserCompletionGuard.handlePostAuthNavigation();
-            if (emit.isDone) return;
-            emit(Done());
-          },
-        );
-      } catch (e) {
-        log("Exception in LoginBloc: $e");
-        AppCore.showSnackBar(
-          notification: AppNotification(
-            message: e.toString(),
-            backgroundColor: Styles.IN_ACTIVE,
-            borderColor: Styles.RED_COLOR,
-          ),
-        );
-        emit(Error());
-      }
-    });
-    on<SocialLoginClick>((event, emit) async {
-      try {
-        emit(Loading());
-
-        final response = await repo.socialLogin(
-          provider: event.provider,
-          token: event.token,
-        );
-
-        await response.fold<Future<void>>(
-          (fail) async {
-            AppCore.showSnackBar(
-              notification: AppNotification(
-                message: fail.error,
-                isFloating: true,
-                backgroundColor: Styles.IN_ACTIVE,
-                borderColor: Colors.transparent,
-              ),
-            );
-            if (emit.isDone) return;
-            emit(Error());
-          },
-          (success) async {
-            final responseData = success.data;
-            await repo.saveUserData(responseData);
-            await UserCompletionGuard.handlePostAuthNavigation();
-            if (emit.isDone) return;
-            emit(Done());
-          },
-        );
-      } catch (e) {
-        log("Exception in SocialLoginClick: $e");
-        AppCore.showSnackBar(
-          notification: AppNotification(
-            message: e.toString(),
-            backgroundColor: Styles.IN_ACTIVE,
-            borderColor: Styles.RED_COLOR,
-          ),
-        );
-        emit(Error());
-      }
-    });
+class LoginBloc extends Bloc<LoginEvent, LoginState> {
+  LoginBloc({
+    required LoginRepository repository,
+    required AuthSessionStore sessionStore,
+  })  : _repository = repository,
+        _sessionStore = sessionStore,
+        super(const LoginInitial()) {
+    on<LoginSubmitted>(_onSubmitted);
   }
 
-  /// Check if the account is unverified based on multiple conditions
-  bool _isAccountUnverified(ServerFailure fail) {
-    // Check the specific Arabic message
-    if (fail.error.contains("قم بتأكيد الحساب")) {
-      return true;
-    }
+  final LoginRepository _repository;
+  final AuthSessionStore _sessionStore;
 
-    // Check for English equivalent messages
-    if ((fail.error.toLowerCase().contains("verify") ||
-        fail.error.toLowerCase().contains("confirm") ||
-        fail.error.toLowerCase().contains("unverified"))) {
-      return true;
-    }
+  Future<void> _onSubmitted(
+    LoginSubmitted event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(const LoginLoading());
 
-    // Check if there's additional data that indicates unverified status
-    // This would require modifying ServerFailure to include response data
-    // For now, we'll rely on the error message
+    final result = await _repository.logIn(
+      email: event.email,
+      password: event.password,
+    );
 
-    return false;
+    await result.fold(
+      (failure) async {
+        if (_isAccountUnverified(failure.error)) {
+          await _repository.resendVerificationEmail(event.email);
+          emit(LoginVerificationRequired(
+            email: event.email,
+            message: failure.error,
+          ));
+          return;
+        }
+        emit(LoginFailed(failure.error));
+      },
+      (response) async {
+        await _sessionStore.saveCredentials(
+          email: event.email,
+          password: event.password,
+        );
+        await _sessionStore.persistAuthenticatedSession(response);
+        emit(const LoginSucceeded());
+      },
+    );
+  }
+
+  bool _isAccountUnverified(String message) {
+    final normalized = message.toLowerCase();
+    return message.contains('قم بتأكيد الحساب') ||
+        normalized.contains('verify') ||
+        normalized.contains('confirm') ||
+        normalized.contains('unverified');
   }
 }

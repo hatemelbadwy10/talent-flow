@@ -6,11 +6,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import 'package:talent_flow/app/core/app_core.dart';
+import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/remote_config_service.dart';
+import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
 import 'package:talent_flow/features/auth/pages/login/repo/login_repo.dart';
+import 'package:talent_flow/features/auth/data/auth_session_store.dart';
 import 'package:talent_flow/helpers/social_media_login_helper.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
@@ -24,6 +28,8 @@ import '../../../../app/core/app_state.dart';
 import '../social_media_login/bloc/social_media_bloc.dart';
 import '../social_media_login/repo/social_media_repo.dart';
 import 'bloc/login_bloc.dart';
+import 'bloc/login_event.dart';
+import 'bloc/login_state.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});
@@ -33,7 +39,10 @@ class Login extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => LoginBloc(repo: sl<LoginRepo>()),
+          create: (_) => LoginBloc(
+            repository: sl<LoginRepo>(),
+            sessionStore: sl<AuthSessionStore>(),
+          ),
         ),
         BlocProvider(
           create: (_) => SocialMediaBloc(repo: sl<SocialMediaRepo>()),
@@ -59,22 +68,60 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          AuthBase(
-            key: ValueKey(context.locale.languageCode),
-            children: _buildLoginContent(context),
-          ),
-          SafeArea(
-            child: Align(
-              alignment: AlignmentDirectional.topEnd,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: _buildLanguageButton(),
+      body: BlocListener<LoginBloc, LoginState>(
+        listener: _onLoginStateChanged,
+        child: Stack(
+          children: [
+            AuthBase(
+              key: ValueKey(context.locale.languageCode),
+              children: _buildLoginContent(context),
+            ),
+            SafeArea(
+              child: Align(
+                alignment: AlignmentDirectional.topEnd,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: _buildLanguageButton(),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onLoginStateChanged(
+    BuildContext context,
+    LoginState state,
+  ) async {
+    if (state case LoginFailed(:final message)) {
+      _showLoginMessage(message);
+      return;
+    }
+    if (state case LoginVerificationRequired(:final email, :final message)) {
+      _showLoginMessage(message);
+      CustomNavigator.push(
+        Routes.sendCodeScreen,
+        arguments: {
+          'email': email,
+          'isFromLogin': true,
+        },
+      );
+      return;
+    }
+    if (state is LoginSucceeded) {
+      await UserCompletionGuard.handlePostAuthNavigation();
+    }
+  }
+
+  void _showLoginMessage(String message) {
+    AppCore.showSnackBar(
+      notification: AppNotification(
+        message: message,
+        isFloating: true,
+        backgroundColor: Styles.IN_ACTIVE,
+        borderColor: Colors.transparent,
       ),
     );
   }
@@ -145,18 +192,18 @@ class _LoginViewState extends State<LoginView> {
       SizedBox(height: 12.h),
 
       /// ✅ BlocBuilder حول زرار Login فقط
-      BlocBuilder<LoginBloc, AppState>(
+      BlocBuilder<LoginBloc, LoginState>(
         builder: (context, state) {
           return CustomButton(
             text: "login.title".tr(),
-            isLoading: state is Loading,
+            isLoading: state is LoginLoading,
             onTap: () {
               if (_formKey.currentState!.validate()) {
                 context.read<LoginBloc>().add(
-                      Click(arguments: {
-                        "email": emailController.text,
-                        "password": passwordController.text,
-                      }),
+                      LoginSubmitted(
+                        email: emailController.text,
+                        password: passwordController.text,
+                      ),
                     );
               }
             },

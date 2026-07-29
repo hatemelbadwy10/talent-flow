@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/features/auth/pages/confirm_code/repo/confirm_code_repo.dart';
+import 'package:talent_flow/features/auth/data/auth_session_store.dart';
 import 'package:talent_flow/features/auth/pages/social_media_login/repo/chat_repo.dart';
 import 'package:talent_flow/features/auth/pages/social_media_login/repo/social_media_repo.dart';
 import 'package:talent_flow/features/home/bloc/home_bloc.dart';
@@ -116,6 +117,12 @@ Future<void> init() async {
   //
   sl.registerLazySingleton(
       () => LoginRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton<AuthSessionStore>(
+    () => LocalAuthSessionStore(
+      sharedPreferences: sl(),
+      dioClient: sl(),
+    ),
+  );
   //
   sl.registerLazySingleton(
       () => RegisterRepo(sharedPreferences: sl(), dioClient: sl()));
