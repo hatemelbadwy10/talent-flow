@@ -8,13 +8,11 @@ import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PartnerProfileView extends StatelessWidget {
-  const PartnerProfileView({super.key, this.arguments});
+  const PartnerProfileView({super.key, required this.partner});
 
-  final Map<String, dynamic>? arguments;
+  final PartnerModel partner;
 
   Future<void> _launchPartnerUrl() async {
-    final partner =
-        PartnerModel.fromJson(arguments ?? const <String, dynamic>{});
     final uri = Uri.tryParse(partner.url);
     if (uri == null) return;
     await launchUrl(uri);
@@ -22,9 +20,6 @@ class PartnerProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final partner =
-        PartnerModel.fromJson(arguments ?? const <String, dynamic>{});
-
     if (partner.name.trim().isEmpty) {
       return Scaffold(
         appBar: CustomAppBar(title: 'partner_profile.title'.tr()),

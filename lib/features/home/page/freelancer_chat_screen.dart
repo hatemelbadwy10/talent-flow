@@ -12,6 +12,7 @@ import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 import 'package:talent_flow/components/custom_images.dart';
 import 'package:talent_flow/features/home/bloc/freelancer_chat_bloc.dart';
+import 'package:talent_flow/features/home/model/home_route_args.dart';
 import 'package:talent_flow/features/home/widgets/chat_bubble.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
@@ -19,11 +20,11 @@ import 'package:talent_flow/navigation/routes.dart';
 class FreelancerChatScreen extends StatefulWidget {
   const FreelancerChatScreen({
     super.key,
-    this.arguments,
+    required this.arguments,
     required this.isFreelancer,
   });
 
-  final Map<String, dynamic>? arguments;
+  final ChatRouteArgs arguments;
   final bool isFreelancer;
 
   @override
@@ -52,8 +53,8 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
       return;
     }
 
-    final conversationId = widget.arguments?['conversationId'];
-    final freelancerId = widget.arguments?['freelancerId'];
+    final conversationId = widget.arguments.conversationId;
+    final freelancerId = widget.arguments.freelancerId;
     final usedFallback = conversationId == null && freelancerId != null;
     _logChatScreen(
       'send text from UI',
@@ -81,9 +82,9 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
     _logChatScreen(
       'initState route arguments',
       {
-        'arguments': _summarizeMap(widget.arguments),
-        'hasConversationId': widget.arguments?['conversationId'] != null,
-        'hasFreelancerId': widget.arguments?['freelancerId'] != null,
+        'arguments': widget.arguments.toLogMap(),
+        'hasConversationId': widget.arguments.conversationId != null,
+        'hasFreelancerId': widget.arguments.freelancerId != null,
       },
     );
     _messageController.addListener(_onComposerChanged);
@@ -174,8 +175,8 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
       context.read<FreelancerChatBloc>().add(
             ChatMessageSent(
               conversationId: _parseInt(
-                widget.arguments?['conversationId'] ??
-                    widget.arguments?['freelancerId'],
+                widget.arguments.conversationId ??
+                    widget.arguments.freelancerId,
               ),
               filePath: filePath,
             ),
@@ -183,11 +184,10 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
       _logChatScreen(
         'send voice/file from UI',
         {
-          'conversationId': widget.arguments?['conversationId']?.toString(),
-          'freelancerId': widget.arguments?['freelancerId']?.toString(),
-          'usedFreelancerFallback':
-              widget.arguments?['conversationId'] == null &&
-                  widget.arguments?['freelancerId'] != null,
+          'conversationId': widget.arguments.conversationId?.toString(),
+          'freelancerId': widget.arguments.freelancerId?.toString(),
+          'usedFreelancerFallback': widget.arguments.conversationId == null &&
+              widget.arguments.freelancerId != null,
           'filePath': filePath,
         },
       );
@@ -220,14 +220,11 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final fallbackFreelancerName =
-        (widget.arguments?['freelancerName'] as String?)?.trim();
-    final fallbackFreelancerJobTitle =
-        (widget.arguments?['freelancerJobTitle'] as String?)?.trim();
-    final freelancerId = widget.arguments?['freelancerId'];
-    final fallbackProjectId = _parseInt(
-        widget.arguments?['projectId'] ?? widget.arguments?['project_id']);
-    final fallbackHasContract = widget.arguments?['hasContract'] == true;
+    final fallbackFreelancerName = widget.arguments.freelancerName;
+    final fallbackFreelancerJobTitle = widget.arguments.freelancerJobTitle;
+    final freelancerId = widget.arguments.freelancerId;
+    final fallbackProjectId = widget.arguments.projectId;
+    final fallbackHasContract = widget.arguments.hasContract;
     final isFreelancer = widget.isFreelancer;
 
     return Scaffold(
@@ -324,8 +321,7 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
                           Routes.createContract,
                           arguments: {
                             'freelancerId': freelancerId,
-                            'conversationId':
-                                widget.arguments?['conversationId'],
+                            'conversationId': widget.arguments.conversationId,
                             if (currentProjectId != null)
                               'projectId': currentProjectId,
                           },
@@ -593,18 +589,6 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
 void _logChatScreen(String message, [Map<String, Object?> details = const {}]) {
   final suffix = details.isEmpty ? '' : ' | $details';
   log('[FreelancerChatScreen] $message$suffix', name: 'FreelancerChatScreen');
-}
-
-Map<String, Object?> _summarizeMap(Map<String, dynamic>? source) {
-  if (source == null) {
-    return const {};
-  }
-  final summary = <String, Object?>{};
-  for (final entry in source.entries) {
-    summary[entry.key] =
-        entry.value is String ? _preview(entry.value) : entry.value?.toString();
-  }
-  return summary;
 }
 
 String _preview(dynamic value, {int max = 120}) {

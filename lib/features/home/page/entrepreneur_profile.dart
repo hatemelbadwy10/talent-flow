@@ -5,6 +5,7 @@ import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/features/home/bloc/entrepreneur_profile_bloc.dart';
 import 'package:talent_flow/features/home/model/entrepreneur_profile_model.dart';
+import 'package:talent_flow/features/home/model/home_route_args.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/main_models/user_model.dart';
@@ -15,13 +16,13 @@ import 'package:talent_flow/features/home/repo/entrepreneur_profile_repository.d
 class EntrepreneurProfileView extends StatefulWidget {
   const EntrepreneurProfileView({
     super.key,
-    this.arguments,
+    required this.arguments,
     required this.profileRepository,
     required this.currentUserId,
     required this.isFreelancer,
   });
 
-  final Map<String, dynamic>? arguments;
+  final EntrepreneurProfileArgs arguments;
   final EntrepreneurProfileRepository profileRepository;
   final int? currentUserId;
   final bool isFreelancer;
@@ -42,9 +43,8 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
   void initState() {
     super.initState();
     _currentUserId = widget.currentUserId;
-    _useCurrentProfile = widget.arguments?['useCurrentProfile'] == true;
-    _entrepreneurId =
-        widget.arguments?['entrepreneurId'] as int? ?? _currentUserId;
+    _useCurrentProfile = widget.arguments.useCurrentProfile;
+    _entrepreneurId = widget.arguments.entrepreneurId ?? _currentUserId;
     _isCurrentUser =
         _entrepreneurId != null && _entrepreneurId == _currentUserId;
     _isEntrepreneurAccount = !widget.isFreelancer;

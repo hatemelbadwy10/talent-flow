@@ -16,18 +16,19 @@ import '../bloc/freelancers_state.dart';
 import '../repo/categories_repository.dart';
 import '../repo/freelancers_repository.dart';
 import '../model/home_model.dart' hide Card;
+import '../model/home_route_args.dart';
 import '../widgets/freelancer_listview_item.dart';
 import '../../setting/repo/favourites_repository.dart';
 
 class AllFreelancersView extends StatefulWidget {
-  final Map<String, dynamic>? arguments;
+  final FreelancersRouteArgs arguments;
   final CategoriesRepository categoriesRepository;
   final FreelancersRepository freelancersRepository;
   final FavouritesRepository favouritesRepository;
 
   const AllFreelancersView({
     super.key,
-    this.arguments,
+    required this.arguments,
     required this.categoriesRepository,
     required this.freelancersRepository,
     required this.favouritesRepository,
@@ -52,7 +53,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
     _freelancersBloc =
         FreelancersBloc(repository: widget.freelancersRepository);
 
-    final categoryId = widget.arguments?["categoryId"] as int?;
+    final categoryId = widget.arguments.categoryId;
     if (categoryId != null) {
       _freelancersBloc.add(FreelancersRequested(categoryId: categoryId));
     } else {
@@ -78,8 +79,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
   }
 
   void _applyFilters() {
-    final categoryId =
-        _selectedCategory?.id ?? (widget.arguments?["categoryId"] as int?);
+    final categoryId = _selectedCategory?.id ?? widget.arguments.categoryId;
     _freelancersBloc.add(
       FreelancersRequested(
         categoryId: categoryId,
@@ -402,7 +402,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
         appBar: CustomAppBar(
           title: "freelancers2".tr(),
           actions: [
-            if (widget.arguments?["categoryId"] == null)
+            if (widget.arguments.categoryId == null)
               IconButton(
                 icon: Stack(
                   children: [
@@ -533,8 +533,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                             SizedBox(height: 20.h),
                             ElevatedButton(
                               onPressed: () {
-                                final categoryId =
-                                    widget.arguments?["categoryId"] as int?;
+                                final categoryId = widget.arguments.categoryId;
                                 _freelancersBloc.add(
                                   FreelancersRequested(
                                     categoryId: categoryId,

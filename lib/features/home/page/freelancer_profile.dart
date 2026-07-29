@@ -7,6 +7,7 @@ import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import '../../../app/core/styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../model/freelancer_profile_model.dart';
+import '../model/home_route_args.dart';
 import '../bloc/freelancer_profile_event.dart';
 import '../bloc/freelancer_profile_state.dart';
 import '../repo/freelancer_profile_repository.dart';
@@ -14,7 +15,7 @@ import '../../setting/repo/favourites_repository.dart';
 import '../widgets/freelancer_work_card.dart';
 
 class FreelancerProfileView extends StatelessWidget {
-  final Map<String, dynamic> arguments;
+  final FreelancerProfileArgs arguments;
   final FreelancerProfileRepository profileRepository;
   final FavouritesRepository favouritesRepository;
 
@@ -29,7 +30,7 @@ class FreelancerProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => FreelancerProfileBloc(repository: profileRepository)
-        ..add(FreelancerProfileRequested(arguments["freelancerId"] as int)),
+        ..add(FreelancerProfileRequested(arguments.freelancerId)),
       child: Scaffold(
         backgroundColor: Styles.BACKGROUND_COLOR,
         appBar: CustomAppBar(title: "freelancer_profile".tr()),

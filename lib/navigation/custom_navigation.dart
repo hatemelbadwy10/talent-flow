@@ -52,6 +52,8 @@ import '../features/home/page/my_freelancer_profile.dart';
 import '../features/home/page/partner_profile.dart';
 import '../features/home/page/work_screen.dart';
 import '../features/home/model/freelancer_profile_model.dart';
+import '../features/home/model/home_route_args.dart';
+import '../features/home/model/partner_model.dart';
 import '../features/home/model/work_details_model.dart';
 import '../features/nav_bar/page/nav_bar.dart';
 import '../features/new_projects/bloc/new_projects_bloc.dart';
@@ -232,7 +234,7 @@ abstract class CustomNavigator {
       case Routes.freelancers:
         return _pageRoute(
           AllFreelancersView(
-            arguments: settings.arguments as Map<String, dynamic>?,
+            arguments: FreelancersRouteArgs.fromRoute(settings.arguments),
             categoriesRepository: sl<HomeRepo>(),
             freelancersRepository: sl<HomeRepo>(),
             favouritesRepository: sl<FavouriteRepo>(),
@@ -245,7 +247,7 @@ abstract class CustomNavigator {
         ));
       case Routes.entrepreneur:
         return _pageRoute(EntrepreneurProfileView(
-          arguments: settings.arguments as Map<String, dynamic>?,
+          arguments: EntrepreneurProfileArgs.fromRoute(settings.arguments),
           profileRepository: sl<HomeRepo>(),
           currentUserId: int.tryParse(
             sl<SharedPreferences>().getString(AppStorageKey.userId) ?? '',
@@ -256,28 +258,26 @@ abstract class CustomNavigator {
         ));
       case Routes.freeLancerView:
         return _pageRoute(FreelancerProfileView(
-          arguments: settings.arguments as Map<String, dynamic>,
+          arguments: FreelancerProfileArgs.fromRoute(settings.arguments),
           profileRepository: sl<HomeRepo>(),
           favouritesRepository: sl<FavouriteRepo>(),
         ));
       case Routes.chat:
+        final chatArguments = ChatRouteArgs.fromRoute(settings.arguments);
         return _pageRoute(BlocProvider(
           create: (context) {
-            final chatArguments = settings.arguments as Map<String, dynamic>?;
-            int? parseId(Object? value) =>
-                value is int ? value : int.tryParse(value?.toString() ?? '');
             return FreelancerChatBloc(
               repository: sl<ChatRepo>(),
               realtimeService: sl<PusherService>(),
             )..add(
                 ConversationRequested(
-                  conversationId: parseId(chatArguments?['conversationId']),
-                  freelancerId: parseId(chatArguments?['freelancerId']),
+                  conversationId: chatArguments.conversationId,
+                  freelancerId: chatArguments.freelancerId,
                 ),
               );
           },
           child: FreelancerChatScreen(
-            arguments: settings.arguments as Map<String, dynamic>?,
+            arguments: chatArguments,
             isFreelancer:
                 sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
                     false,
@@ -343,7 +343,9 @@ abstract class CustomNavigator {
                   profileRepository: sl<HomeRepo>(),
                 )
               : EntrepreneurProfileView(
-                  arguments: const {'useCurrentProfile': true},
+                  arguments: const EntrepreneurProfileArgs(
+                    useCurrentProfile: true,
+                  ),
                   profileRepository: sl<HomeRepo>(),
                   currentUserId: int.tryParse(
                     sl<SharedPreferences>().getString(AppStorageKey.userId) ??
@@ -502,7 +504,13 @@ abstract class CustomNavigator {
       case Routes.brands:
         return _pageRoute(
           PartnerProfileView(
-            arguments: settings.arguments as Map<String, dynamic>?,
+            partner: PartnerModel.fromJson(
+              settings.arguments is Map
+                  ? Map<String, dynamic>.from(
+                      settings.arguments as Map,
+                    )
+                  : const <String, dynamic>{},
+            ),
           ),
         );
       //
