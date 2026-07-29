@@ -1,18 +1,24 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talent_flow/app/core/app_core.dart';
+import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
+import 'package:talent_flow/app/core/user_completion_guard.dart';
+import 'package:talent_flow/features/auth/data/auth_session_store.dart';
 import 'package:talent_flow/features/auth/pages/confirm_code/repo/confirm_code_repo.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../../../../app/core/app_event.dart';
 import '../../../../app/core/styles.dart';
 import '../../../../components/custom_button.dart';
 import '../../../../data/config/di.dart';
+import '../../../../navigation/custom_navigation.dart';
+import '../../../../navigation/routes.dart';
 import '../../widgets/auth_base.dart';
 import 'bloc/confirm_code_bloc.dart';
+import 'bloc/confirm_code_event.dart';
+import 'bloc/confirm_code_state.dart';
+import 'model/confirm_code_request.dart';
 
 class ConfirmCodeScreen extends StatefulWidget {
   final Map<String, dynamic> argument;
@@ -84,16 +90,15 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
     return SizedBox(
       width: 50,
       height: 64,
-      child: RawKeyboardListener(
-        focusNode: FocusNode(),
-        onKey: (RawKeyEvent event) {
-          if (event is RawKeyDownEvent) {
+      child: Focus(
+        onKeyEvent: (_, KeyEvent event) {
+          if (event is KeyDownEvent) {
             // Handle backspace
             if (event.logicalKey == LogicalKeyboardKey.backspace) {
               _onBackspace(index);
             }
             // Handle paste with Ctrl+V
-            else if (event.isControlPressed &&
+            else if (HardwareKeyboard.instance.isControlPressed &&
                 event.logicalKey == LogicalKeyboardKey.keyV) {
               Clipboard.getData(Clipboard.kTextPlain).then((data) {
                 if (data?.text != null) {
@@ -102,6 +107,7 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
               });
             }
           }
+          return KeyEventResult.ignored;
         },
         child: TextFormField(
           controller: _controllers[index],
@@ -210,68 +216,140 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
     final identifier =
         (widget.argument["identifier"] ?? widget.argument["email"] ?? '')
             .toString();
-    final isPhoneVerification = widget.argument["isPhoneVerification"] == true;
-
     return BlocProvider(
-      create: (_) => ConfirmCodeBloc(sl<ConfirmCodeRepo>()),
-      child: AuthBase(
-        children: [
-          SizedBox(height: 86.h),
-          Text(
-            "confirm_code.title".tr(),
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          const SizedBox(height: 40),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Text(
-              "confirm_code.enter_code".tr(),
-              style: const TextStyle(fontSize: 16, color: Colors.black54),
+      create: (_) => ConfirmCodeBloc(
+        repository: sl<ConfirmCodeRepo>(),
+        sessionStore: sl<AuthSessionStore>(),
+      ),
+      child: BlocListener<ConfirmCodeBloc, ConfirmCodeState>(
+        listener: _onConfirmCodeStateChanged,
+        child: AuthBase(
+          children: [
+            SizedBox(height: 86.h),
+            Text(
+              "confirm_code.title".tr(),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-          ),
-          const SizedBox(height: 10),
-          _buildCodeInputRow(context),
-          const SizedBox(height: 24),
-          Builder(
-            builder: (context) {
-              return CustomButton(
-                text: "confirm_code.send".tr(),
-                onTap: () {
-                  final code = _controllers.map((c) => c.text).join();
-                  if (code.length == 6) {
-                    final isRegister = widget.argument["isRegister"] ?? false;
-                    log('identifier $identifier');
-                    context.read<ConfirmCodeBloc>().add(
-                          Click(arguments: {
-                            "identifier": identifier,
-                            "otp": code,
-                            if (isPhoneVerification) "is_phone": "true",
-                            if (isPhoneVerification)
-                              "isPhoneVerification": true,
-                            "isRegister": isRegister,
-                            "isFromLogin": widget.argument["isFromLogin"],
-                          }),
-                        );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text("confirm_code.error_incomplete".tr())),
-                    );
-                  }
-                },
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF031A1B),
-                    Color(0xFF0C7D81),
-                  ],
-                  begin: Alignment.centerRight,
-                  end: Alignment.centerLeft,
-                ),
-              );
-            },
-          ),
-        ],
+            const SizedBox(height: 40),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                "confirm_code.enter_code".tr(),
+                style: const TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _buildCodeInputRow(context),
+            const SizedBox(height: 24),
+            BlocBuilder<ConfirmCodeBloc, ConfirmCodeState>(
+              builder: (context, state) {
+                return CustomButton(
+                  text: "confirm_code.send".tr(),
+                  isLoading: state is ConfirmCodeLoading,
+                  onTap: () {
+                    final code = _controllers.map((c) => c.text).join();
+                    if (code.length == 6) {
+                      context.read<ConfirmCodeBloc>().add(
+                            CodeSubmitted(
+                              ConfirmCodeRequest(
+                                identifier: identifier,
+                                otp: code,
+                                flow: _confirmationFlow,
+                              ),
+                            ),
+                          );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                                Text("confirm_code.error_incomplete".tr())),
+                      );
+                    }
+                  },
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF031A1B),
+                      Color(0xFF0C7D81),
+                    ],
+                    begin: Alignment.centerRight,
+                    end: Alignment.centerLeft,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  ConfirmationFlow get _confirmationFlow {
+    if (widget.argument['isPhoneVerification'] == true) {
+      return ConfirmationFlow.phoneVerification;
+    }
+    if (widget.argument['isRegister'] == true) {
+      return ConfirmationFlow.registration;
+    }
+    if (widget.argument['isFromLogin'] == true) {
+      return ConfirmationFlow.loginActivation;
+    }
+    return ConfirmationFlow.passwordReset;
+  }
+
+  Future<void> _onConfirmCodeStateChanged(
+    BuildContext context,
+    ConfirmCodeState state,
+  ) async {
+    if (state case ConfirmCodeFailed(:final message)) {
+      AppCore.showSnackBar(
+        notification: AppNotification(
+          message: message,
+          isFloating: true,
+          backgroundColor: Styles.IN_ACTIVE,
+          borderColor: Colors.transparent,
+        ),
+      );
+      return;
+    }
+    if (state case ConfirmCodeSucceeded(:final request, :final message)) {
+      switch (request.flow) {
+        case ConfirmationFlow.phoneVerification:
+          AppCore.showSnackBar(
+            notification: AppNotification(
+              message: message.isEmpty
+                  ? 'edit_profile.phone_verified_success'.tr()
+                  : message,
+              backgroundColor: Styles.ACTIVE,
+              borderColor: Colors.transparent,
+            ),
+          );
+          CustomNavigator.pop(
+            result: {
+              'identifier': request.identifier,
+              'verifiedAt': DateTime.now().toIso8601String(),
+            },
+          );
+          return;
+        case ConfirmationFlow.registration:
+          await UserCompletionGuard.handlePostAuthNavigation();
+          return;
+        case ConfirmationFlow.loginActivation:
+          AppCore.showSnackBar(
+            notification: AppNotification(
+              message: 'تم تفعيل الحساب بنجاح. سجل الدخول الآن'.tr(),
+              backgroundColor: Styles.ACTIVE,
+              borderColor: Colors.transparent,
+            ),
+          );
+          CustomNavigator.push(Routes.login, clean: true);
+          return;
+        case ConfirmationFlow.passwordReset:
+          CustomNavigator.push(
+            Routes.forgetPassword,
+            arguments: {'identifier': request.identifier},
+          );
+          return;
+      }
+    }
   }
 }
