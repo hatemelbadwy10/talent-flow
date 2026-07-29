@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/setting/bloc/portofilo_form_bloc.dart';
 import 'package:talent_flow/features/setting/repo/acceptance_test_repo.dart';
-import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
+import 'package:talent_flow/features/setting/repo/add_work_repository.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
@@ -14,9 +13,16 @@ import 'package:talent_flow/navigation/routes.dart';
 import '../../../app/core/app_core.dart';
 
 class AcceptanceTestQuestionsScreen extends StatefulWidget {
-  const AcceptanceTestQuestionsScreen({super.key, this.arguments});
+  const AcceptanceTestQuestionsScreen({
+    super.key,
+    this.arguments,
+    required this.acceptanceTestRepo,
+    required this.workRepository,
+  });
 
   final Map<String, dynamic>? arguments;
+  final AcceptanceTestRepo acceptanceTestRepo;
+  final AddWorkRepository workRepository;
 
   @override
   State<AcceptanceTestQuestionsScreen> createState() =>
@@ -43,7 +49,7 @@ class _AcceptanceTestQuestionsScreenState
   @override
   void initState() {
     super.initState();
-    _questionsFuture = sl<AcceptanceTestRepo>().getAcceptanceTestQuestions();
+    _questionsFuture = widget.acceptanceTestRepo.getAcceptanceTestQuestions();
   }
 
   @override
@@ -77,7 +83,7 @@ class _AcceptanceTestQuestionsScreenState
       _isSubmitting = true;
     });
 
-    final result = await sl<AddWorkRepo>().addWorks(
+    final result = await widget.workRepository.addWorks(
       works: _pendingWorks.map((item) => item.toWorkItem()).toList(),
       answers: answers,
     );
@@ -142,7 +148,7 @@ class _AcceptanceTestQuestionsScreenState
                 onTap: () {
                   setState(() {
                     _questionsFuture =
-                        sl<AcceptanceTestRepo>().getAcceptanceTestQuestions();
+                        widget.acceptanceTestRepo.getAcceptanceTestQuestions();
                   });
                 },
               );
@@ -156,7 +162,7 @@ class _AcceptanceTestQuestionsScreenState
             if (content.questions.isEmpty &&
                 content.title.isEmpty &&
                 content.description.isEmpty) {
-              return  _StateMessage(
+              return _StateMessage(
                 title: 'acceptance_test.empty'.tr(),
               );
             }
@@ -255,10 +261,9 @@ class _AcceptanceTestQuestionsScreenState
                                               const EdgeInsets.only(bottom: 10),
                                           child: _ChoiceTile(
                                             label: choice,
-                                            selected:
-                                                _selectedAnswers[entry
-                                                        .value.fieldKey] ==
-                                                    choice,
+                                            selected: _selectedAnswers[
+                                                    entry.value.fieldKey] ==
+                                                choice,
                                             onTap: () {
                                               setState(() {
                                                 _selectedAnswers[entry
@@ -518,54 +523,62 @@ String _firstText(List<dynamic> candidates) {
 
 List<_AcceptanceQuestion> _extractQuestions(dynamic value) {
   if (value is List) {
-    return value.asMap().entries.map((entry) {
-      final item = entry.value;
-      if (item is Map) {
-        final fieldKey = _firstText([
-          item['id'],
-          item['key'],
-          item['field'],
-        ]);
-        final text = _firstText([
-          item['question'],
-          item['title'],
-          item['name'],
-          item['text'],
-          item['content'],
-        ]);
-        if (text.isEmpty) {
-          return null;
-        }
-      return _AcceptanceQuestion(
-        fieldKey: fieldKey.isNotEmpty ? fieldKey : '${entry.key + 1}',
-        text: text,
-        choices: _extractChoices(item['choices']),
-      );
-      }
-      final text = item?.toString().trim() ?? '';
-      if (text.isEmpty) {
-        return null;
-      }
-      return _AcceptanceQuestion(
-        fieldKey: '${entry.key + 1}',
-        text: text,
-        choices: const <String>[],
-      );
-    }).whereType<_AcceptanceQuestion>().toList();
+    return value
+        .asMap()
+        .entries
+        .map((entry) {
+          final item = entry.value;
+          if (item is Map) {
+            final fieldKey = _firstText([
+              item['id'],
+              item['key'],
+              item['field'],
+            ]);
+            final text = _firstText([
+              item['question'],
+              item['title'],
+              item['name'],
+              item['text'],
+              item['content'],
+            ]);
+            if (text.isEmpty) {
+              return null;
+            }
+            return _AcceptanceQuestion(
+              fieldKey: fieldKey.isNotEmpty ? fieldKey : '${entry.key + 1}',
+              text: text,
+              choices: _extractChoices(item['choices']),
+            );
+          }
+          final text = item?.toString().trim() ?? '';
+          if (text.isEmpty) {
+            return null;
+          }
+          return _AcceptanceQuestion(
+            fieldKey: '${entry.key + 1}',
+            text: text,
+            choices: const <String>[],
+          );
+        })
+        .whereType<_AcceptanceQuestion>()
+        .toList();
   }
 
   if (value is Map) {
-    return value.entries.map((entry) {
-      final text = entry.value?.toString().trim() ?? '';
-      if (text.isEmpty) {
-        return null;
-      }
-      return _AcceptanceQuestion(
-        fieldKey: entry.key.toString(),
-        text: text,
-        choices: const <String>[],
-      );
-    }).whereType<_AcceptanceQuestion>().toList();
+    return value.entries
+        .map((entry) {
+          final text = entry.value?.toString().trim() ?? '';
+          if (text.isEmpty) {
+            return null;
+          }
+          return _AcceptanceQuestion(
+            fieldKey: entry.key.toString(),
+            text: text,
+            choices: const <String>[],
+          );
+        })
+        .whereType<_AcceptanceQuestion>()
+        .toList();
   }
 
   return const <_AcceptanceQuestion>[];

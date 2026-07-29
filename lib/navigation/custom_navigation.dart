@@ -17,6 +17,8 @@ import 'package:talent_flow/features/projects/page/single_project_view.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
 import 'package:talent_flow/features/setting/repo/chats_repo.dart';
+import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
+import 'package:talent_flow/features/setting/repo/acceptance_test_repo.dart';
 import 'package:talent_flow/features/setting/page/add_projects.dart';
 import 'package:talent_flow/features/setting/page/add_single_work_screen.dart';
 import 'package:talent_flow/features/setting/page/favourite.dart';
@@ -146,7 +148,9 @@ abstract class CustomNavigator {
         final shouldOpenSingleWork =
             isFreelancer && addedWorks && arguments?['fromOnboarding'] != true;
         if (shouldOpenSingleWork) {
-          return _pageRoute(const AddSingleWorkScreen());
+          return _pageRoute(
+            AddSingleWorkScreen(repository: sl<AddWorkRepo>()),
+          );
         }
         return _pageRoute(
           AddYourProjects(
@@ -284,6 +288,8 @@ abstract class CustomNavigator {
         return _pageRoute(
           AcceptanceTestQuestionsScreen(
             arguments: settings.arguments as Map<String, dynamic>?,
+            acceptanceTestRepo: sl<AcceptanceTestRepo>(),
+            workRepository: sl<AddWorkRepo>(),
           ),
         );
       case Routes.accountStatement:

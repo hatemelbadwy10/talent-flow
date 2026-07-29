@@ -8,8 +8,8 @@ import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
-import 'package:talent_flow/data/config/di.dart';
-import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
+import 'package:talent_flow/features/setting/model/work_item.dart';
+import 'package:talent_flow/features/setting/repo/add_work_repository.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/helpers/date_time_picker.dart';
 import 'package:talent_flow/helpers/pickers/view/image_picker_helper.dart';
@@ -18,7 +18,12 @@ import 'package:talent_flow/navigation/custom_navigation.dart';
 import '../../../app/core/user_completion_guard.dart';
 
 class AddSingleWorkScreen extends StatefulWidget {
-  const AddSingleWorkScreen({super.key});
+  const AddSingleWorkScreen({
+    super.key,
+    required this.repository,
+  });
+
+  final AddWorkRepository repository;
 
   @override
   State<AddSingleWorkScreen> createState() => _AddSingleWorkScreenState();
@@ -144,7 +149,7 @@ class _AddSingleWorkScreenState extends State<AddSingleWorkScreen> {
       _isSubmitting = true;
     });
 
-    final result = await sl<AddWorkRepo>().addWork(
+    final result = await widget.repository.addWork(
       work: WorkItem(
         title: title,
         description: description,
@@ -164,15 +169,15 @@ class _AddSingleWorkScreenState extends State<AddSingleWorkScreen> {
         });
         _showError(failure.error);
       },
-      (response) async {
+      (successMessage) async {
         await UserCompletionGuard.updateStoredFlags(addedWorks: true);
         if (!mounted) return;
         setState(() {
           _isSubmitting = false;
         });
 
-        final message = response.data is Map && response.data['message'] != null
-            ? response.data['message'].toString()
+        final message = successMessage.isNotEmpty
+            ? successMessage
             : 'single_work.success'.tr();
 
         _showSuccess(message);
