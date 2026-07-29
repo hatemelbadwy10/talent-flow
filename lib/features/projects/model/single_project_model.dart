@@ -28,12 +28,12 @@ class SingleProjectModel extends SingleMapper {
   final Owner? owner;
   final String? title;
   final String? description;
-  final dynamic filesDescription;
-  final dynamic similarProjects;
-  final dynamic requiredToBeReceived;
+  final String? filesDescription;
+  final List<String> similarProjects;
+  final String? requiredToBeReceived;
   final List<ProjectProposal> proposals;
   final List<ProjectQuestion> questions;
-  final List<dynamic> files;
+  final List<Object?> files;
 
   factory SingleProjectModel.fromJson(Map<String, dynamic> json) {
     return SingleProjectModel(
@@ -48,9 +48,9 @@ class SingleProjectModel extends SingleMapper {
       owner: json["owner"] == null ? null : Owner.fromJson(json["owner"]),
       title: json["title"],
       description: json["description"],
-      filesDescription: json["files_description"],
-      similarProjects: json["similar_projects"],
-      requiredToBeReceived: json["required_to_be_received"],
+      filesDescription: _optionalText(json["files_description"]),
+      similarProjects: _extractStrings(json["similar_projects"]),
+      requiredToBeReceived: _optionalText(json["required_to_be_received"]),
       proposals: json["proposals"] == null
           ? []
           : List<ProjectProposal>.from(
@@ -72,13 +72,25 @@ class SingleProjectModel extends SingleMapper {
 
   @override
   Map<String, dynamic> toJson() {
-    // TODO: implement toJson
-    throw UnimplementedError();
+    return {
+      'views': views,
+      'since': since,
+      'status': status,
+      'duration': duration,
+      'budget': budget,
+      'skills': skills,
+      'title': title,
+      'description': description,
+      'files_description': filesDescription,
+      'similar_projects': similarProjects,
+      'required_to_be_received': requiredToBeReceived,
+      'files': files,
+    };
   }
 
-  static List<dynamic> _extractFiles(dynamic value) {
+  static List<Object?> _extractFiles(Object? value) {
     if (value is List) {
-      return List<dynamic>.from(value);
+      return List<Object?>.from(value);
     }
 
     if (value == null) {
@@ -195,6 +207,19 @@ int? _parseInt(dynamic value) {
     return value.toInt();
   }
   return int.tryParse(value?.toString() ?? '');
+}
+
+String? _optionalText(Object? value) {
+  final text = value?.toString().trim() ?? '';
+  return text.isEmpty || text.toLowerCase() == 'null' ? null : text;
+}
+
+List<String> _extractStrings(Object? value) {
+  if (value is List) {
+    return value.map(_optionalText).whereType<String>().toList(growable: false);
+  }
+  final text = _optionalText(value);
+  return text == null ? const [] : [text];
 }
 
 bool _toBool(dynamic value) {

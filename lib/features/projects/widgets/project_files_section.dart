@@ -16,7 +16,7 @@ class ProjectFilesSection extends StatelessWidget {
     required this.files,
   });
 
-  final List<dynamic> files;
+  final List<Object?> files;
 
   @override
   Widget build(BuildContext context) {
@@ -600,9 +600,9 @@ class _ProjectAttachment {
     return upper.length <= 4 ? upper : upper.substring(0, 4);
   }
 
-  static List<_ProjectAttachment> fromList(List<dynamic> values) {
+  static List<_ProjectAttachment> fromList(List<Object?> values) {
     return values
-        .expand<dynamic>((value) {
+        .expand<Object?>((value) {
           if (value is Iterable && value is! String && value is! Map) {
             return value;
           }
@@ -614,7 +614,7 @@ class _ProjectAttachment {
         .toList();
   }
 
-  static _ProjectAttachment? _fromDynamic(dynamic value) {
+  static _ProjectAttachment? _fromDynamic(Object? value) {
     if (value == null) {
       return null;
     }
@@ -713,7 +713,7 @@ class _ProjectAttachment {
     );
   }
 
-  static String? _pickFirstNonEmpty(List<dynamic> candidates) {
+  static String? _pickFirstNonEmpty(List<Object?> candidates) {
     for (final candidate in candidates) {
       if (candidate == null) {
         continue;

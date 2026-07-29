@@ -42,6 +42,24 @@ void main() {
     expect(state.message, 'Projects failed');
     await bloc.close();
   });
+
+  test('project details normalize optional text, lists, and attachments', () {
+    final project = SingleProjectModel.fromJson({
+      'files_description': 123,
+      'similar_projects': ['First', null, 'Second'],
+      'required_to_be_received': ' Brief ',
+      'files': [
+        'https://example.com/image.png',
+        {'url': 'https://example.com/document.pdf'},
+      ],
+    });
+
+    expect(project.filesDescription, '123');
+    expect(project.similarProjects, ['First', 'Second']);
+    expect(project.requiredToBeReceived, 'Brief');
+    expect(project.files, hasLength(2));
+    expect(project.toJson()['files_description'], '123');
+  });
 }
 
 class _FakeProjectsRepository implements ProjectsRepository {
