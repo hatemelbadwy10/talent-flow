@@ -75,7 +75,9 @@ class _HomeViewState extends State<HomeView> {
                         children: [
                           homeModel.categories.isNotEmpty
                               ? ServiceCategoriesGrid(
-                                  serviceData: homeModel.categories)
+                                  serviceData: homeModel.categories,
+                                  isFreelancer: isFreelancer,
+                                )
                               : SizedBox(
                                   height: 100.h,
                                 ),

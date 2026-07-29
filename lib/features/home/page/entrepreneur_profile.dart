@@ -1,11 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/entrepreneur_profile_bloc.dart';
 import 'package:talent_flow/features/home/model/entrepreneur_profile_model.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
@@ -13,12 +10,21 @@ import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/main_models/user_model.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
-import 'package:talent_flow/features/home/repo/home_repo.dart';
+import 'package:talent_flow/features/home/repo/entrepreneur_profile_repository.dart';
 
 class EntrepreneurProfileView extends StatefulWidget {
-  const EntrepreneurProfileView({super.key, this.arguments});
+  const EntrepreneurProfileView({
+    super.key,
+    this.arguments,
+    required this.profileRepository,
+    required this.currentUserId,
+    required this.isFreelancer,
+  });
 
   final Map<String, dynamic>? arguments;
+  final EntrepreneurProfileRepository profileRepository;
+  final int? currentUserId;
+  final bool isFreelancer;
 
   @override
   State<EntrepreneurProfileView> createState() =>
@@ -35,15 +41,13 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
   @override
   void initState() {
     super.initState();
-    final prefs = sl<SharedPreferences>();
-    _currentUserId = int.tryParse(prefs.getString(AppStorageKey.userId) ?? '');
+    _currentUserId = widget.currentUserId;
     _useCurrentProfile = widget.arguments?['useCurrentProfile'] == true;
     _entrepreneurId =
         widget.arguments?['entrepreneurId'] as int? ?? _currentUserId;
     _isCurrentUser =
         _entrepreneurId != null && _entrepreneurId == _currentUserId;
-    _isEntrepreneurAccount =
-        !(prefs.getBool(AppStorageKey.isFreelancer) ?? false);
+    _isEntrepreneurAccount = !widget.isFreelancer;
 
     if (_useCurrentProfile) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -111,8 +115,9 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
     }
 
     return BlocProvider(
-      create: (_) => EntrepreneurProfileBloc(repository: sl<HomeRepo>())
-        ..add(EntrepreneurProfileRequested(_entrepreneurId)),
+      create: (_) =>
+          EntrepreneurProfileBloc(repository: widget.profileRepository)
+            ..add(EntrepreneurProfileRequested(_entrepreneurId)),
       child: Builder(
         builder: (context) {
           return Scaffold(

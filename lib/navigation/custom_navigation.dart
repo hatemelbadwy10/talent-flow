@@ -127,7 +127,14 @@ abstract class CustomNavigator {
           argument: settings.arguments as Map<String, dynamic>,
         ));
       case Routes.allCategories:
-        return _pageRoute(const ServiceCategoryView());
+        return _pageRoute(
+          ServiceCategoryView(
+            repository: sl<HomeRepo>(),
+            isFreelancer:
+                sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                    false,
+          ),
+        );
       case Routes.addOffer:
         return _pageRoute(BlocProvider(
           create: (context) => NewProjectsBloc(
@@ -184,6 +191,13 @@ abstract class CustomNavigator {
       case Routes.entrepreneur:
         return _pageRoute(EntrepreneurProfileView(
           arguments: settings.arguments as Map<String, dynamic>?,
+          profileRepository: sl<HomeRepo>(),
+          currentUserId: int.tryParse(
+            sl<SharedPreferences>().getString(AppStorageKey.userId) ?? '',
+          ),
+          isFreelancer:
+              sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                  false,
         ));
       case Routes.freeLancerView:
         return _pageRoute(FreelancerProfileView(
@@ -254,8 +268,14 @@ abstract class CustomNavigator {
               ? MyFreelancerProfileView(
                   profileRepository: sl<HomeRepo>(),
                 )
-              : const EntrepreneurProfileView(
-                  arguments: {'useCurrentProfile': true},
+              : EntrepreneurProfileView(
+                  arguments: const {'useCurrentProfile': true},
+                  profileRepository: sl<HomeRepo>(),
+                  currentUserId: int.tryParse(
+                    sl<SharedPreferences>().getString(AppStorageKey.userId) ??
+                        '',
+                  ),
+                  isFreelancer: false,
                 ),
         );
       // case Routes.dashboard:

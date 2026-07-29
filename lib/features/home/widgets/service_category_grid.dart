@@ -1,21 +1,21 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/features/home/widgets/service_widget.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../components/grid_list_animator.dart';
-import '../../../data/config/di.dart';
 import '../model/home_model.dart';
 
 class ServiceCategoriesGrid extends StatelessWidget {
   final List<Category> serviceData;
+  final bool isFreelancer;
 
-  const ServiceCategoriesGrid({super.key, required this.serviceData});
+  const ServiceCategoriesGrid({
+    super.key,
+    required this.serviceData,
+    required this.isFreelancer,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +31,7 @@ class ServiceCategoriesGrid extends StatelessWidget {
         return InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            log("sl ${sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer)} ");
-            if (sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                true) {
+            if (isFreelancer) {
               CustomNavigator.push(Routes.ownerProjects, arguments: {
                 "categoryName": data.name,
                 "from_category": true,

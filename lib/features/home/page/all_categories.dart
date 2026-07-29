@@ -1,27 +1,29 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
-import '../../../data/config/di.dart';
 import '../bloc/categories_bloc.dart';
 import '../bloc/categories_event.dart';
 import '../bloc/categories_state.dart';
-import '../repo/home_repo.dart';
+import '../repo/categories_repository.dart';
 
 class ServiceCategoryView extends StatelessWidget {
+  final CategoriesRepository repository;
+  final bool isFreelancer;
+
   const ServiceCategoryView({
     super.key,
+    required this.repository,
+    required this.isFreelancer,
   });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => CategoriesBloc(
-        repository: sl<HomeRepo>(),
+        repository: repository,
       )..add(const CategoriesRequested()),
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -45,9 +47,7 @@ class ServiceCategoryView extends StatelessWidget {
                       title: category.name ?? "",
                       subtitle: category.description ?? "",
                       onTap: () {
-                        if (sl<SharedPreferences>()
-                                .getBool(AppStorageKey.isFreelancer) ??
-                            false) {
+                        if (isFreelancer) {
                           CustomNavigator.push(Routes.ownerProjects,
                               arguments: {
                                 "categoryName": category.name,
