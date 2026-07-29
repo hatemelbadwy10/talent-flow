@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/features/projects/model/my_projects_model.dart';
+import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import '../../../app/core/styles.dart';
-import '../../../data/config/di.dart';
 import '../../../navigation/routes.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -13,7 +11,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/features/new_projects/bloc/new_projects_bloc.dart'; // Import your Bloc
 import 'package:talent_flow/features/new_projects/bloc/new_projects_event.dart';
 import 'package:talent_flow/features/new_projects/bloc/new_projects_state.dart';
-import 'package:talent_flow/features/setting/repo/favourite_repo.dart';
 
 class ProjectCard extends StatefulWidget {
   final MyProjectsModel projectsModel;
@@ -31,13 +28,6 @@ class ProjectCard extends StatefulWidget {
 
 class _ProjectCardState extends State<ProjectCard> {
   late MyProjectsModel _currentProjectModel;
-  bool _isFavouriteLoading = false;
-
-  int? _currentUserId() {
-    final rawUserId = sl<SharedPreferences>().getString(AppStorageKey.userId);
-    return int.tryParse(rawUserId ?? '');
-  }
-
   @override
   void initState() {
     super.initState();
@@ -54,6 +44,9 @@ class _ProjectCardState extends State<ProjectCard> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.watch<UserBloc>().user;
+    final isFreelancer = currentUser?.userType == 'Freelancer';
+    final currentUserId = currentUser?.id;
     NewProjectsBloc? newProjectsBloc;
     try {
       newProjectsBloc = context.read<NewProjectsBloc>();
@@ -130,28 +123,17 @@ class _ProjectCardState extends State<ProjectCard> {
                 ],
               ),
               IconButton(
-                icon: _isFavouriteLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(
-                        (_currentProjectModel.isInFavorites ?? false)
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color: (_currentProjectModel.isInFavorites ?? false)
-                            ? Colors.red
-                            : Colors.grey,
-                      ),
+                icon: Icon(
+                  (_currentProjectModel.isInFavorites ?? false)
+                      ? Icons.favorite
+                      : Icons.favorite_border,
+                  color: (_currentProjectModel.isInFavorites ?? false)
+                      ? Colors.red
+                      : Colors.grey,
+                ),
                 onPressed: () async {
                   if (_currentProjectModel.id != null) {
-                    if (_isFavouriteLoading) {
-                      return;
-                    }
                     // Optimistic update
-                    final previous =
-                        _currentProjectModel.isInFavorites ?? false;
                     setState(() {
                       _currentProjectModel = _currentProjectModel.copyWith(
                         isInFavorites:
@@ -171,24 +153,10 @@ class _ProjectCardState extends State<ProjectCard> {
                     }
 
                     setState(() {
-                      _isFavouriteLoading = true;
-                    });
-                    final result = await sl<FavouriteRepo>()
-                        .toggleProjectFavourite(_currentProjectModel.id!);
-                    if (!mounted) {
-                      return;
-                    }
-                    result.fold(
-                      (_) {
-                        _currentProjectModel = _currentProjectModel.copyWith(
-                          isInFavorites: previous,
-                        );
-                      },
-                      (_) {},
-                    );
-
-                    setState(() {
-                      _isFavouriteLoading = false;
+                      _currentProjectModel = _currentProjectModel.copyWith(
+                        isInFavorites:
+                            !(_currentProjectModel.isInFavorites ?? false),
+                      );
                     });
                   }
                 },
@@ -242,10 +210,6 @@ class _ProjectCardState extends State<ProjectCard> {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () async {
-                final isFreelancer = sl<SharedPreferences>()
-                        .getBool(AppStorageKey.isFreelancer) ??
-                    false;
-                final currentUserId = _currentUserId();
                 final isMyEntrepreneurProject = !isFreelancer &&
                     currentUserId != null &&
                     _currentProjectModel.owner?.id == currentUserId;
@@ -272,15 +236,11 @@ class _ProjectCardState extends State<ProjectCard> {
                 }
               },
               icon: Icon(
-                sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                        false
-                    ? Icons.add
-                    : Icons.description,
+                isFreelancer ? Icons.add : Icons.description,
                 color: Colors.white,
               ),
               label: Text(
-                sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                        false
+                isFreelancer
                     ? "project_card.add_offer".tr()
                     : "project_card.read_project".tr(),
                 style: const TextStyle(
