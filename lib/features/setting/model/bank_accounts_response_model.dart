@@ -213,20 +213,20 @@ class BankAccountMutationResponseModel {
   }
 }
 
-dynamic _payload(Map<String, dynamic> json) {
+Object? _payload(Map<String, dynamic> json) {
   return json['payload'] ?? json['data'] ?? json;
 }
 
-List<dynamic> _extractList(dynamic payload) {
+List<Object?> _extractList(Object? payload) {
   if (payload is List) {
-    return payload;
+    return List<Object?>.from(payload);
   }
   if (payload is Map) {
     final map = Map<String, dynamic>.from(payload);
     final nested =
         map['items'] ?? map['data'] ?? map['rows'] ?? map['accounts'];
     if (nested is List) {
-      return nested;
+      return List<Object?>.from(nested);
     }
   }
   return const [];

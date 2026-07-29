@@ -151,14 +151,14 @@ class AccountStatementProposalsModel implements Mapper {
   });
 
   final int? count;
-  final List<dynamic> items;
+  final List<Object?> items;
 
-  factory AccountStatementProposalsModel.fromDynamic(dynamic value) {
+  factory AccountStatementProposalsModel.fromDynamic(Object? value) {
     if (value is Map<String, dynamic>) {
       return AccountStatementProposalsModel(
         count: _toInt(value['count']) ??
             (value['items'] is List ? (value['items'] as List).length : null),
-        items: value['items'] is List ? List<dynamic>.from(value['items']) : [],
+        items: value['items'] is List ? List<Object?>.from(value['items']) : [],
       );
     }
 
@@ -167,14 +167,14 @@ class AccountStatementProposalsModel implements Mapper {
       return AccountStatementProposalsModel(
         count: _toInt(map['count']) ??
             (map['items'] is List ? (map['items'] as List).length : null),
-        items: map['items'] is List ? List<dynamic>.from(map['items']) : [],
+        items: map['items'] is List ? List<Object?>.from(map['items']) : [],
       );
     }
 
     if (value is List) {
       return AccountStatementProposalsModel(
         count: value.length,
-        items: List<dynamic>.from(value),
+        items: List<Object?>.from(value),
       );
     }
 
@@ -227,7 +227,7 @@ class AccountStatementIndexResponseModel {
 
     if (payload is Map) {
       final map = Map<String, dynamic>.from(payload);
-      final dynamic listRaw =
+      final Object? listRaw =
           map['items'] ?? map['data'] ?? map['rows'] ?? map['statements'];
       final list = listRaw is List
           ? listRaw

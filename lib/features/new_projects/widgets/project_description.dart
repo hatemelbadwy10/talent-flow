@@ -116,7 +116,7 @@ class ProjectDescription extends StatelessWidget {
     );
   }
 
-  List<String> _extractFileUrls(List<dynamic> files) {
+  List<String> _extractFileUrls(List<Object?> files) {
     return files
         .map((file) {
           if (file is String) {

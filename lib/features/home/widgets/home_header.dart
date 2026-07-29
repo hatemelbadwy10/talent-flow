@@ -310,7 +310,7 @@ class _Avatar extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ActionButton extends StatelessWidget {
-  final dynamic icon;
+  final String? icon;
   final bool isIcon;
   final int badge;
   final VoidCallback? onTap;
@@ -348,7 +348,7 @@ class _ActionButton extends StatelessWidget {
                       size: 22,
                     )
                   : SvgPicture.asset(
-                      icon as String,
+                      icon ?? '',
                       height: 22,
                       width: 22,
                       colorFilter: const ColorFilter.mode(

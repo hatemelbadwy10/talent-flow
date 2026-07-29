@@ -172,7 +172,7 @@ Map<String, dynamic>? _asMap(dynamic value) {
   return null;
 }
 
-dynamic _firstValue(List<dynamic> values) {
+Object? _firstValue(List<Object?> values) {
   for (final value in values) {
     if (value == null) {
       continue;
@@ -185,7 +185,7 @@ dynamic _firstValue(List<dynamic> values) {
   return null;
 }
 
-String? _firstString(List<dynamic> values) {
+String? _firstString(List<Object?> values) {
   final value = _firstValue(values);
   if (value == null) {
     return null;
@@ -194,7 +194,7 @@ String? _firstString(List<dynamic> values) {
   return text.isEmpty ? null : text;
 }
 
-int? _firstInt(List<dynamic> values) {
+int? _firstInt(List<Object?> values) {
   for (final value in values) {
     if (value is int) {
       return value;

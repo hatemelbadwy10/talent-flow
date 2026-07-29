@@ -33,7 +33,7 @@ class ChatRepo extends BaseRepo implements ChatRepository {
         }),
       );
 
-      final dynamic data = response.data;
+      final Object? data = response.data;
       final int? conversationId = _extractConversationId(data);
       _logChatRepo(
         'startConversation response',
@@ -189,13 +189,13 @@ class ChatRepo extends BaseRepo implements ChatRepository {
     }
   }
 
-  int? _extractConversationId(dynamic raw) {
+  int? _extractConversationId(Object? raw) {
     if (raw is Map<String, dynamic>) {
-      final dynamic payload = raw['payload'];
-      final dynamic data = raw['data'];
+      final Object? payload = raw['payload'];
+      final Object? data = raw['data'];
 
-      return _parseInt(payload?['id']) ??
-          _parseInt(data?['id']) ??
+      return _parseInt(_mapId(payload)) ??
+          _parseInt(_mapId(data)) ??
           _parseInt(raw['id']) ??
           _extractConversationId(payload) ??
           _extractConversationId(data);
@@ -209,6 +209,8 @@ class ChatRepo extends BaseRepo implements ChatRepository {
 
     return null;
   }
+
+  Object? _mapId(Object? value) => value is Map ? value['id'] : null;
 
   int? _parseInt(dynamic value) {
     if (value is int) {
