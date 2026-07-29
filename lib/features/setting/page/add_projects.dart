@@ -9,7 +9,6 @@ import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
 import '../../../data/config/di.dart';
-import '../../../app/core/app_state.dart';
 import '../bloc/portofilo_form_bloc.dart';
 import '../widgets/protofilo_form.dart';
 
@@ -77,17 +76,17 @@ class AddYourProjects extends StatelessWidget {
               children: [
                 const PortfolioInfoCard(),
                 BlocProvider(
-                  create: (context) => PortfolioFormBloc(sl()),
-                  child: BlocListener<PortfolioFormBloc, AppState>(
+                  create: (context) => PortfolioFormBloc(),
+                  child: BlocListener<PortfolioFormBloc, PortfolioFormState>(
                     listener: (context, state) async {
-                      if (state is! Done || state.reload != true) {
+                      if (state is! PortfolioFormReadyForSubmission) {
                         return;
                       }
                       CustomNavigator.push(
                         Routes.acceptanceTestQuestions,
                         arguments: {
                           'fromOnboarding': _fromOnboarding,
-                          'pendingWorks': (state.data as PortfolioFormsState).forms,
+                          'pendingWorks': state.data.forms,
                         },
                       );
                     },
