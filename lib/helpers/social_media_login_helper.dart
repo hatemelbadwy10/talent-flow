@@ -96,66 +96,6 @@ class SocialMediaLoginHelper {
     }
   }
 
-  // Facebook login
-  // Future<Either<ServerFailure, SocialMediaModel>> facebookLogin() async {
-  //   try {
-  //     print("=====> Provider FacebookAuth");
-  //
-  //     final LoginResult result = await FacebookAuth.instance.login(
-  //       permissions: ["email", "public_profile"],
-  //     );
-  //     print("result: ${result.message}");
-  //     print("result: ${result.status}");
-  //     print("result: ${result.accessToken}");
-  //     print("result: ${result.accessToken?.tokenString}");
-  //     print("result: ${result.accessToken?.type}");
-  //
-  //     if (result.status == LoginStatus.success) {
-  //       final AccessToken? facebookAuth = result.accessToken;
-  //
-  //       try {
-  //         // Create a credential from the access token
-  //         final OAuthCredential facebookAuthCredential =
-  //         FacebookAuthProvider.credential(
-  //           facebookAuth!.tokenString,
-  //         );
-  //
-  //         // Once signed in, return the UserCredential
-  //
-  //
-  //         final SocialMediaModel model = SocialMediaModel();
-  //         model.provider = SocialMediaProvider.facebook.name;
-  //
-  //         // هنا الـ backend طالب access_token للفيسبوك
-  //         model.idToken = facebookAuth.tokenString;
-  //
-  //         // model.uid = userAccountFirebase.user?.uid;
-  //         // model.name = userAccountFirebase.user?.displayName;
-  //         // model.image = userAccountFirebase.user?.photoURL;
-  //         // model.email = userAccountFirebase.user?.email;
-  //         // model.phone = userAccountFirebase.user?.phoneNumber;
-  //         model.printData();
-  //         return Right(model);
-  //       } on FirebaseAuthException catch (error) {
-  //         print("=====> ${error.code}");
-  //         print("=====> from fire base ${error.message}");
-  //         return left(ApiErrorHandler.getServerFailure(error));
-  //       } catch (error) {
-  //         print("=====> from Server Failure ${error}");
-  //         return left(ApiErrorHandler.getServerFailure(error));
-  //       }
-  //     } else {
-  //       print("=====> from Server Failure ${result.message}");
-  //
-  //       return left(ServerFailure("${result.message}"));
-  //     }
-  //   } catch (error) {
-  //     print("=====> from Server Failure ${error.toString()}");
-  //
-  //     return left(ApiErrorHandler.getServerFailure(error));
-  //   }
-  // }
-
   // Apple login
   Future<Either<ServerFailure, SocialMediaModel>> appleLogin() async {
     try {

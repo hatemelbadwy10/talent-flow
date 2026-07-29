@@ -288,30 +288,6 @@ abstract class CustomNavigator {
           ),
         ));
 
-      //
-      // case Routes.splash:
-      //   return _pageRoute(const Splash());
-      //
-      // case Routes.login:
-      //   return _pageRoute(Login());
-      //
-      // case Routes.register:
-      //   return _pageRoute(const Register());
-      //
-      // case Routes.forgetPassword:
-      //   return _pageRoute(const ForgetPassword());
-      //
-      // case Routes.resetPassword:
-      //   return _pageRoute(ResetPassword(
-      //     data: settings.arguments as VerificationModel,
-      //   ));
-      //
-      // case Routes.changePassword:
-      //   return _pageRoute(const ChangePassword());
-      //
-      // case Routes.verification:
-      //   return _pageRoute(Verification(model: settings.arguments as VerificationModel));
-      //
       case Routes.editProfile:
         final preferences = sl<SharedPreferences>();
         return _pageRoute(
@@ -358,11 +334,6 @@ abstract class CustomNavigator {
                   isFreelancer: false,
                 ),
         );
-      // case Routes.dashboard:
-      //   return _pageRotute(DashBoard(
-      //     index: settings.arguments as int?,
-      //   ));
-      //
       case Routes.notifications:
         return _pageRoute(BlocProvider(
           create: (context) => NotificationBloc(
@@ -498,13 +469,6 @@ abstract class CustomNavigator {
             dio: sl<Dio>(),
           ),
         );
-      //
-      // case Routes.services:
-      //   return _pageRoute(const ServicesPage());
-      //
-      // case Routes.offers:
-      //   return _pageRoute(const OffersPage());
-      //
       case Routes.brands:
         return _pageRoute(
           PartnerProfileView(
@@ -517,86 +481,10 @@ abstract class CustomNavigator {
             ),
           ),
         );
-      //
-      // case Routes.newsDetails:
-      //   return _pageRoute(NewsDetailsPage(id: settings.arguments as int));
-      //
-      // case Routes.courses:
-      //   return _pageRoute(const CoursesPage());
-      //
-      // case Routes.myCourses:
-      //   return _pageRoute(const MyCoursesPage());
-      //
-      // case Routes.courseDetails:
-      //   return _pageRoute(CourseDetailsPage(id: settings.arguments as int));
-      //
-      // case Routes.associations:
-      //   return _pageRoute(const AssociationsPage());
-      //
-      // case Routes.myAssociations:
-      //   return _pageRoute(const MyAssociationsPage());
-      //
-      // case Routes.associationDetails:
-      //   return _pageRoute(AssociationDetailsPage(id: settings.arguments as int));
-      //
-      // case Routes.conferences:
-      //   return _pageRoute(const ConferencesPage());
-      //
-      // case Routes.myConferences:
-      //   return _pageRoute(const MyConferencesPage());
-      //
-      // case Routes.conferenceDetails:
-      //   return _pageRoute(ConferenceDetailsPage(id: settings.arguments as int));
-      //
-      // case Routes.addMembershipRequest:
-      //   return _pageRoute(AddMembershipRequestPage(model: settings.arguments as MembershipRequestModel?));
-      //
-      // case Routes.addAssociationRequest:
-      //   return _pageRoute(AddAssociationRequestPage(model: settings.arguments as AssociationModel?));
-      //
-      // case Routes.addStudentMembershipRequest:
-      //   return _pageRoute(AddStudentMembershipRequestPage(model: settings.arguments as MembershipRequestModel?));
-      //
-      // case Routes.updateMembership:
-      //   return _pageRoute(UpdateMembershipPage(model: settings.arguments as MembershipRequestModel?));
-      //
-      // case Routes.addEducationalData:
-      //   return _pageRoute(AddEducationalDataPage(data: settings.arguments as Map<String, dynamic>));
-      //
-      // case Routes.addExperienceData:
-      //   return _pageRoute(AddExperienceDataPage(data: settings.arguments as Map<String, dynamic>));
-      //
-      // case Routes.membershipRequest:
-      //   return _pageRoute(const MembershipRequestPage());
-      //
-      // case Routes.videoPreview:
-      //   return _pageRoute(VideoPreviewPage(data: settings.arguments as Map));
-      //
-      // case Routes.pickLocation:
-      //   return _pageRoute(PickMapPage(data: settings.arguments as LocationModel));
-      //
-      // case Routes.payment:
-      //   return _pageRoute(InAppViewPage(url: settings.arguments as String));
-      //
-      // case Routes.whoUs:
-      //   return _pageRoute(WhoUsPage(
-      //     index: settings.arguments as int?,
-      //   ));
-      //
-      // case Routes.contactWithUs:
-      //   return _pageRoute(const ContactWithUsPage());
-      //
-      // case Routes.privacy:
-      //   return _pageRoute(const PrivacyPolicy());
-      //
       case Routes.terms:
         return _pageRoute(
           TermsAndConditionsScreen(repository: sl<TermsAndConditionRepo>()),
         );
-      //
-      // case Routes.faqs:
-      //   return _pageRoute(const FaqsPage());
-
       default:
         return MaterialPageRoute(builder: (_) => const MyApp());
     }
@@ -638,23 +526,6 @@ abstract class CustomNavigator {
   static _pageRoute(Widget child) => Platform.isIOS
       ? CupertinoPageRoute(builder: (_) => child)
       : MaterialPageRoute(builder: (_) => child);
-
-  // static PageRouteBuilder<dynamic> _pageRoute(Widget child) => PageRouteBuilder(
-  //     transitionDuration: const Duration(milliseconds: 100),
-  //     reverseTransitionDuration: const Duration(milliseconds: 100),
-  //     transitionsBuilder: (c, anim, a2, child) {
-  //       var begin = const Offset(1.0, 0.0);
-  //       var end = Offset.zero;
-  //       var tween = Tween(begin: begin, end: end);
-  //       var curveAnimation =
-  //           CurvedAnimation(parent: anim, curve: Curves.linearToEaseOut);
-  //       return SlideTransition(
-  //         position: tween.animate(curveAnimation),
-  //         child: child,
-  //       );
-  //     },
-  //     opaque: false,
-  //     pageBuilder: (_, __, ___) => child);
 
   static pop({dynamic result}) {
     if (navigatorState.currentState!.canPop()) {
