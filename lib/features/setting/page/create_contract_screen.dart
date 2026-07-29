@@ -8,25 +8,32 @@ import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/new_projects/bloc/add_project_bloc.dart';
 import 'package:talent_flow/features/new_projects/bloc/add_project_event.dart';
 import 'package:talent_flow/features/new_projects/widgets/file_upload_section.dart';
+import 'package:talent_flow/features/new_projects/repo/add_project_repository.dart';
 import 'package:talent_flow/features/setting/bloc/create_contract_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/create_contract_event.dart';
 import 'package:talent_flow/features/setting/bloc/create_contract_state.dart';
 import 'package:talent_flow/features/setting/model/contract_model.dart';
 import 'package:talent_flow/features/setting/model/create_contract_page_info_model.dart';
 import 'package:talent_flow/features/setting/model/create_contract_request_model.dart';
-import 'package:talent_flow/features/setting/repo/contracts_repo.dart';
+import 'package:talent_flow/features/setting/repo/contracts_repository.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/helpers/date_time_picker.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 
 class CreateContractScreen extends StatefulWidget {
-  const CreateContractScreen({super.key, this.arguments});
+  const CreateContractScreen({
+    super.key,
+    this.arguments,
+    required this.addProjectRepository,
+    required this.contractsRepository,
+  });
 
   final Map<String, dynamic>? arguments;
+  final AddProjectRepository addProjectRepository;
+  final ContractsRepository contractsRepository;
 
   @override
   State<CreateContractScreen> createState() => _CreateContractScreenState();
@@ -90,9 +97,9 @@ class _CreateContractScreenState extends State<CreateContractScreen> {
   @override
   void initState() {
     super.initState();
-    _addProjectBloc = AddProjectBloc(repository: sl());
+    _addProjectBloc = AddProjectBloc(repository: widget.addProjectRepository);
     _createContractBloc = CreateContractBloc(
-      repository: sl<ContractsRepo>(),
+      repository: widget.contractsRepository,
     );
     _hydrateFromInitialContract();
     final projectId = _projectId;

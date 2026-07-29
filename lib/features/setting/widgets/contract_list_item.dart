@@ -7,15 +7,18 @@ import 'package:talent_flow/app/core/svg_images.dart';
 import 'package:talent_flow/features/setting/helpers/contract_pdf_downloader.dart';
 import 'package:talent_flow/features/setting/model/contract_model.dart';
 import 'package:talent_flow/features/setting/model/contract_status.dart';
+import 'package:talent_flow/features/setting/repo/contracts_repository.dart';
 
 class ContractListItem extends StatefulWidget {
   const ContractListItem({
     super.key,
     required this.contract,
+    required this.repository,
     this.onTap,
   });
 
   final ContractModel contract;
+  final ContractsReadRepository repository;
   final VoidCallback? onTap;
 
   @override
@@ -34,7 +37,10 @@ class _ContractListItemState extends State<ContractListItem> {
       _isDownloading = true;
     });
 
-    await ContractPdfDownloader.downloadContract(widget.contract);
+    await ContractPdfDownloader.downloadContract(
+      widget.contract,
+      repository: widget.repository,
+    );
 
     if (!mounted) {
       return;

@@ -4,12 +4,9 @@ import 'package:dartz/dartz.dart' show Either;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/styles.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/data/error/failures.dart';
 import 'package:talent_flow/features/payment/model/contract_payment_args.dart';
 import 'package:talent_flow/features/projects/widgets/project_files_section.dart';
@@ -17,7 +14,7 @@ import 'package:talent_flow/features/setting/bloc/contract_details_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/contract_details_event.dart';
 import 'package:talent_flow/features/setting/model/contract_details_ui_model.dart';
 import 'package:talent_flow/features/setting/model/contract_model.dart';
-import 'package:talent_flow/features/setting/repo/contracts_repo.dart';
+import 'package:talent_flow/features/setting/repo/contracts_repository.dart';
 import 'package:talent_flow/features/setting/widgets/contract_details/contract_details_components.dart';
 import 'package:talent_flow/features/setting/widgets/contract_details/contract_details_dialogs.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
@@ -31,17 +28,20 @@ class ContractDetailsBody extends StatefulWidget {
     super.key,
     required this.contract,
     required this.onContractUpdated,
+    required this.repository,
+    required this.isFreelancer,
   });
 
   final ContractModel contract;
   final VoidCallback onContractUpdated;
+  final ContractsRepository repository;
+  final bool isFreelancer;
 
   @override
   State<ContractDetailsBody> createState() => _ContractDetailsBodyState();
 }
 
 class _ContractDetailsBodyState extends State<ContractDetailsBody> {
-  final ContractsRepo _contractsRepo = sl();
   String? _activeActionKey;
 
   ContractModel get _contract => widget.contract;
@@ -54,7 +54,7 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
 
     await _runContractAction(
       actionKey: 'approve_contract',
-      request: () => _contractsRepo.approveContract(contractId),
+      request: () => widget.repository.approveContract(contractId),
     );
   }
 
@@ -72,7 +72,7 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
 
     await _runContractAction(
       actionKey: 'reject_contract',
-      request: () => _contractsRepo.rejectContract(
+      request: () => widget.repository.rejectContract(
         contractId: contractId,
         reason: reason,
       ),
@@ -109,7 +109,7 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
 
     await _runContractAction(
       actionKey: 'mark_completed',
-      request: () => _contractsRepo.markWorkCompleted(contractId),
+      request: () => widget.repository.markWorkCompleted(contractId),
     );
   }
 
@@ -127,7 +127,7 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
 
     await _runContractAction(
       actionKey: 'have_notes',
-      request: () => _contractsRepo.rejectWorkWithNotes(
+      request: () => widget.repository.rejectWorkWithNotes(
         contractId: contractId,
         reason: reason,
       ),
@@ -148,7 +148,7 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
 
     await _runContractAction(
       actionKey: 'submit_complaint',
-      request: () => _contractsRepo.submitComplaint(
+      request: () => widget.repository.submitComplaint(
         contractId: contractId,
         content: content,
       ),
@@ -167,7 +167,7 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
 
     await _runContractAction(
       actionKey: 'accept_close_project',
-      request: () => _contractsRepo.closeContractAndReview(
+      request: () => widget.repository.closeContractAndReview(
         contractId: contractId,
         comment: reviewInput.comment,
         rating: reviewInput.rating,
@@ -187,7 +187,7 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
 
     await _runContractAction(
       actionKey: 'review_entrepreneur',
-      request: () => _contractsRepo.reviewEntrepreneur(
+      request: () => widget.repository.reviewEntrepreneur(
         contractId: contractId,
         comment: reviewInput.comment,
         rating: reviewInput.rating,
@@ -309,8 +309,7 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
 
   @override
   Widget build(BuildContext context) {
-    final isFreelancer =
-        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
+    final isFreelancer = widget.isFreelancer;
     final uiModel = ContractDetailsUiModel(
       contract: _contract,
       isFreelancer: isFreelancer,

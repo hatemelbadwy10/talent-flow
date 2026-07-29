@@ -1,19 +1,20 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/projects/widgets/projects_shimmer.dart';
 import 'package:talent_flow/features/setting/bloc/contracts_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/contracts_event.dart';
 import 'package:talent_flow/features/setting/bloc/contracts_state.dart';
-import 'package:talent_flow/features/setting/repo/contracts_repo.dart';
+import 'package:talent_flow/features/setting/repo/contracts_repository.dart';
 import 'package:talent_flow/features/setting/widgets/contract_list_item.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
 class ContractsScreen extends StatefulWidget {
-  const ContractsScreen({super.key});
+  final ContractsReadRepository repository;
+
+  const ContractsScreen({super.key, required this.repository});
 
   @override
   State<ContractsScreen> createState() => _ContractsScreenState();
@@ -25,7 +26,7 @@ class _ContractsScreenState extends State<ContractsScreen> {
   @override
   void initState() {
     super.initState();
-    _contractsBloc = ContractsBloc(repository: sl<ContractsRepo>())
+    _contractsBloc = ContractsBloc(repository: widget.repository)
       ..add(const ContractsRequested());
   }
 
@@ -102,6 +103,7 @@ class _ContractsScreenState extends State<ContractsScreen> {
                     final contract = contracts[index];
                     return ContractListItem(
                       contract: contract,
+                      repository: widget.repository,
                       onTap: () async {
                         final id = contract.id;
                         if (id == null) {

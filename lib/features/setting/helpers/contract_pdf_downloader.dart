@@ -12,15 +12,17 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 import '../../../app/core/app_core.dart';
 import '../../../app/core/app_notification.dart';
 import '../../../app/core/styles.dart';
-import '../../../data/config/di.dart';
 import '../../../helpers/permissions.dart';
 import '../model/contract_model.dart';
-import '../repo/contracts_repo.dart';
+import '../repo/contracts_repository.dart';
 
 class ContractPdfDownloader {
   static const String _fontPath = 'assets/fonts/IBMPlexSansArabic-Regular.ttf';
 
-  static Future<void> downloadContract(ContractModel contract) async {
+  static Future<void> downloadContract(
+    ContractModel contract, {
+    required ContractsReadRepository repository,
+  }) async {
     final hasPermission = await PermissionHandler.checkFilePermission();
     if (!hasPermission) {
       _showError('contracts_screen.download_permission_denied'.tr());
@@ -28,7 +30,7 @@ class ContractPdfDownloader {
     }
 
     try {
-      final resolvedContract = await _resolveContract(contract);
+      final resolvedContract = await _resolveContract(contract, repository);
       final pdfBytes = await _buildPdf(resolvedContract);
 
       final directoryPath = await AppCore.getAppFilePath();
@@ -60,13 +62,16 @@ class ContractPdfDownloader {
     }
   }
 
-  static Future<ContractModel> _resolveContract(ContractModel contract) async {
+  static Future<ContractModel> _resolveContract(
+    ContractModel contract,
+    ContractsReadRepository repository,
+  ) async {
     final contractId = contract.id;
     if (contractId == null) {
       return contract;
     }
 
-    final result = await sl<ContractsRepo>().getContractDetails(contractId);
+    final result = await repository.getContractDetails(contractId);
     return result.fold(
       (_) => contract,
       (resolvedContract) => resolvedContract,

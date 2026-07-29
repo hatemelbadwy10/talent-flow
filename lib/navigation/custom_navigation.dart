@@ -49,11 +49,13 @@ import '../features/nav_bar/page/nav_bar.dart';
 import '../features/new_projects/bloc/new_projects_bloc.dart';
 import '../features/new_projects/page/add_offer_screen.dart';
 import '../features/new_projects/repo/new_projects_repo.dart';
+import '../features/new_projects/repo/add_project_repo.dart';
 import '../features/new_projects/repo/selection_option_repo.dart';
 import '../features/setting/repo/notification_repo.dart';
 import '../features/setting/repo/about_repo.dart';
 import '../features/setting/repo/account_statement_repo.dart';
 import '../features/setting/repo/terms_condation_repo.dart';
+import '../features/setting/repo/contracts_repo.dart';
 import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
 import '../features/projects/page/my_projects.dart';
@@ -381,17 +383,25 @@ abstract class CustomNavigator {
           ),
         );
       case Routes.contracts:
-        return _pageRoute(const ContractsScreen());
+        return _pageRoute(_contractsScreen());
       case Routes.contractDetails:
         final contractId = settings.arguments as int?;
         if (contractId == null) {
-          return _pageRoute(const ContractsScreen());
+          return _pageRoute(_contractsScreen());
         }
-        return _pageRoute(ContractDetailsScreen(contractId: contractId));
+        return _pageRoute(
+          ContractDetailsScreen(
+            contractId: contractId,
+            repository: sl<ContractsRepo>(),
+            isFreelancer:
+                sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                    false,
+          ),
+        );
       case Routes.contractPaymentRequest:
         final arguments = settings.arguments as ContractPaymentRequestArgs?;
         if (arguments == null) {
-          return _pageRoute(const ContractsScreen());
+          return _pageRoute(_contractsScreen());
         }
         return _pageRoute(
           ContractPaymentRequestScreen(
@@ -403,7 +413,7 @@ abstract class CustomNavigator {
       case Routes.contractPaymentConfirm:
         final arguments = settings.arguments as ContractPaymentConfirmArgs?;
         if (arguments == null) {
-          return _pageRoute(const ContractsScreen());
+          return _pageRoute(_contractsScreen());
         }
         return _pageRoute(
           ContractPaymentConfirmScreen(
@@ -415,6 +425,8 @@ abstract class CustomNavigator {
         return _pageRoute(
           CreateContractScreen(
             arguments: settings.arguments as Map<String, dynamic>?,
+            addProjectRepository: sl<ProjectRepository>(),
+            contractsRepository: sl<ContractsRepo>(),
           ),
         );
       case Routes.identityVerification:
@@ -538,6 +550,10 @@ abstract class CustomNavigator {
         isFreelancer:
             sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
                 false,
+      );
+
+  static ContractsScreen _contractsScreen() => ContractsScreen(
+        repository: sl<ContractsRepo>(),
       );
 
   static _pageRoute(Widget child) => Platform.isIOS
