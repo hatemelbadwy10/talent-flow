@@ -26,19 +26,6 @@ class HomeRepo extends BaseRepo
         WorkDetailsRepository {
   HomeRepo({required super.sharedPreferences, required super.dioClient});
 
-  Future<Either<ServerFailure, Response>> getHome() async {
-    try {
-      final response = await dioClient.get(uri: EndPoints.home);
-      return Right(response);
-    } on DioException catch (e) {
-      return Left(
-          ServerFailure(e.message ?? 'An unexpected Dio error occurred'));
-    } catch (e) {
-      // Catch any other general errors
-      return Left(ServerFailure(e.toString()));
-    }
-  }
-
   @override
   Future<Either<ServerFailure, HomeModel>> getDashboard() async {
     try {
@@ -59,20 +46,6 @@ class HomeRepo extends BaseRepo
       return left(ServerFailure(error.message));
     } catch (error) {
       return left(ServerFailure(error.toString()));
-    }
-  }
-
-  Future<Either<ServerFailure, Response>> getCategories() async {
-    try {
-      final response = await dioClient.get(uri: EndPoints.categories);
-      return Right(response); // If successful, wrap the response in a Right
-    } on DioException catch (e) {
-      // Catch Dio-specific errors
-      return Left(
-          ServerFailure(e.message ?? 'An unexpected Dio error occurred'));
-    } catch (e) {
-      // Catch any other general errors
-      return Left(ServerFailure(e.toString()));
     }
   }
 
@@ -100,32 +73,6 @@ class HomeRepo extends BaseRepo
       return left(ServerFailure(error.message));
     } catch (error) {
       return left(ServerFailure(error.toString()));
-    }
-  }
-
-  Future<Either<ServerFailure, Response>> getFreelancers({
-    int? categoryId,
-    String? search,
-  }) async {
-    try {
-      final uri = categoryId != null
-          ? "${EndPoints.subCategories}$categoryId" // api/categories/{id}
-          : EndPoints.freelancers; // الحالة العادية
-      final queryParameters = <String, dynamic>{};
-      if (search != null && search.trim().isNotEmpty) {
-        queryParameters['search'] = search.trim();
-      }
-
-      final response = await dioClient.get(
-        uri: uri,
-        queryParameters: queryParameters.isEmpty ? null : queryParameters,
-      );
-      return Right(response);
-    } on DioException catch (e) {
-      return Left(
-          ServerFailure(e.message ?? 'An unexpected Dio error occurred'));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
     }
   }
 
@@ -172,19 +119,6 @@ class HomeRepo extends BaseRepo
     }
   }
 
-  Future<Either<ServerFailure, Response>> getFreelancerProfile(int id) async {
-    try {
-      final response =
-          await dioClient.get(uri: "${EndPoints.freelancerDetails}$id");
-      return Right(response);
-    } on DioException catch (e) {
-      return Left(
-          ServerFailure(e.message ?? 'An unexpected Dio error occurred'));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
-  }
-
   @override
   Future<Either<ServerFailure, FreelancerProfileModel>> getProfile(
     int id,
@@ -213,19 +147,6 @@ class HomeRepo extends BaseRepo
     }
   }
 
-  Future<Either<ServerFailure, Response>> getEntrepreneurProfile(int id) async {
-    try {
-      final response =
-          await dioClient.get(uri: "${EndPoints.entrepreneurDetails}$id");
-      return Right(response);
-    } on DioException catch (e) {
-      return Left(
-          ServerFailure(e.message ?? 'An unexpected Dio error occurred'));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
-  }
-
   @override
   Future<Either<ServerFailure, EntrepreneurProfileModel>> getEntrepreneur(
     int id,
@@ -251,18 +172,6 @@ class HomeRepo extends BaseRepo
       return left(ServerFailure(error.message));
     } catch (error) {
       return left(ServerFailure(error.toString()));
-    }
-  }
-
-  Future<Either<ServerFailure, Response>> getWorkDetails(int id) async {
-    try {
-      final response = await dioClient.get(uri: EndPoints.workDetails(id));
-      return Right(response);
-    } on DioException catch (e) {
-      return Left(
-          ServerFailure(e.message ?? 'An unexpected Dio error occurred'));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
     }
   }
 

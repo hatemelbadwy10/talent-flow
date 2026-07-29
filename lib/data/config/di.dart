@@ -7,7 +7,6 @@ import 'package:talent_flow/features/auth/pages/confirm_code/repo/confirm_code_r
 import 'package:talent_flow/features/auth/data/auth_session_store.dart';
 import 'package:talent_flow/features/auth/pages/social_media_login/repo/chat_repo.dart';
 import 'package:talent_flow/features/auth/pages/social_media_login/repo/social_media_repo.dart';
-import 'package:talent_flow/features/home/bloc/home_bloc.dart';
 import 'package:talent_flow/features/home/repo/home_repo.dart';
 import 'package:talent_flow/features/new_projects/repo/new_projects_repo.dart';
 import 'package:talent_flow/features/new_projects/repo/selection_option_repo.dart';
@@ -72,7 +71,6 @@ Future<void> init() async {
   //
   sl.registerLazySingleton(
       () => HomeRepo(sharedPreferences: sl(), dioClient: sl()));
-  sl.registerFactory(() => HomeBloc(homeRepo: sl()));
   sl.registerLazySingleton(
       () => NewProjectsRepo(sharedPreferences: sl(), dioClient: sl()));
   sl.registerLazySingleton(
