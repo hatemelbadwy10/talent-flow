@@ -2,13 +2,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/data/config/di.dart';
-import 'package:talent_flow/features/home/bloc/home_bloc.dart';
+import 'package:talent_flow/features/home/bloc/freelancer_profile_bloc.dart';
 import 'package:talent_flow/features/home/widgets/freelancer_work_card.dart';
 import 'package:talent_flow/features/new_projects/widgets/skills_section.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
@@ -16,12 +14,16 @@ import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
 import '../model/freelancer_profile_model.dart';
+import '../bloc/freelancer_profile_event.dart';
+import '../bloc/freelancer_profile_state.dart';
+import '../repo/home_repo.dart';
 
 class MyFreelancerProfileView extends StatefulWidget {
   const MyFreelancerProfileView({super.key});
 
   @override
-  State<MyFreelancerProfileView> createState() => _MyFreelancerProfileViewState();
+  State<MyFreelancerProfileView> createState() =>
+      _MyFreelancerProfileViewState();
 }
 
 class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
@@ -45,7 +47,8 @@ class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
     }
 
     return BlocProvider(
-      create: (_) => HomeBloc(homeRepo: sl())..add(FreelancerProfile(arguments: userId)),
+      create: (_) => FreelancerProfileBloc(repository: sl<HomeRepo>())
+        ..add(FreelancerProfileRequested(userId)),
       child: Scaffold(
         backgroundColor: const Color(0xFFF7F9FB),
         appBar: CustomAppBar(
@@ -56,7 +59,9 @@ class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
               onPressed: () async {
                 await CustomNavigator.push(Routes.editProfile);
                 if (context.mounted) {
-                  context.read<HomeBloc>().add(FreelancerProfile(arguments: userId));
+                  context
+                      .read<FreelancerProfileBloc>()
+                      .add(FreelancerProfileRequested(userId));
                 }
               },
               icon: const Icon(
@@ -67,21 +72,21 @@ class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
             SizedBox(width: 8.w),
           ],
         ),
-        body: BlocBuilder<HomeBloc, AppState>(
+        body: BlocBuilder<FreelancerProfileBloc, FreelancerProfileState>(
           builder: (context, state) {
-            if (state is Loading) {
+            if (state is FreelancerProfileLoading) {
               return const Center(
                 child: CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
               );
             }
-            if (state is Error) {
+            if (state is FreelancerProfileFailed) {
               return Center(child: Text('profile.load_failed'.tr()));
             }
-            if (state is! Done || state.model is! FreelancerProfileModel) {
+            if (state is! FreelancerProfileLoaded) {
               return const SizedBox.shrink();
             }
 
-            final model = state.model as FreelancerProfileModel;
+            final model = state.profile;
             return DefaultTabController(
               length: 3,
               child: Column(
@@ -431,8 +436,8 @@ class _WorksTab extends StatelessWidget {
                   if (shouldRefresh == true &&
                       context.mounted &&
                       model.id != null) {
-                    context.read<HomeBloc>().add(
-                          FreelancerProfile(arguments: model.id),
+                    context.read<FreelancerProfileBloc>().add(
+                          FreelancerProfileRequested(model.id!),
                         );
                   }
                 },
@@ -598,7 +603,9 @@ class _ReviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      (review.name ?? '').trim().isNotEmpty ? review.name! : '-',
+                      (review.name ?? '').trim().isNotEmpty
+                          ? review.name!
+                          : '-',
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
