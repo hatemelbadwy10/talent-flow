@@ -67,11 +67,10 @@ class _ContractPaymentConfirmScreenState
           ),
         );
       },
-      (response) {
-        final message = _paymentRepo.messageFromResponse(
-          response,
-          fallback: 'contract_payment.confirm_success'.tr(),
-        );
+      (serverMessage) {
+        final message = serverMessage.trim().isNotEmpty
+            ? serverMessage
+            : 'contract_payment.confirm_success'.tr();
         CustomNavigator.pop(result: message);
       },
     );
@@ -97,11 +96,10 @@ class _ContractPaymentConfirmScreenState
           ),
         );
       },
-      (response) {
-        final message = _paymentRepo.messageFromResponse(
-          response,
-          fallback: 'contract_payment.request_success'.tr(),
-        );
+      (serverMessage) {
+        final message = serverMessage.trim().isNotEmpty
+            ? serverMessage
+            : 'contract_payment.request_success'.tr();
         AppCore.showSnackBar(
           notification: AppNotification(
             message: message,

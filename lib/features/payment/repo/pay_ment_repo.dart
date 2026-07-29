@@ -5,20 +5,36 @@ import '../../../data/api/end_points.dart';
 import '../../../data/error/api_error_handler.dart';
 import '../../../data/error/failures.dart';
 import '../../../main_repos/base_repo.dart';
+import '../model/model.dart';
+import 'payment_repository.dart';
 
-class PaymentRepo extends BaseRepo {
+class PaymentRepo extends BaseRepo implements PaymentRepository {
   PaymentRepo({required super.sharedPreferences, required super.dioClient});
 
-  Future<Either<ServerFailure, Response>> getPayment() async {
+  @override
+  Future<Either<ServerFailure, List<PaymentModel>>> getPaymentMethods() async {
     try {
       final response = await dioClient.get(uri: EndPoints.paymentMethods);
-      return right(response);
+      final data = Map<String, dynamic>.from(response.data as Map);
+      final payload = data['payload'];
+      if (payload is! List) {
+        return left(ServerFailure('Payment methods payload is invalid'));
+      }
+      return right(
+        payload
+            .whereType<Map>()
+            .map((item) => PaymentModel.fromJson(
+                  Map<String, dynamic>.from(item),
+                ))
+            .toList(growable: false),
+      );
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> requestContractPayment({
+  @override
+  Future<Either<ServerFailure, String>> requestContractPayment({
     required String customerNumber,
     required String paymentCode,
     required String paymentAmount,
@@ -32,13 +48,14 @@ class PaymentRepo extends BaseRepo {
           'payment_Amount': paymentAmount,
         }),
       );
-      return right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> confirmContractPayment({
+  @override
+  Future<Either<ServerFailure, String>> confirmContractPayment({
     required String customerNumber,
     required String paymentCode,
     required String paymentAmount,
@@ -58,20 +75,16 @@ class PaymentRepo extends BaseRepo {
           'start_date': startDate,
         }),
       );
-      return right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  String messageFromResponse(
-    Response response, {
-    String fallback = '',
-  }) {
-    final data = response.data;
+  String _messageFrom(Object? data) {
     if (data is Map && data['message'] != null) {
       return data['message'].toString();
     }
-    return fallback;
+    return '';
   }
 }
