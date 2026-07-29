@@ -294,7 +294,9 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
                 hint: "work_title_hint".tr(),
                 controller: _titleControllers[formIndex],
                 onChanged: (value) => bloc.add(UpdateFormField(
-                    formIndex: formIndex, fieldName: 'title', value: value)),
+                    formIndex: formIndex,
+                    field: PortfolioTextField.title,
+                    value: value)),
               ),
               if (_validationErrors['title_$formIndex'] != null)
                 Padding(
@@ -318,7 +320,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
                 maxLines: 4,
                 onChanged: (value) => bloc.add(UpdateFormField(
                     formIndex: formIndex,
-                    fieldName: 'description',
+                    field: PortfolioTextField.description,
                     value: value)),
               ),
               if (_validationErrors['description_$formIndex'] != null)
@@ -338,7 +340,9 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
             controller: _featuresControllers[formIndex],
             maxLines: 3,
             onChanged: (value) => bloc.add(UpdateFormField(
-                formIndex: formIndex, fieldName: 'features', value: value)),
+                formIndex: formIndex,
+                field: PortfolioTextField.features,
+                value: value)),
           ),
           const SizedBox(height: 16.0),
           _buildFilesField(context, formIndex, formData.files),
@@ -351,7 +355,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
                 controller: _linkControllers[formIndex],
                 onChanged: (value) => bloc.add(UpdateFormField(
                     formIndex: formIndex,
-                    fieldName: 'clientLink',
+                    field: PortfolioTextField.clientLink,
                     value: value)),
               ),
               if (_validationErrors['link_$formIndex'] != null)
@@ -577,7 +581,7 @@ class _PortfolioUploadFormState extends State<PortfolioUploadForm> {
                       DateFormat('yyyy-MM-dd').format(newDate);
                   bloc.add(UpdateFormField(
                     formIndex: formIndex,
-                    fieldName: 'date',
+                    field: PortfolioTextField.date,
                     value: formattedDate,
                   ));
                 },

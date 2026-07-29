@@ -9,7 +9,7 @@ void main() {
       bloc.add(
         const UpdateFormField(
           formIndex: 0,
-          fieldName: 'title',
+          field: PortfolioTextField.title,
           value: 'Mobile application',
         ),
       );

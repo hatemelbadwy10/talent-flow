@@ -86,12 +86,21 @@ sealed class PortfolioFormEvent {
   const PortfolioFormEvent();
 }
 
+enum PortfolioTextField {
+  title,
+  description,
+  features,
+  clientLink,
+  date,
+}
+
 class UpdateFormField extends PortfolioFormEvent {
   final int formIndex;
-  final String fieldName;
-  final dynamic value;
+  final PortfolioTextField field;
+  final String value;
+
   const UpdateFormField(
-      {required this.formIndex, required this.fieldName, required this.value});
+      {required this.formIndex, required this.field, required this.value});
 }
 
 class UpdateFormImage extends PortfolioFormEvent {
@@ -175,24 +184,17 @@ class PortfolioFormBloc extends Bloc<PortfolioFormEvent, PortfolioFormState> {
     final oldFormData = newFormsList[event.formIndex];
     SinglePortfolioData newFormData;
 
-    switch (event.fieldName) {
-      case 'title':
+    switch (event.field) {
+      case PortfolioTextField.title:
         newFormData = oldFormData.copyWith(title: event.value);
-        break;
-      case 'description':
+      case PortfolioTextField.description:
         newFormData = oldFormData.copyWith(description: event.value);
-        break;
-      case 'features':
+      case PortfolioTextField.features:
         newFormData = oldFormData.copyWith(features: event.value);
-        break;
-      case 'clientLink':
+      case PortfolioTextField.clientLink:
         newFormData = oldFormData.copyWith(clientLink: event.value);
-        break;
-      case 'date':
+      case PortfolioTextField.date:
         newFormData = oldFormData.copyWith(date: event.value);
-        break;
-      default:
-        return;
     }
 
     newFormsList[event.formIndex] = newFormData;
