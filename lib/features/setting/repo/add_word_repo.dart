@@ -9,6 +9,7 @@ import '../../../data/error/api_error_handler.dart';
 import '../../../data/error/failures.dart';
 import '../../../main_repos/base_repo.dart';
 import '../model/edit_work_request_model.dart';
+import 'edit_work_repository.dart';
 
 class WorkItem {
   final String title;
@@ -28,7 +29,7 @@ class WorkItem {
   });
 }
 
-class AddWorkRepo extends BaseRepo {
+class AddWorkRepo extends BaseRepo implements EditWorkRepository {
   AddWorkRepo({required super.sharedPreferences, required super.dioClient});
 
   Future<Either<ServerFailure, Response>> addWork({
@@ -235,7 +236,8 @@ class AddWorkRepo extends BaseRepo {
     }
   }
 
-  Future<Either<ServerFailure, Response>> updateWork({
+  @override
+  Future<Either<ServerFailure, String>> updateWork({
     required EditWorkRequestModel request,
   }) async {
     try {
@@ -280,20 +282,28 @@ class AddWorkRepo extends BaseRepo {
         uri: EndPoints.workEdit(request.id),
       );
 
-      return Right(response);
+      return Right(_messageFrom(response.data));
     } catch (error) {
       log('AddWorkRepo updateWork error: $error');
       return Left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> deleteWork(int id) async {
+  @override
+  Future<Either<ServerFailure, String>> deleteWork(int id) async {
     try {
       final response = await dioClient.delete(uri: EndPoints.workDetails(id));
-      return Right(response);
+      return Right(_messageFrom(response.data));
     } catch (error) {
       log('AddWorkRepo deleteWork error: $error');
       return Left(ApiErrorHandler.getServerFailure(error));
     }
+  }
+
+  String _messageFrom(Object? data) {
+    if (data is Map && data['message'] != null) {
+      return data['message'].toString();
+    }
+    return '';
   }
 }

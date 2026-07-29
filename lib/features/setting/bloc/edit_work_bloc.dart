@@ -1,53 +1,40 @@
-import 'dart:developer';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
-import '../model/edit_work_request_model.dart';
-import '../repo/add_word_repo.dart';
+import '../repo/edit_work_repository.dart';
+import 'edit_work_event.dart';
+import 'edit_work_state.dart';
 
-class EditWorkBloc extends Bloc<AppEvent, AppState> {
-  EditWorkBloc(this._repo) : super(Start()) {
-    on<Update>(_onUpdateWork);
-    on<Delete>(_onDeleteWork);
+class EditWorkBloc extends Bloc<EditWorkEvent, EditWorkState> {
+  EditWorkBloc({required EditWorkRepository repository})
+      : _repository = repository,
+        super(const EditWorkInitial()) {
+    on<WorkUpdateSubmitted>(_onUpdate);
+    on<WorkDeleteSubmitted>(_onDelete);
   }
 
-  final AddWorkRepo _repo;
+  final EditWorkRepository _repository;
 
-  Future<void> _onUpdateWork(Update event, Emitter<AppState> emit) async {
-    final request = event.arguments;
-    if (request is! EditWorkRequestModel) {
-      emit(Error());
-      return;
-    }
-
-    emit(Loading());
-    final result = await _repo.updateWork(request: request);
+  Future<void> _onUpdate(
+    WorkUpdateSubmitted event,
+    Emitter<EditWorkState> emit,
+  ) async {
+    emit(const EditWorkSubmitting());
+    final result = await _repository.updateWork(request: event.request);
     result.fold(
-      (failure) {
-        log('Edit work update error: ${failure.error}');
-        emit(Error());
-      },
-      (_) => emit(Done(data: 'updated')),
+      (failure) => emit(EditWorkFailed(failure.error)),
+      (_) => emit(const EditWorkSucceeded(EditWorkAction.updated)),
     );
   }
 
-  Future<void> _onDeleteWork(Delete event, Emitter<AppState> emit) async {
-    final id = event.arguments;
-    if (id is! int) {
-      emit(Error());
-      return;
-    }
-
-    emit(Loading());
-    final result = await _repo.deleteWork(id);
+  Future<void> _onDelete(
+    WorkDeleteSubmitted event,
+    Emitter<EditWorkState> emit,
+  ) async {
+    emit(const EditWorkSubmitting());
+    final result = await _repository.deleteWork(event.workId);
     result.fold(
-      (failure) {
-        log('Edit work delete error: ${failure.error}');
-        emit(Error());
-      },
-      (_) => emit(Done(data: 'deleted')),
+      (failure) => emit(EditWorkFailed(failure.error)),
+      (_) => emit(const EditWorkSucceeded(EditWorkAction.deleted)),
     );
   }
 }

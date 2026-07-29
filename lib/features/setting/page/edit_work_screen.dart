@@ -4,8 +4,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/app/core/app_state.dart';
-import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
@@ -16,7 +14,10 @@ import 'package:talent_flow/features/new_projects/bloc/selection_option_bloc.dar
 import 'package:talent_flow/features/new_projects/bloc/selection_option_event.dart';
 import 'package:talent_flow/features/new_projects/bloc/selection_option_state.dart';
 import 'package:talent_flow/features/setting/bloc/edit_work_bloc.dart';
+import 'package:talent_flow/features/setting/bloc/edit_work_event.dart';
+import 'package:talent_flow/features/setting/bloc/edit_work_state.dart';
 import 'package:talent_flow/features/setting/model/edit_work_request_model.dart';
+import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
 import 'package:talent_flow/features/setting/widgets/multi_select_skills_dialog.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/helpers/date_time_picker.dart';
@@ -45,7 +46,7 @@ class EditWorkScreen extends StatelessWidget {
             ..add(const SelectionOptionsRequested()),
         ),
         BlocProvider(
-          create: (_) => EditWorkBloc(sl()),
+          create: (_) => EditWorkBloc(repository: sl<AddWorkRepo>()),
         ),
       ],
       child: _EditWorkView(workId: workId),
@@ -109,19 +110,21 @@ class _EditWorkViewState extends State<_EditWorkView> {
             }
           },
         ),
-        BlocListener<EditWorkBloc, AppState>(
+        BlocListener<EditWorkBloc, EditWorkState>(
           listener: (context, state) {
-            if (state is Done && state.data == 'updated') {
+            if (state is EditWorkSucceeded &&
+                state.action == EditWorkAction.updated) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('edit_work.update_success'.tr())),
               );
               CustomNavigator.pop(result: true);
-            } else if (state is Done && state.data == 'deleted') {
+            } else if (state is EditWorkSucceeded &&
+                state.action == EditWorkAction.deleted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('edit_work.delete_success'.tr())),
               );
               CustomNavigator.pop(result: true);
-            } else if (state is Error) {
+            } else if (state is EditWorkFailed) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('something_went_wrong'.tr())),
               );
@@ -147,9 +150,9 @@ class _EditWorkViewState extends State<_EditWorkView> {
               return Center(child: Text('something_went_wrong'.tr()));
             }
 
-            return BlocBuilder<EditWorkBloc, AppState>(
+            return BlocBuilder<EditWorkBloc, EditWorkState>(
               builder: (context, actionState) {
-                final isSubmitting = actionState is Loading;
+                final isSubmitting = actionState is EditWorkSubmitting;
                 return Stack(
                   children: [
                     SingleChildScrollView(
@@ -609,8 +612,8 @@ class _EditWorkViewState extends State<_EditWorkView> {
     }
 
     context.read<EditWorkBloc>().add(
-          Update(
-            arguments: EditWorkRequestModel(
+          WorkUpdateSubmitted(
+            EditWorkRequestModel(
               id: widget.workId,
               title: title,
               description: description,
@@ -650,7 +653,7 @@ class _EditWorkViewState extends State<_EditWorkView> {
 
     if (!confirmed || !mounted) return;
     final editWorkBloc = context.read<EditWorkBloc>();
-    editWorkBloc.add(Delete(arguments: widget.workId));
+    editWorkBloc.add(WorkDeleteSubmitted(widget.workId));
   }
 
   String _fileName(String url) {
