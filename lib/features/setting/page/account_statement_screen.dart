@@ -4,12 +4,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
 import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
 import '../bloc/account_statement_bloc.dart';
+import '../bloc/account_statement_event.dart';
+import '../bloc/account_statement_state.dart';
+import '../repo/account_statement_repo.dart';
 import '../model/account_statement_response_model.dart';
 import '../widgets/setting_app_bar.dart';
 
@@ -27,7 +28,8 @@ class _AccountStatementScreenState extends State<AccountStatementScreen> {
   @override
   void initState() {
     super.initState();
-    _bloc = AccountStatementBloc(sl())..add(Add());
+    _bloc = AccountStatementBloc(repository: sl<AccountStatementRepo>())
+      ..add(const AccountStatementsRequested());
   }
 
   @override
@@ -39,10 +41,8 @@ class _AccountStatementScreenState extends State<AccountStatementScreen> {
 
   void _loadStatements() {
     _bloc.add(
-      Add(
-        arguments: {
-          'search': _searchController.text.trim(),
-        },
+      AccountStatementsRequested(
+        search: _searchController.text.trim(),
       ),
     );
   }
@@ -67,21 +67,20 @@ class _AccountStatementScreenState extends State<AccountStatementScreen> {
               ),
               const SizedBox(height: 12),
               Expanded(
-                child: BlocBuilder<AccountStatementBloc, AppState>(
+                child: BlocBuilder<AccountStatementBloc, AccountStatementState>(
                   builder: (context, state) {
-                    if (state is Loading) {
+                    if (state is AccountStatementLoading) {
                       return const _TableLoading();
                     }
 
-                    if (state is Error) {
+                    if (state is AccountStatementFailed) {
                       return Center(
                         child: Text('something_went_wrong'.tr()),
                       );
                     }
 
-                    if (state is Done) {
-                      final statements =
-                          state.list?.cast<AccountStatementItemModel>() ?? [];
+                    if (state is AccountStatementLoaded) {
+                      final statements = state.statements;
                       if (statements.isEmpty) {
                         return Center(
                           child: Text('account_statement_screen.empty'.tr()),

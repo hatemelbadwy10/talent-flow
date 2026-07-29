@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
 import '../bloc/account_statement_details_bloc.dart';
+import '../bloc/account_statement_details_event.dart';
+import '../bloc/account_statement_details_state.dart';
 import '../model/account_statement_response_model.dart';
+import '../repo/account_statement_repo.dart';
 import '../widgets/setting_app_bar.dart';
 
 class AccountStatementDetailsScreen extends StatelessWidget {
@@ -18,34 +19,30 @@ class AccountStatementDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) =>
-          AccountStatementDetailsBloc(sl())..add(Add(arguments: statementId)),
+      create: (_) => AccountStatementDetailsBloc(
+        repository: sl<AccountStatementRepo>(),
+      )..add(AccountStatementDetailsRequested(statementId)),
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F7FB),
         appBar: CustomAppBar(
           title: 'account_statement_details_screen.title'.tr(),
           centerTitle: true,
         ),
-        body: BlocBuilder<AccountStatementDetailsBloc, AppState>(
+        body: BlocBuilder<AccountStatementDetailsBloc,
+            AccountStatementDetailsState>(
           builder: (context, state) {
-            if (state is Loading) {
+            if (state is AccountStatementDetailsLoading) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (state is Error) {
+            if (state is AccountStatementDetailsFailed) {
               return Center(
                 child: Text('something_went_wrong'.tr()),
               );
             }
 
-            if (state is Done) {
-              final model = state.model as AccountStatementItemModel?;
-              if (model == null) {
-                return Center(
-                  child: Text('account_statement_details_screen.empty'.tr()),
-                );
-              }
-
+            if (state is AccountStatementDetailsLoaded) {
+              final model = state.statement;
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(

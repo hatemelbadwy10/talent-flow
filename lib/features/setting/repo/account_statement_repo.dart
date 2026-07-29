@@ -6,8 +6,10 @@ import '../../../main_repos/base_repo.dart';
 import '../model/account_statement_request_model.dart';
 import '../model/account_statement_response_model.dart';
 import 'account_statement_service.dart';
+import 'account_statements_repository.dart';
 
-class AccountStatementRepo extends BaseRepo {
+class AccountStatementRepo extends BaseRepo
+    implements AccountStatementsRepository {
   AccountStatementRepo({
     required super.sharedPreferences,
     required super.dioClient,
@@ -15,6 +17,7 @@ class AccountStatementRepo extends BaseRepo {
 
   final AccountStatementService _service;
 
+  @override
   Future<Either<ServerFailure, AccountStatementIndexResponseModel>>
       getAccountStatementIndex({
     AccountStatementIndexRequestModel request =
@@ -48,6 +51,7 @@ class AccountStatementRepo extends BaseRepo {
     }
   }
 
+  @override
   Future<Either<ServerFailure, AccountStatementShowResponseModel>>
       getAccountStatementShow({
     required AccountStatementShowRequestModel request,

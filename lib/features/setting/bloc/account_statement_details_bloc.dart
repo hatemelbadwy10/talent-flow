@@ -1,50 +1,41 @@
-import 'dart:developer';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../model/account_statement_request_model.dart';
-import '../repo/account_statement_repo.dart';
+import '../repo/account_statements_repository.dart';
+import 'account_statement_details_event.dart';
+import 'account_statement_details_state.dart';
 
-class AccountStatementDetailsBloc extends Bloc<AppEvent, AppState> {
-  AccountStatementDetailsBloc(this._repo) : super(Start()) {
-    on<Add>(_onGetAccountStatementDetails);
+class AccountStatementDetailsBloc
+    extends Bloc<AccountStatementDetailsEvent, AccountStatementDetailsState> {
+  AccountStatementDetailsBloc({
+    required AccountStatementsRepository repository,
+  })  : _repository = repository,
+        super(const AccountStatementDetailsInitial()) {
+    on<AccountStatementDetailsRequested>(_onRequested);
   }
 
-  final AccountStatementRepo _repo;
+  final AccountStatementsRepository _repository;
 
-  Future<void> _onGetAccountStatementDetails(
-    Add event,
-    Emitter<AppState> emit,
+  Future<void> _onRequested(
+    AccountStatementDetailsRequested event,
+    Emitter<AccountStatementDetailsState> emit,
   ) async {
-    emit(Loading());
-    final id = event.arguments;
-    if (id is! int) {
-      emit(Error());
-      return;
-    }
-
-    try {
-      final result = await _repo.getAccountStatementShow(
-        request: AccountStatementShowRequestModel(id: id),
-      );
-      result.fold(
-        (failure) {
-          log('Account statement details error: $failure');
-          emit(Error());
-        },
-        (response) {
-          if (response.item == null) {
-            emit(Error());
-            return;
-          }
-          emit(Done(model: response.item));
-        },
-      );
-    } catch (e, s) {
-      log('Exception in AccountStatementDetailsBloc', error: e, stackTrace: s);
-      emit(Error());
-    }
+    emit(const AccountStatementDetailsLoading());
+    final result = await _repository.getAccountStatementShow(
+      request: AccountStatementShowRequestModel(id: event.statementId),
+    );
+    result.fold(
+      (failure) => emit(AccountStatementDetailsFailed(failure.error)),
+      (response) {
+        final statement = response.item;
+        if (statement == null) {
+          emit(const AccountStatementDetailsFailed(
+            'Account statement payload is invalid',
+          ));
+          return;
+        }
+        emit(AccountStatementDetailsLoaded(statement));
+      },
+    );
   }
 }
