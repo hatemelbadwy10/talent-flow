@@ -10,12 +10,13 @@ import 'package:talent_flow/features/new_projects/widgets/project_card.dart';
 import 'package:talent_flow/features/projects/model/my_projects_model.dart';
 import 'package:talent_flow/features/projects/widgets/projects_shimmer.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
 import '../../home/model/freelancers_model.dart';
 import '../bloc/fav_bloc.dart';
+import '../bloc/fav_event.dart';
+import '../bloc/fav_state.dart';
 import '../model/favourite_model.dart';
+import '../repo/favourite_repo.dart';
 import '../widgets/favourite_work_card.dart';
 import '../widgets/setting_app_bar.dart';
 
@@ -49,7 +50,8 @@ class Favourite extends StatelessWidget {
           ];
 
     return BlocProvider(
-      create: (context) => FavBloc(sl())..add(Add()),
+      create: (context) => FavBloc(repository: sl<FavouriteRepo>())
+        ..add(const FavouritesRequested()),
       child: DefaultTabController(
         length: tabs.length,
         child: Scaffold(
@@ -75,13 +77,13 @@ class Favourite extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Expanded(
-                  child: BlocBuilder<FavBloc, AppState>(
+                  child: BlocBuilder<FavBloc, FavouriteState>(
                     builder: (context, state) {
-                      if (state is Loading) {
+                      if (state is FavouriteLoading) {
                         return const ProjectCardShimmer();
                       }
 
-                      if (state is Error) {
+                      if (state is FavouriteFailed) {
                         return Center(
                           child: Text(
                             'something_went_wrong'.tr(),
@@ -90,9 +92,8 @@ class Favourite extends StatelessWidget {
                         );
                       }
 
-                      if (state is Done &&
-                          state.model is FavouriteResponseModel) {
-                        final model = state.model! as FavouriteResponseModel;
+                      if (state is FavouriteLoaded) {
+                        final model = state.favourites;
                         final canToggleFreelancerAndWork = !isFreelancer;
                         final tabViews = isFreelancer
                             ? [
@@ -151,11 +152,9 @@ class Favourite extends StatelessWidget {
               ? null
               : () {
                   blocContext.read<FavBloc>().add(
-                        Update(
-                          arguments: {
-                            'type': 'project',
-                            'id': project.id,
-                          },
+                        FavouriteToggled(
+                          type: FavouriteType.project,
+                          id: project.id!,
                         ),
                       );
                 },
@@ -193,11 +192,9 @@ class Favourite extends StatelessWidget {
           onToggleFavourite: canToggleFavourite && freelancer.id != null
               ? () {
                   blocContext.read<FavBloc>().add(
-                        Update(
-                          arguments: {
-                            'type': 'freelancer',
-                            'id': freelancer.id,
-                          },
+                        FavouriteToggled(
+                          type: FavouriteType.freelancer,
+                          id: freelancer.id!,
                         ),
                       );
                 }
@@ -228,11 +225,9 @@ class Favourite extends StatelessWidget {
           onToggleFavourite: canToggleFavourite && work.id != null
               ? () {
                   blocContext.read<FavBloc>().add(
-                        Update(
-                          arguments: {
-                            'type': 'work',
-                            'id': work.id,
-                          },
+                        FavouriteToggled(
+                          type: FavouriteType.work,
+                          id: work.id!,
                         ),
                       );
                 }

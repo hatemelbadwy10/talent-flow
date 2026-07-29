@@ -1,15 +1,16 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import 'package:talent_flow/main_repos/base_repo.dart';
 
 import '../../../data/api/end_points.dart';
 import '../../../data/error/api_error_handler.dart';
 import '../../../data/error/failures.dart';
 import '../model/favourite_model.dart';
+import 'favourites_repository.dart';
 
-class FavouriteRepo extends BaseRepo {
+class FavouriteRepo extends BaseRepo implements FavouritesRepository {
   FavouriteRepo({required super.sharedPreferences, required super.dioClient});
 
+  @override
   Future<Either<ServerFailure, FavouriteResponseModel>> getFavourites() async {
     try {
       const uri = EndPoints.favourites;
@@ -42,32 +43,42 @@ class FavouriteRepo extends BaseRepo {
     }
   }
 
-  Future<Either<ServerFailure, Response>> toggleProjectFavourite(int id) async {
+  @override
+  Future<Either<ServerFailure, String>> toggleProjectFavourite(int id) async {
     try {
       final response = await dioClient.get(uri: EndPoints.projectFavourite(id));
-      return Right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> toggleFreelancerFavourite(
+  @override
+  Future<Either<ServerFailure, String>> toggleFreelancerFavourite(
       int id) async {
     try {
       final response =
           await dioClient.get(uri: EndPoints.freelancerFavourite(id));
-      return Right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> toggleWorkFavourite(int id) async {
+  @override
+  Future<Either<ServerFailure, String>> toggleWorkFavourite(int id) async {
     try {
       final response = await dioClient.get(uri: EndPoints.workFavourite(id));
-      return Right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
+  }
+
+  String _messageFrom(Object? data) {
+    if (data is Map && data['message'] != null) {
+      return data['message'].toString();
+    }
+    return '';
   }
 }
