@@ -4,9 +4,10 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/images.dart';
 import 'package:talent_flow/app/core/styles.dart';
+import 'package:talent_flow/main_blocs/user_bloc.dart';
+import 'package:talent_flow/navigation/custom_navigation.dart';
+import 'package:talent_flow/navigation/routes.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
 import '../bloc/splash_bloc.dart';
 import '../repo/splash_repo.dart';
@@ -34,8 +35,22 @@ class _SplashState extends State<Splash> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => SplashBloc(repo: sl<SplashRepo>())..add(Click()),
-      child: BlocBuilder<SplashBloc, AppState>(
+      create: (context) =>
+          SplashBloc(repository: sl<SplashRepo>())..add(const SplashStarted()),
+      child: BlocConsumer<SplashBloc, SplashState>(
+        listener: (context, state) {
+          if (state case SplashReady(:final destination)) {
+            if (destination == SplashDestination.home) {
+              UserBloc.instance.add(const UserRequested());
+            }
+            final route = switch (destination) {
+              SplashDestination.onboarding => Routes.onBoarding,
+              SplashDestination.login => Routes.login,
+              SplashDestination.home => Routes.navBar,
+            };
+            CustomNavigator.push(route, clean: true);
+          }
+        },
         builder: (context, state) {
           return AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle.dark.copyWith(
