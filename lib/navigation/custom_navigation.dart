@@ -51,6 +51,8 @@ import '../features/new_projects/page/add_offer_screen.dart';
 import '../features/new_projects/repo/new_projects_repo.dart';
 import '../features/new_projects/repo/selection_option_repo.dart';
 import '../features/setting/repo/notification_repo.dart';
+import '../features/setting/repo/about_repo.dart';
+import '../features/setting/repo/terms_condation_repo.dart';
 import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
 import '../features/projects/page/my_projects.dart';
@@ -122,7 +124,9 @@ abstract class CustomNavigator {
       case Routes.payment:
         return _pageRoute(PaymentPage(repository: sl<PaymentRepo>()));
       case Routes.about:
-        return _pageRoute(const AboutTalentFlowView());
+        return _pageRoute(
+          AboutTalentFlowView(repository: sl<AboutRepo>()),
+        );
       case Routes.favorites:
         return _pageRoute(
           Favourite(
@@ -494,7 +498,9 @@ abstract class CustomNavigator {
       //   return _pageRoute(const PrivacyPolicy());
       //
       case Routes.terms:
-        return _pageRoute(const TermsAndConditionsScreen());
+        return _pageRoute(
+          TermsAndConditionsScreen(repository: sl<TermsAndConditionRepo>()),
+        );
       //
       // case Routes.faqs:
       //   return _pageRoute(const FaqsPage());

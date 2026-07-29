@@ -3,20 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
-import '../../../data/config/di.dart';
 import '../../projects/widgets/projects_shimmer.dart';
 import '../bloc/terms_bloc.dart';
 import '../bloc/static_content_state.dart';
-import '../repo/terms_condation_repo.dart';
+import '../repo/terms_repository.dart';
 
 class TermsAndConditionsScreen extends StatelessWidget {
-  const TermsAndConditionsScreen({super.key});
+  final TermsRepository repository;
+
+  const TermsAndConditionsScreen({super.key, required this.repository});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => TermsBloc(repository: sl<TermsAndConditionRepo>())
-        ..add(const TermsRequested()),
+      create: (context) =>
+          TermsBloc(repository: repository)..add(const TermsRequested()),
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FA),
         appBar: CustomAppBar(title: "terms_and_conditions".tr()),

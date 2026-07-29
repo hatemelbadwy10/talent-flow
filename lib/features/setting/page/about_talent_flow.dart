@@ -4,19 +4,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart'; // لعرض الـ HTML
 import 'package:talent_flow/features/projects/widgets/projects_shimmer.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
-import '../../../data/config/di.dart';
 import '../bloc/about_bloc.dart';
 import '../bloc/static_content_state.dart';
-import '../repo/about_repo.dart';
+import '../repo/about_repository.dart';
 
 class AboutTalentFlowView extends StatelessWidget {
-  const AboutTalentFlowView({super.key});
+  final AboutRepository repository;
+
+  const AboutTalentFlowView({super.key, required this.repository});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          AboutBloc(repository: sl<AboutRepo>())..add(const AboutRequested()),
+          AboutBloc(repository: repository)..add(const AboutRequested()),
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FA),
         appBar: CustomAppBar(title: "about".tr()),
