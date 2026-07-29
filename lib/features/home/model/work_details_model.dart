@@ -45,9 +45,7 @@ class WorkDetailsModel extends SingleMapper {
           _asString(json['preview_link']) ?? _asString(json['previewLink']),
       files: _extractFiles(json['files'] ?? json['attachments']),
       skills: _extractStrings(json['skills']),
-      isInFavorites: json['is_in_favorites'] == true ||
-          json['is_in_favorites'] == 1 ||
-          json['is_in_favorites']?.toString() == '1',
+      isInFavorites: _toBool(json['is_in_favorites'] ?? json['is_fav']),
     );
   }
 
@@ -125,6 +123,13 @@ class WorkDetailsModel extends SingleMapper {
         })
         .where((item) => item.isNotEmpty)
         .toList();
+  }
+
+  static bool _toBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    final normalized = value?.toString().trim().toLowerCase() ?? '';
+    return normalized == '1' || normalized == 'true' || normalized == 'yes';
   }
 
   @override

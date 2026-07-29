@@ -1,17 +1,15 @@
 import 'dart:developer';
-import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
+import 'package:talent_flow/app/core/remote_config_service.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/features/auth/pages/register/repo/register_repo.dart';
 import 'package:talent_flow/features/auth/widgets/auth_base.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../app/core/app_core.dart';
 import '../../../../app/core/app_event.dart';
-import '../../../../app/core/app_notification.dart';
 import '../../../../app/core/app_state.dart';
 import '../../../../app/core/app_storage_keys.dart';
 import '../../../../app/core/styles.dart';
@@ -23,7 +21,6 @@ import '../../../../navigation/routes.dart';
 import '../../../../data/config/di.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../login/bloc/login_bloc.dart';
 import '../social_media_login/bloc/social_media_bloc.dart';
 import 'bloc/register_bloc.dart'; // Import Bloc
 
@@ -54,9 +51,13 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     final bool isFreelancer =
         sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
-    final String userType = isFreelancer
-        ? "Freelancer"
-        : "Entrepreneur"; // Determine user type
+    final String userType =
+        isFreelancer ? "Freelancer" : "Entrepreneur"; // Determine user type
+    final bool showSocialAuth = RemoteConfigService.showSocialAuth;
+    log(
+      'Register screen social auth visibility: '
+      'showSocialAuth=$showSocialAuth, userType=$userType',
+    );
 
     return MultiBlocProvider(
       providers: [
@@ -99,7 +100,6 @@ class _RegisterState extends State<Register> {
             key: _formKey,
             child: Column(
               children: [
-
                 /// --------- First & Last name fields ---------
                 Row(
                   children: [
@@ -191,7 +191,7 @@ class _RegisterState extends State<Register> {
                 text: "register.register_button".tr(),
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
-                    log("usertype ${userType}");
+                    log("usertype $userType");
                     BlocProvider.of<RegisterBloc>(context).add(
                       Click(
                         arguments: {
@@ -217,84 +217,66 @@ class _RegisterState extends State<Register> {
             },
           ),
 
-          /// --------- OR divider ---------
-          SizedBox(height: 16.h),
-          Row(
-            children: [
-              const Expanded(
-                child: Divider(
-                  height: 1,
-                  color: Colors.grey,
-                  thickness: 0.5,
-                  endIndent: 10,
+          if (showSocialAuth) ...[
+            /// --------- OR divider ---------
+            SizedBox(height: 16.h),
+            Row(
+              children: [
+                const Expanded(
+                  child: Divider(
+                    height: 1,
+                    color: Colors.grey,
+                    thickness: 0.5,
+                    endIndent: 10,
+                  ),
                 ),
-              ),
-              Text(
-                'register.or_register_with'.tr(),
-                style: AppTextStyles.w500.copyWith(color: Colors.grey),
-              ),
-              const Expanded(
-                child: Divider(
-                  height: 1,
-                  color: Colors.grey,
-                  thickness: 0.5,
-                  indent: 10,
+                Text(
+                  'register.or_register_with'.tr(),
+                  style: AppTextStyles.w500.copyWith(color: Colors.grey),
                 ),
-              ),
-            ],
-          ),
-
-          /// --------- Social buttons ---------
-          SizedBox(height: 16.h),
-          CustomButton(
-            text: "register.register_google".tr(),
-            backgroundColor: Colors.white,
-            textColor: Colors.black,
-            lIconWidget: SvgPicture.asset("assets/svgs/google.svg"),
-            onTap: () async {
-              final result = await SocialMediaLoginHelper().googleLogin();
-
-              result.fold(
-                    (failure) {
-                  // show error
-                  AppCore.showSnackBar(
-                    notification: AppNotification(
-                      message: failure.error,
-                      backgroundColor: Styles.IN_ACTIVE,
-                    ),
-                  );
-                },
-                    (socialModel) {
-                  // call bloc event
-                  context.read<RegisterBloc>().add(
-                    SocialLoginClick(
-                      provider: socialModel.provider!, // "google"
-                      token: socialModel.idToken!,
-                      userType: userType,
-// the token for backend
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-          SizedBox(height: 16.h),
-          CustomButton(
-            text: "register.register_facebook".tr(),
-            backgroundColor: Colors.white,
-            textColor: Colors.black,
-            lIconWidget: SvgPicture.asset("assets/svgs/facebook.svg"),
-            onTap: () {},
-          ),
-          SizedBox(height: 16.h),
-          if (Platform.isIOS)
-            CustomButton(
-              text: "register.register_apple".tr(),
-              backgroundColor: Colors.white,
-              textColor: Colors.black,
-              lIconWidget: SvgPicture.asset("assets/svgs/apple.svg"),
-              onTap: () {},
+                const Expanded(
+                  child: Divider(
+                    height: 1,
+                    color: Colors.grey,
+                    thickness: 0.5,
+                    indent: 10,
+                  ),
+                ),
+              ],
             ),
+
+            /// --------- Social buttons ---------
+            SizedBox(height: 16.h),
+            BlocBuilder<SocialMediaBloc, AppState>(
+              builder: (context, state) {
+                return Column(
+                  children: [
+                    CustomButton(
+                      text: "register.register_google".tr(),
+                      backgroundColor: Colors.white,
+                      textColor: Colors.black,
+                      isLoading: state is Loading,
+                      lIconWidget: SvgPicture.asset("assets/svgs/google.svg"),
+                      onTap: () async {
+                        log('Google login tapped from Register screen');
+                        context.read<SocialMediaBloc>().add(
+                              Click(arguments: SocialMediaProvider.google),
+                            );
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+                    // CustomButton(
+                    //   text: "register.register_facebook".tr(),
+                    //   backgroundColor: Colors.white,
+                    //   textColor: Colors.black,
+                    //   lIconWidget: SvgPicture.asset("assets/svgs/facebook.svg"),
+                    //   onTap: () {},
+                    // ),
+                  ],
+                );
+              },
+            ),
+          ],
 
           SizedBox(height: 16.h),
           Center(

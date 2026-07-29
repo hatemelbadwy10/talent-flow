@@ -13,7 +13,7 @@ class MyProjectsModel extends SingleMapper {
     this.isPaid,
     this.specialization,
     this.isInFavorites,
-    this.date
+    this.date,
   });
 
   final int? id;
@@ -57,7 +57,8 @@ class MyProjectsModel extends SingleMapper {
                   image: fallbackSpecializationImage,
                 )
               : null,
-      isInFavorites: _toBool(json['is_in_favorites']) ?? false,
+      isInFavorites:
+          _toBool(json['is_in_favorites'] ?? json['is_fav']) ?? false,
       date: _toText(json['date']),
     );
   }

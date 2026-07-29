@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:developer';
 
 import 'package:permission_handler/permission_handler.dart';
@@ -39,24 +38,8 @@ abstract class PermissionHandler {
       _requestPermission(Permission.photos);
   static Future<bool> checkNotificationsPermission() async =>
       _requestPermission(Permission.notification);
-  static Future<bool> checkStoragePermission() async =>
-      _requestPermission(Permission.storage);
 
-  static Future<bool> checkFilePermission() async {
-    if (!Platform.isAndroid) {
-      return true;
-    }
-
-    final storageGranted = await _requestPermission(
-      Permission.storage,
-      openSettingsOnPermanentDenial: false,
-    );
-    if (storageGranted) {
-      return true;
-    }
-
-    return _requestPermission(Permission.manageExternalStorage);
-  }
+  static Future<bool> checkFilePermission() async => true;
 
   static Future<bool> checkMicrophonePermission() async =>
       _requestPermission(Permission.microphone);

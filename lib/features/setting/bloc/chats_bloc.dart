@@ -57,16 +57,12 @@ class ChatsBloc extends Bloc<AppEvent, AppState> {
     emit(Loading());
     try {
       final args = event.arguments;
-      final search = args is Map ? (args['search']?.toString() ?? '') : '';
       final projectIdRaw = args is Map ? args['project_id'] : null;
       final int? projectId = projectIdRaw is int
           ? projectIdRaw
           : int.tryParse(projectIdRaw?.toString() ?? '');
 
-      final result = await _chatsRepo.getChats(
-        search: search,
-        projectId: projectId,
-      );
+      final result = await _chatsRepo.getChats(projectId: projectId);
       result.fold(
         (failure) {
           log("Chats error: $failure");

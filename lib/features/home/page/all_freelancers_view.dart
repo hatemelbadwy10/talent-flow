@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,6 +26,8 @@ class AllFreelancersView extends StatefulWidget {
 
 class _AllFreelancersViewState extends State<AllFreelancersView> {
   Category? _selectedCategory;
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _searchTimer;
 
   late HomeBloc _categoriesBloc;
   late HomeBloc _freelancersBloc;
@@ -36,7 +40,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
 
     final categoryId = widget.arguments?["categoryId"] as int?;
     if (categoryId != null) {
-      _freelancersBloc.add(Follow(arguments: categoryId));
+      _freelancersBloc.add(Follow(arguments: {'categoryId': categoryId}));
     } else {
       _categoriesBloc.add(Click());
       _freelancersBloc.add(Follow());
@@ -45,6 +49,8 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
 
   @override
   void dispose() {
+    _searchTimer?.cancel();
+    _searchController.dispose();
     _categoriesBloc.close();
     _freelancersBloc.close();
     super.dispose();
@@ -58,11 +64,21 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
   }
 
   void _applyFilters() {
-    if (_selectedCategory == null) {
-      _freelancersBloc.add(Follow());
-    } else {
-      _freelancersBloc.add(Follow(arguments: _selectedCategory!.id));
-    }
+    final categoryId =
+        _selectedCategory?.id ?? (widget.arguments?["categoryId"] as int?);
+    _freelancersBloc.add(
+      Follow(
+        arguments: {
+          'categoryId': categoryId,
+          'search': _searchController.text.trim(),
+        },
+      ),
+    );
+  }
+
+  void _onSearchChanged(String value) {
+    _searchTimer?.cancel();
+    _searchTimer = Timer(const Duration(milliseconds: 500), _applyFilters);
   }
 
   void _showFilterBottomSheet(BuildContext context) {
@@ -397,6 +413,37 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
         ),
         body: Column(
           children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
+              child: TextField(
+                controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onChanged: _onSearchChanged,
+                onSubmitted: (_) => _applyFilters(),
+                decoration: InputDecoration(
+                  hintText: 'search'.tr(),
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: Styles.PRIMARY_COLOR),
+                  ),
+                ),
+              ),
+            ),
             if (_selectedCategory != null)
               Container(
                 width: double.infinity,
@@ -473,8 +520,14 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                               onPressed: () {
                                 final categoryId =
                                     widget.arguments?["categoryId"] as int?;
-                                _freelancersBloc
-                                    .add(Follow(arguments: categoryId));
+                                _freelancersBloc.add(
+                                  Follow(
+                                    arguments: {
+                                      'categoryId': categoryId,
+                                      'search': _searchController.text.trim(),
+                                    },
+                                  ),
+                                );
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Styles.PRIMARY_COLOR,

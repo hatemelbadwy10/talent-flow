@@ -66,7 +66,7 @@ class FreelancersModel extends SingleMapper {
       loggedIn: _toBool(json["logged_in"]),
       emailVerifiedAt: _toDateTime(json["email_verified_at"]),
       phoneVerifiedAt: json["phone_verified_at"],
-      isInFavorites: _toBool(json["is_in_favorites"]),
+      isInFavorites: _toBool(json["is_in_favorites"] ?? json["is_fav"]),
     );
   }
 

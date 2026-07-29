@@ -292,6 +292,9 @@
     "terms_and_conditions": "الشروط والاحكام",
     "language": "اللغة",
     "current_language": "English",
+    "delete_account": "حذف الحساب",
+    "delete_account_confirm_title": "حذف الحساب",
+    "delete_account_confirm_body": "سيتم حذف حسابك نهائياً وإزالة وصولك إلى بياناتك في Talent Flow. هل تريد المتابعة؟",
     "logout": "تسجيل الخروج",
     "logout_confirm_title": "تسجيل الخروج",
     "logout_confirm_body": "هل تريد تسجيل الخروج؟"
@@ -463,7 +466,8 @@
     "service_provider": "اسم منفذ الخدمة",
     "date": "التاريخ",
     "project_cost": "له (تكلفة المشروع)",
-    "commission_paid": "عليه (مبلغ السداد)"
+    "commission_paid": "عليه (مبلغ السداد)",
+    "due": "المستحق"
   },
   "account_statement_details_screen": {
     "title": "تفاصيل كشف حساب",

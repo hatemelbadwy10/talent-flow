@@ -1,12 +1,9 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
-import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:motion_toast/motion_toast.dart';
-import 'package:motion_toast/resources/arrays.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
@@ -66,16 +63,8 @@ class AppCore {
   }
 
   static Future<String> getAppFilePath() async {
-    String? path;
-    if (Platform.isAndroid) {
-      path =
-          '${await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD)}/talent_flow';
-    } else {
-      Directory documents = await getApplicationDocumentsDirectory();
-      path = '${documents.path}/talent_flow';
-    }
-
-    return path;
+    final documents = await getApplicationDocumentsDirectory();
+    return '${documents.path}/talent_flow';
   }
 
   static String removeAllHtmlTags(String htmlText) {

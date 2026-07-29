@@ -13,6 +13,7 @@ import 'package:talent_flow/features/home/model/chat_model.dart';
 class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
   FreelancerChatBloc(this._chatRepo, this._pusherService) : super(Start()) {
     on<Add>(_onLoadConversation);
+    on<Search>(_onSearchMessages);
     on<SendMessage>(_onSendMessage);
     on<ReceiveMessage>(_onReceiveMessage);
     on<_RefreshConversation>(_onRefreshConversation);
@@ -23,6 +24,7 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
   int? _conversationId;
   ChatModel? _chat;
   String? _subscribedChannelName;
+  String _messageSearch = '';
   Map<String, dynamic> _latestArgs = <String, dynamic>{};
   final Set<int> _messageIds = <int>{};
   final Set<String> _messageFingerprints = <String>{};
@@ -41,9 +43,8 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
     final dynamic rawConversationId = mapArgs['conversationId'];
     final dynamic rawFreelancerId = mapArgs['freelancerId'];
     final dynamic idRaw = rawConversationId ?? rawFreelancerId;
-    final int? conversationId = idRaw is int
-        ? idRaw
-        : int.tryParse(idRaw?.toString() ?? '');
+    final int? conversationId =
+        idRaw is int ? idRaw : int.tryParse(idRaw?.toString() ?? '');
     final usedFallback = rawConversationId == null && rawFreelancerId != null;
 
     _logChatBloc(
@@ -72,6 +73,11 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
     _startPolling();
   }
 
+  Future<void> _onSearchMessages(Search event, Emitter<AppState> emit) async {
+    _messageSearch = event.arguments?.toString().trim() ?? '';
+    await _loadConversation(emit: emit, showLoader: true);
+  }
+
   Future<void> _onSendMessage(
     SendMessage event,
     Emitter<AppState> emit,
@@ -87,11 +93,12 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
       return;
     }
 
-    final dynamic rawId =
-        mapArgs['conversationId'] ?? _conversationId ?? _latestArgs['conversationId'] ?? _latestArgs['freelancerId'];
-    final int? conversationId = rawId is int
-        ? rawId
-        : int.tryParse(rawId?.toString() ?? '');
+    final dynamic rawId = mapArgs['conversationId'] ??
+        _conversationId ??
+        _latestArgs['conversationId'] ??
+        _latestArgs['freelancerId'];
+    final int? conversationId =
+        rawId is int ? rawId : int.tryParse(rawId?.toString() ?? '');
     final usedFreelancerFallback = mapArgs['conversationId'] == null &&
         _conversationId == null &&
         _latestArgs['conversationId'] == null &&
@@ -235,7 +242,11 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
         'showLoader': showLoader,
       },
     );
-    final result = await _chatRepo.getConversationMessages(conversationId);
+    final search = _messageSearch.trim();
+    final result = await _chatRepo.getConversationMessages(
+      conversationId,
+      search: search,
+    );
     result.fold(
       (failure) {
         _logChatBloc(
@@ -250,6 +261,7 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
       (chat) {
         final currentChat = _chat;
         final List<Message> updatedMessages = List<Message>.from(chat.messages);
+        final isSearchActive = search.isNotEmpty;
         final apiLastMessage =
             updatedMessages.isNotEmpty ? updatedMessages.last : null;
         _logChatBloc(
@@ -265,11 +277,12 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
             'apiLastMessageTime': apiLastMessage?.time,
             'currentCachedMessageCount': currentChat?.messages.length,
             'pendingMessageCount': _pendingMessages.length,
+            'isSearchActive': isSearchActive,
           },
         );
         _seedKnownMessages(updatedMessages);
 
-        if (currentChat != null) {
+        if (currentChat != null && !isSearchActive) {
           for (final existing in currentChat.messages) {
             if (!_isDuplicateMessage(existing)) {
               updatedMessages.add(existing);
@@ -278,7 +291,7 @@ class FreelancerChatBloc extends Bloc<AppEvent, AppState> {
         }
 
         // Flush any messages that arrived before the conversation was loaded
-        if (_pendingMessages.isNotEmpty) {
+        if (_pendingMessages.isNotEmpty && !isSearchActive) {
           _logChatBloc(
             '_loadConversation flushing pending messages',
             {'pendingMessageCount': _pendingMessages.length},

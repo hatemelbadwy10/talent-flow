@@ -169,9 +169,17 @@ class HomeBloc extends Bloc<AppEvent, AppState> {
     try {
       // اقرأ الـ categoryId من event.arguments (ممكن ييجي null عادي)
 
-      final categoryId = event.arguments as int?;
+      final args = event.arguments;
+      final categoryId = args is Map<String, dynamic>
+          ? args['categoryId'] as int?
+          : args as int?;
+      final search =
+          args is Map<String, dynamic> ? args['search']?.toString() : null;
       // ننده على الريبو ونبعتله الـ categoryId (ممكن null)
-      final result = await _homeRepo.getFreelancers(categoryId: categoryId);
+      final result = await _homeRepo.getFreelancers(
+        categoryId: categoryId,
+        search: search,
+      );
 
       result.fold(
         (failure) => emit(Error()),

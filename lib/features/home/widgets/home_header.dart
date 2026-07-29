@@ -23,8 +23,6 @@ class HomeHeaderSection extends StatelessWidget {
   final String? jobTitle;
   final int notificationCount;
   final int messageCount;
-  final TextEditingController? searchController;
-  final VoidCallback? onSearch;
 
   const HomeHeaderSection({
     super.key,
@@ -35,8 +33,6 @@ class HomeHeaderSection extends StatelessWidget {
     this.jobTitle,
     this.notificationCount = 0,
     this.messageCount = 0,
-    this.searchController,
-    this.onSearch,
   });
 
   @override
@@ -87,7 +83,7 @@ class HomeHeaderSection extends StatelessWidget {
             : (blocUser?.unreadMessagesCount ?? storedMessageCount);
 
         return SizedBox(
-          height: 216.h,
+          height: 176.h,
           width: double.infinity,
           child: Stack(
             clipBehavior: Clip.none,
@@ -178,15 +174,6 @@ class HomeHeaderSection extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
-              ),
-              Positioned(
-                bottom: 16.h,
-                left: Dimensions.PADDING_SIZE_DEFAULT.w,
-                right: Dimensions.PADDING_SIZE_DEFAULT.w,
-                child: HomeSearchBar(
-                  controller: searchController,
-                  onSearch: onSearch,
                 ),
               ),
             ],

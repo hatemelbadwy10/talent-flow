@@ -298,6 +298,9 @@
     "terms_and_conditions": "Terms and Conditions",
     "language": "Language",
     "current_language": "العربية",
+    "delete_account": "Delete Account",
+    "delete_account_confirm_title": "Delete Account",
+    "delete_account_confirm_body": "This will permanently delete your account and remove access to your Talent Flow data. Do you want to continue?",
     "logout": "Logout",
     "logout_confirm_title": "Logout",
     "logout_confirm_body": "Do you want to logout?"
@@ -471,7 +474,8 @@
     "service_provider": "Service Provider",
     "date": "Date",
     "project_cost": "Project Cost",
-    "commission_paid": "Commission Paid"
+    "commission_paid": "Commission Paid",
+    "due": "Due"
   },
   "account_statement_details_screen": {
     "title": "Account Statement Details",

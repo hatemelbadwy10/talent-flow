@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
@@ -32,7 +33,9 @@ class FreelancerChatScreen extends StatefulWidget {
 
 class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
   final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   final AudioRecorder _audioRecorder = AudioRecorder();
+  Timer? _searchTimer;
 
   bool _isRecording = false;
   String? _lastRenderSummary;
@@ -93,6 +96,18 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  void _onMessageSearchChanged(String value) {
+    _searchTimer?.cancel();
+    if (mounted) {
+      setState(() {});
+    }
+    _searchTimer = Timer(const Duration(milliseconds: 500), () {
+      context.read<FreelancerChatBloc>().add(
+            Search(arguments: value.trim()),
+          );
+    });
   }
 
   Future<void> _toggleRecording() async {
@@ -198,8 +213,10 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
 
   @override
   void dispose() {
+    _searchTimer?.cancel();
     _messageController.removeListener(_onComposerChanged);
     _messageController.dispose();
+    _searchController.dispose();
     _audioRecorder.dispose();
     super.dispose();
   }
@@ -294,10 +311,9 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
             : [
                 BlocBuilder<FreelancerChatBloc, AppState>(
                   builder: (context, state) {
-                    final chatModel =
-                        state is Done && state.data is ChatModel
-                            ? state.data as ChatModel
-                            : null;
+                    final chatModel = state is Done && state.data is ChatModel
+                        ? state.data as ChatModel
+                        : null;
                     final currentProjectId =
                         chatModel?.projectId ?? fallbackProjectId;
                     final hasContract =
@@ -338,6 +354,53 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
         top: false,
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: TextField(
+                controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onChanged: _onMessageSearchChanged,
+                onSubmitted: (value) {
+                  context.read<FreelancerChatBloc>().add(
+                        Search(arguments: value.trim()),
+                      );
+                },
+                decoration: InputDecoration(
+                  hintText: 'search'.tr(),
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchController.text.trim().isEmpty
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            _searchController.clear();
+                            context.read<FreelancerChatBloc>().add(
+                                  Search(arguments: ''),
+                                );
+                            setState(() {});
+                          },
+                        ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFFD9DEE6)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFFD9DEE6)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Styles.PRIMARY_COLOR),
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child: BlocBuilder<FreelancerChatBloc, AppState>(
                 builder: (context, state) {

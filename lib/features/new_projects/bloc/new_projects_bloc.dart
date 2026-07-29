@@ -25,10 +25,12 @@ class NewProjectsBloc extends Bloc<AppEvent, AppState> {
           : const <String, dynamic>{};
       final specializationId = args['specialization'] as int?;
       final sortBy = args['sortBy']?.toString();
+      final search = args['search']?.toString();
 
       final result = await _projectsRepo.getProjects(
         specializationId: specializationId,
         sortBy: sortBy,
+        search: search,
       );
       result.fold(
         (failure) => emit(Error()),

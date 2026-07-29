@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,6 +39,8 @@ class _NewProjectState extends State<NewProject> {
 
   late final NewProjectsBloc _projectsBloc;
   late final Future<SelectionModel> _selectionFuture;
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _searchTimer;
   int? _selectedSpecializationId;
   String? _selectedSpecializationName;
   String? _selectedSortBy;
@@ -46,12 +50,14 @@ class _NewProjectState extends State<NewProject> {
     super.initState();
     _projectsBloc = NewProjectsBloc(sl<NewProjectsRepo>())..add(Add());
     _selectionFuture = sl<SelectionOptionRepo>().getSelectionOption().then(
-      (result) => result.fold((failure) => throw failure, (model) => model),
-    );
+          (result) => result.fold((failure) => throw failure, (model) => model),
+        );
   }
 
   @override
   void dispose() {
+    _searchTimer?.cancel();
+    _searchController.dispose();
     _projectsBloc.close();
     super.dispose();
   }
@@ -62,9 +68,15 @@ class _NewProjectState extends State<NewProject> {
         arguments: {
           'specialization': _selectedSpecializationId,
           'sortBy': _selectedSortBy,
+          'search': _searchController.text.trim(),
         },
       ),
     );
+  }
+
+  void _onSearchChanged(String value) {
+    _searchTimer?.cancel();
+    _searchTimer = Timer(const Duration(milliseconds: 500), _fetchProjects);
   }
 
   Future<void> _selectSpecialization() async {
@@ -132,97 +144,128 @@ class _NewProjectState extends State<NewProject> {
     return BlocProvider.value(
       value: _projectsBloc,
       child: Scaffold(
-          backgroundColor: Colors.grey.shade200,
-          appBar: CustomAppBar(
-            title: 'new_project.title'.tr(),
-            showBackButton: false,
-            actions: [
-              if (!(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                  false))
-                Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.add,
-                        color: Colors.black,
-                        size: 22,
-                      ),
-                      onPressed: () {
-                        UserCompletionGuard.ensureCanAddProject(context).then(
-                          (allowed) {
-                            if (!allowed) return;
-                            CustomNavigator.push(Routes.addProject);
-                          },
-                        );
-                      },
+        backgroundColor: Colors.grey.shade200,
+        appBar: CustomAppBar(
+          title: 'new_project.title'.tr(),
+          showBackButton: false,
+          actions: [
+            if (!(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                false))
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Colors.white,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.add,
+                      color: Colors.black,
+                      size: 22,
                     ),
-                  ),
-                ),
-            ],
-          ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            child: Column(
-              children: [
-                FutureBuilder<SelectionModel>(
-                  future: _selectionFuture,
-                  builder: (context, snapshot) {
-                    return _FiltersBar(
-                      specializationLabel: _selectedSpecializationName,
-                      sortLabel: _selectedSortBy == null
-                          ? null
-                          : _sortOptions[_selectedSortBy!]?.tr(),
-                      showClear: _hasFilters,
-                      specializationsReady: snapshot.hasData,
-                      onSpecializationTap:
-                          snapshot.hasData ? _selectSpecialization : null,
-                      onSortTap: _selectSortBy,
-                      onClearTap: _clearFilters,
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: BlocBuilder<NewProjectsBloc, AppState>(
-                    builder: (context, state) {
-                      if (state is Loading) {
-                        return const ProjectCardShimmer();
-                      } else if (state is Error) {
-                        return Center(
-                          child: Text('failed_to_load_projects'.tr()),
-                        );
-                      } else if (state is Done) {
-                        final projects = state.list as List<MyProjectsModel>;
-
-                        if (projects.isEmpty) {
-                          return Center(
-                            child: Text('no_projects_available'.tr()),
-                          );
-                        }
-
-                        return ListAnimator(
-                          data: projects
-                              .map(
-                                (project) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 24),
-                                  child: ProjectCard(projectsModel: project),
-                                ),
-                              )
-                              .toList(),
-                        );
-                      }
-
-                      return const SizedBox.shrink();
+                    onPressed: () {
+                      UserCompletionGuard.ensureCanAddProject(context).then(
+                        (allowed) {
+                          if (!allowed) return;
+                          CustomNavigator.push(Routes.addProject);
+                        },
+                      );
                     },
                   ),
                 ),
-              ],
-            ),
+              ),
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          child: Column(
+            children: [
+              FutureBuilder<SelectionModel>(
+                future: _selectionFuture,
+                builder: (context, snapshot) {
+                  return _FiltersBar(
+                    specializationLabel: _selectedSpecializationName,
+                    sortLabel: _selectedSortBy == null
+                        ? null
+                        : _sortOptions[_selectedSortBy!]?.tr(),
+                    showClear: _hasFilters,
+                    specializationsReady: snapshot.hasData,
+                    onSpecializationTap:
+                        snapshot.hasData ? _selectSpecialization : null,
+                    onSortTap: _selectSortBy,
+                    onClearTap: _clearFilters,
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onChanged: _onSearchChanged,
+                onSubmitted: (_) => _fetchProjects(),
+                decoration: InputDecoration(
+                  hintText: 'search'.tr(),
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide:
+                        const BorderSide(color: Styles.LIGHT_BORDER_COLOR),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide:
+                        const BorderSide(color: Styles.LIGHT_BORDER_COLOR),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: Styles.PRIMARY_COLOR),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: BlocBuilder<NewProjectsBloc, AppState>(
+                  builder: (context, state) {
+                    if (state is Loading) {
+                      return const ProjectCardShimmer();
+                    } else if (state is Error) {
+                      return Center(
+                        child: Text('failed_to_load_projects'.tr()),
+                      );
+                    } else if (state is Done) {
+                      final projects = state.list as List<MyProjectsModel>;
+
+                      if (projects.isEmpty) {
+                        return Center(
+                          child: Text('no_projects_available'.tr()),
+                        );
+                      }
+
+                      return ListAnimator(
+                        data: projects
+                            .map(
+                              (project) => Padding(
+                                padding: const EdgeInsets.only(bottom: 24),
+                                child: ProjectCard(projectsModel: project),
+                              ),
+                            )
+                            .toList(),
+                      );
+                    }
+
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 }
@@ -250,33 +293,35 @@ class _FiltersBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _FilterChipButton(
-                label: specializationLabel ??
-                    'new_project.filter_specialization'.tr(),
-                icon: Icons.category_outlined,
-                onTap: onSpecializationTap,
-                enabled: specializationsReady,
+        SizedBox(
+          height: 56,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _FilterChipButton(
+                  label: specializationLabel ?? 'specialization'.tr(),
+                  icon: Icons.category_outlined,
+                  onTap: onSpecializationTap,
+                  enabled: specializationsReady,
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _FilterChipButton(
-                label: sortLabel ?? 'new_project.sort_by'.tr(),
-                icon: Icons.swap_vert_rounded,
-                onTap: onSortTap,
-              ),
-            ),
-            if (showClear) ...[
               const SizedBox(width: 12),
-              _ResetFilterButton(
-                onTap: onClearTap,
+              Expanded(
+                child: _FilterChipButton(
+                  label: sortLabel ?? 'new_project.sort_by'.tr(),
+                  icon: Icons.swap_vert_rounded,
+                  onTap: onSortTap,
+                ),
               ),
+              if (showClear) ...[
+                const SizedBox(width: 12),
+                _ResetFilterButton(
+                  onTap: onClearTap,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ],
     );
@@ -306,6 +351,7 @@ class _FilterChipButton extends StatelessWidget {
         onTap: enabled ? onTap : null,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          height: 56,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: Styles.LIGHT_BORDER_COLOR),
@@ -321,8 +367,8 @@ class _FilterChipButton extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  maxLines: 3,
-                  overflow: TextOverflow.visible,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -359,7 +405,9 @@ class _ResetFilterButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          width: 56,
+          height: 56,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: Styles.LIGHT_BORDER_COLOR),
@@ -370,13 +418,15 @@ class _ResetFilterButton extends StatelessWidget {
               const Icon(
                 Icons.refresh_rounded,
                 color: Styles.IN_ACTIVE,
-                size: 20,
+                size: 18,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 'new_project.reset'.tr(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: FontWeight.w600,
                   color: Styles.IN_ACTIVE,
                 ),

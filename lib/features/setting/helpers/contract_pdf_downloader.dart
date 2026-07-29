@@ -18,8 +18,7 @@ import '../model/contract_model.dart';
 import '../repo/contracts_repo.dart';
 
 class ContractPdfDownloader {
-  static const String _fontPath =
-      'assets/fonts/IBMPlexSansArabic-Regular.ttf';
+  static const String _fontPath = 'assets/fonts/IBMPlexSansArabic-Regular.ttf';
 
   static Future<void> downloadContract(ContractModel contract) async {
     final hasPermission = await PermissionHandler.checkFilePermission();
@@ -73,7 +72,8 @@ class ContractPdfDownloader {
       (response) {
         final data = response.data;
         if (data is Map && data['payload'] is Map<String, dynamic>) {
-          return ContractModel.fromJson(data['payload'] as Map<String, dynamic>);
+          return ContractModel.fromJson(
+              data['payload'] as Map<String, dynamic>);
         }
         if (data is Map && data['payload'] is Map) {
           return ContractModel.fromJson(
@@ -120,8 +120,10 @@ class ContractPdfDownloader {
     cursor = cursor.copyWith(top: cursor.top + 12);
     cursor =
         _drawInfoRow(cursor, 'رقم العقد', '#${contract.id ?? '-'}', baseFont);
-    cursor = _drawInfoRow(cursor, 'عنوان المشروع', contract.projectTitle, baseFont);
-    cursor = _drawInfoRow(cursor, 'صاحب المشروع', contract.projectOwner, baseFont);
+    cursor =
+        _drawInfoRow(cursor, 'عنوان المشروع', contract.projectTitle, baseFont);
+    cursor =
+        _drawInfoRow(cursor, 'صاحب المشروع', contract.projectOwner, baseFont);
     cursor = _drawInfoRow(cursor, 'المستقل', contract.freelancer, baseFont);
     cursor = _drawInfoRow(cursor, 'التاريخ', contract.date, baseFont);
     cursor = _drawInfoRow(cursor, 'الميزانية', contract.budget, baseFont);
@@ -191,18 +193,17 @@ class ContractPdfDownloader {
     PdfFont font,
   ) {
     return _drawTextBlock(
-          cursor: cursor,
-          text: '$label: ${value?.trim().isNotEmpty == true ? value! : '-'}',
-          font: font,
-          bounds: Rect.fromLTWH(
-            20,
-            cursor.top,
-            cursor.page.getClientSize().width - 40,
-            40,
-          ),
-          format: _rtlFormat(PdfTextAlignment.right),
-        )
-        .copyWithSpacing(8);
+      cursor: cursor,
+      text: '$label: ${value?.trim().isNotEmpty == true ? value! : '-'}',
+      font: font,
+      bounds: Rect.fromLTWH(
+        20,
+        cursor.top,
+        cursor.page.getClientSize().width - 40,
+        40,
+      ),
+      format: _rtlFormat(PdfTextAlignment.right),
+    ).copyWithSpacing(8);
   }
 
   static _PdfCursor _drawSection(
@@ -214,31 +215,29 @@ class ContractPdfDownloader {
   ) {
     final resolvedValue = value?.trim().isNotEmpty == true ? value! : '-';
     cursor = _drawTextBlock(
-          cursor: cursor,
-          text: title,
-          font: titleFont,
-          bounds: Rect.fromLTWH(
-            20,
-            cursor.top,
-            cursor.page.getClientSize().width - 40,
-            30,
-          ),
-          format: _rtlFormat(PdfTextAlignment.right),
-        )
-        .copyWithSpacing(6);
+      cursor: cursor,
+      text: title,
+      font: titleFont,
+      bounds: Rect.fromLTWH(
+        20,
+        cursor.top,
+        cursor.page.getClientSize().width - 40,
+        30,
+      ),
+      format: _rtlFormat(PdfTextAlignment.right),
+    ).copyWithSpacing(6);
     cursor = _drawTextBlock(
-          cursor: cursor,
-          text: resolvedValue,
-          font: bodyFont,
-          bounds: Rect.fromLTWH(
-            20,
-            cursor.top,
-            cursor.page.getClientSize().width - 40,
-            cursor.page.getClientSize().height - cursor.top - 20,
-          ),
-          format: _rtlFormat(PdfTextAlignment.right),
-        )
-        .copyWithSpacing(14);
+      cursor: cursor,
+      text: resolvedValue,
+      font: bodyFont,
+      bounds: Rect.fromLTWH(
+        20,
+        cursor.top,
+        cursor.page.getClientSize().width - 40,
+        cursor.page.getClientSize().height - cursor.top - 20,
+      ),
+      format: _rtlFormat(PdfTextAlignment.right),
+    ).copyWithSpacing(14);
     return cursor;
   }
 
@@ -249,34 +248,32 @@ class ContractPdfDownloader {
     PdfFont bodyFont,
   ) async {
     cursor = _drawTextBlock(
-          cursor: cursor,
-          text: 'المرفقات',
-          font: titleFont,
-          bounds: Rect.fromLTWH(
-            20,
-            cursor.top,
-            cursor.page.getClientSize().width - 40,
-            30,
-          ),
-          format: _rtlFormat(PdfTextAlignment.right),
-        )
-        .copyWithSpacing(10);
+      cursor: cursor,
+      text: 'المرفقات',
+      font: titleFont,
+      bounds: Rect.fromLTWH(
+        20,
+        cursor.top,
+        cursor.page.getClientSize().width - 40,
+        30,
+      ),
+      format: _rtlFormat(PdfTextAlignment.right),
+    ).copyWithSpacing(10);
 
     for (final file in files) {
       final fileName = _fileNameFromUrl(file);
       cursor = _drawTextBlock(
-            cursor: cursor,
-            text: fileName,
-            font: bodyFont,
-            bounds: Rect.fromLTWH(
-              20,
-              cursor.top,
-              cursor.page.getClientSize().width - 40,
-              30,
-            ),
-            format: _rtlFormat(PdfTextAlignment.right),
-          )
-          .copyWithSpacing(8);
+        cursor: cursor,
+        text: fileName,
+        font: bodyFont,
+        bounds: Rect.fromLTWH(
+          20,
+          cursor.top,
+          cursor.page.getClientSize().width - 40,
+          30,
+        ),
+        format: _rtlFormat(PdfTextAlignment.right),
+      ).copyWithSpacing(8);
 
       if (!_isImageUrl(file)) {
         continue;
@@ -396,7 +393,8 @@ class ContractPdfDownloader {
   }
 
   static bool _isImageUrl(String url) {
-    final extension = path.extension(Uri.tryParse(url)?.path ?? url)
+    final extension = path
+        .extension(Uri.tryParse(url)?.path ?? url)
         .toLowerCase()
         .replaceFirst('.', '');
     return extension == 'jpg' ||

@@ -29,7 +29,7 @@ def releaseKeystoreFile = releaseKeystoreFromProperties
 def hasReleaseSigning = releaseKeystoreFile.exists()
 
 android {
-    namespace = "com.example.talent_flow"
+    namespace = "com.yem.talentflow"
     compileSdk = 36
     ndkVersion = "28.2.13676358"
 
@@ -44,7 +44,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.talent_flow"
+        applicationId = "com.yem.talentflow"
         minSdkVersion = flutter.minSdkVersion
         targetSdkVersion = 36
         versionCode = flutterVersionCode.toInteger()

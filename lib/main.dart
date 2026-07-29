@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talent_flow/app/core/remote_config_service.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/data/realtime/user_channel_realtime_service.dart'
     as data_realtime;
@@ -19,6 +20,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await RemoteConfigService.initialize();
   await EasyLocalization.ensureInitialized();
   await di.init();
   await sl<LocaleDatabase>().initDatabase();
@@ -108,8 +110,7 @@ class _RealtimeSessionBootstrapState extends State<_RealtimeSessionBootstrap>
   void _scheduleSync() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      sl<data_realtime.UserChannelRealtimeService>()
-          .syncSessionSubscription();
+      sl<data_realtime.UserChannelRealtimeService>().syncSessionSubscription();
     });
   }
 

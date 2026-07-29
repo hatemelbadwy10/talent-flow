@@ -1,4 +1,5 @@
-import 'dart:io';
+import 'dart:developer';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:talent_flow/app/core/dimensions.dart';
+import 'package:talent_flow/app/core/remote_config_service.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
 import 'package:talent_flow/features/auth/pages/login/repo/login_repo.dart';
@@ -78,6 +80,9 @@ class _LoginViewState extends State<LoginView> {
   }
 
   List<Widget> _buildLoginContent(BuildContext context) {
+    final bool showSocialAuth = RemoteConfigService.showSocialAuth;
+    log('Login screen social auth visibility: showSocialAuth=$showSocialAuth');
+
     return [
       SizedBox(height: 15.h),
       Form(
@@ -148,11 +153,11 @@ class _LoginViewState extends State<LoginView> {
             onTap: () {
               if (_formKey.currentState!.validate()) {
                 context.read<LoginBloc>().add(
-                  Click(arguments: {
-                    "email": emailController.text,
-                    "password": passwordController.text,
-                  }),
-                );
+                      Click(arguments: {
+                        "email": emailController.text,
+                        "password": passwordController.text,
+                      }),
+                    );
               }
             },
             gradient: const LinearGradient(
@@ -164,77 +169,75 @@ class _LoginViewState extends State<LoginView> {
         },
       ),
 
-      SizedBox(height: 16.h),
+      if (showSocialAuth) ...[
+        SizedBox(height: 16.h),
 
-      /// Divider
-      Row(
-        children: [
-          const Expanded(child: Divider(height: 1, color: Colors.grey, thickness: 0.5, endIndent: 10)),
-          Text('login.or_login_with'.tr(),
-              style: AppTextStyles.w500.copyWith(color: Colors.grey)),
-          const Expanded(child: Divider(height: 1, color: Colors.grey, thickness: 0.5, indent: 10)),
-        ],
-      ),
+        /// Divider
+        Row(
+          children: [
+            const Expanded(
+                child: Divider(
+                    height: 1,
+                    color: Colors.grey,
+                    thickness: 0.5,
+                    endIndent: 10)),
+            Text('login.or_login_with'.tr(),
+                style: AppTextStyles.w500.copyWith(color: Colors.grey)),
+            const Expanded(
+                child: Divider(
+                    height: 1, color: Colors.grey, thickness: 0.5, indent: 10)),
+          ],
+        ),
 
-      SizedBox(height: 16.h),
+        SizedBox(height: 16.h),
 
-      /// ✅ BlocBuilder للسوشيال لوجين
-      BlocBuilder<SocialMediaBloc, AppState>(
-        builder: (context, state) {
-          return Column(
-            children: [
-              CustomButton(
-                text: "login.login_google".tr(),
-                backgroundColor: Colors.white,
-                textColor: Colors.black,
-                isLoading: state is Loading,
-                lIconWidget: SvgPicture.asset("assets/svgs/google.svg"),
-                onTap: () async {
-                  context.read<SocialMediaBloc>().add(
-                    Click(arguments: SocialMediaProvider.google),
-                  );
-                },
-              ),
-              // SizedBox(height: 16.h),
-              // CustomButton(
-              //   text: "login.login_facebook".tr(),
-              //   backgroundColor: Colors.white,
-              //   textColor: Colors.black,
-              //   lIconWidget: SvgPicture.asset("assets/svgs/facebook.svg"),
-              //   onTap: () async {
-              //     final result = await SocialMediaLoginHelper().facebookLogin();
-              //     result.fold(
-              //           (failure) {
-              //         AppCore.showSnackBar(
-              //           notification: AppNotification(
-              //             message: failure.error,
-              //             backgroundColor: Styles.IN_ACTIVE,
-              //           ),
-              //         );
-              //       },
-              //           (socialModel) {
-              //         context.read<SocialMediaBloc>().add(
-              //           Click(arguments:SocialMediaProvider.facebook),
-              //         );
-              //       },
-              //     );                },
-              // ),
-              if (Platform.isIOS) ...[
-                SizedBox(height: 16.h),
+        /// ✅ BlocBuilder للسوشيال لوجين
+        BlocBuilder<SocialMediaBloc, AppState>(
+          builder: (context, state) {
+            return Column(
+              children: [
                 CustomButton(
-                  text: "login.login_apple".tr(),
+                  text: "login.login_google".tr(),
                   backgroundColor: Colors.white,
                   textColor: Colors.black,
-                  lIconWidget: SvgPicture.asset("assets/svgs/apple.svg"),
-                  onTap: () {
-                    // TODO: add apple handler
+                  isLoading: state is Loading,
+                  lIconWidget: SvgPicture.asset("assets/svgs/google.svg"),
+                  onTap: () async {
+                    log('Google login tapped from Login screen');
+                    context.read<SocialMediaBloc>().add(
+                          Click(arguments: SocialMediaProvider.google),
+                        );
                   },
                 ),
+                // SizedBox(height: 16.h),
+                // CustomButton(
+                //   text: "login.login_facebook".tr(),
+                //   backgroundColor: Colors.white,
+                //   textColor: Colors.black,
+                //   lIconWidget: SvgPicture.asset("assets/svgs/facebook.svg"),
+                //   onTap: () async {
+                //     final result = await SocialMediaLoginHelper().facebookLogin();
+                //     result.fold(
+                //           (failure) {
+                //         AppCore.showSnackBar(
+                //           notification: AppNotification(
+                //             message: failure.error,
+                //             backgroundColor: Styles.IN_ACTIVE,
+                //           ),
+                //         );
+                //       },
+                //           (socialModel) {
+                //         context.read<SocialMediaBloc>().add(
+                //           Click(arguments:SocialMediaProvider.facebook),
+                //         );
+                //       },
+                //     );                },
+                // ),
               ],
-            ],
-          );
-        },
-      ),
+            );
+          },
+        ),
+      ],
 
       SizedBox(height: 16.h),
 
@@ -282,9 +285,10 @@ class _LoginViewState extends State<LoginView> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+          border:
+              Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

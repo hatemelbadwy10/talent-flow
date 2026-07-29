@@ -196,11 +196,14 @@ class _HomeViewState extends State<HomeView> {
                                                 : null,
                                             imageUrl: item['image'],
                                             isInFavorites:
-                                                item['is_in_favorites'] ==
+                                                (item['is_in_favorites'] ??
+                                                            item['is_fav']) ==
                                                         true ||
-                                                    item['is_in_favorites'] ==
+                                                    (item['is_in_favorites'] ??
+                                                            item['is_fav']) ==
                                                         1 ||
-                                                    item['is_in_favorites']
+                                                    (item['is_in_favorites'] ??
+                                                                item['is_fav'])
                                                             ?.toString() ==
                                                         '1',
                                           ),

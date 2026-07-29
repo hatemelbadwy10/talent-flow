@@ -33,6 +33,15 @@ class SettingsRepo extends BaseRepo {
     }
   }
 
+  Future<Either<ServerFailure, Response>> deleteAccount() async {
+    try {
+      final response = await dioClient.delete(uri: EndPoints.deleteAccount);
+      return Right(response);
+    } catch (error) {
+      return left(ApiErrorHandler.getServerFailure(error));
+    }
+  }
+
   Future<Either<ServerFailure, Response>> submitIdentityVerification(
     IdentityVerificationRequest request,
   ) async {

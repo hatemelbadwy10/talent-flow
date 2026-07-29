@@ -1,5 +1,7 @@
-import 'dart:math';
+import 'dart:math' hide log;
 import 'dart:convert';
+import 'dart:io';
+import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,8 +17,11 @@ class SocialMediaLoginHelper {
   // Google login
   Future<Either<ServerFailure, SocialMediaModel>> googleLogin() async {
     try {
-      print("=====> Provider Google");
+      log("=====> Provider Google");
       final GoogleSignIn googleSignIn = GoogleSignIn(
+        clientId: Platform.isIOS
+            ? '863499364117-diha913qm5360v35ml1lpes7qla9ckaf.apps.googleusercontent.com'
+            : null,
         scopes: ['email', 'profile'],
       );
 
@@ -32,22 +37,22 @@ class SocialMediaLoginHelper {
       }
 
       // Obtain the auth details from the request
-      final GoogleSignInAuthentication? googleAuth =
-      await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
-      if (googleAuth?.idToken == null) {
+      if (googleAuth.idToken == null) {
         return left(ServerFailure("Failed to obtain Google ID token"));
       }
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
 
       // Once signed in, return the UserCredential
       UserCredential userAccountFirebase =
-      await FirebaseAuth.instance.signInWithCredential(credential);
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
       if (userAccountFirebase.user == null) {
         return left(ServerFailure("Failed to create Firebase user"));
@@ -58,7 +63,7 @@ class SocialMediaLoginHelper {
       try {
         firebaseIdToken = await userAccountFirebase.user!.getIdToken();
       } catch (e) {
-        print("=====> Error getting Firebase ID token: $e");
+        log("=====> Error getting Firebase ID token: $e");
         return left(ServerFailure("Failed to get Firebase ID token: $e"));
       }
 
@@ -73,7 +78,8 @@ class SocialMediaLoginHelper {
       // ✅ Use Firebase ID Token (not Google ID Token)
       model.idToken = firebaseIdToken;
 
-      model.name = userAccountFirebase.user?.displayName ?? googleUser.displayName;
+      model.name =
+          userAccountFirebase.user?.displayName ?? googleUser.displayName;
       model.image = userAccountFirebase.user?.photoURL ?? googleUser.photoUrl;
       model.email = userAccountFirebase.user?.email ?? googleUser.email;
       model.phone = userAccountFirebase.user?.phoneNumber;
@@ -81,10 +87,11 @@ class SocialMediaLoginHelper {
       model.printData();
       return Right(model);
     } on FirebaseAuthException catch (error) {
-      print("=====> Firebase Error: ${error.code} - ${error.message}");
-      return left(ServerFailure(error.message ?? "Firebase authentication failed"));
+      log("=====> Firebase Error: ${error.code} - ${error.message}");
+      return left(
+          ServerFailure(error.message ?? "Firebase authentication failed"));
     } catch (error) {
-      print("=====> Error: ${error}");
+      log("=====> Error: $error");
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
@@ -152,7 +159,7 @@ class SocialMediaLoginHelper {
   // Apple login
   Future<Either<ServerFailure, SocialMediaModel>> appleLogin() async {
     try {
-      print("=====> Provider Apple");
+      log("=====> Provider Apple");
 
       final rawNonce = generateNonce();
       final nonce = sha256ofString(rawNonce);
@@ -175,7 +182,7 @@ class SocialMediaLoginHelper {
       );
 
       UserCredential userAccountFirebase =
-      await FirebaseAuth.instance.signInWithCredential(
+          await FirebaseAuth.instance.signInWithCredential(
         oAuthCredential,
       );
 
@@ -188,7 +195,7 @@ class SocialMediaLoginHelper {
       try {
         firebaseIdToken = await userAccountFirebase.user!.getIdToken();
       } catch (e) {
-        print("=====> Error getting Firebase ID token: $e");
+        log("=====> Error getting Firebase ID token: $e");
         return left(ServerFailure("Failed to get Firebase ID token: $e"));
       }
 
@@ -210,10 +217,10 @@ class SocialMediaLoginHelper {
       model.printData();
       return Right(model);
     } on FirebaseAuthException catch (error) {
-      print("=====> Firebase Error: ${error.code} - ${error.message}");
+      log("=====> Firebase Error: ${error.code} - ${error.message}");
       return left(ServerFailure(error.message ?? ""));
     } catch (error) {
-      print("=====> Error: ${error}");
+      log("=====> Error: $error");
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
@@ -251,13 +258,13 @@ class SocialMediaModel {
   String? phone;
 
   void printData() {
-    print("provider ==> $provider");
-    print("idToken ==> $idToken");
-    print("rawNonce ==> $rawNonce");
-    print("uid ==> $uid");
-    print("name ==> $name");
-    print("image ==> $image");
-    print("email ==> $email");
-    print("phone ==> $phone");
+    log("provider ==> $provider");
+    log("idToken ==> $idToken");
+    log("rawNonce ==> $rawNonce");
+    log("uid ==> $uid");
+    log("name ==> $name");
+    log("image ==> $image");
+    log("email ==> $email");
+    log("phone ==> $phone");
   }
 }

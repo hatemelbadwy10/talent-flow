@@ -8,6 +8,7 @@ class AccountStatementItemModel implements Mapper {
     this.date,
     this.projectCost,
     this.commissionPaid,
+    this.due,
     this.description,
     this.files = const [],
     this.views,
@@ -25,6 +26,7 @@ class AccountStatementItemModel implements Mapper {
   final String? date;
   final String? projectCost;
   final String? commissionPaid;
+  final String? due;
   final String? description;
   final List<String> files;
   final int? views;
@@ -63,6 +65,7 @@ class AccountStatementItemModel implements Mapper {
             json['commission_amount'] ??
             json['talent_flow_commission'],
       ),
+      due: _toStringValue(json['due'] ?? json['due_amount']),
       description: _toStringValue(json['description']),
       files: _extractFiles(json['files'] ?? json['attachments']),
       views: _toInt(json['views']),
@@ -86,6 +89,7 @@ class AccountStatementItemModel implements Mapper {
       'date': date,
       'project_cost': projectCost,
       'commission_paid': commissionPaid,
+      'due': due,
       'description': description,
       'files': files,
       'views': views,

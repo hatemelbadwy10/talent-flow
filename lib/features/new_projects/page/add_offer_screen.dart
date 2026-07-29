@@ -11,6 +11,7 @@ import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
 import '../../projects/bloc/my_projects_bloc.dart';
 import '../../projects/model/single_project_model.dart';
+import '../../projects/widgets/project_files_section.dart';
 import '../widgets/project_details_card.dart';
 import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
@@ -38,10 +39,9 @@ class AddOfferScreen extends StatelessWidget {
           preferredSize: const Size.fromHeight(kToolbarHeight),
           child: BlocBuilder<MyProjectsBloc, AppState>(
             builder: (context, state) {
-              final project = state is Done ? state.model as SingleProjectModel : null;
-              final myProposal = isFreelancer
-                  ? _findMyProposal(project)
-                  : null;
+              final project =
+                  state is Done ? state.model as SingleProjectModel : null;
+              final myProposal = isFreelancer ? _findMyProposal(project) : null;
               final hasEditArguments = argument?['proposalId'] != null;
               final title = !isFreelancer
                   ? 'projectData'.tr()
@@ -84,12 +84,15 @@ class AddOfferScreen extends StatelessWidget {
                       ),
                       ProjectDescription(
                         singleProjectModel: project,
+                        showAttachments: false,
                       ),
+                      if (project.files.isNotEmpty)
+                        ProjectFilesSection(files: project.files),
                       isFreelancer
                           ? AddOfferWidget(
                               id: argument?['id'],
-                              proposalId:
-                                  argument?['proposalId'] as int? ?? myProposal?.id,
+                              proposalId: argument?['proposalId'] as int? ??
+                                  myProposal?.id,
                               initialDescription:
                                   argument?['initialDescription'] as String? ??
                                       myProposal?.description,

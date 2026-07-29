@@ -95,6 +95,10 @@ class AccountStatementDetailsScreen extends StatelessWidget {
                             value: model.projectCost,
                           ),
                           _InfoRow(
+                            title: 'account_statement_screen.due'.tr(),
+                            value: model.due,
+                          ),
+                          _InfoRow(
                             title:
                                 'account_statement_screen.commission_paid'.tr(),
                             value: model.commissionPaid,

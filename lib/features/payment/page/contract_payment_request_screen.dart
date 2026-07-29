@@ -295,6 +295,7 @@ class _ContractPaymentRequestScreenState
                 label: 'contract_payment.amount'.tr(),
                 hint: 'contract_payment.amount_hint'.tr(),
                 inputType: const TextInputType.numberWithOptions(decimal: true),
+                readOnly: true,
                 formattedType: [
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                 ],

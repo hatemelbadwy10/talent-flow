@@ -50,6 +50,40 @@ Future<void> _confirmLogout(BuildContext context) async {
   context.read<SettingsBloc>().add(Add());
 }
 
+Future<void> _confirmDeleteAccount(BuildContext context) async {
+  final shouldDelete = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            title: Text('settings_screen.delete_account_confirm_title'.tr()),
+            content: Text('settings_screen.delete_account_confirm_body'.tr()),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text('cancel'.tr(),
+                    style: const TextStyle(color: Styles.SUBTITLE)),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: Text(
+                  'settings_screen.delete_account'.tr(),
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          );
+        },
+      ) ??
+      false;
+
+  if (!shouldDelete || !context.mounted) {
+    return;
+  }
+
+  context.read<SettingsBloc>().add(Delete());
+}
+
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
 
@@ -183,6 +217,15 @@ class SettingScreen extends StatelessWidget {
                                   blocContext.setLocale(const Locale('en'));
                                 }
                               }),
+                          SettingsMenuItem(
+                            icon: Icons.delete_forever_outlined,
+                            text: 'settings_screen.delete_account'.tr(),
+                            textColor: Colors.red,
+                            iconColor: Colors.red,
+                            onTap: () {
+                              _confirmDeleteAccount(blocContext);
+                            },
+                          ),
                           const SizedBox(height: 8.0),
                           const Divider(height: 1, color: Color(0xFFEEEEEE)),
                           const SizedBox(height: 8.0),

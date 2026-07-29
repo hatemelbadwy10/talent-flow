@@ -1,4 +1,4 @@
-package com.example.talent_flow
+package com.yem.talentflow
 
 import android.os.Bundle
 import android.util.Base64

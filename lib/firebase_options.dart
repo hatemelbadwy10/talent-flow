@@ -60,20 +60,20 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAL_Dmf3ba_wu_w45VKDAnqjpNPlUFKWls',
-    appId: '1:863499364117:ios:58b25af30802a06025ab1c',
+    appId: '1:863499364117:ios:734d699f0367720c25ab1c',
     messagingSenderId: '863499364117',
     projectId: 'talent-flow-1a793',
     storageBucket: 'talent-flow-1a793.firebasestorage.app',
-    iosBundleId: 'com.example.talentFlow',
+    iosBundleId: 'io.hatemelbadwy.talentflow.yem',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAL_Dmf3ba_wu_w45VKDAnqjpNPlUFKWls',
-    appId: '1:863499364117:ios:58b25af30802a06025ab1c',
+    appId: '1:863499364117:ios:734d699f0367720c25ab1c',
     messagingSenderId: '863499364117',
     projectId: 'talent-flow-1a793',
     storageBucket: 'talent-flow-1a793.firebasestorage.app',
-    iosBundleId: 'com.example.talentFlow',
+    iosBundleId: 'io.hatemelbadwy.talentflow.yem',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

@@ -53,8 +53,8 @@ class ChatRepo extends BaseRepo {
   }
 
   Future<Either<ServerFailure, ChatModel>> getConversationMessages(
-    int conversationId,
-  ) async {
+      int conversationId,
+      {String? search}) async {
     try {
       _logChatRepo(
         'getConversationMessages request',
@@ -62,6 +62,9 @@ class ChatRepo extends BaseRepo {
       );
       final Response response = await dioClient.get(
         uri: EndPoints.conversationMessages(conversationId),
+        queryParameters: search?.trim().isNotEmpty == true
+            ? {'search': search!.trim()}
+            : null,
       );
 
       final data = response.data;

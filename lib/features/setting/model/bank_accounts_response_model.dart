@@ -36,6 +36,7 @@ class BankAccountModel implements Mapper {
       bankName: _toText(
         json['bank_name'] ??
             json['bankName'] ??
+            (json['bank'] is String ? json['bank'] : null) ??
             bankMap['name'] ??
             bankMap['title'],
       ),

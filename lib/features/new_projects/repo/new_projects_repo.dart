@@ -12,6 +12,7 @@ class NewProjectsRepo extends BaseRepo {
   Future<Either<ServerFailure, Response>> getProjects({
     int? specializationId,
     String? sortBy,
+    String? search,
   }) async {
     try {
       final queryParameters = <String, dynamic>{};
@@ -20,6 +21,9 @@ class NewProjectsRepo extends BaseRepo {
       }
       if (sortBy != null && sortBy.trim().isNotEmpty) {
         queryParameters['sortBy'] = sortBy.trim();
+      }
+      if (search != null && search.trim().isNotEmpty) {
+        queryParameters['search'] = search.trim();
       }
 
       final response = await dioClient.get(
@@ -110,7 +114,8 @@ class NewProjectsRepo extends BaseRepo {
 
   Future<Either<Failure, dynamic>> addRemoveFavorite(int id) async {
     try {
-      final response = await dioClient.get(uri: "${EndPoints.projects}/$id/favourite");
+      final response =
+          await dioClient.get(uri: "${EndPoints.projects}/$id/favourite");
       return Right(response);
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));

@@ -137,7 +137,7 @@ class Statistics {
     required this.lastSeen,
   });
 
-  final int? rating;
+  final num? rating;
   final bool identityAuthenticated;
   final bool bankAccountAdded;
   final int? completedProjects;
@@ -204,9 +204,7 @@ class Work {
       views: json["views"],
       likes: json["likes"],
       status: json["status"],
-      isInFavorites: json["is_in_favorites"] == true ||
-          json["is_in_favorites"] == 1 ||
-          json["is_in_favorites"]?.toString() == "1",
+      isInFavorites: _toBool(json["is_in_favorites"] ?? json["is_fav"]),
     );
   }
 }

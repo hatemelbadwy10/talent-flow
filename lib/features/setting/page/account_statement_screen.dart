@@ -179,7 +179,7 @@ class _AccountStatementTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = math.max(constraints.maxWidth, 860.0);
+        final width = math.max(constraints.maxWidth, 980.0);
         return Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -255,6 +255,11 @@ class _TableHeader extends StatelessWidget {
             width: 155,
             isHeader: true,
           ),
+          _TableTextCell(
+            text: 'account_statement_screen.due'.tr(),
+            width: 120,
+            isHeader: true,
+          ),
         ],
       ),
     );
@@ -298,6 +303,7 @@ class _TableRowItem extends StatelessWidget {
           _TableTextCell(text: statement.date ?? '-', width: 130),
           _TableTextCell(text: statement.projectCost ?? '-', width: 145),
           _TableTextCell(text: statement.commissionPaid ?? '-', width: 155),
+          _TableTextCell(text: statement.due ?? '-', width: 120),
         ],
       ),
     );

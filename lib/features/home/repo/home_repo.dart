@@ -35,14 +35,23 @@ class HomeRepo extends BaseRepo {
     }
   }
 
-  Future<Either<ServerFailure, Response>> getFreelancers(
-      {int? categoryId}) async {
+  Future<Either<ServerFailure, Response>> getFreelancers({
+    int? categoryId,
+    String? search,
+  }) async {
     try {
       final uri = categoryId != null
           ? "${EndPoints.subCategories}$categoryId" // api/categories/{id}
           : EndPoints.freelancers; // الحالة العادية
+      final queryParameters = <String, dynamic>{};
+      if (search != null && search.trim().isNotEmpty) {
+        queryParameters['search'] = search.trim();
+      }
 
-      final response = await dioClient.get(uri: uri);
+      final response = await dioClient.get(
+        uri: uri,
+        queryParameters: queryParameters.isEmpty ? null : queryParameters,
+      );
       return Right(response);
     } on DioException catch (e) {
       return Left(

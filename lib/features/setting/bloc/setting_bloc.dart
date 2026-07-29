@@ -1,5 +1,8 @@
 import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talent_flow/app/core/app_core.dart';
+import 'package:talent_flow/app/core/app_notification.dart';
+import 'package:talent_flow/app/core/styles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/features/setting/repo/settings_repo.dart';
 
@@ -18,6 +21,7 @@ class SettingsBloc extends Bloc<AppEvent, AppState> {
   SettingsBloc(this._settingsRepo) : super(Start()) {
     on<Click>(_onHelp);
     on<Add>(_onLogout);
+    on<Delete>(_onDeleteAccount);
   }
 
   Future<void> _onHelp(Click event, Emitter<AppState> emit) async {
@@ -57,6 +61,49 @@ class SettingsBloc extends Bloc<AppEvent, AppState> {
         },
       );
     } catch (e) {
+      emit(Error());
+    }
+  }
+
+  Future<void> _onDeleteAccount(Delete event, Emitter<AppState> emit) async {
+    emit(Loading());
+    try {
+      final result = await _settingsRepo.deleteAccount();
+      await result.fold<Future<void>>(
+        (failure) async {
+          AppCore.showSnackBar(
+            notification: AppNotification(
+              message: failure.error,
+              backgroundColor: Styles.IN_ACTIVE,
+              borderColor: Styles.IN_ACTIVE,
+            ),
+          );
+          if (emit.isDone) return;
+          emit(Error());
+        },
+        (response) async {
+          final isFirstTime =
+              sl<SharedPreferences>().getBool(AppStorageKey.notFirstTime);
+          UserBloc.instance.add(Delete());
+          await sl<SharedPreferences>().clear();
+          await sl<SharedPreferences>()
+              .setBool(AppStorageKey.notFirstTime, isFirstTime ?? true);
+
+          CustomNavigator.push(Routes.login, clean: true);
+
+          log("Delete account response: ${response.data}");
+          if (emit.isDone) return;
+          emit(Done(data: response.data));
+        },
+      );
+    } catch (e) {
+      AppCore.showSnackBar(
+        notification: AppNotification(
+          message: e.toString(),
+          backgroundColor: Styles.IN_ACTIVE,
+          borderColor: Styles.IN_ACTIVE,
+        ),
+      );
       emit(Error());
     }
   }

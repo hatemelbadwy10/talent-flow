@@ -1,14 +1,10 @@
-import 'dart:async';
-
 import 'dart:developer';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_state.dart';
-import 'package:talent_flow/app/core/extensions.dart';
 import 'package:talent_flow/components/animated_widget.dart';
-import 'package:talent_flow/components/custom_text_form_field.dart';
 import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
 import 'package:talent_flow/features/setting/model/chats_model.dart';
 import 'package:talent_flow/features/setting/widgets/chat_list_item.dart';
@@ -24,8 +20,6 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  Timer? _searchTimer;
   int? _selectedProjectId;
 
   @override
@@ -43,21 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
-    _searchTimer?.cancel();
-    _searchController.dispose();
     super.dispose();
-  }
-
-  List<ChatsModel> _filterChats(List<ChatsModel> allChats) {
-    final query = _searchController.text.trim().toLowerCase();
-    return allChats.where((chat) {
-      final userName = (chat.receiver?.name ?? '').toLowerCase();
-      final lastMessage = (chat.lastMessageSnippet ?? '').toLowerCase();
-      final projectTitle = (chat.projectTitle ?? '').toLowerCase();
-      return userName.contains(query) ||
-          lastMessage.contains(query) ||
-          projectTitle.contains(query);
-    }).toList();
   }
 
   Future<void> _openChat(ChatsModel chat) async {
@@ -88,29 +68,9 @@ class _ChatScreenState extends State<ChatScreen> {
     if (!mounted) return;
     context.read<ChatsBloc>().add(
           Add(arguments: {
-            'search': _searchController.text.trim(),
             'project_id': _selectedProjectId,
           }),
         );
-  }
-
-  void _onSearchChanged(String query) {
-    // Cancel previous timer
-    _searchTimer?.cancel();
-
-    // Trigger immediate local filtering
-    setState(() {});
-
-    // Debounce backend search by 500ms - only search if query is not empty
-    if (query.trim().isNotEmpty) {
-      _searchTimer = Timer(const Duration(milliseconds: 500), () {
-        context.read<ChatsBloc>().add(
-              Add(arguments: {
-                'search': query,
-              }),
-            );
-      });
-    }
   }
 
   @override
@@ -156,42 +116,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        sufAssetIcon: 'assets/icons/search.svg',
-                        controller: _searchController,
-                        onChanged: _onSearchChanged,
-                        hint: 'chat_screen.search_hint'.tr(),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    InkWell(
-                      onTap: () {},
-                      borderRadius: BorderRadius.circular(12),
-                      child: const Icon(
-                        Icons.sort_rounded,
-                        color: Colors.black87,
-                      )
-                          .onTap(() {}, borderRadius: BorderRadius.circular(12))
-                          .setContainerToView(
-                            width: 48,
-                            height: 48,
-                            color: const Color(0xFFF2F4FA),
-                            radius: 12,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
               BlocBuilder<ChatsBloc, AppState>(
                 buildWhen: (previous, current) => true,
                 builder: (context, state) {
@@ -260,9 +184,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
                     if (state is Done) {
                       final allChats = state.list?.cast<ChatsModel>() ?? [];
-                      final filteredChats = _filterChats(allChats);
 
-                      if (filteredChats.isEmpty) {
+                      if (allChats.isEmpty) {
                         return Center(
                           child: Text("no_chats_found".tr()),
                         );
@@ -271,7 +194,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       return ListAnimator(
                         addPadding: false,
                         customPadding: EdgeInsets.zero,
-                        data: filteredChats
+                        data: allChats
                             .map(
                               (chat) => Padding(
                                 padding: const EdgeInsets.only(bottom: 10),

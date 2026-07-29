@@ -1,20 +1,31 @@
+import 'dart:developer';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
+import 'package:talent_flow/app/core/remote_config_service.dart';
 
 import '../../../../../app/core/app_event.dart';
 import '../../../../../app/core/app_state.dart';
 import '../../../../../components/custom_button.dart';
 import '../../../../../helpers/social_media_login_helper.dart';
 import '../bloc/social_media_bloc.dart';
+
 class SocialLoginWidget extends StatelessWidget {
   const SocialLoginWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
- return   BlocBuilder<SocialMediaBloc, AppState>(
+    final bool showSocialAuth = RemoteConfigService.showSocialAuth;
+    log('SocialLoginWidget visibility: showSocialAuth=$showSocialAuth');
+
+    if (!showSocialAuth) {
+      return const SizedBox.shrink();
+    }
+
+    return BlocBuilder<SocialMediaBloc, AppState>(
       builder: (context, state) {
         return Column(
           children: [
@@ -25,9 +36,10 @@ class SocialLoginWidget extends StatelessWidget {
               isLoading: state is Loading,
               lIconWidget: SvgPicture.asset("assets/svgs/google.svg"),
               onTap: () async {
+                log('Google login tapped from SocialLoginWidget');
                 context.read<SocialMediaBloc>().add(
-                  Click(arguments:SocialMediaProvider.google),
-                );
+                      Click(arguments: SocialMediaProvider.google),
+                    );
               },
             ),
             SizedBox(height: 16.h),
@@ -37,9 +49,11 @@ class SocialLoginWidget extends StatelessWidget {
               textColor: Colors.black,
               lIconWidget: SvgPicture.asset("assets/svgs/facebook.svg"),
               onTap: () async {
+                log('Facebook login tapped from SocialLoginWidget');
                 context.read<SocialMediaBloc>().add(
-                  Click(arguments:SocialMediaProvider.facebook),
-                );               },
+                      Click(arguments: SocialMediaProvider.facebook),
+                    );
+              },
             ),
           ],
         );

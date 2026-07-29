@@ -46,7 +46,7 @@ class DioClient extends ApiClient {
     dio.options.headers = {
       "Accept": "application/json",
       "x-api-key": EndPoints.apiKey,
-      "Accept-Language": lang,
+      "lang": lang,
       if (token != null)
         "Authorization": "Bearer $token"
       else if (sharedPreferences.getString(AppStorageKey.token) != null)
@@ -70,7 +70,7 @@ class DioClient extends ApiClient {
     dio.options.headers = {
       "Accept": "application/json",
       "x-api-key": EndPoints.apiKey,
-      "Accept-Language": lang,
+      "lang": lang,
       if (sharedPreferences.getString(AppStorageKey.token) != null)
         "Authorization": "Bearer ${sharedPreferences.getString(AppStorageKey.token)}",
     };
