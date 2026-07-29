@@ -1,24 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../app/core/app_event.dart';
 import '../../../data/auth_session_store.dart';
 import '../repo/login_repository.dart';
 import 'login_event.dart';
 import 'login_state.dart';
-
-// Kept temporarily for RegisterBloc compatibility. Registration owns this
-// event after its migration and this shim can then be removed.
-final class SocialLoginClick extends AppEvent {
-  SocialLoginClick({
-    required this.provider,
-    required this.token,
-    this.userType,
-  });
-
-  final String provider;
-  final String token;
-  final String? userType;
-}
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({

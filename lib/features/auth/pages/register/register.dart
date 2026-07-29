@@ -9,7 +9,9 @@ import 'package:talent_flow/features/auth/pages/register/repo/register_repo.dart
 import 'package:talent_flow/features/auth/widgets/auth_base.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../app/core/app_core.dart';
 import '../../../../app/core/app_event.dart';
+import '../../../../app/core/app_notification.dart';
 import '../../../../app/core/app_state.dart';
 import '../../../../app/core/app_storage_keys.dart';
 import '../../../../app/core/styles.dart';
@@ -22,7 +24,10 @@ import '../../../../data/config/di.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../social_media_login/bloc/social_media_bloc.dart';
-import 'bloc/register_bloc.dart'; // Import Bloc
+import 'bloc/register_bloc.dart';
+import 'bloc/register_event.dart';
+import 'bloc/register_state.dart';
+import 'model/register_request.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -62,7 +67,9 @@ class _RegisterState extends State<Register> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => RegisterBloc(repo: sl<RegisterRepo>()),
+          create: (context) => RegisterBloc(
+            repository: sl<RegisterRepo>(),
+          ),
         ),
         BlocProvider(
           create: (context) => SocialMediaBloc(repo: sl()),
@@ -181,28 +188,45 @@ class _RegisterState extends State<Register> {
 
           /// --------- Register button ---------
           SizedBox(height: 12.h),
-          BlocConsumer<RegisterBloc, AppState>(
+          BlocConsumer<RegisterBloc, RegisterState>(
             listener: (context, state) {
-              if (state is Done) {}
+              if (state case RegisterFailed(:final message)) {
+                AppCore.showSnackBar(
+                  notification: AppNotification(
+                    message: message,
+                    backgroundColor: Styles.IN_ACTIVE,
+                    borderColor: Styles.RED_COLOR,
+                  ),
+                );
+              }
+              if (state case RegisterSucceeded(:final email)) {
+                CustomNavigator.push(
+                  Routes.sendCodeScreen,
+                  arguments: {
+                    'email': email,
+                    'isRegister': true,
+                  },
+                );
+              }
             },
             builder: (context, state) {
               return CustomButton(
-                isLoading: state is Loading,
+                isLoading: state is RegisterLoading,
                 text: "register.register_button".tr(),
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
                     log("usertype $userType");
-                    BlocProvider.of<RegisterBloc>(context).add(
-                      Click(
-                        arguments: {
-                          "first_name": _firstNameController.text,
-                          "last_name": _lastNameController.text,
-                          "email": _emailController.text,
-                          "password": _passwordController.text,
-                          "user_type": userType,
-                        },
-                      ),
-                    );
+                    context.read<RegisterBloc>().add(
+                          RegisterSubmitted(
+                            RegisterRequest(
+                              firstName: _firstNameController.text,
+                              lastName: _lastNameController.text,
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                              userType: userType,
+                            ),
+                          ),
+                        );
                   }
                 },
                 gradient: const LinearGradient(
