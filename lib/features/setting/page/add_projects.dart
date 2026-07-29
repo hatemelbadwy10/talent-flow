@@ -8,18 +8,19 @@ import 'package:talent_flow/navigation/routes.dart';
 
 import '../bloc/portofilo_form_bloc.dart';
 import '../widgets/protofilo_form.dart';
+import '../model/user_completion_route_args.dart';
 
 class AddYourProjects extends StatelessWidget {
   const AddYourProjects({
     super.key,
-    this.arguments,
+    required this.arguments,
     required this.isFreelancer,
   });
 
-  final Map<String, dynamic>? arguments;
+  final UserCompletionRouteArgs arguments;
   final bool isFreelancer;
 
-  bool get _fromOnboarding => arguments?['fromOnboarding'] == true;
+  bool get _fromOnboarding => arguments.fromOnboarding;
 
   @override
   Widget build(BuildContext context) {
@@ -84,10 +85,9 @@ class AddYourProjects extends StatelessWidget {
                       }
                       CustomNavigator.push(
                         Routes.acceptanceTestQuestions,
-                        arguments: {
-                          'fromOnboarding': _fromOnboarding,
-                          'pendingWorks': state.data.forms,
-                        },
+                        arguments: AcceptanceTestRouteArgs(
+                          pendingWorks: state.data.forms,
+                        ),
                       );
                     },
                     child: const PortfolioUploadForm(),

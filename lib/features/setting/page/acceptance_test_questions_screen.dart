@@ -11,16 +11,17 @@ import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
 import '../../../app/core/app_core.dart';
+import '../model/user_completion_route_args.dart';
 
 class AcceptanceTestQuestionsScreen extends StatefulWidget {
   const AcceptanceTestQuestionsScreen({
     super.key,
-    this.arguments,
+    required this.arguments,
     required this.acceptanceTestRepo,
     required this.workRepository,
   });
 
-  final Map<String, dynamic>? arguments;
+  final AcceptanceTestRouteArgs arguments;
   final AcceptanceTestRepo acceptanceTestRepo;
   final AddWorkRepository workRepository;
 
@@ -35,16 +36,7 @@ class _AcceptanceTestQuestionsScreenState
   final Map<String, String> _selectedAnswers = {};
   bool _isSubmitting = false;
 
-  List<SinglePortfolioData> get _pendingWorks {
-    final rawWorks = widget.arguments?['pendingWorks'];
-    if (rawWorks is List<SinglePortfolioData>) {
-      return rawWorks;
-    }
-    if (rawWorks is List) {
-      return rawWorks.whereType<SinglePortfolioData>().toList();
-    }
-    return const <SinglePortfolioData>[];
-  }
+  List<SinglePortfolioData> get _pendingWorks => widget.arguments.pendingWorks;
 
   @override
   void initState() {

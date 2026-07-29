@@ -30,18 +30,19 @@ import 'package:talent_flow/main_repos/location_options_repo.dart';
 import '../../../components/custom_text_form_field.dart';
 import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
+import '../model/user_completion_route_args.dart';
 
 class IdentityVerificationScreen extends StatefulWidget {
   const IdentityVerificationScreen({
     super.key,
-    this.arguments,
+    required this.arguments,
     required this.settingsRepository,
     required this.locationOptionsRepository,
     required this.sharedPreferences,
     required this.dio,
   });
 
-  final Map<String, dynamic>? arguments;
+  final UserCompletionRouteArgs arguments;
   final SettingsRepo settingsRepository;
   final LocationOptionsRepo locationOptionsRepository;
   final SharedPreferences sharedPreferences;
@@ -259,7 +260,7 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
     }
   }
 
-  bool get _fromOnboarding => widget.arguments?['fromOnboarding'] == true;
+  bool get _fromOnboarding => widget.arguments.fromOnboarding;
 
   String _readIdentityVerifyStatus() {
     final rawUserData =

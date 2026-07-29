@@ -8,14 +8,15 @@ import '../../../app/core/images.dart';
 import '../../../app/core/styles.dart';
 import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
+import '../model/user_type_route_args.dart';
 
 class UserTypeSelectionScreen extends StatelessWidget {
   const UserTypeSelectionScreen({
     super.key,
-    this.arguments,
+    required this.arguments,
     required this.sharedPreferences,
   });
-  final Map<String, dynamic>? arguments;
+  final UserTypeRouteArgs arguments;
   final SharedPreferences sharedPreferences;
 
   @override
@@ -82,8 +83,8 @@ class UserTypeSelectionScreen extends StatelessWidget {
                       AppStorageKey.isFreelancer,
                       false,
                     );
-                    log('arguments?["from_login"]${arguments?["from_login"]}');
-                    if (arguments?["from_login"] == true) {
+                    log('fromLogin=${arguments.fromLogin}');
+                    if (arguments.fromLogin) {
                       CustomNavigator.push(Routes.register);
                     } else {
                       CustomNavigator.push(Routes.login, clean: true);
@@ -99,8 +100,8 @@ class UserTypeSelectionScreen extends StatelessWidget {
                         AppStorageKey.isFreelancer,
                         true,
                       );
-                      log('arguments?["from_login"]${arguments?["from_login"]}');
-                      if (arguments?["from_login"] == true) {
+                      log('fromLogin=${arguments.fromLogin}');
+                      if (arguments.fromLogin) {
                         CustomNavigator.push(Routes.register);
                       } else {
                         CustomNavigator.push(Routes.login, clean: true);

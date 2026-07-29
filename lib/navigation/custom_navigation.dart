@@ -75,6 +75,7 @@ import '../features/splash/repo/splash_repo.dart';
 import '../main_repos/location_options_repo.dart';
 import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
+import '../features/on_boarding/model/user_type_route_args.dart';
 import '../features/projects/page/my_projects.dart';
 import '../features/projects/repo/projects_repo.dart';
 import '../features/setting/page/about_talent_flow.dart';
@@ -89,6 +90,7 @@ import '../features/setting/page/create_contract_screen.dart';
 import '../features/setting/page/edit_profile.dart';
 import '../features/setting/page/edit_work_screen.dart';
 import '../features/setting/page/identity_verification_screen.dart';
+import '../features/setting/model/user_completion_route_args.dart';
 import '../features/setting/page/terms_and_condations.dart';
 import '../features/splash/page/splash.dart';
 import '../main.dart';
@@ -110,7 +112,7 @@ abstract class CustomNavigator {
         return _pageRoute(const OnboardingScreen());
       case Routes.freeLancer:
         return _pageRoute(UserTypeSelectionScreen(
-          arguments: settings.arguments as Map<String, dynamic>?,
+          arguments: UserTypeRouteArgs.fromRoute(settings.arguments),
           sharedPreferences: sl<SharedPreferences>(),
         ));
       case Routes.navBar:
@@ -203,7 +205,7 @@ abstract class CustomNavigator {
       case Routes.addProject:
         return _pageRoute(const AddProject());
       case Routes.addYourProject:
-        final arguments = settings.arguments as Map<String, dynamic>?;
+        final arguments = UserCompletionRouteArgs.fromRoute(settings.arguments);
         final prefs = sl<SharedPreferences>();
         final rawUserData = prefs.getString(AppStorageKey.userData) ?? '';
         bool addedWorks = false;
@@ -220,7 +222,7 @@ abstract class CustomNavigator {
         }
         final isFreelancer = prefs.getBool(AppStorageKey.isFreelancer) ?? true;
         final shouldOpenSingleWork =
-            isFreelancer && addedWorks && arguments?['fromOnboarding'] != true;
+            isFreelancer && addedWorks && !arguments.fromOnboarding;
         if (shouldOpenSingleWork) {
           return _pageRoute(
             AddSingleWorkScreen(repository: sl<AddWorkRepo>()),
@@ -416,7 +418,7 @@ abstract class CustomNavigator {
       case Routes.acceptanceTestQuestions:
         return _pageRoute(
           AcceptanceTestQuestionsScreen(
-            arguments: settings.arguments as Map<String, dynamic>?,
+            arguments: AcceptanceTestRouteArgs.fromRoute(settings.arguments),
             acceptanceTestRepo: sl<AcceptanceTestRepo>(),
             workRepository: sl<AddWorkRepo>(),
           ),
@@ -488,7 +490,7 @@ abstract class CustomNavigator {
       case Routes.identityVerification:
         return _pageRoute(
           IdentityVerificationScreen(
-            arguments: settings.arguments as Map<String, dynamic>?,
+            arguments: UserCompletionRouteArgs.fromRoute(settings.arguments),
             settingsRepository: sl<SettingsRepo>(),
             locationOptionsRepository: sl<LocationOptionsRepo>(),
             sharedPreferences: sl<SharedPreferences>(),
