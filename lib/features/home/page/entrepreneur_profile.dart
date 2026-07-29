@@ -8,13 +8,14 @@ import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/data/config/di.dart';
-import 'package:talent_flow/features/home/bloc/home_bloc.dart';
+import 'package:talent_flow/features/home/bloc/entrepreneur_profile_bloc.dart';
 import 'package:talent_flow/features/home/model/entrepreneur_profile_model.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/main_models/user_model.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
+import 'package:talent_flow/features/home/repo/home_repo.dart';
 
 class EntrepreneurProfileView extends StatefulWidget {
   const EntrepreneurProfileView({super.key, this.arguments});
@@ -112,8 +113,8 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
     }
 
     return BlocProvider(
-      create: (_) => HomeBloc(homeRepo: sl())
-        ..add(EntrepreneurProfileEvent(arguments: _entrepreneurId)),
+      create: (_) => EntrepreneurProfileBloc(repository: sl<HomeRepo>())
+        ..add(EntrepreneurProfileRequested(_entrepreneurId)),
       child: Builder(
         builder: (context) {
           return Scaffold(
@@ -127,10 +128,8 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
                         onPressed: () async {
                           await CustomNavigator.push(Routes.editProfile);
                           if (!context.mounted) return;
-                          context.read<HomeBloc>().add(
-                                EntrepreneurProfileEvent(
-                                    arguments: _entrepreneurId),
-                              );
+                          context.read<EntrepreneurProfileBloc>().add(
+                              EntrepreneurProfileRequested(_entrepreneurId));
                         },
                         icon: const Icon(
                           Icons.edit_outlined,
@@ -141,23 +140,23 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
                     ]
                   : null,
             ),
-            body: BlocBuilder<HomeBloc, AppState>(
+            body:
+                BlocBuilder<EntrepreneurProfileBloc, EntrepreneurProfileState>(
               builder: (context, state) {
-                if (state is Loading) {
+                if (state is EntrepreneurProfileLoading) {
                   return const Center(
                     child:
                         CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
                   );
                 }
-                if (state is Error) {
+                if (state is EntrepreneurProfileFailed) {
                   return Center(child: Text('profile.load_failed'.tr()));
                 }
-                if (state is! Done ||
-                    state.model is! EntrepreneurProfileModel) {
+                if (state is! EntrepreneurProfileLoaded) {
                   return const SizedBox.shrink();
                 }
 
-                final model = state.model as EntrepreneurProfileModel;
+                final model = state.profile;
 
                 return _EntrepreneurProfileScaffold(model: model);
               },

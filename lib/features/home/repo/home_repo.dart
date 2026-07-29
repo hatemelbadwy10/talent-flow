@@ -7,17 +7,20 @@ import '../../../data/error/failures.dart';
 import '../model/home_model.dart';
 import '../model/freelancers_model.dart';
 import '../model/freelancer_profile_model.dart';
+import '../model/entrepreneur_profile_model.dart';
 import 'home_dashboard_repository.dart';
 import 'categories_repository.dart';
 import 'freelancers_repository.dart';
 import 'freelancer_profile_repository.dart';
+import 'entrepreneur_profile_repository.dart';
 
 class HomeRepo extends BaseRepo
     implements
         HomeDashboardRepository,
         CategoriesRepository,
         FreelancersRepository,
-        FreelancerProfileRepository {
+        FreelancerProfileRepository,
+        EntrepreneurProfileRepository {
   HomeRepo({required super.sharedPreferences, required super.dioClient});
 
   Future<Either<ServerFailure, Response>> getHome() async {
@@ -217,6 +220,34 @@ class HomeRepo extends BaseRepo
           ServerFailure(e.message ?? 'An unexpected Dio error occurred'));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ServerFailure, EntrepreneurProfileModel>> getEntrepreneur(
+    int id,
+  ) async {
+    try {
+      final response =
+          await dioClient.get(uri: '${EndPoints.entrepreneurDetails}$id');
+      final data = Map<String, dynamic>.from(response.data as Map);
+      final payload = data['payload'];
+      if (payload is! Map) {
+        return left(ServerFailure('Entrepreneur profile payload is invalid'));
+      }
+      return right(
+        EntrepreneurProfileModel.fromJson(
+          Map<String, dynamic>.from(payload),
+        ),
+      );
+    } on DioException catch (error) {
+      return left(
+        ServerFailure(error.message ?? 'An unexpected Dio error occurred'),
+      );
+    } on FormatException catch (error) {
+      return left(ServerFailure(error.message));
+    } catch (error) {
+      return left(ServerFailure(error.toString()));
     }
   }
 
