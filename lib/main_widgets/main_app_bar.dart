@@ -2,7 +2,6 @@ import 'package:talent_flow/app/core/extensions.dart';
 import 'package:talent_flow/components/custom_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
@@ -22,7 +21,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, AppState>(
+    return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
         return Container(
           padding: EdgeInsets.only(
@@ -33,8 +32,8 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Styles.PRIMARY_COLOR.withOpacity(0.28),
-                Color(0XFFFFF6F1).withOpacity(0.2),
+                Styles.PRIMARY_COLOR.withValues(alpha: 0.28),
+                const Color(0XFFFFF6F1).withValues(alpha: 0.2),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,

@@ -9,7 +9,6 @@ import '../../features/setting/repo/bank_accounts_repo.dart';
 import '../../main_blocs/user_bloc.dart';
 import '../../navigation/custom_navigation.dart';
 import '../../navigation/routes.dart';
-import 'app_event.dart';
 import 'app_storage_keys.dart';
 
 enum GuardedAction {
@@ -111,7 +110,7 @@ abstract class UserCompletionGuard {
     }
 
     await _prefs.setString(AppStorageKey.userData, jsonEncode(rawUser));
-    UserBloc.instance.add(Click());
+    UserBloc.instance.add(const UserRequested());
   }
 
   static String? get identityVerifyStatus {

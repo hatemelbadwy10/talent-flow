@@ -8,8 +8,6 @@ import 'package:talent_flow/app/core/extensions.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 
 import '../../../app/core/app_storage_keys.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../app/core/images.dart';
 import '../../../data/config/di.dart';
 import '../../../main_blocs/user_bloc.dart';
@@ -28,29 +26,36 @@ class _ProfileCardState extends State<ProfileCard> {
   void initState() {
     super.initState();
     // Fetch user data when widget initializes
-    context.read<UserBloc>().add(Click());
+    context.read<UserBloc>().add(const UserRequested());
   }
 
   @override
   Widget build(BuildContext context) {
     context.locale; // Ensure widget rebuilds on locale change
-    return BlocBuilder<UserBloc, AppState>(
+    return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
         final prefs = sl<SharedPreferences>();
         final userBloc = context.read<UserBloc>();
         final user = userBloc.user;
-        
+
         // Get data from UserBloc or fallback to SharedPreferences
-        final userName = user?.name ?? prefs.getString(AppStorageKey.userName) ?? "user_example.name".tr();
-        final userEmail = user?.email ?? prefs.getString(AppStorageKey.userEmail) ?? "user_example.email".tr();
-        final userImage = user?.profileImage ?? prefs.getString(AppStorageKey.userImage) ?? Images.appLogo;
-        
+        final userName = user?.name ??
+            prefs.getString(AppStorageKey.userName) ??
+            "user_example.name".tr();
+        final userEmail = user?.email ??
+            prefs.getString(AppStorageKey.userEmail) ??
+            "user_example.email".tr();
+        final userImage = user?.profileImage ??
+            prefs.getString(AppStorageKey.userImage) ??
+            Images.appLogo;
+
         final isFreelancer = prefs.getBool(AppStorageKey.isFreelancer) ?? false;
         final accountTypeKey = isFreelancer
             ? 'settings_screen.account_type_freelancer'
             : 'settings_screen.account_type_entrepreneur';
-        final userId = user?.id ?? int.tryParse(prefs.getString(AppStorageKey.userId) ?? '');
-        
+        final userId = user?.id ??
+            int.tryParse(prefs.getString(AppStorageKey.userId) ?? '');
+
         return Container(
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
@@ -90,7 +95,8 @@ class _ProfileCardState extends State<ProfileCard> {
                         const SizedBox(height: 4.0),
                         Text(
                           userEmail,
-                          style: const TextStyle(color: Colors.grey, fontSize: 14),
+                          style:
+                              const TextStyle(color: Colors.grey, fontSize: 14),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),

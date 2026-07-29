@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/notification_event.dart';
 import 'package:talent_flow/features/setting/bloc/notification_state.dart';
@@ -41,7 +40,7 @@ class _NotificationState extends State<Notification>
 
     _tabController = TabController(length: _tabTitles.length, vsync: this);
     UserBloc.instance.add(
-      SyncUnreadCounts(arguments: {'notifications': 0}),
+      const UserUnreadCountsSynced(notifications: 0),
     );
 
     // send first request when screen opens

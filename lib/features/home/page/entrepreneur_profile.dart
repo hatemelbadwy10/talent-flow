@@ -2,8 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
@@ -50,7 +48,7 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
     if (_useCurrentProfile) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        context.read<UserBloc>().add(Click());
+        context.read<UserBloc>().add(const UserRequested());
       });
     }
   }
@@ -81,7 +79,7 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
                     onPressed: () async {
                       await CustomNavigator.push(Routes.editProfile);
                       if (!context.mounted) return;
-                      context.read<UserBloc>().add(Click());
+                      context.read<UserBloc>().add(const UserRequested());
                     },
                     icon: const Icon(
                       Icons.edit_outlined,
@@ -92,11 +90,11 @@ class _EntrepreneurProfileViewState extends State<EntrepreneurProfileView> {
                 ]
               : null,
         ),
-        body: BlocBuilder<UserBloc, AppState>(
+        body: BlocBuilder<UserBloc, UserState>(
           builder: (context, state) {
             final user = context.read<UserBloc>().user;
 
-            if (state is Loading && user == null) {
+            if (state is UserLoading && user == null) {
               return const Center(
                 child: CircularProgressIndicator(color: Styles.PRIMARY_COLOR),
               );

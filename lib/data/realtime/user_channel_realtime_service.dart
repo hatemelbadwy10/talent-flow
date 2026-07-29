@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_core.dart';
-import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/styles.dart';
@@ -12,8 +11,9 @@ import 'package:talent_flow/data/realtime/pusher_service.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
+import 'user_subscription_controller.dart';
 
-class UserChannelRealtimeService {
+class UserChannelRealtimeService implements UserSubscriptionController {
   UserChannelRealtimeService({
     required SharedPreferences sharedPreferences,
     required PusherService pusherService,
@@ -27,7 +27,8 @@ class UserChannelRealtimeService {
   int? _subscribedUserId;
 
   Future<void> syncSessionSubscription() async {
-    final token = _sharedPreferences.getString(AppStorageKey.token)?.trim() ?? '';
+    final token =
+        _sharedPreferences.getString(AppStorageKey.token)?.trim() ?? '';
     final rawUserId =
         _sharedPreferences.getString(AppStorageKey.userId)?.trim() ?? '';
     final userId = int.tryParse(rawUserId);
@@ -82,6 +83,7 @@ class UserChannelRealtimeService {
     );
   }
 
+  @override
   Future<void> clearSubscription() async {
     if (_subscribedChannelName == null) {
       return;
@@ -232,7 +234,7 @@ class UserChannelRealtimeService {
       },
     );
     UserBloc.instance.add(
-      SyncUnreadCounts(arguments: {'messages': nextCount}),
+      UserUnreadCountsSynced(messages: nextCount),
     );
   }
 
@@ -262,9 +264,8 @@ class UserChannelRealtimeService {
       if ((messageText ?? '').trim().isNotEmpty) messageText!.trim(),
     ].join(': ');
 
-    final message = displayMessage.isNotEmpty
-        ? displayMessage
-        : 'You have a new message';
+    final message =
+        displayMessage.isNotEmpty ? displayMessage : 'You have a new message';
 
     AppCore.showSnackBar(
       notification: AppNotification(
@@ -302,7 +303,8 @@ class UserChannelRealtimeService {
   }
 }
 
-void _logUserChannel(String message, [Map<String, Object?> details = const {}]) {
+void _logUserChannel(String message,
+    [Map<String, Object?> details = const {}]) {
   final suffix = details.isEmpty ? '' : ' | $details';
   log('[UserChannelRealtimeService] $message$suffix',
       name: 'UserChannelRealtimeService');

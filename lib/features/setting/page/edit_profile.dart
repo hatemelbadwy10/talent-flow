@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
-import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_button.dart';
@@ -119,7 +118,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
           _lastShownSuccessState = true;
           final payload = state.updatedUserPayload;
           if (payload != null) {
-            context.read<UserBloc>().add(Update(arguments: payload));
+            context.read<UserBloc>().add(UserPayloadUpdated(payload));
           }
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

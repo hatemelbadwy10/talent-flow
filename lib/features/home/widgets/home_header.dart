@@ -13,7 +13,6 @@ import 'package:talent_flow/app/core/svg_images.dart';
 import '../../../app/core/app_storage_keys.dart';
 import '../../../data/config/di.dart';
 import '../../../main_blocs/user_bloc.dart';
-import '../../../app/core/app_state.dart';
 
 class HomeHeaderSection extends StatelessWidget {
   final VoidCallback? onNotificationTap;
@@ -37,7 +36,7 @@ class HomeHeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, AppState>(
+    return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
         final prefs = sl<SharedPreferences>();
         final rawUserData = prefs.getString(AppStorageKey.userData);

@@ -1,8 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,20 +36,23 @@ class _GlobalUserHeaderState extends State<GlobalUserHeader> {
   void initState() {
     super.initState();
     // Fetch latest user data when header initializes
-    context.read<UserBloc>().add(Click());
+    context.read<UserBloc>().add(const UserRequested());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, AppState>(
+    return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
         final userBloc = context.read<UserBloc>();
         final user = userBloc.user;
         final prefs = sl<SharedPreferences>();
 
         // Get data from UserBloc or fallback to SharedPreferences
-        final userName = user?.name ?? prefs.getString(AppStorageKey.userName) ?? "User";
-        final userImage = user?.profileImage ?? prefs.getString(AppStorageKey.userImage) ?? Images.appLogo;
+        final userName =
+            user?.name ?? prefs.getString(AppStorageKey.userName) ?? "User";
+        final userImage = user?.profileImage ??
+            prefs.getString(AppStorageKey.userImage) ??
+            Images.appLogo;
 
         return GestureDetector(
           onTap: widget.onUserTap ??
@@ -122,19 +123,22 @@ class _GlobalUserAvatarState extends State<GlobalUserAvatar> {
   @override
   void initState() {
     super.initState();
-    context.read<UserBloc>().add(Click());
+    context.read<UserBloc>().add(const UserRequested());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, AppState>(
+    return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
         final userBloc = context.read<UserBloc>();
         final user = userBloc.user;
         final prefs = sl<SharedPreferences>();
 
-        final userImage = user?.profileImage ?? prefs.getString(AppStorageKey.userImage) ?? Images.appLogo;
-        final notificationCount = widget.notificationCount ?? user?.unreadNotificationsCount ?? 0;
+        final userImage = user?.profileImage ??
+            prefs.getString(AppStorageKey.userImage) ??
+            Images.appLogo;
+        final notificationCount =
+            widget.notificationCount ?? user?.unreadNotificationsCount ?? 0;
 
         return GestureDetector(
           onTap: widget.onTap ?? () => CustomNavigator.push(Routes.profile),
@@ -155,7 +159,9 @@ class _GlobalUserAvatarState extends State<GlobalUserAvatar> {
                       shape: BoxShape.circle,
                     ),
                     child: Text(
-                      notificationCount > 99 ? '99+' : notificationCount.toString(),
+                      notificationCount > 99
+                          ? '99+'
+                          : notificationCount.toString(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
@@ -194,18 +200,19 @@ class _GlobalUserNameState extends State<GlobalUserName> {
   @override
   void initState() {
     super.initState();
-    context.read<UserBloc>().add(Click());
+    context.read<UserBloc>().add(const UserRequested());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, AppState>(
+    return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
         final userBloc = context.read<UserBloc>();
         final user = userBloc.user;
         final prefs = sl<SharedPreferences>();
 
-        final userName = user?.name ?? prefs.getString(AppStorageKey.userName) ?? "User";
+        final userName =
+            user?.name ?? prefs.getString(AppStorageKey.userName) ?? "User";
 
         return GestureDetector(
           onTap: widget.onTap,

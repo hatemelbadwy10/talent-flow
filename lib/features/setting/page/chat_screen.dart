@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/components/animated_widget.dart';
 import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
 import 'package:talent_flow/features/setting/model/chats_model.dart';
@@ -26,7 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     final chatsBloc = context.read<ChatsBloc>();
     UserBloc.instance.add(
-      SyncUnreadCounts(arguments: {'messages': 0}),
+      const UserUnreadCountsSynced(messages: 0),
     );
     Future.microtask(() {
       chatsBloc.add(const ChatProjectOptionsRequested());

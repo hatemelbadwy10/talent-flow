@@ -3,27 +3,30 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/data/api/end_points.dart';
 import 'package:talent_flow/main_repos/base_repo.dart';
 import '../app/core/app_currency.dart';
 import '../app/core/app_storage_keys.dart';
-import '../data/config/di.dart';
 import '../data/error/api_error_handler.dart';
 import '../data/error/failures.dart';
 import '../main_models/user_model.dart';
+import 'user_repository.dart';
 
-class UserRepo extends BaseRepo {
+class UserRepo extends BaseRepo implements UserRepository {
   UserRepo({required super.sharedPreferences, required super.dioClient});
 
+  @override
   bool get isLogIn => token.isNotEmpty;
 
+  @override
   Future<Either<ServerFailure, UserModel>> fetchUserProfile() async {
     try {
       final Response response = await dioClient.get(uri: EndPoints.profile);
       final responseData = response.data;
       final payload = _asMap(responseData)?['payload'];
-      final userJson = _asMap(payload)?['user'] ?? _asMap(payload) ?? _asMap(responseData)?['user'];
+      final userJson = _asMap(payload)?['user'] ??
+          _asMap(payload) ??
+          _asMap(responseData)?['user'];
 
       if (userJson == null) {
         return Left(ServerFailure("Profile payload is empty"));
@@ -36,6 +39,7 @@ class UserRepo extends BaseRepo {
     }
   }
 
+  @override
   Either<ServerFailure, UserModel> getUser() {
     try {
       final String? userObject =
@@ -52,35 +56,37 @@ class UserRepo extends BaseRepo {
     }
   }
 
-  setUserData(json) {
-    AppCurrency.cacheFromPayload(json);
-    sharedPreferences.setString(
+  @override
+  Future<void> setUserData(Map<String, dynamic> json) async {
+    await AppCurrency.cacheFromPayload(json);
+    await sharedPreferences.setString(
       AppStorageKey.userId,
       json["id"]?.toString() ?? "",
     );
-    sharedPreferences.setString(AppStorageKey.userData, jsonEncode(json));
-    sharedPreferences.setString(
+    await sharedPreferences.setString(AppStorageKey.userData, jsonEncode(json));
+    await sharedPreferences.setString(
       AppStorageKey.userName,
       json["first_name"]?.toString() ?? json["name"]?.toString() ?? "",
     );
-    sharedPreferences.setString(
+    await sharedPreferences.setString(
       AppStorageKey.userEmail,
       json["email"]?.toString() ?? "",
     );
-    sharedPreferences.setString(
+    await sharedPreferences.setString(
       AppStorageKey.userImage,
       json["profile_image"]?.toString() ?? json["image"]?.toString() ?? "",
     );
-    sharedPreferences.setBool(AppStorageKey.isLogin, true);
+    await sharedPreferences.setBool(AppStorageKey.isLogin, true);
 
     if (json['user_type'] != null) {
-      sl<SharedPreferences>().setBool(
+      await sharedPreferences.setBool(
         AppStorageKey.isFreelancer,
         json['user_type']?.toString() != "Entrepreneur",
       );
     }
   }
 
+  @override
   UserModel? updateUnreadCounts({
     int? notifications,
     int? messages,
@@ -136,22 +142,23 @@ class UserRepo extends BaseRepo {
     await sharedPreferences.setBool(AppStorageKey.isLogin, true);
 
     if (json['user_type'] != null) {
-      await sl<SharedPreferences>().setBool(
+      await sharedPreferences.setBool(
         AppStorageKey.isFreelancer,
         json['user_type']?.toString() != "Entrepreneur",
       );
     }
   }
 
-  clearUserData() {
-    sharedPreferences.remove(AppStorageKey.userData);
-    sharedPreferences.remove(AppStorageKey.userId);
-    sharedPreferences.remove(AppStorageKey.userName);
-    sharedPreferences.remove(AppStorageKey.userEmail);
-    sharedPreferences.remove(AppStorageKey.userImage);
-    sharedPreferences.remove(AppStorageKey.token);
-    sharedPreferences.remove(AppStorageKey.isLogin);
-    sharedPreferences.remove(AppStorageKey.isFreelancer);
+  @override
+  Future<void> clearUserData() async {
+    await sharedPreferences.remove(AppStorageKey.userData);
+    await sharedPreferences.remove(AppStorageKey.userId);
+    await sharedPreferences.remove(AppStorageKey.userName);
+    await sharedPreferences.remove(AppStorageKey.userEmail);
+    await sharedPreferences.remove(AppStorageKey.userImage);
+    await sharedPreferences.remove(AppStorageKey.token);
+    await sharedPreferences.remove(AppStorageKey.isLogin);
+    await sharedPreferences.remove(AppStorageKey.isFreelancer);
   }
 }
 

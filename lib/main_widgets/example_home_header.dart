@@ -1,8 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/main_widgets/global_user_header.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
@@ -45,10 +43,13 @@ class ExampleHomeHeader extends StatelessWidget {
                     children: [
                       const Icon(Icons.notifications_outlined, size: 24),
                       // You can add notification count here
-                      BlocBuilder<UserBloc, AppState>(
+                      BlocBuilder<UserBloc, UserState>(
                         builder: (context, state) {
-                          final notificationCount =
-                              context.read<UserBloc>().user?.unreadNotificationsCount ?? 0;
+                          final notificationCount = context
+                                  .read<UserBloc>()
+                                  .user
+                                  ?.unreadNotificationsCount ??
+                              0;
                           if (notificationCount > 0) {
                             return Positioned(
                               right: -2,
@@ -60,7 +61,9 @@ class ExampleHomeHeader extends StatelessWidget {
                                   shape: BoxShape.circle,
                                 ),
                                 child: Text(
-                                  notificationCount > 9 ? '9+' : '$notificationCount',
+                                  notificationCount > 9
+                                      ? '9+'
+                                      : '$notificationCount',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,
@@ -85,10 +88,13 @@ class ExampleHomeHeader extends StatelessWidget {
                     children: [
                       const Icon(Icons.mail_outline, size: 24),
                       // Message count badge
-                      BlocBuilder<UserBloc, AppState>(
+                      BlocBuilder<UserBloc, UserState>(
                         builder: (context, state) {
-                          final messageCount =
-                              context.read<UserBloc>().user?.unreadMessagesCount ?? 0;
+                          final messageCount = context
+                                  .read<UserBloc>()
+                                  .user
+                                  ?.unreadMessagesCount ??
+                              0;
                           if (messageCount > 0) {
                             return Positioned(
                               right: -2,
@@ -131,19 +137,19 @@ class SimpleHomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
       child: Row(
         children: [
           /// User avatar only
-          const GlobalUserAvatar(
+          GlobalUserAvatar(
             radius: 28,
             showNotificationBadge: true,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
 
           /// User name and greeting
-          const Expanded(
+          Expanded(
             child: GlobalUserName(
               showGreeting: true,
             ),
@@ -172,7 +178,7 @@ class _AdvancedHomeHeaderState extends State<AdvancedHomeHeader> {
     super.initState();
     _searchController = TextEditingController();
     // Fetch user data when header initializes
-    context.read<UserBloc>().add(Click());
+    context.read<UserBloc>().add(const UserRequested());
   }
 
   @override

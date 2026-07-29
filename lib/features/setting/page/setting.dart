@@ -6,7 +6,6 @@ import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 
-import '../../../app/core/app_event.dart';
 import '../../../data/config/di.dart';
 import '../../auth/data/auth_session_store.dart';
 import '../../../main_blocs/user_bloc.dart';
@@ -98,7 +97,7 @@ SettingsBloc _createSettingsBloc() {
 
 void _listenToSettingsState(BuildContext context, SettingsState state) {
   if (state is LogoutSucceeded || state is AccountDeletionSucceeded) {
-    UserBloc.instance.add(Delete());
+    UserBloc.instance.add(const UserCleared());
     CustomNavigator.push(Routes.login, clean: true);
     return;
   }

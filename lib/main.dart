@@ -68,7 +68,16 @@ class MyApp extends StatelessWidget {
         final userBloc = UserBloc.instance;
         return BlocProvider.value(
           value: userBloc,
-          child: _RealtimeSessionBootstrap(child: child!),
+          child: BlocListener<UserBloc, UserState>(
+            listener: (context, state) {
+              if (state case UserFailed(:final message)) {
+                CustomNavigator.scaffoldState.currentState?.showSnackBar(
+                  SnackBar(content: Text(message)),
+                );
+              }
+            },
+            child: _RealtimeSessionBootstrap(child: child!),
+          ),
         );
       },
     );

@@ -28,7 +28,7 @@ class SplashBloc extends Bloc<AppEvent, AppState> {
       } else {
         final hasToken = repo.isLogin;
         if (hasToken) {
-          UserBloc.instance.add(Click());
+          UserBloc.instance.add(const UserRequested());
         }
         final routes = hasToken ? Routes.navBar : Routes.login;
         CustomNavigator.push(routes, clean: true);

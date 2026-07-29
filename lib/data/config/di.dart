@@ -156,7 +156,12 @@ Future<void> init() async {
   // User Repo and Bloc
   sl.registerLazySingleton(
       () => UserRepo(sharedPreferences: sl(), dioClient: sl()));
-  sl.registerLazySingleton(() => UserBloc(repo: sl()));
+  sl.registerLazySingleton(
+    () => UserBloc(
+      repository: sl<UserRepo>(),
+      subscriptionController: sl<UserChannelRealtimeService>(),
+    ),
+  );
 
   //
   // sl.registerLazySingleton(() => ChangePasswordRepo(sharedPreferences: sl(), dioClient: sl()));

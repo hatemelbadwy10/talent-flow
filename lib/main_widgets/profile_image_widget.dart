@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,7 +29,7 @@ class ProfileImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, AppState>(
+    return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
         return GestureDetector(
           onTap: () {
@@ -45,7 +44,7 @@ class ProfileImageWidget extends StatelessWidget {
                   ? GestureDetector(
                       onTap: () => showDialog(
                           context: context,
-                          barrierColor: Colors.black.withOpacity(0.75),
+                          barrierColor: Colors.black.withValues(alpha: 0.75),
                           builder: (context) {
                             return ImagePopUpViewer(
                               image: imageFile != null ? imageFile! : image,
@@ -88,7 +87,7 @@ class ProfileImageWidget extends StatelessWidget {
               if (withEdit)
                 Positioned(
                   bottom: 0,
-                  left:  0,
+                  left: 0,
                   right: null,
                   child: InkWell(
                     highlightColor: Colors.transparent,
