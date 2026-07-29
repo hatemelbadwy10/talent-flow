@@ -8,6 +8,7 @@ import 'package:talent_flow/features/auth/pages/register/register.dart';
 import 'package:talent_flow/features/auth/pages/social_media_login/repo/chat_repo.dart';
 import 'package:talent_flow/data/realtime/pusher_service.dart';
 import 'package:talent_flow/features/home/bloc/freelancer_chat_bloc.dart';
+import 'package:talent_flow/features/home/repo/home_repo.dart';
 import 'package:talent_flow/features/new_projects/page/add_project.dart';
 import 'package:talent_flow/features/payment/model/contract_payment_args.dart';
 import 'package:talent_flow/features/payment/page/contract_payment_confirm_screen.dart';
@@ -18,6 +19,7 @@ import 'package:talent_flow/features/projects/page/single_project_view.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
 import 'package:talent_flow/features/setting/repo/chats_repo.dart';
+import 'package:talent_flow/features/setting/repo/favourite_repo.dart';
 import 'package:talent_flow/features/setting/repo/bank_accounts_repo.dart';
 import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
 import 'package:talent_flow/features/setting/repo/acceptance_test_repo.dart';
@@ -277,6 +279,8 @@ abstract class CustomNavigator {
           workId: workId,
           initialWork: initialWork,
           canEdit: canEdit,
+          workDetailsRepository: sl<HomeRepo>(),
+          favouritesRepository: sl<FavouriteRepo>(),
         ));
       case Routes.chats:
         return _pageRoute(BlocProvider(

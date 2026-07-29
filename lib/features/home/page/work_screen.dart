@@ -1,20 +1,18 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/status_chip.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/work_details_bloc.dart';
 import 'package:talent_flow/features/home/model/work_details_model.dart';
-import 'package:talent_flow/features/setting/repo/favourite_repo.dart';
+import 'package:talent_flow/features/setting/repo/favourites_repository.dart';
+import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:talent_flow/features/home/repo/home_repo.dart';
+import 'package:talent_flow/features/home/repo/work_details_repository.dart';
 
 class WorkScreen extends StatefulWidget {
   const WorkScreen({
@@ -22,11 +20,15 @@ class WorkScreen extends StatefulWidget {
     required this.workId,
     this.initialWork,
     this.canEdit = false,
+    required this.workDetailsRepository,
+    required this.favouritesRepository,
   });
 
   final int workId;
   final WorkDetailsModel? initialWork;
   final bool canEdit;
+  final WorkDetailsRepository workDetailsRepository;
+  final FavouritesRepository favouritesRepository;
 
   @override
   State<WorkScreen> createState() => _WorkScreenState();
@@ -36,9 +38,6 @@ class _WorkScreenState extends State<WorkScreen> {
   bool _didEdit = false;
   bool _isFavouriteLoading = false;
   late bool _isInFavorites;
-
-  bool get _canFavourite =>
-      !(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false);
 
   @override
   void initState() {
@@ -56,7 +55,9 @@ class _WorkScreenState extends State<WorkScreen> {
   }
 
   Future<void> _toggleFavourite(BuildContext context) async {
-    if (!_canFavourite || _isFavouriteLoading) {
+    final isFreelancer =
+        context.read<UserBloc>().user?.userType == 'Freelancer';
+    if (isFreelancer || _isFavouriteLoading) {
       return;
     }
 
@@ -66,7 +67,8 @@ class _WorkScreenState extends State<WorkScreen> {
       _isInFavorites = !_isInFavorites;
     });
 
-    final result = await sl<FavouriteRepo>().toggleWorkFavourite(widget.workId);
+    final result =
+        await widget.favouritesRepository.toggleWorkFavourite(widget.workId);
     if (!mounted) {
       return;
     }
@@ -90,10 +92,12 @@ class _WorkScreenState extends State<WorkScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => WorkDetailsBloc(repository: sl<HomeRepo>())
+      create: (_) => WorkDetailsBloc(repository: widget.workDetailsRepository)
         ..add(WorkDetailsRequested(widget.workId)),
       child: Builder(
         builder: (context) {
+          final canFavourite =
+              context.watch<UserBloc>().user?.userType != 'Freelancer';
           return BlocListener<WorkDetailsBloc, WorkDetailsState>(
             listener: (context, state) {
               if (state is WorkDetailsLoaded) {
@@ -120,7 +124,7 @@ class _WorkScreenState extends State<WorkScreen> {
                     CustomNavigator.pop(result: _didEdit);
                   },
                   actions: [
-                    if (_canFavourite)
+                    if (canFavourite)
                       IconButton(
                         onPressed: _isFavouriteLoading
                             ? null
