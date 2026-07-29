@@ -4,18 +4,19 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/config/di.dart';
 import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
 import '../bloc/account_statement_bloc.dart';
 import '../bloc/account_statement_event.dart';
 import '../bloc/account_statement_state.dart';
-import '../repo/account_statement_repo.dart';
+import '../repo/account_statements_repository.dart';
 import '../model/account_statement_response_model.dart';
 import '../widgets/setting_app_bar.dart';
 
 class AccountStatementScreen extends StatefulWidget {
-  const AccountStatementScreen({super.key});
+  final AccountStatementsRepository repository;
+
+  const AccountStatementScreen({super.key, required this.repository});
 
   @override
   State<AccountStatementScreen> createState() => _AccountStatementScreenState();
@@ -28,7 +29,7 @@ class _AccountStatementScreenState extends State<AccountStatementScreen> {
   @override
   void initState() {
     super.initState();
-    _bloc = AccountStatementBloc(repository: sl<AccountStatementRepo>())
+    _bloc = AccountStatementBloc(repository: widget.repository)
       ..add(const AccountStatementsRequested());
   }
 

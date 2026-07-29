@@ -52,6 +52,7 @@ import '../features/new_projects/repo/new_projects_repo.dart';
 import '../features/new_projects/repo/selection_option_repo.dart';
 import '../features/setting/repo/notification_repo.dart';
 import '../features/setting/repo/about_repo.dart';
+import '../features/setting/repo/account_statement_repo.dart';
 import '../features/setting/repo/terms_condation_repo.dart';
 import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
@@ -351,7 +352,9 @@ abstract class CustomNavigator {
           child: const ChatScreen(),
         ));
       case Routes.bankAccounts:
-        return _pageRoute(const BankAccountsScreen());
+        return _pageRoute(
+          BankAccountsScreen(repository: sl<BankAccountsRepo>()),
+        );
       case Routes.acceptanceTestQuestions:
         return _pageRoute(
           AcceptanceTestQuestionsScreen(
@@ -361,14 +364,22 @@ abstract class CustomNavigator {
           ),
         );
       case Routes.accountStatement:
-        return _pageRoute(const AccountStatementScreen());
+        return _pageRoute(
+          AccountStatementScreen(repository: sl<AccountStatementRepo>()),
+        );
       case Routes.accountStatementDetails:
         final statementId = settings.arguments as int?;
         if (statementId == null) {
-          return _pageRoute(const AccountStatementScreen());
+          return _pageRoute(
+            AccountStatementScreen(repository: sl<AccountStatementRepo>()),
+          );
         }
         return _pageRoute(
-            AccountStatementDetailsScreen(statementId: statementId));
+          AccountStatementDetailsScreen(
+            statementId: statementId,
+            repository: sl<AccountStatementRepo>(),
+          ),
+        );
       case Routes.contracts:
         return _pageRoute(const ContractsScreen());
       case Routes.contractDetails:

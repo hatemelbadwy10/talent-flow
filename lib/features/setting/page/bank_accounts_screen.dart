@@ -5,7 +5,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/styles.dart';
-import 'package:talent_flow/data/config/di.dart';
 
 import '../../../app/core/user_completion_guard.dart';
 import '../bloc/bank_accounts_bloc.dart';
@@ -13,11 +12,13 @@ import '../bloc/bank_accounts_event.dart';
 import '../bloc/bank_accounts_state.dart';
 import '../model/bank_accounts_request_model.dart';
 import '../model/bank_accounts_response_model.dart';
-import '../repo/bank_accounts_repo.dart';
+import '../repo/bank_accounts_repository.dart';
 import '../widgets/setting_app_bar.dart';
 
 class BankAccountsScreen extends StatefulWidget {
-  const BankAccountsScreen({super.key});
+  final BankAccountsRepository repository;
+
+  const BankAccountsScreen({super.key, required this.repository});
 
   @override
   State<BankAccountsScreen> createState() => _BankAccountsScreenState();
@@ -29,7 +30,7 @@ class _BankAccountsScreenState extends State<BankAccountsScreen> {
   @override
   void initState() {
     super.initState();
-    _bloc = BankAccountsBloc(repository: sl<BankAccountsRepo>())
+    _bloc = BankAccountsBloc(repository: widget.repository)
       ..add(const FetchBankAccounts());
   }
 

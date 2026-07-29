@@ -3,24 +3,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../data/config/di.dart';
 import '../bloc/account_statement_details_bloc.dart';
 import '../bloc/account_statement_details_event.dart';
 import '../bloc/account_statement_details_state.dart';
 import '../model/account_statement_response_model.dart';
-import '../repo/account_statement_repo.dart';
+import '../repo/account_statements_repository.dart';
 import '../widgets/setting_app_bar.dart';
 
 class AccountStatementDetailsScreen extends StatelessWidget {
-  const AccountStatementDetailsScreen({super.key, required this.statementId});
+  const AccountStatementDetailsScreen({
+    super.key,
+    required this.statementId,
+    required this.repository,
+  });
 
   final int statementId;
+  final AccountStatementsRepository repository;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => AccountStatementDetailsBloc(
-        repository: sl<AccountStatementRepo>(),
+        repository: repository,
       )..add(AccountStatementDetailsRequested(statementId)),
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F7FB),
