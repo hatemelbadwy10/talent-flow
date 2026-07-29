@@ -6,7 +6,6 @@ import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 
-import '../../../data/config/di.dart';
 import '../../auth/data/auth_session_store.dart';
 import '../../../main_blocs/user_bloc.dart';
 import '../../../navigation/routes.dart';
@@ -14,7 +13,7 @@ import '../bloc/setting_bloc.dart';
 import '../bloc/settings_event.dart';
 import '../bloc/settings_state.dart';
 import '../model/help_model.dart';
-import '../repo/settings_repo.dart';
+import '../repo/settings_repository.dart';
 import '../widgets/helo_dialoug.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/setting_app_bar.dart';
@@ -88,16 +87,19 @@ Future<void> _confirmDeleteAccount(BuildContext context) async {
   context.read<SettingsBloc>().add(const AccountDeletionRequested());
 }
 
-SettingsBloc _createSettingsBloc() {
+SettingsBloc _createSettingsBloc({
+  required SettingsRepository repository,
+  required AuthSessionStore sessionStore,
+}) {
   return SettingsBloc(
-    repository: sl<SettingsRepo>(),
-    sessionStore: sl<AuthSessionStore>(),
+    repository: repository,
+    sessionStore: sessionStore,
   );
 }
 
 void _listenToSettingsState(BuildContext context, SettingsState state) {
   if (state is LogoutSucceeded || state is AccountDeletionSucceeded) {
-    UserBloc.instance.add(const UserCleared());
+    context.read<UserBloc>().add(const UserCleared());
     CustomNavigator.push(Routes.login, clean: true);
     return;
   }
@@ -109,12 +111,22 @@ void _listenToSettingsState(BuildContext context, SettingsState state) {
 }
 
 class SettingScreen extends StatelessWidget {
-  const SettingScreen({super.key});
+  const SettingScreen({
+    super.key,
+    required this.repository,
+    required this.sessionStore,
+  });
+
+  final SettingsRepository repository;
+  final AuthSessionStore sessionStore;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => _createSettingsBloc(),
+      create: (context) => _createSettingsBloc(
+        repository: repository,
+        sessionStore: sessionStore,
+      ),
       child: BlocListener<SettingsBloc, SettingsState>(
         listener: _listenToSettingsState,
         child: Scaffold(
@@ -286,12 +298,22 @@ class SettingScreen extends StatelessWidget {
 
 // Alternative Solution: If you prefer BlocProvider.value approach
 class SettingAlternative extends StatelessWidget {
-  const SettingAlternative({super.key});
+  const SettingAlternative({
+    super.key,
+    required this.repository,
+    required this.sessionStore,
+  });
+
+  final SettingsRepository repository;
+  final AuthSessionStore sessionStore;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => _createSettingsBloc(),
+      create: (context) => _createSettingsBloc(
+        repository: repository,
+        sessionStore: sessionStore,
+      ),
       child: BlocListener<SettingsBloc, SettingsState>(
         listener: _listenToSettingsState,
         child: Scaffold(

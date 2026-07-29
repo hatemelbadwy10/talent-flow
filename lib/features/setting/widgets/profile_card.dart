@@ -2,14 +2,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/extensions.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 
-import '../../../app/core/app_storage_keys.dart';
 import '../../../app/core/images.dart';
-import '../../../data/config/di.dart';
 import '../../../main_blocs/user_bloc.dart';
 import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
@@ -34,27 +31,17 @@ class _ProfileCardState extends State<ProfileCard> {
     context.locale; // Ensure widget rebuilds on locale change
     return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
-        final prefs = sl<SharedPreferences>();
-        final userBloc = context.read<UserBloc>();
-        final user = userBloc.user;
+        final user = state.user;
 
-        // Get data from UserBloc or fallback to SharedPreferences
-        final userName = user?.name ??
-            prefs.getString(AppStorageKey.userName) ??
-            "user_example.name".tr();
-        final userEmail = user?.email ??
-            prefs.getString(AppStorageKey.userEmail) ??
-            "user_example.email".tr();
-        final userImage = user?.profileImage ??
-            prefs.getString(AppStorageKey.userImage) ??
-            Images.appLogo;
+        final userName = user?.name ?? "user_example.name".tr();
+        final userEmail = user?.email ?? "user_example.email".tr();
+        final userImage = user?.profileImage ?? Images.appLogo;
 
-        final isFreelancer = prefs.getBool(AppStorageKey.isFreelancer) ?? false;
+        final isFreelancer = user?.userType != 'Entrepreneur';
         final accountTypeKey = isFreelancer
             ? 'settings_screen.account_type_freelancer'
             : 'settings_screen.account_type_entrepreneur';
-        final userId = user?.id ??
-            int.tryParse(prefs.getString(AppStorageKey.userId) ?? '');
+        final userId = user?.id;
 
         return Container(
           padding: const EdgeInsets.all(16.0),

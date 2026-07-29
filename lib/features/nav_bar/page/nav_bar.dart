@@ -15,6 +15,8 @@ import '../../new_projects/repo/new_projects_repository.dart';
 import '../../new_projects/repo/selection_options_repository.dart';
 import '../../projects/repo/projects_repository.dart';
 import '../../setting/repo/favourites_repository.dart';
+import '../../setting/repo/settings_repository.dart';
+import '../../auth/data/auth_session_store.dart';
 import '../bloc/nav_bar_bloc.dart';
 
 class NavBar extends StatelessWidget {
@@ -23,6 +25,8 @@ class NavBar extends StatelessWidget {
   final ProjectsRepository projectsRepository;
   final NewProjectsRepository newProjectsRepository;
   final SelectionOptionsRepository selectionOptionsRepository;
+  final SettingsRepository settingsRepository;
+  final AuthSessionStore authSessionStore;
   final bool isFreelancer;
 
   const NavBar({
@@ -32,6 +36,8 @@ class NavBar extends StatelessWidget {
     required this.projectsRepository,
     required this.newProjectsRepository,
     required this.selectionOptionsRepository,
+    required this.settingsRepository,
+    required this.authSessionStore,
     required this.isFreelancer,
   });
 
@@ -39,7 +45,10 @@ class NavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     context.locale;
     final List<Widget> widgetOptions = [
-      const SettingScreen(),
+      SettingScreen(
+        repository: settingsRepository,
+        sessionStore: authSessionStore,
+      ),
       OwnerProjects(repository: projectsRepository),
       HomeView(
         repository: homeRepository,

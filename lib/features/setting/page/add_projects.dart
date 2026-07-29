@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
-import '../../../data/config/di.dart';
 import '../bloc/portofilo_form_bloc.dart';
 import '../widgets/protofilo_form.dart';
 
 class AddYourProjects extends StatelessWidget {
-  const AddYourProjects({super.key, this.arguments});
+  const AddYourProjects({
+    super.key,
+    this.arguments,
+    required this.isFreelancer,
+  });
 
   final Map<String, dynamic>? arguments;
+  final bool isFreelancer;
 
   bool get _fromOnboarding => arguments?['fromOnboarding'] == true;
 
   @override
   Widget build(BuildContext context) {
-    final isFreelancer =
-        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? true;
     final canSkipToNextStep = _fromOnboarding;
 
     return Scaffold(

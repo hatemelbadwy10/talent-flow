@@ -60,6 +60,7 @@ import '../features/setting/repo/contracts_repo.dart';
 import '../features/setting/repo/dashboard_repo.dart';
 import '../features/setting/repo/settings_repo.dart';
 import '../features/setting/repo/update_profile_repo.dart';
+import '../features/auth/data/auth_session_store.dart';
 import '../main_repos/location_options_repo.dart';
 import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
@@ -202,6 +203,7 @@ abstract class CustomNavigator {
         return _pageRoute(
           AddYourProjects(
             arguments: arguments,
+            isFreelancer: isFreelancer,
           ),
         );
       case Routes.freelancers:
@@ -579,6 +581,8 @@ abstract class CustomNavigator {
         projectsRepository: sl<ProjectsRepo>(),
         newProjectsRepository: sl<NewProjectsRepo>(),
         selectionOptionsRepository: sl<SelectionOptionRepo>(),
+        settingsRepository: sl<SettingsRepo>(),
+        authSessionStore: sl<AuthSessionStore>(),
         isFreelancer:
             sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
                 false,
