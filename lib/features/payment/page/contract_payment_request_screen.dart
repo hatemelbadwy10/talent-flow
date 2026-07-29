@@ -7,11 +7,10 @@ import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/payment/model/contract_payment_args.dart';
-import 'package:talent_flow/features/payment/repo/pay_ment_repo.dart';
+import 'package:talent_flow/features/payment/repo/payment_repository.dart';
 import 'package:talent_flow/features/setting/model/bank_accounts_response_model.dart';
-import 'package:talent_flow/features/setting/repo/bank_accounts_repo.dart';
+import 'package:talent_flow/features/setting/repo/bank_accounts_repository.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/helpers/date_time_picker.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
@@ -21,9 +20,13 @@ class ContractPaymentRequestScreen extends StatefulWidget {
   const ContractPaymentRequestScreen({
     super.key,
     required this.arguments,
+    required this.paymentRepository,
+    required this.bankAccountsRepository,
   });
 
   final ContractPaymentRequestArgs arguments;
+  final PaymentRepository paymentRepository;
+  final BankAccountsRepository bankAccountsRepository;
 
   @override
   State<ContractPaymentRequestScreen> createState() =>
@@ -42,9 +45,6 @@ class _ContractPaymentRequestScreenState
   bool _isLoadingBankAccounts = false;
   List<BankAccountModel> _bankAccounts = const <BankAccountModel>[];
   BankAccountModel? _selectedBankAccount;
-
-  PaymentRepo get _paymentRepo => sl<PaymentRepo>();
-  BankAccountsRepo get _bankAccountsRepo => sl<BankAccountsRepo>();
 
   @override
   void initState() {
@@ -69,7 +69,7 @@ class _ContractPaymentRequestScreenState
 
   Future<void> _loadBankAccounts() async {
     setState(() => _isLoadingBankAccounts = true);
-    final result = await _bankAccountsRepo.getBankAccounts();
+    final result = await widget.bankAccountsRepository.getBankAccounts();
     if (!mounted) return;
 
     result.fold(
@@ -197,7 +197,7 @@ class _ContractPaymentRequestScreenState
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSubmitting = true);
-    final result = await _paymentRepo.requestContractPayment(
+    final result = await widget.paymentRepository.requestContractPayment(
       customerNumber: _selectedCustomerNumber,
       paymentCode: _paymentCodeController.text.trim(),
       paymentAmount: _amountController.text.trim(),

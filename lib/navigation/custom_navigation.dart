@@ -13,10 +13,12 @@ import 'package:talent_flow/features/payment/model/contract_payment_args.dart';
 import 'package:talent_flow/features/payment/page/contract_payment_confirm_screen.dart';
 import 'package:talent_flow/features/payment/page/contract_payment_request_screen.dart';
 import 'package:talent_flow/features/payment/page/payment_page.dart';
+import 'package:talent_flow/features/payment/repo/pay_ment_repo.dart';
 import 'package:talent_flow/features/projects/page/single_project_view.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
 import 'package:talent_flow/features/setting/repo/chats_repo.dart';
+import 'package:talent_flow/features/setting/repo/bank_accounts_repo.dart';
 import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
 import 'package:talent_flow/features/setting/repo/acceptance_test_repo.dart';
 import 'package:talent_flow/features/setting/page/add_projects.dart';
@@ -315,7 +317,11 @@ abstract class CustomNavigator {
           return _pageRoute(const ContractsScreen());
         }
         return _pageRoute(
-          ContractPaymentRequestScreen(arguments: arguments),
+          ContractPaymentRequestScreen(
+            arguments: arguments,
+            paymentRepository: sl<PaymentRepo>(),
+            bankAccountsRepository: sl<BankAccountsRepo>(),
+          ),
         );
       case Routes.contractPaymentConfirm:
         final arguments = settings.arguments as ContractPaymentConfirmArgs?;
@@ -323,7 +329,10 @@ abstract class CustomNavigator {
           return _pageRoute(const ContractsScreen());
         }
         return _pageRoute(
-          ContractPaymentConfirmScreen(arguments: arguments),
+          ContractPaymentConfirmScreen(
+            arguments: arguments,
+            paymentRepository: sl<PaymentRepo>(),
+          ),
         );
       case Routes.createContract:
         return _pageRoute(

@@ -6,9 +6,8 @@ import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/payment/model/contract_payment_args.dart';
-import 'package:talent_flow/features/payment/repo/pay_ment_repo.dart';
+import 'package:talent_flow/features/payment/repo/payment_repository.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 
@@ -16,9 +15,11 @@ class ContractPaymentConfirmScreen extends StatefulWidget {
   const ContractPaymentConfirmScreen({
     super.key,
     required this.arguments,
+    required this.paymentRepository,
   });
 
   final ContractPaymentConfirmArgs arguments;
+  final PaymentRepository paymentRepository;
 
   @override
   State<ContractPaymentConfirmScreen> createState() =>
@@ -33,8 +34,6 @@ class _ContractPaymentConfirmScreenState
   bool _isSubmitting = false;
   bool _isResending = false;
 
-  PaymentRepo get _paymentRepo => sl<PaymentRepo>();
-
   @override
   void dispose() {
     _otpController.dispose();
@@ -46,7 +45,7 @@ class _ContractPaymentConfirmScreenState
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSubmitting = true);
-    final result = await _paymentRepo.confirmContractPayment(
+    final result = await widget.paymentRepository.confirmContractPayment(
       customerNumber: widget.arguments.customerNumber,
       paymentCode: widget.arguments.paymentCode,
       paymentAmount: widget.arguments.paymentAmount,
@@ -78,7 +77,7 @@ class _ContractPaymentConfirmScreenState
 
   Future<void> _resendCode() async {
     setState(() => _isResending = true);
-    final result = await _paymentRepo.requestContractPayment(
+    final result = await widget.paymentRepository.requestContractPayment(
       customerNumber: widget.arguments.customerNumber,
       paymentCode: widget.arguments.paymentCode,
       paymentAmount: widget.arguments.paymentAmount,
