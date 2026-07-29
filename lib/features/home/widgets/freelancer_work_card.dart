@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/status_chip.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/model/freelancer_profile_model.dart';
-import 'package:talent_flow/features/setting/repo/favourite_repo.dart';
+import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
@@ -14,10 +12,12 @@ class FreelancerWorkCard extends StatefulWidget {
     super.key,
     required this.work,
     this.onTap,
+    this.onToggleFavourite,
   });
 
   final Work work;
   final Future<void> Function()? onTap;
+  final Future<bool> Function(int workId)? onToggleFavourite;
 
   @override
   State<FreelancerWorkCard> createState() => _FreelancerWorkCardState();
@@ -26,9 +26,6 @@ class FreelancerWorkCard extends StatefulWidget {
 class _FreelancerWorkCardState extends State<FreelancerWorkCard> {
   late bool _isInFavorites;
   bool _isFavouriteLoading = false;
-
-  bool get _canFavourite =>
-      !(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false);
 
   @override
   void initState() {
@@ -45,7 +42,9 @@ class _FreelancerWorkCardState extends State<FreelancerWorkCard> {
   }
 
   Future<void> _toggleFavourite() async {
-    if (!_canFavourite || _isFavouriteLoading || (widget.work.id ?? 0) <= 0) {
+    if (widget.onToggleFavourite == null ||
+        _isFavouriteLoading ||
+        (widget.work.id ?? 0) <= 0) {
       return;
     }
 
@@ -55,18 +54,14 @@ class _FreelancerWorkCardState extends State<FreelancerWorkCard> {
       _isInFavorites = !_isInFavorites;
     });
 
-    final result =
-        await sl<FavouriteRepo>().toggleWorkFavourite(widget.work.id!);
+    final succeeded = await widget.onToggleFavourite!(widget.work.id!);
     if (!mounted) {
       return;
     }
 
-    result.fold(
-      (_) {
-        _isInFavorites = previous;
-      },
-      (_) {},
-    );
+    if (!succeeded) {
+      _isInFavorites = previous;
+    }
 
     setState(() {
       _isFavouriteLoading = false;
@@ -76,6 +71,9 @@ class _FreelancerWorkCardState extends State<FreelancerWorkCard> {
   @override
   Widget build(BuildContext context) {
     final status = ProjectStatusHelper.fromString(widget.work.status);
+    final canFavourite =
+        context.watch<UserBloc>().user?.userType != 'Freelancer' &&
+            widget.onToggleFavourite != null;
 
     return Material(
       color: Colors.transparent,
@@ -130,7 +128,7 @@ class _FreelancerWorkCardState extends State<FreelancerWorkCard> {
                           : _fallbackImage(),
                     ),
                   ),
-                  if (_canFavourite)
+                  if (canFavourite)
                     Positioned(
                       top: 8,
                       right: 8,

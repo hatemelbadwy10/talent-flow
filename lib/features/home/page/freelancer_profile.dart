@@ -5,22 +5,30 @@ import 'package:talent_flow/features/home/bloc/freelancer_profile_bloc.dart';
 import 'package:talent_flow/features/new_projects/widgets/skills_section.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import '../../../app/core/styles.dart';
-import '../../../data/config/di.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../model/freelancer_profile_model.dart';
 import '../bloc/freelancer_profile_event.dart';
 import '../bloc/freelancer_profile_state.dart';
-import '../repo/home_repo.dart';
+import '../repo/freelancer_profile_repository.dart';
+import '../../setting/repo/favourites_repository.dart';
 import '../widgets/freelancer_work_card.dart';
 
 class FreelancerProfileView extends StatelessWidget {
   final Map<String, dynamic> arguments;
-  const FreelancerProfileView({super.key, required this.arguments});
+  final FreelancerProfileRepository profileRepository;
+  final FavouritesRepository favouritesRepository;
+
+  const FreelancerProfileView({
+    super.key,
+    required this.arguments,
+    required this.profileRepository,
+    required this.favouritesRepository,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => FreelancerProfileBloc(repository: sl<HomeRepo>())
+      create: (_) => FreelancerProfileBloc(repository: profileRepository)
         ..add(FreelancerProfileRequested(arguments["freelancerId"] as int)),
       child: Scaffold(
         backgroundColor: Styles.BACKGROUND_COLOR,
@@ -80,7 +88,10 @@ class FreelancerProfileView extends StatelessWidget {
                         children: [
                           _BioTab(model: model),
                           _ReviewsTab(model: model),
-                          _WorksTab(model: model),
+                          _WorksTab(
+                            model: model,
+                            favouritesRepository: favouritesRepository,
+                          ),
                         ],
                       ),
                     ),
@@ -466,7 +477,12 @@ class _ReviewsTab extends StatelessWidget {
 // Works Tab
 class _WorksTab extends StatelessWidget {
   final FreelancerProfileModel model;
-  const _WorksTab({required this.model});
+  final FavouritesRepository favouritesRepository;
+
+  const _WorksTab({
+    required this.model,
+    required this.favouritesRepository,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -492,7 +508,14 @@ class _WorksTab extends StatelessWidget {
         ),
         itemCount: model.works.length,
         itemBuilder: (context, index) {
-          return FreelancerWorkCard(work: model.works[index]);
+          return FreelancerWorkCard(
+            work: model.works[index],
+            onToggleFavourite: (workId) async {
+              final result =
+                  await favouritesRepository.toggleWorkFavourite(workId);
+              return result.isRight();
+            },
+          );
         },
       ),
     );

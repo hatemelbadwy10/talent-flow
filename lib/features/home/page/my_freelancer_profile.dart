@@ -1,25 +1,28 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/freelancer_profile_bloc.dart';
 import 'package:talent_flow/features/home/widgets/freelancer_work_card.dart';
 import 'package:talent_flow/features/new_projects/widgets/skills_section.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
+import 'package:talent_flow/main_blocs/user_bloc.dart';
 
 import '../model/freelancer_profile_model.dart';
 import '../bloc/freelancer_profile_event.dart';
 import '../bloc/freelancer_profile_state.dart';
-import '../repo/home_repo.dart';
+import '../repo/freelancer_profile_repository.dart';
 
 class MyFreelancerProfileView extends StatefulWidget {
-  const MyFreelancerProfileView({super.key});
+  const MyFreelancerProfileView({
+    super.key,
+    required this.profileRepository,
+  });
+
+  final FreelancerProfileRepository profileRepository;
 
   @override
   State<MyFreelancerProfileView> createState() =>
@@ -27,13 +30,9 @@ class MyFreelancerProfileView extends StatefulWidget {
 }
 
 class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
-  int? get _userId => int.tryParse(
-        sl<SharedPreferences>().getString(AppStorageKey.userId) ?? '',
-      );
-
   @override
   Widget build(BuildContext context) {
-    final userId = _userId;
+    final userId = context.watch<UserBloc>().user?.id;
     if (userId == null) {
       return Scaffold(
         appBar: CustomAppBar(
@@ -47,7 +46,7 @@ class _MyFreelancerProfileViewState extends State<MyFreelancerProfileView> {
     }
 
     return BlocProvider(
-      create: (_) => FreelancerProfileBloc(repository: sl<HomeRepo>())
+      create: (_) => FreelancerProfileBloc(repository: widget.profileRepository)
         ..add(FreelancerProfileRequested(userId)),
       child: Scaffold(
         backgroundColor: const Color(0xFFF7F9FB),

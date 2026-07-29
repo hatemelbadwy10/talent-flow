@@ -175,6 +175,8 @@ abstract class CustomNavigator {
       case Routes.freeLancerView:
         return _pageRoute(FreelancerProfileView(
           arguments: settings.arguments as Map<String, dynamic>,
+          profileRepository: sl<HomeRepo>(),
+          favouritesRepository: sl<FavouriteRepo>(),
         ));
       case Routes.chat:
         return _pageRoute(BlocProvider(
@@ -236,7 +238,9 @@ abstract class CustomNavigator {
                 false;
         return _pageRoute(
           isFreelancer
-              ? const MyFreelancerProfileView()
+              ? MyFreelancerProfileView(
+                  profileRepository: sl<HomeRepo>(),
+                )
               : const EntrepreneurProfileView(
                   arguments: {'useCurrentProfile': true},
                 ),
