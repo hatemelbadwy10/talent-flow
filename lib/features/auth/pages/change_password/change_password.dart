@@ -14,13 +14,14 @@ import 'bloc/change_password_state.dart';
 import 'repo/change_password_repository.dart';
 import '../../../../navigation/custom_navigation.dart';
 import '../../../../navigation/routes.dart';
+import '../../models/auth_route_args.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
-  final Map<String, dynamic>? arguments;
+  final ChangePasswordArgs arguments;
 
   const ChangePasswordScreen({
     super.key,
-    this.arguments,
+    required this.arguments,
     required this.repository,
   });
 
@@ -124,8 +125,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   isLoading: state is ChangePasswordLoading,
                   onTap: () {
                     if (_formKey.currentState!.validate()) {
-                      final String identifier =
-                          widget.arguments?["identifier"] ?? "";
+                      final identifier = widget.arguments.identifier;
 
                       context.read<ChangePasswordBloc>().add(
                             ChangePasswordSubmitted(

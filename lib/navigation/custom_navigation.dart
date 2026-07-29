@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/features/auth/pages/register/register.dart';
+import 'package:talent_flow/features/auth/models/auth_route_args.dart';
 import 'package:talent_flow/features/auth/pages/login/repo/login_repo.dart';
 import 'package:talent_flow/features/auth/pages/register/repo/register_repo.dart';
 import 'package:talent_flow/features/auth/pages/social_media_login/repo/social_media_repo.dart';
@@ -130,7 +131,7 @@ abstract class CustomNavigator {
         );
       case Routes.forgetPassword:
         return _pageRoute(ChangePasswordScreen(
-          arguments: settings.arguments as Map<String, dynamic>,
+          arguments: ChangePasswordArgs.fromRoute(settings.arguments),
           repository: sl<ChangePasswordRepo>(),
         ));
 
@@ -167,7 +168,7 @@ abstract class CustomNavigator {
         );
       case Routes.sendCodeScreen:
         return _pageRoute(ConfirmCodeScreen(
-          argument: settings.arguments as Map<String, dynamic>,
+          argument: ConfirmCodeArgs.fromRoute(settings.arguments),
           repository: sl<ConfirmCodeRepo>(),
           sessionStore: sl<AuthSessionStore>(),
         ));

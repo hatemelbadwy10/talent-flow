@@ -18,9 +18,10 @@ import 'bloc/confirm_code_bloc.dart';
 import 'bloc/confirm_code_event.dart';
 import 'bloc/confirm_code_state.dart';
 import 'model/confirm_code_request.dart';
+import '../../models/auth_route_args.dart';
 
 class ConfirmCodeScreen extends StatefulWidget {
-  final Map<String, dynamic> argument;
+  final ConfirmCodeArgs argument;
   final ConfirmCodeRepository repository;
   final AuthSessionStore sessionStore;
 
@@ -220,9 +221,7 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final identifier =
-        (widget.argument["identifier"] ?? widget.argument["email"] ?? '')
-            .toString();
+    final identifier = widget.argument.identifier;
     return BlocProvider(
       create: (_) => ConfirmCodeBloc(
         repository: widget.repository,
@@ -290,18 +289,7 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
     );
   }
 
-  ConfirmationFlow get _confirmationFlow {
-    if (widget.argument['isPhoneVerification'] == true) {
-      return ConfirmationFlow.phoneVerification;
-    }
-    if (widget.argument['isRegister'] == true) {
-      return ConfirmationFlow.registration;
-    }
-    if (widget.argument['isFromLogin'] == true) {
-      return ConfirmationFlow.loginActivation;
-    }
-    return ConfirmationFlow.passwordReset;
-  }
+  ConfirmationFlow get _confirmationFlow => widget.argument.flow;
 
   Future<void> _onConfirmCodeStateChanged(
     BuildContext context,
