@@ -7,11 +7,13 @@ import 'package:talent_flow/data/api/end_points.dart';
 import 'package:talent_flow/data/error/api_error_handler.dart';
 import 'package:talent_flow/data/error/failures.dart';
 import 'package:talent_flow/features/home/model/chat_model.dart';
+import 'package:talent_flow/features/home/repo/chat_repository.dart';
 import 'package:talent_flow/main_repos/base_repo.dart';
 
-class ChatRepo extends BaseRepo {
+class ChatRepo extends BaseRepo implements ChatRepository {
   ChatRepo({required super.sharedPreferences, required super.dioClient});
 
+  @override
   Future<Either<ServerFailure, int>> startConversation({
     required int userId,
     int? projectId,
@@ -52,6 +54,7 @@ class ChatRepo extends BaseRepo {
     }
   }
 
+  @override
   Future<Either<ServerFailure, ChatModel>> getConversationMessages(
       int conversationId,
       {String? search}) async {
@@ -106,7 +109,8 @@ class ChatRepo extends BaseRepo {
     }
   }
 
-  Future<Either<ServerFailure, Response>> sendConversationMessage({
+  @override
+  Future<Either<ServerFailure, Message?>> sendConversationMessage({
     required int conversationId,
     required String body,
   }) async {
@@ -130,7 +134,7 @@ class ChatRepo extends BaseRepo {
         label: 'sendConversationMessage response',
         responseData: response.data,
       );
-      return Right(response);
+      return Right(_parseSentMessage(response.data));
     } catch (error) {
       _logChatRepo(
         'sendConversationMessage error',
@@ -143,7 +147,8 @@ class ChatRepo extends BaseRepo {
     }
   }
 
-  Future<Either<ServerFailure, Response>> sendConversationFileMessage({
+  @override
+  Future<Either<ServerFailure, Message?>> sendConversationFileMessage({
     required int conversationId,
     required File file,
   }) async {
@@ -170,7 +175,7 @@ class ChatRepo extends BaseRepo {
         label: 'sendConversationFileMessage response',
         responseData: response.data,
       );
-      return Right(response);
+      return Right(_parseSentMessage(response.data));
     } catch (error) {
       _logChatRepo(
         'sendConversationFileMessage error',
@@ -210,6 +215,18 @@ class ChatRepo extends BaseRepo {
       return value;
     }
     return int.tryParse(value?.toString() ?? '');
+  }
+}
+
+Message? _parseSentMessage(dynamic responseData) {
+  final json = _extractMessageMap(responseData);
+  if (json == null) {
+    return null;
+  }
+  try {
+    return Message.fromJson(json);
+  } catch (_) {
+    return null;
   }
 }
 

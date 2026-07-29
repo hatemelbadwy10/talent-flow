@@ -5,6 +5,8 @@ import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/features/auth/pages/register/register.dart';
+import 'package:talent_flow/features/auth/pages/social_media_login/repo/chat_repo.dart';
+import 'package:talent_flow/data/realtime/pusher_service.dart';
 import 'package:talent_flow/features/home/bloc/freelancer_chat_bloc.dart';
 import 'package:talent_flow/features/new_projects/page/add_project.dart';
 import 'package:talent_flow/features/payment/model/contract_payment_args.dart';
@@ -20,7 +22,6 @@ import 'package:talent_flow/features/setting/page/add_single_work_screen.dart';
 import 'package:talent_flow/features/setting/page/favourite.dart';
 import 'package:talent_flow/features/setting/page/notification.dart';
 import 'package:talent_flow/features/setting/page/dashboard_screen.dart';
-import '../app/core/app_event.dart';
 import '../app/core/app_storage_keys.dart';
 import '../data/config/di.dart';
 import '../features/auth/pages/change_password/change_password.dart';
@@ -169,8 +170,20 @@ abstract class CustomNavigator {
         ));
       case Routes.chat:
         return _pageRoute(BlocProvider(
-          create: (context) => FreelancerChatBloc(sl(), sl())
-            ..add(Add(arguments: settings.arguments)),
+          create: (context) {
+            final chatArguments = settings.arguments as Map<String, dynamic>?;
+            int? parseId(Object? value) =>
+                value is int ? value : int.tryParse(value?.toString() ?? '');
+            return FreelancerChatBloc(
+              repository: sl<ChatRepo>(),
+              realtimeService: sl<PusherService>(),
+            )..add(
+                ConversationRequested(
+                  conversationId: parseId(chatArguments?['conversationId']),
+                  freelancerId: parseId(chatArguments?['freelancerId']),
+                ),
+              );
+          },
           child: FreelancerChatScreen(
             arguments: settings.arguments as Map<String, dynamic>?,
           ),

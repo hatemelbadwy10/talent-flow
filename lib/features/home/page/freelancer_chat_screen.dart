@@ -10,14 +10,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 import 'package:talent_flow/components/custom_images.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/freelancer_chat_bloc.dart';
-import 'package:talent_flow/features/home/model/chat_model.dart';
 import 'package:talent_flow/features/home/widgets/chat_bubble.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
@@ -68,11 +65,9 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
     );
 
     context.read<FreelancerChatBloc>().add(
-          SendMessage(
-            arguments: {
-              'conversationId': conversationId ?? freelancerId,
-              'body': body,
-            },
+          ChatMessageSent(
+            conversationId: _parseInt(conversationId ?? freelancerId),
+            body: body,
           ),
         );
     _messageController.clear();
@@ -105,7 +100,7 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
     }
     _searchTimer = Timer(const Duration(milliseconds: 500), () {
       context.read<FreelancerChatBloc>().add(
-            Search(arguments: value.trim()),
+            ChatMessagesSearched(value.trim()),
           );
     });
   }
@@ -175,12 +170,12 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
       }
 
       context.read<FreelancerChatBloc>().add(
-            SendMessage(
-              arguments: {
-                'conversationId': widget.arguments?['conversationId'] ??
+            ChatMessageSent(
+              conversationId: _parseInt(
+                widget.arguments?['conversationId'] ??
                     widget.arguments?['freelancerId'],
-                'filePath': filePath,
-              },
+              ),
+              filePath: filePath,
             ),
           );
       _logChatScreen(
@@ -259,7 +254,7 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
           ),
         ),
         titleSpacing: 0,
-        title: BlocBuilder<FreelancerChatBloc, AppState>(
+        title: BlocBuilder<FreelancerChatBloc, FreelancerChatState>(
           builder: (context, state) {
             String headerName = fallbackFreelancerName?.isNotEmpty == true
                 ? fallbackFreelancerName!
@@ -268,8 +263,8 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
                 ? fallbackFreelancerJobTitle!
                 : 'Freelancer';
 
-            if (state is Done && state.data is ChatModel) {
-              final model = state.data as ChatModel;
+            if (state is FreelancerChatLoaded) {
+              final model = state.chat;
               final receiver = model.receiver;
               if ((receiver?.name ?? '').trim().isNotEmpty) {
                 headerName = receiver!.name!.trim();
@@ -309,11 +304,10 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
         actions: isFreelancer
             ? const []
             : [
-                BlocBuilder<FreelancerChatBloc, AppState>(
+                BlocBuilder<FreelancerChatBloc, FreelancerChatState>(
                   builder: (context, state) {
-                    final chatModel = state is Done && state.data is ChatModel
-                        ? state.data as ChatModel
-                        : null;
+                    final chatModel =
+                        state is FreelancerChatLoaded ? state.chat : null;
                     final currentProjectId =
                         chatModel?.projectId ?? fallbackProjectId;
                     final hasContract =
@@ -362,7 +356,7 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
                 onChanged: _onMessageSearchChanged,
                 onSubmitted: (value) {
                   context.read<FreelancerChatBloc>().add(
-                        Search(arguments: value.trim()),
+                        ChatMessagesSearched(value.trim()),
                       );
                 },
                 decoration: InputDecoration(
@@ -375,7 +369,7 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
                           onPressed: () {
                             _searchController.clear();
                             context.read<FreelancerChatBloc>().add(
-                                  Search(arguments: ''),
+                                  const ChatMessagesSearched(''),
                                 );
                             setState(() {});
                           },
@@ -402,9 +396,10 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
               ),
             ),
             Expanded(
-              child: BlocBuilder<FreelancerChatBloc, AppState>(
+              child: BlocBuilder<FreelancerChatBloc, FreelancerChatState>(
                 builder: (context, state) {
-                  if (state is Loading || state is Start) {
+                  if (state is FreelancerChatLoading ||
+                      state is FreelancerChatInitial) {
                     return const Center(
                       child: CircularProgressIndicator(
                         color: Styles.PRIMARY_COLOR,
@@ -412,20 +407,20 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
                     );
                   }
 
-                  if (state is Error) {
+                  if (state is FreelancerChatFailed) {
                     return Center(
                       child: Text('chat_screen.load_failed'.tr()),
                     );
                   }
 
-                  if (state is Empty) {
+                  if (state is FreelancerChatEmpty) {
                     return Center(
                       child: Text('chat_screen.no_conversation'.tr()),
                     );
                   }
 
-                  if (state is Done && state.data is ChatModel) {
-                    final chat = state.data as ChatModel;
+                  if (state is FreelancerChatLoaded) {
+                    final chat = state.chat;
                     final messages = chat.messages;
                     final lastMessage =
                         messages.isNotEmpty ? messages.last : null;

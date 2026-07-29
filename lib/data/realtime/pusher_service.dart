@@ -7,8 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../app/core/app_storage_keys.dart';
 import '../api/end_points.dart';
+import 'realtime_chat_service.dart';
 
-class PusherService {
+class PusherService implements RealtimeChatService {
   PusherService({required SharedPreferences sharedPreferences})
       : _sharedPreferences = sharedPreferences;
 
@@ -26,6 +27,7 @@ class PusherService {
     Uri.parse(EndPoints.baseUrl).resolve('broadcasting/auth').toString(),
   ];
 
+  @override
   String chatChannel(int conversationId) => 'private-chat.$conversationId';
   String userChannel(int userId) => 'private-user.$userId';
 
@@ -110,6 +112,7 @@ class PusherService {
     _logPusher('disconnect completed');
   }
 
+  @override
   Future<void> subscribe({
     required String channelName,
     required Function(dynamic event) onEvent,
@@ -136,6 +139,7 @@ class PusherService {
     _logPusher('subscribe completed', {'channelName': channelName});
   }
 
+  @override
   Future<void> unsubscribe(String channelName) async {
     _logPusher('unsubscribe start', {'channelName': channelName});
     await _client.unsubscribe(channelName: channelName);
@@ -219,7 +223,6 @@ class PusherService {
 
     return null;
   }
-
 }
 
 Map<String, String>? _normalizeAuthPayload(dynamic raw) {
