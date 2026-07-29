@@ -95,18 +95,6 @@ Future<void> init() async {
       dioClient: sl()));
   sl.registerLazySingleton(
       () => ChatRepo(sharedPreferences: sl(), dioClient: sl()));
-  //
-  // sl.registerLazySingleton(() => DashboardRepo(sharedPreferences: sl(), dioClient: sl()));
-  //
-  // sl.registerLazySingleton(() => DeleteFileRepo(sharedPreferences: sl(), dioClient: sl()));
-  // sl.registerLazySingleton(() => FaqsRepo(sharedPreferences: sl(), dioClient: sl()));
-  //
-  // sl.registerLazySingleton(() => DownloadRepo());
-  //
-  // sl.registerLazySingleton(() => SelectorsRepo(sharedPreferences: sl(), dioClient: sl()));
-  //
-  // sl.registerLazySingleton(() => PickerHelperRepo(sharedPreferences: sl(), dioClient: sl()));
-  //
   sl.registerLazySingleton(
       () => SplashRepo(sharedPreferences: sl(), dioClient: sl()));
   //

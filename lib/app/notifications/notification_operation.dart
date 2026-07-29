@@ -45,7 +45,6 @@ void handlePath(Map dataMap) {
 updateUserFunctions({required notify}) async {
   // Future.delayed(Duration.zero, () {
   //   if (UserBloc.instance.isLogin) {
-  //     // sl<NotificationsBloc>().add(Get(arguments: SearchEngine()));
   //   }
   // });
 }
