@@ -6,7 +6,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_event.dart';
 import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
@@ -16,6 +15,7 @@ import 'package:talent_flow/data/error/failures.dart';
 import 'package:talent_flow/features/payment/model/contract_payment_args.dart';
 import 'package:talent_flow/features/projects/widgets/project_files_section.dart';
 import 'package:talent_flow/features/setting/bloc/contract_details_bloc.dart';
+import 'package:talent_flow/features/setting/bloc/contract_details_event.dart';
 import 'package:talent_flow/features/setting/model/contract_details_ui_model.dart';
 import 'package:talent_flow/features/setting/model/contract_model.dart';
 import 'package:talent_flow/features/setting/repo/contracts_repo.dart';
@@ -100,7 +100,7 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
     if (paymentResult is String && paymentResult.trim().isNotEmpty) {
       _showSuccess(paymentResult);
       widget.onContractUpdated();
-      detailsBloc.add(Add(arguments: contractId));
+      detailsBloc.add(ContractDetailsRequested(contractId));
     }
   }
 
@@ -225,7 +225,9 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
     }
 
     widget.onContractUpdated();
-    context.read<ContractDetailsBloc>().add(Add(arguments: contractId));
+    context
+        .read<ContractDetailsBloc>()
+        .add(ContractDetailsRequested(contractId));
   }
 
   Future<void> _runContractAction({
@@ -249,7 +251,9 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
         widget.onContractUpdated();
         final contractId = _contract.id;
         if (contractId != null) {
-          context.read<ContractDetailsBloc>().add(Add(arguments: contractId));
+          context
+              .read<ContractDetailsBloc>()
+              .add(ContractDetailsRequested(contractId));
         }
       },
     );

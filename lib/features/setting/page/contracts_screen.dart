@@ -1,12 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/projects/widgets/projects_shimmer.dart';
 import 'package:talent_flow/features/setting/bloc/contracts_bloc.dart';
-import 'package:talent_flow/features/setting/model/contract_model.dart';
+import 'package:talent_flow/features/setting/bloc/contracts_event.dart';
+import 'package:talent_flow/features/setting/bloc/contracts_state.dart';
+import 'package:talent_flow/features/setting/repo/contracts_repo.dart';
 import 'package:talent_flow/features/setting/widgets/contract_list_item.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
@@ -25,7 +25,8 @@ class _ContractsScreenState extends State<ContractsScreen> {
   @override
   void initState() {
     super.initState();
-    _contractsBloc = ContractsBloc(sl())..add(Add());
+    _contractsBloc = ContractsBloc(repository: sl<ContractsRepo>())
+      ..add(const ContractsRequested());
   }
 
   @override
@@ -35,7 +36,7 @@ class _ContractsScreenState extends State<ContractsScreen> {
   }
 
   Future<void> _refreshContracts() async {
-    _contractsBloc.add(Add());
+    _contractsBloc.add(const ContractsRequested());
     await Future<void>.delayed(const Duration(milliseconds: 250));
   }
 
@@ -63,20 +64,20 @@ class _ContractsScreenState extends State<ContractsScreen> {
           //   ),
           // ],
         ),
-        body: BlocBuilder<ContractsBloc, AppState>(
+        body: BlocBuilder<ContractsBloc, ContractsState>(
           builder: (context, state) {
-            if (state is Loading) {
+            if (state is ContractsLoading) {
               return const ProjectCardShimmer();
             }
 
-            if (state is Error) {
+            if (state is ContractsFailed) {
               return Center(
                 child: Text('something_went_wrong'.tr()),
               );
             }
 
-            if (state is Done) {
-              final contracts = state.list?.cast<ContractModel>() ?? [];
+            if (state is ContractsLoaded) {
+              final contracts = state.contracts;
               if (contracts.isEmpty) {
                 return RefreshIndicator(
                   onRefresh: _refreshContracts,

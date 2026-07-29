@@ -69,19 +69,7 @@ class ContractPdfDownloader {
     final result = await sl<ContractsRepo>().getContractDetails(contractId);
     return result.fold(
       (_) => contract,
-      (response) {
-        final data = response.data;
-        if (data is Map && data['payload'] is Map<String, dynamic>) {
-          return ContractModel.fromJson(
-              data['payload'] as Map<String, dynamic>);
-        }
-        if (data is Map && data['payload'] is Map) {
-          return ContractModel.fromJson(
-            Map<String, dynamic>.from(data['payload'] as Map),
-          );
-        }
-        return contract;
-      },
+      (resolvedContract) => resolvedContract,
     );
   }
 

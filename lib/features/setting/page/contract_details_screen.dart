@@ -1,12 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/projects/widgets/projects_shimmer.dart';
 import 'package:talent_flow/features/setting/bloc/contract_details_bloc.dart';
-import 'package:talent_flow/features/setting/model/contract_model.dart';
+import 'package:talent_flow/features/setting/bloc/contract_details_event.dart';
+import 'package:talent_flow/features/setting/bloc/contract_details_state.dart';
+import 'package:talent_flow/features/setting/repo/contracts_repo.dart';
 import 'package:talent_flow/features/setting/widgets/contract_details/contract_details_body.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 
@@ -42,8 +42,8 @@ class _ContractDetailsScreenState extends State<ContractDetailsScreen> {
         await _handleWillPop();
       },
       child: BlocProvider(
-        create: (_) =>
-            ContractDetailsBloc(sl())..add(Add(arguments: widget.contractId)),
+        create: (_) => ContractDetailsBloc(repository: sl<ContractsRepo>())
+          ..add(ContractDetailsRequested(widget.contractId)),
         child: Scaffold(
           backgroundColor: const Color(0xFFF6F7FB),
           appBar: CustomAppBar(
@@ -52,22 +52,18 @@ class _ContractDetailsScreenState extends State<ContractDetailsScreen> {
             showBackButton: true,
             onBackPressed: () => Navigator.of(context).pop(_shouldRefreshOnPop),
           ),
-          body: BlocBuilder<ContractDetailsBloc, AppState>(
+          body: BlocBuilder<ContractDetailsBloc, ContractDetailsState>(
             builder: (context, state) {
-              if (state is Loading) {
+              if (state is ContractDetailsLoading) {
                 return const ProjectCardShimmer();
               }
 
-              if (state is Error) {
+              if (state is ContractDetailsFailed) {
                 return Center(child: Text('something_went_wrong'.tr()));
               }
 
-              if (state is Done) {
-                final contract = state.model as ContractModel?;
-                if (contract == null) {
-                  return Center(child: Text('something_went_wrong'.tr()));
-                }
-
+              if (state is ContractDetailsLoaded) {
+                final contract = state.contract;
                 return ContractDetailsBody(
                   contract: contract,
                   onContractUpdated: _markUpdated,

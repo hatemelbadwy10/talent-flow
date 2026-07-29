@@ -5,24 +5,49 @@ import '../../../data/api/end_points.dart';
 import '../../../data/error/api_error_handler.dart';
 import '../../../data/error/failures.dart';
 import '../model/create_contract_request_model.dart';
+import '../model/contract_model.dart';
 import '../../../main_repos/base_repo.dart';
+import 'contracts_repository.dart';
 
-class ContractsRepo extends BaseRepo {
+class ContractsRepo extends BaseRepo implements ContractsRepository {
   ContractsRepo({required super.sharedPreferences, required super.dioClient});
 
-  Future<Either<ServerFailure, Response>> getContracts() async {
+  @override
+  Future<Either<ServerFailure, List<ContractModel>>> getContracts() async {
     try {
       final response = await dioClient.get(uri: EndPoints.contracts);
-      return Right(response);
+      final data = Map<String, dynamic>.from(response.data as Map);
+      final payload = data['payload'];
+      if (payload is! List) {
+        return left(ServerFailure('Contracts payload is invalid'));
+      }
+      return right(
+        payload
+            .whereType<Map>()
+            .map((item) => ContractModel.fromJson(
+                  Map<String, dynamic>.from(item),
+                ))
+            .toList(growable: false),
+      );
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> getContractDetails(int id) async {
+  @override
+  Future<Either<ServerFailure, ContractModel>> getContractDetails(
+      int id) async {
     try {
       final response = await dioClient.get(uri: EndPoints.contractDetails(id));
-      return Right(response);
+      final body = response.data;
+      final payload =
+          body is Map && body['payload'] != null ? body['payload'] : body;
+      if (payload is! Map) {
+        return left(ServerFailure('Contract payload is invalid'));
+      }
+      return right(
+        ContractModel.fromJson(Map<String, dynamic>.from(payload)),
+      );
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }

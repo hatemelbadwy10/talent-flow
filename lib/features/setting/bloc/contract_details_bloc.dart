@@ -1,52 +1,28 @@
-import 'dart:developer';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
-import '../model/contract_model.dart';
-import '../repo/contracts_repo.dart';
+import '../repo/contracts_repository.dart';
+import 'contract_details_event.dart';
+import 'contract_details_state.dart';
 
-class ContractDetailsBloc extends Bloc<AppEvent, AppState> {
-  ContractDetailsBloc(this._contractsRepo) : super(Start()) {
-    on<Add>(_onGetContractDetails);
+class ContractDetailsBloc
+    extends Bloc<ContractDetailsEvent, ContractDetailsState> {
+  ContractDetailsBloc({required ContractsRepository repository})
+      : _repository = repository,
+        super(const ContractDetailsInitial()) {
+    on<ContractDetailsRequested>(_onRequested);
   }
 
-  final ContractsRepo _contractsRepo;
+  final ContractsRepository _repository;
 
-  Future<void> _onGetContractDetails(Add event, Emitter<AppState> emit) async {
-    emit(Loading());
-    final id = event.arguments;
-    if (id is! int) {
-      emit(Error());
-      return;
-    }
-
-    try {
-      final result = await _contractsRepo.getContractDetails(id);
-      result.fold(
-        (failure) {
-          log('Contract details error: $failure');
-          emit(Error());
-        },
-        (response) {
-          final body = response.data;
-          final payload = body is Map<String, dynamic> && body['payload'] != null
-              ? body['payload']
-              : body;
-
-          if (payload is! Map) {
-            emit(Error());
-            return;
-          }
-
-          final data = Map<String, dynamic>.from(payload);
-          emit(Done(model: ContractModel.fromJson(data)));
-        },
-      );
-    } catch (e, s) {
-      log('Exception in ContractDetailsBloc', error: e, stackTrace: s);
-      emit(Error());
-    }
+  Future<void> _onRequested(
+    ContractDetailsRequested event,
+    Emitter<ContractDetailsState> emit,
+  ) async {
+    emit(const ContractDetailsLoading());
+    final result = await _repository.getContractDetails(event.contractId);
+    result.fold(
+      (failure) => emit(ContractDetailsFailed(failure.error)),
+      (contract) => emit(ContractDetailsLoaded(contract)),
+    );
   }
 }
