@@ -1,10 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../app/core/app_storage_keys.dart';
 import '../app/core/images.dart';
 import '../navigation/custom_navigation.dart';
 import '../navigation/routes.dart';
@@ -43,16 +40,10 @@ class _GlobalUserHeaderState extends State<GlobalUserHeader> {
   Widget build(BuildContext context) {
     return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
-        final userBloc = context.read<UserBloc>();
-        final user = userBloc.user;
-        final prefs = sl<SharedPreferences>();
+        final user = state.user;
 
-        // Get data from UserBloc or fallback to SharedPreferences
-        final userName =
-            user?.name ?? prefs.getString(AppStorageKey.userName) ?? "User";
-        final userImage = user?.profileImage ??
-            prefs.getString(AppStorageKey.userImage) ??
-            Images.appLogo;
+        final userName = user?.name ?? "User";
+        final userImage = user?.profileImage ?? Images.appLogo;
 
         return GestureDetector(
           onTap: widget.onUserTap ??
@@ -130,13 +121,9 @@ class _GlobalUserAvatarState extends State<GlobalUserAvatar> {
   Widget build(BuildContext context) {
     return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
-        final userBloc = context.read<UserBloc>();
-        final user = userBloc.user;
-        final prefs = sl<SharedPreferences>();
+        final user = state.user;
 
-        final userImage = user?.profileImage ??
-            prefs.getString(AppStorageKey.userImage) ??
-            Images.appLogo;
+        final userImage = user?.profileImage ?? Images.appLogo;
         final notificationCount =
             widget.notificationCount ?? user?.unreadNotificationsCount ?? 0;
 
@@ -207,12 +194,9 @@ class _GlobalUserNameState extends State<GlobalUserName> {
   Widget build(BuildContext context) {
     return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
-        final userBloc = context.read<UserBloc>();
-        final user = userBloc.user;
-        final prefs = sl<SharedPreferences>();
+        final user = state.user;
 
-        final userName =
-            user?.name ?? prefs.getString(AppStorageKey.userName) ?? "User";
+        final userName = user?.name ?? "User";
 
         return GestureDetector(
           onTap: widget.onTap,
