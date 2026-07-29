@@ -1,17 +1,12 @@
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 
-import '../../../app/core/app_storage_keys.dart';
-import '../../../data/config/di.dart';
 import '../../../main_blocs/user_bloc.dart';
 
 class HomeHeaderSection extends StatelessWidget {
@@ -38,48 +33,16 @@ class HomeHeaderSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
-        final prefs = sl<SharedPreferences>();
-        final rawUserData = prefs.getString(AppStorageKey.userData);
-        String? storedJobTitle;
-        String? storedName;
-        String? storedImage;
-        int storedNotificationCount = 0;
-        int storedMessageCount = 0;
-
-        if ((rawUserData ?? '').isNotEmpty) {
-          try {
-            final decoded = jsonDecode(rawUserData!);
-            if (decoded is Map<String, dynamic>) {
-              storedJobTitle = decoded['job_title']?.toString();
-              storedName = _resolveStoredName(decoded);
-              storedImage = decoded['profile_image']?.toString() ??
-                  decoded['image']?.toString();
-              storedNotificationCount =
-                  _toInt(decoded['unread_notifications_count']) ?? 0;
-              storedMessageCount =
-                  _toInt(decoded['unread_messages_count']) ?? 0;
-            }
-          } catch (_) {}
-        }
-
-        final blocUser = UserBloc.instance.user;
-        final resolvedUserName = userName ??
-            blocUser?.name ??
-            storedName ??
-            prefs.getString(AppStorageKey.userName) ??
-            "Guest";
-        final resolvedJobTitle =
-            jobTitle ?? blocUser?.jobTitle ?? storedJobTitle;
-        final resolvedUserImage = userImage ??
-            blocUser?.profileImage ??
-            storedImage ??
-            prefs.getString(AppStorageKey.userImage);
+        final blocUser = state.user;
+        final resolvedUserName = userName ?? blocUser?.name ?? "Guest";
+        final resolvedJobTitle = jobTitle ?? blocUser?.jobTitle;
+        final resolvedUserImage = userImage ?? blocUser?.profileImage;
         final resolvedNotificationCount = notificationCount > 0
             ? notificationCount
-            : (blocUser?.unreadNotificationsCount ?? storedNotificationCount);
+            : (blocUser?.unreadNotificationsCount ?? 0);
         final resolvedMessageCount = messageCount > 0
             ? messageCount
-            : (blocUser?.unreadMessagesCount ?? storedMessageCount);
+            : (blocUser?.unreadMessagesCount ?? 0);
 
         return SizedBox(
           height: 176.h,
@@ -428,26 +391,4 @@ class _ActionButton extends StatelessWidget {
       ),
     );
   }
-}
-
-String? _resolveStoredName(Map<String, dynamic> json) {
-  final directName = json['name']?.toString().trim();
-  if (directName?.isNotEmpty ?? false) {
-    return directName;
-  }
-
-  final firstName = json['first_name']?.toString().trim();
-  final lastName = json['last_name']?.toString().trim();
-  final combinedName = [firstName, lastName]
-      .whereType<String>()
-      .where((e) => e.isNotEmpty)
-      .join(' ');
-  return combinedName.isEmpty ? null : combinedName;
-}
-
-int? _toInt(dynamic value) {
-  if (value is int) return value;
-  if (value is num) return value.toInt();
-  if (value is String) return int.tryParse(value);
-  return null;
 }
