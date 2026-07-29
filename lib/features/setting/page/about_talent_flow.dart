@@ -4,11 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart'; // لعرض الـ HTML
 import 'package:talent_flow/features/projects/widgets/projects_shimmer.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../data/config/di.dart';
-import '../../home/widgets/jop_offer_listview_item.dart';
 import '../bloc/about_bloc.dart';
+import '../bloc/static_content_state.dart';
+import '../repo/about_repo.dart';
 
 class AboutTalentFlowView extends StatelessWidget {
   const AboutTalentFlowView({super.key});
@@ -16,21 +15,22 @@ class AboutTalentFlowView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => AboutBloc(sl())..add(Add()), // يجيب البيانات
+      create: (context) =>
+          AboutBloc(repository: sl<AboutRepo>())..add(const AboutRequested()),
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FA),
-        appBar:  CustomAppBar(title: "about".tr()),
+        appBar: CustomAppBar(title: "about".tr()),
         body: SafeArea(
-          child: BlocBuilder<AboutBloc, AppState>(
+          child: BlocBuilder<AboutBloc, StaticContentState>(
             builder: (context, state) {
-              if (state is Loading) {
+              if (state is StaticContentLoading) {
                 return const ProjectCardShimmer();
-              } else if (state is Error) {
+              } else if (state is StaticContentFailed) {
                 return Center(
                   child: Text("failed_to_load_data".tr()),
                 );
-              } else if (state is Done) {
-                final aboutHtml = state.data as String;
+              } else if (state is StaticContentLoaded) {
+                final aboutHtml = state.html;
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(20.0),
                   child: Container(
@@ -41,7 +41,7 @@ class AboutTalentFlowView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12.0),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
+                          color: Colors.grey.withValues(alpha: 0.1),
                           spreadRadius: 1,
                           blurRadius: 10,
                         ),

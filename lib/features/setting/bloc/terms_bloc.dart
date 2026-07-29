@@ -1,30 +1,34 @@
-import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
-import '../repo/terms_condation_repo.dart';
 
-class TermsBloc extends Bloc<AppEvent, AppState> {
-  final TermsAndConditionRepo _termsRepo;
+import '../repo/terms_repository.dart';
+import 'static_content_state.dart';
 
-  TermsBloc(this._termsRepo) : super(Start()) {
-    on<Add>(_onGetTerms);
+sealed class TermsEvent {
+  const TermsEvent();
+}
+
+final class TermsRequested extends TermsEvent {
+  const TermsRequested();
+}
+
+class TermsBloc extends Bloc<TermsEvent, StaticContentState> {
+  TermsBloc({required TermsRepository repository})
+      : _repository = repository,
+        super(const StaticContentInitial()) {
+    on<TermsRequested>(_onRequested);
   }
 
-  Future<void> _onGetTerms(
-      Add event, Emitter<AppState> emit) async {
-    emit(Loading());
-    try {
-      final terms = await _termsRepo.getTermsAndCondition();
+  final TermsRepository _repository;
 
-      if (terms.isEmpty) {
-        emit(Error());
-      } else {
-        emit(Done(data: terms));
-      }
-    } catch (e) {
-      log("🔴 Error loading terms: $e");
-      emit(Error());
-    }
+  Future<void> _onRequested(
+    TermsRequested event,
+    Emitter<StaticContentState> emit,
+  ) async {
+    emit(const StaticContentLoading());
+    final result = await _repository.getTermsAndCondition();
+    result.fold(
+      (failure) => emit(StaticContentFailed(failure.error)),
+      (html) => emit(StaticContentLoaded(html)),
+    );
   }
 }

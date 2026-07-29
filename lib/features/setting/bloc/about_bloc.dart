@@ -1,29 +1,34 @@
-import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
-import '../repo/about_repo.dart';
 
-class AboutBloc extends Bloc<AppEvent, AppState> {
-  final AboutRepo _aboutRepo;
+import '../repo/about_repository.dart';
+import 'static_content_state.dart';
 
-  AboutBloc(this._aboutRepo) : super(Start()) {
-    on<Add>(_onGetAbout);
+sealed class AboutEvent {
+  const AboutEvent();
+}
+
+final class AboutRequested extends AboutEvent {
+  const AboutRequested();
+}
+
+class AboutBloc extends Bloc<AboutEvent, StaticContentState> {
+  AboutBloc({required AboutRepository repository})
+      : _repository = repository,
+        super(const StaticContentInitial()) {
+    on<AboutRequested>(_onRequested);
   }
 
-  Future<void> _onGetAbout(Add event, Emitter<AppState> emit) async {
-    emit(Loading());
-    try {
-      final about = await _aboutRepo.getAboutContent();
+  final AboutRepository _repository;
 
-      if (about.isEmpty) {
-        emit(Error());
-      } else {
-        emit(Done(data: about));
-      }
-    } catch (e) {
-      log("🔴 Error loading about content: $e");
-      emit(Error());
-    }
+  Future<void> _onRequested(
+    AboutRequested event,
+    Emitter<StaticContentState> emit,
+  ) async {
+    emit(const StaticContentLoading());
+    final result = await _repository.getAboutContent();
+    result.fold(
+      (failure) => emit(StaticContentFailed(failure.error)),
+      (html) => emit(StaticContentLoaded(html)),
+    );
   }
 }
