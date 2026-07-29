@@ -5,11 +5,16 @@ import 'package:talent_flow/main_repos/base_repo.dart';
 
 import '../../../data/error/failures.dart';
 import '../model/home_model.dart';
+import '../model/freelancers_model.dart';
 import 'home_dashboard_repository.dart';
 import 'categories_repository.dart';
+import 'freelancers_repository.dart';
 
 class HomeRepo extends BaseRepo
-    implements HomeDashboardRepository, CategoriesRepository {
+    implements
+        HomeDashboardRepository,
+        CategoriesRepository,
+        FreelancersRepository {
   HomeRepo({required super.sharedPreferences, required super.dioClient});
 
   Future<Either<ServerFailure, Response>> getHome() async {
@@ -112,6 +117,49 @@ class HomeRepo extends BaseRepo
           ServerFailure(e.message ?? 'An unexpected Dio error occurred'));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ServerFailure, List<FreelancersModel>>> getFreelancerList({
+    int? categoryId,
+    String? search,
+  }) async {
+    try {
+      final uri = categoryId == null
+          ? EndPoints.freelancers
+          : '${EndPoints.subCategories}$categoryId';
+      final normalizedSearch = search?.trim() ?? '';
+      final response = await dioClient.get(
+        uri: uri,
+        queryParameters:
+            normalizedSearch.isEmpty ? null : {'search': normalizedSearch},
+      );
+      final data = Map<String, dynamic>.from(response.data as Map);
+      final rootPayload = data['payload'];
+      final payload = categoryId == null
+          ? rootPayload
+          : rootPayload is Map
+              ? rootPayload['items']
+              : null;
+      if (payload is! List) {
+        return left(ServerFailure('Freelancers payload is invalid'));
+      }
+      return right(
+        payload
+            .map((item) => FreelancersModel.fromJson(
+                  Map<String, dynamic>.from(item as Map),
+                ))
+            .toList(growable: false),
+      );
+    } on DioException catch (error) {
+      return left(
+        ServerFailure(error.message ?? 'An unexpected Dio error occurred'),
+      );
+    } on FormatException catch (error) {
+      return left(ServerFailure(error.message));
+    } catch (error) {
+      return left(ServerFailure(error.toString()));
     }
   }
 

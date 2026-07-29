@@ -5,13 +5,16 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
 import '../../../app/core/images.dart';
 import '../../../data/config/di.dart';
 import '../../setting/widgets/setting_app_bar.dart';
-import '../bloc/home_bloc.dart';
-import '../model/freelancers_model.dart';
+import '../bloc/categories_bloc.dart';
+import '../bloc/categories_event.dart';
+import '../bloc/categories_state.dart';
+import '../bloc/freelancers_bloc.dart';
+import '../bloc/freelancers_event.dart';
+import '../bloc/freelancers_state.dart';
+import '../repo/home_repo.dart';
 import '../model/home_model.dart' hide Card;
 import '../widgets/freelancer_listview_item.dart';
 
@@ -29,21 +32,21 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchTimer;
 
-  late HomeBloc _categoriesBloc;
-  late HomeBloc _freelancersBloc;
+  late CategoriesBloc _categoriesBloc;
+  late FreelancersBloc _freelancersBloc;
 
   @override
   void initState() {
     super.initState();
-    _categoriesBloc = HomeBloc(homeRepo: sl());
-    _freelancersBloc = HomeBloc(homeRepo: sl());
+    _categoriesBloc = CategoriesBloc(repository: sl<HomeRepo>());
+    _freelancersBloc = FreelancersBloc(repository: sl<HomeRepo>());
 
     final categoryId = widget.arguments?["categoryId"] as int?;
     if (categoryId != null) {
-      _freelancersBloc.add(Follow(arguments: {'categoryId': categoryId}));
+      _freelancersBloc.add(FreelancersRequested(categoryId: categoryId));
     } else {
-      _categoriesBloc.add(Click());
-      _freelancersBloc.add(Follow());
+      _categoriesBloc.add(const CategoriesRequested());
+      _freelancersBloc.add(const FreelancersRequested());
     }
   }
 
@@ -67,11 +70,9 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
     final categoryId =
         _selectedCategory?.id ?? (widget.arguments?["categoryId"] as int?);
     _freelancersBloc.add(
-      Follow(
-        arguments: {
-          'categoryId': categoryId,
-          'search': _searchController.text.trim(),
-        },
+      FreelancersRequested(
+        categoryId: categoryId,
+        search: _searchController.text.trim(),
       ),
     );
   }
@@ -163,14 +164,15 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                               ),
                               SizedBox(height: 16.h),
                               Expanded(
-                                child: BlocBuilder<HomeBloc, AppState>(
+                                child: BlocBuilder<CategoriesBloc,
+                                    CategoriesState>(
                                   bloc: _categoriesBloc,
                                   builder: (context, state) {
-                                    if (state is Loading) {
+                                    if (state is CategoriesLoading) {
                                       return const Center(
                                         child: CircularProgressIndicator(),
                                       );
-                                    } else if (state is Error) {
+                                    } else if (state is CategoriesFailed) {
                                       return Center(
                                         child: Column(
                                           mainAxisAlignment:
@@ -192,16 +194,18 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                             SizedBox(height: 8.h),
                                             TextButton(
                                               onPressed: () =>
-                                                  _categoriesBloc.add(Click()),
+                                                  _categoriesBloc.add(
+                                                const CategoriesRequested(),
+                                              ),
                                               child: Text("retry".tr()),
                                             ),
                                           ],
                                         ),
                                       );
-                                    } else if (state is Done) {
-                                      final categories =
-                                          state.list as List<Category>;
-
+                                    } else if (state
+                                        case CategoriesLoaded(
+                                          :final categories
+                                        )) {
                                       if (categories.isEmpty) {
                                         return Center(
                                           child: Text(
@@ -379,8 +383,8 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<HomeBloc>.value(value: _categoriesBloc),
-        BlocProvider<HomeBloc>.value(value: _freelancersBloc),
+        BlocProvider<CategoriesBloc>.value(value: _categoriesBloc),
+        BlocProvider<FreelancersBloc>.value(value: _freelancersBloc),
       ],
       child: Scaffold(
         backgroundColor: Colors.grey[50],
@@ -480,12 +484,12 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                 ),
               ),
             Expanded(
-              child: BlocBuilder<HomeBloc, AppState>(
+              child: BlocBuilder<FreelancersBloc, FreelancersState>(
                 bloc: _freelancersBloc,
                 builder: (context, state) {
-                  if (state is Loading) {
+                  if (state is FreelancersLoading) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (state is Error) {
+                  } else if (state is FreelancersFailed) {
                     return Center(
                       child: Padding(
                         padding: EdgeInsets.all(20.w),
@@ -521,11 +525,9 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                                 final categoryId =
                                     widget.arguments?["categoryId"] as int?;
                                 _freelancersBloc.add(
-                                  Follow(
-                                    arguments: {
-                                      'categoryId': categoryId,
-                                      'search': _searchController.text.trim(),
-                                    },
+                                  FreelancersRequested(
+                                    categoryId: categoryId,
+                                    search: _searchController.text.trim(),
                                   ),
                                 );
                               },
@@ -543,8 +545,7 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                         ),
                       ),
                     );
-                  } else if (state is Done) {
-                    final freelancers = state.list as List<FreelancersModel>;
+                  } else if (state case FreelancersLoaded(:final freelancers)) {
                     if (freelancers.isEmpty) {
                       return Center(
                         child: Padding(
