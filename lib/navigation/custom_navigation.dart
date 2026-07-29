@@ -14,6 +14,7 @@ import 'package:talent_flow/features/payment/page/payment_page.dart';
 import 'package:talent_flow/features/projects/page/single_project_view.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
+import 'package:talent_flow/features/setting/repo/chats_repo.dart';
 import 'package:talent_flow/features/setting/page/add_projects.dart';
 import 'package:talent_flow/features/setting/page/add_single_work_screen.dart';
 import 'package:talent_flow/features/setting/page/favourite.dart';
@@ -260,7 +261,8 @@ abstract class CustomNavigator {
         ));
       case Routes.chats:
         return _pageRoute(BlocProvider(
-          create: (context) => ChatsBloc(sl())..add(Add()),
+          create: (context) => ChatsBloc(repository: sl<ChatsRepo>())
+            ..add(const ChatsRequested()),
           child: const ChatScreen(),
         ));
       case Routes.bankAccounts:

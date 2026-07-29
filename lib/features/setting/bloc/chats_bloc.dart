@@ -1,125 +1,135 @@
-import 'dart:developer';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/features/setting/model/chats_model.dart';
-import 'package:talent_flow/features/setting/repo/chats_repo.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
+import '../model/chats_model.dart';
+import '../repo/chats_repository.dart';
 
-class ChatsBloc extends Bloc<AppEvent, AppState> {
-  final ChatsRepo _chatsRepo;
-  Map<int, String> projectOptions = {};
-  List<ChatsModel> _currentChats = [];
+sealed class ChatsEvent {
+  const ChatsEvent();
+}
 
-  ChatsBloc(this._chatsRepo) : super(Start()) {
-    on<Add>(_onGetChats);
-    on<Click>(_onLoadProjectOptions);
-    on<Read>(_onMarkConversationRead);
+final class ChatsRequested extends ChatsEvent {
+  const ChatsRequested({this.projectId});
+
+  final int? projectId;
+}
+
+final class ChatProjectOptionsRequested extends ChatsEvent {
+  const ChatProjectOptionsRequested();
+}
+
+final class ConversationMarkedRead extends ChatsEvent {
+  const ConversationMarkedRead(this.conversationId);
+
+  final int conversationId;
+}
+
+sealed class ChatsState {
+  const ChatsState({
+    this.chats = const [],
+    this.projectOptions = const {},
+  });
+
+  final List<ChatsModel> chats;
+  final Map<int, String> projectOptions;
+}
+
+final class ChatsInitial extends ChatsState {
+  const ChatsInitial();
+}
+
+final class ChatsLoading extends ChatsState {
+  const ChatsLoading({
+    required super.chats,
+    required super.projectOptions,
+  });
+}
+
+final class ChatsLoaded extends ChatsState {
+  const ChatsLoaded({
+    required super.chats,
+    required super.projectOptions,
+  });
+}
+
+final class ChatsFailed extends ChatsState {
+  const ChatsFailed({
+    required this.message,
+    required super.chats,
+    required super.projectOptions,
+  });
+
+  final String message;
+}
+
+class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
+  ChatsBloc({required ChatsRepository repository})
+      : _repository = repository,
+        super(const ChatsInitial()) {
+    on<ChatsRequested>(_onChatsRequested);
+    on<ChatProjectOptionsRequested>(_onProjectOptionsRequested);
+    on<ConversationMarkedRead>(_onConversationMarkedRead);
   }
 
-  Future<void> _onLoadProjectOptions(
-      Click event, Emitter<AppState> emit) async {
-    try {
-      final result = await _chatsRepo.getProjectChatOptions();
-      result.fold(
-        (failure) {
-          log("Project options error: $failure");
-        },
-        (response) {
-          try {
-            if (response.data is Map && response.data['payload'] is Map) {
-              final payload = response.data['payload'] as Map;
-              final options = <int, String>{};
+  final ChatsRepository _repository;
 
-              payload.forEach((key, value) {
-                final id = int.tryParse(key.toString());
-                if (id != null && value is String) {
-                  options[id] = value;
-                }
-              });
-
-              projectOptions = options;
-              // Emit current state to trigger UI rebuild with new project options
-              emit(state);
-            }
-          } catch (e) {
-            log("Error parsing project options: $e");
-          }
-        },
-      );
-    } catch (e, s) {
-      log("Exception loading project options", error: e, stackTrace: s);
-    }
+  Future<void> _onProjectOptionsRequested(
+    ChatProjectOptionsRequested event,
+    Emitter<ChatsState> emit,
+  ) async {
+    final result = await _repository.getProjectChatOptions();
+    result.fold(
+      (failure) => emit(
+        ChatsFailed(
+          message: failure.error,
+          chats: state.chats,
+          projectOptions: state.projectOptions,
+        ),
+      ),
+      (options) => emit(
+        ChatsLoaded(chats: state.chats, projectOptions: options),
+      ),
+    );
   }
 
-  Future<void> _onGetChats(Add event, Emitter<AppState> emit) async {
-    emit(Loading());
-    try {
-      final args = event.arguments;
-      final projectIdRaw = args is Map ? args['project_id'] : null;
-      final int? projectId = projectIdRaw is int
-          ? projectIdRaw
-          : int.tryParse(projectIdRaw?.toString() ?? '');
-
-      final result = await _chatsRepo.getChats(projectId: projectId);
-      result.fold(
-        (failure) {
-          log("Chats error: $failure");
-          emit(Error());
-        },
-        (response) {
-          if (response.data == null || response.data['payload'] == null) {
-            emit(Error());
-            return;
-          }
-
-          final payload = response.data['payload'];
-          if (payload is! List) {
-            emit(Error());
-            return;
-          }
-
-          final List<ChatsModel> chats = payload
-              .whereType<Map<String, dynamic>>()
-              .map(ChatsModel.fromJson)
-              .toList()
-            ..sort(ChatsModel.compareNewestFirst);
-
-          _currentChats = chats;
-          emit(Done(list: chats));
-        },
-      );
-    } catch (e, s) {
-      log("Exception in ChatsBloc", error: e, stackTrace: s);
-      emit(Error());
-    }
+  Future<void> _onChatsRequested(
+    ChatsRequested event,
+    Emitter<ChatsState> emit,
+  ) async {
+    emit(
+      ChatsLoading(
+        chats: state.chats,
+        projectOptions: state.projectOptions,
+      ),
+    );
+    final result = await _repository.getChats(projectId: event.projectId);
+    result.fold(
+      (failure) => emit(
+        ChatsFailed(
+          message: failure.error,
+          chats: state.chats,
+          projectOptions: state.projectOptions,
+        ),
+      ),
+      (chats) => emit(
+        ChatsLoaded(chats: chats, projectOptions: state.projectOptions),
+      ),
+    );
   }
 
-  void _onMarkConversationRead(Read event, Emitter<AppState> emit) {
-    final rawId = event.arguments;
-    final int? conversationId =
-        rawId is int ? rawId : int.tryParse(rawId?.toString() ?? '');
-
-    if (conversationId == null || _currentChats.isEmpty) {
-      return;
-    }
-
-    var hasChanges = false;
-    final updatedChats = _currentChats.map((chat) {
-      if (chat.id != conversationId || (chat.unreadCount ?? 0) == 0) {
+  void _onConversationMarkedRead(
+    ConversationMarkedRead event,
+    Emitter<ChatsState> emit,
+  ) {
+    var changed = false;
+    final chats = state.chats.map((chat) {
+      if (chat.id != event.conversationId || (chat.unreadCount ?? 0) == 0) {
         return chat;
       }
-
-      hasChanges = true;
+      changed = true;
       return chat.copyWith(unreadCount: 0);
     }).toList();
-
-    if (!hasChanges) {
-      return;
+    if (changed) {
+      emit(ChatsLoaded(chats: chats, projectOptions: state.projectOptions));
     }
-
-    _currentChats = updatedChats;
-    emit(Done(list: updatedChats));
   }
 }

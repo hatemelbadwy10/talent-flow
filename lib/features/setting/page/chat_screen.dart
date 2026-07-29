@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/components/animated_widget.dart';
 import 'package:talent_flow/features/setting/bloc/chats_bloc.dart';
 import 'package:talent_flow/features/setting/model/chats_model.dart';
@@ -30,8 +29,8 @@ class _ChatScreenState extends State<ChatScreen> {
       SyncUnreadCounts(arguments: {'messages': 0}),
     );
     Future.microtask(() {
-      chatsBloc.add(Click());
-      chatsBloc.add(Add());
+      chatsBloc.add(const ChatProjectOptionsRequested());
+      chatsBloc.add(const ChatsRequested());
     });
   }
 
@@ -43,7 +42,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _openChat(ChatsModel chat) async {
     final conversationId = chat.id;
     if (conversationId != null) {
-      context.read<ChatsBloc>().add(Read(arguments: conversationId));
+      context.read<ChatsBloc>().add(ConversationMarkedRead(conversationId));
     }
 
     final arguments = {
@@ -67,9 +66,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
     if (!mounted) return;
     context.read<ChatsBloc>().add(
-          Add(arguments: {
-            'project_id': _selectedProjectId,
-          }),
+          ChatsRequested(projectId: _selectedProjectId),
         );
   }
 
@@ -116,11 +113,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              BlocBuilder<ChatsBloc, AppState>(
+              BlocBuilder<ChatsBloc, ChatsState>(
                 buildWhen: (previous, current) => true,
                 builder: (context, state) {
-                  final projectOptions =
-                      context.read<ChatsBloc>().projectOptions;
+                  final projectOptions = state.projectOptions;
                   return Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -151,7 +147,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           _selectedProjectId = value;
                         });
                         context.read<ChatsBloc>().add(
-                              Add(arguments: {'project_id': value}),
+                              ChatsRequested(projectId: value),
                             );
                       },
                     ),
@@ -160,9 +156,9 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               const SizedBox(height: 14),
               Expanded(
-                child: BlocBuilder<ChatsBloc, AppState>(
+                child: BlocBuilder<ChatsBloc, ChatsState>(
                   builder: (context, state) {
-                    if (state is Loading) {
+                    if (state is ChatsLoading) {
                       return ListView.builder(
                         itemCount: 6,
                         itemBuilder: (_, __) => Container(
@@ -176,14 +172,15 @@ class _ChatScreenState extends State<ChatScreen> {
                       );
                     }
 
-                    if (state is Error) {
+                    if (state is ChatsFailed && state.chats.isEmpty) {
                       return Center(
                         child: Text("failed_to_load_chats".tr()),
                       );
                     }
 
-                    if (state is Done) {
-                      final allChats = state.list?.cast<ChatsModel>() ?? [];
+                    if (state is ChatsLoaded ||
+                        state is ChatsFailed && state.chats.isNotEmpty) {
+                      final allChats = state.chats;
 
                       if (allChats.isEmpty) {
                         return Center(
