@@ -33,6 +33,7 @@ import 'package:talent_flow/features/setting/repo/bank_accounts_repo.dart';
 import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
 import 'package:talent_flow/features/setting/repo/acceptance_test_repo.dart';
 import 'package:talent_flow/features/setting/page/add_projects.dart';
+import 'package:talent_flow/features/setting/model/create_contract_route_args.dart';
 import 'package:talent_flow/features/setting/page/add_single_work_screen.dart';
 import 'package:talent_flow/features/setting/page/favourite.dart';
 import 'package:talent_flow/features/setting/page/notification.dart';
@@ -482,7 +483,7 @@ abstract class CustomNavigator {
       case Routes.createContract:
         return _pageRoute(
           CreateContractScreen(
-            arguments: settings.arguments as Map<String, dynamic>?,
+            arguments: CreateContractRouteArgs.fromRoute(settings.arguments),
             addProjectRepository: sl<ProjectRepository>(),
             contractsRepository: sl<ContractsRepo>(),
           ),

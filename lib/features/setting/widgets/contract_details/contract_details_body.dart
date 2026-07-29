@@ -14,6 +14,7 @@ import 'package:talent_flow/features/setting/bloc/contract_details_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/contract_details_event.dart';
 import 'package:talent_flow/features/setting/model/contract_details_ui_model.dart';
 import 'package:talent_flow/features/setting/model/contract_model.dart';
+import 'package:talent_flow/features/setting/model/create_contract_route_args.dart';
 import 'package:talent_flow/features/setting/repo/contracts_repository.dart';
 import 'package:talent_flow/features/setting/widgets/contract_details/contract_details_components.dart';
 import 'package:talent_flow/features/setting/widgets/contract_details/contract_details_dialogs.dart';
@@ -211,12 +212,12 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
 
     final result = await CustomNavigator.push(
       Routes.createContract,
-      arguments: {
-        'contractId': contractId,
-        'projectId': projectId,
-        'freelancerId': freelancerId,
-        'contract': _contract,
-      },
+      arguments: CreateContractRouteArgs(
+        contractId: contractId,
+        projectId: projectId,
+        freelancerId: freelancerId,
+        contract: _contract,
+      ),
     );
 
     if (!mounted || result != true) {

@@ -18,6 +18,7 @@ import 'package:talent_flow/features/setting/bloc/create_contract_state.dart';
 import 'package:talent_flow/features/setting/model/contract_model.dart';
 import 'package:talent_flow/features/setting/model/create_contract_page_info_model.dart';
 import 'package:talent_flow/features/setting/model/create_contract_request_model.dart';
+import 'package:talent_flow/features/setting/model/create_contract_route_args.dart';
 import 'package:talent_flow/features/setting/repo/contracts_repository.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/helpers/date_time_picker.dart';
@@ -26,12 +27,12 @@ import 'package:talent_flow/navigation/custom_navigation.dart';
 class CreateContractScreen extends StatefulWidget {
   const CreateContractScreen({
     super.key,
-    this.arguments,
+    required this.arguments,
     required this.addProjectRepository,
     required this.contractsRepository,
   });
 
-  final Map<String, dynamic>? arguments;
+  final CreateContractRouteArgs arguments;
   final AddProjectRepository addProjectRepository;
   final ContractsRepository contractsRepository;
 
@@ -51,48 +52,17 @@ class _CreateContractScreenState extends State<CreateContractScreen> {
   late final AddProjectBloc _addProjectBloc;
   late final CreateContractBloc _createContractBloc;
 
-  int? get _projectId {
-    final value =
-        widget.arguments?['projectId'] ?? widget.arguments?['project_id'];
-    if (value is int) {
-      return value;
-    }
-    return int.tryParse(value?.toString() ?? '');
-  }
+  int? get _projectId => widget.arguments.projectId;
 
-  int? get _conversationId {
-    final value = widget.arguments?['conversationId'] ??
-        widget.arguments?['conversation_id'];
-    if (value is int) {
-      return value;
-    }
-    return int.tryParse(value?.toString() ?? '');
-  }
+  int? get _conversationId => widget.arguments.conversationId;
 
-  int? get _userId {
-    final value =
-        widget.arguments?['freelancerId'] ?? widget.arguments?['user_id'];
-    if (value is int) {
-      return value;
-    }
-    return int.tryParse(value?.toString() ?? '');
-  }
+  int? get _userId => widget.arguments.freelancerId;
 
-  int? get _contractId {
-    final value =
-        widget.arguments?['contractId'] ?? widget.arguments?['contract_id'];
-    if (value is int) {
-      return value;
-    }
-    return int.tryParse(value?.toString() ?? '');
-  }
+  int? get _contractId => widget.arguments.contractId;
 
   bool get _isEditMode => _contractId != null;
 
-  ContractModel? get _initialContract {
-    final value = widget.arguments?['contract'];
-    return value is ContractModel ? value : null;
-  }
+  ContractModel? get _initialContract => widget.arguments.contract;
 
   @override
   void initState() {

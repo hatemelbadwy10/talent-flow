@@ -14,6 +14,7 @@ import 'package:talent_flow/components/custom_images.dart';
 import 'package:talent_flow/features/home/bloc/freelancer_chat_bloc.dart';
 import 'package:talent_flow/features/home/model/home_route_args.dart';
 import 'package:talent_flow/features/home/widgets/chat_bubble.dart';
+import 'package:talent_flow/features/setting/model/create_contract_route_args.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
@@ -319,12 +320,11 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
                       onPressed: () {
                         CustomNavigator.push(
                           Routes.createContract,
-                          arguments: {
-                            'freelancerId': freelancerId,
-                            'conversationId': widget.arguments.conversationId,
-                            if (currentProjectId != null)
-                              'projectId': currentProjectId,
-                          },
+                          arguments: CreateContractRouteArgs(
+                            freelancerId: freelancerId,
+                            conversationId: widget.arguments.conversationId,
+                            projectId: currentProjectId,
+                          ),
                         );
                       },
                       child: Text(
