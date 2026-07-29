@@ -233,54 +233,35 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
             successMessage: response.message.trim().isNotEmpty
                 ? response.message
                 : 'تم التحديث بنجاح',
-            updatedUserPayload: payload,
-            firstName: payload?['first_name']?.toString() ?? state.firstName,
-            lastName: payload?['last_name']?.toString() ?? state.lastName,
-            email: payload?['email']?.toString() ?? state.email,
-            phone: payload?['phone']?.toString() ?? state.phone,
-            verifiedPhone:
-                (payload?['phone_verified_at']?.toString().isNotEmpty ?? false)
-                    ? (payload?['phone'])?.toString()
-                    : state.verifiedPhone,
-            phoneVerifiedAt: payload?['phone_verified_at']?.toString() ??
-                state.phoneVerifiedAt,
+            updatedUser: payload,
+            firstName: payload?.firstName ?? state.firstName,
+            lastName: payload?.lastName ?? state.lastName,
+            email: payload?.email ?? state.email,
+            phone: payload?.phone ?? state.phone,
+            verifiedPhone: (payload?.phoneVerifiedAt?.isNotEmpty ?? false)
+                ? payload?.phone
+                : state.verifiedPhone,
+            phoneVerifiedAt: payload?.phoneVerifiedAt ?? state.phoneVerifiedAt,
             specializationId:
-                _toInt(payload?['specialization_id']) ?? state.specializationId,
-            specializationName: payload?['specialization']?.toString() ??
-                state.specializationName,
-            jobTitleId: _toInt(payload?['job_title_id']) ?? state.jobTitleId,
-            jobTitleName:
-                payload?['job_title']?.toString() ?? state.jobTitleName,
-            bio: payload?['bio']?.toString() ?? state.bio,
-            countryId: payload?['country_id']?.toString() ?? state.countryId,
-            countryName: payload?['country']?.toString() ?? state.countryName,
-            cityId: payload?['city_id']?.toString() ?? state.cityId,
-            cityName: payload?['city']?.toString() ?? state.cityName,
-            gender: payload?['gender']?.toString() ?? state.gender,
-            dateOfBirth:
-                payload?['date_of_birth']?.toString() ?? state.dateOfBirth,
-            skills: payload == null
-                ? state.skills
-                : _parseSkills(payload['skills']),
-            selectedSkills: payload?['skillsNames'] is List
-                ? List<String>.from(payload!['skillsNames'] as List)
+                payload?.specializationId ?? state.specializationId,
+            specializationName:
+                payload?.specialization ?? state.specializationName,
+            jobTitleId: payload?.jobTitleId ?? state.jobTitleId,
+            jobTitleName: payload?.jobTitle ?? state.jobTitleName,
+            bio: payload?.bio ?? state.bio,
+            countryId: payload?.countryId?.toString() ?? state.countryId,
+            countryName: payload?.country ?? state.countryName,
+            cityId: payload?.cityId?.toString() ?? state.cityId,
+            cityName: payload?.city ?? state.cityName,
+            gender: payload?.gender ?? state.gender,
+            dateOfBirth: payload?.dateOfBirth ?? state.dateOfBirth,
+            skills: payload == null ? state.skills : payload.skills,
+            selectedSkills: payload?.skillNames.isNotEmpty == true
+                ? payload!.skillNames
                 : state.selectedSkills,
           ),
         );
       },
     );
-  }
-
-  int? _toInt(Object? value) =>
-      value is int ? value : int.tryParse(value?.toString() ?? '');
-
-  List<int> _parseSkills(Object? value) {
-    if (value is List) {
-      return value.map((item) => _toInt(item) ?? 0).toList();
-    }
-    if (value is String) {
-      return value.split(',').map((item) => _toInt(item.trim()) ?? 0).toList();
-    }
-    return const [];
   }
 }

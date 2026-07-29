@@ -18,12 +18,6 @@ final class UserModelUpdated extends UserEvent {
   final UserModel user;
 }
 
-final class UserPayloadUpdated extends UserEvent {
-  const UserPayloadUpdated(this.payload);
-
-  final Map<String, dynamic> payload;
-}
-
 final class UserUnreadCountsSynced extends UserEvent {
   const UserUnreadCountsSynced({
     this.notifications,
@@ -71,7 +65,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         super(const UserInitial()) {
     on<UserRequested>(_onRequested);
     on<UserModelUpdated>(_onModelUpdated);
-    on<UserPayloadUpdated>(_onPayloadUpdated);
     on<UserUnreadCountsSynced>(_onUnreadCountsSynced);
     on<UserCleared>(_onCleared);
   }
@@ -108,14 +101,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   ) async {
     await _repository.setUserData(event.user.toJson());
     emit(UserLoaded(event.user));
-  }
-
-  Future<void> _onPayloadUpdated(
-    UserPayloadUpdated event,
-    Emitter<UserState> emit,
-  ) async {
-    await _repository.setUserData(event.payload);
-    emit(UserLoaded(UserModel.fromJson(event.payload)));
   }
 
   void _onUnreadCountsSynced(

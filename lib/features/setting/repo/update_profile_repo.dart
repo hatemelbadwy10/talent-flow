@@ -9,6 +9,7 @@ import 'package:talent_flow/main_repos/base_repo.dart';
 import '../../../data/error/api_error_handler.dart';
 import '../../../data/error/failures.dart';
 import '../model/profile_update_result.dart';
+import '../../../main_models/user_model.dart';
 import 'profile_repository.dart';
 
 class UpdateProfileRepo extends BaseRepo implements ProfileRepository {
@@ -106,7 +107,9 @@ class UpdateProfileRepo extends BaseRepo implements ProfileRepository {
       return Right(
         ProfileUpdateResult(
           message: responseMap['message']?.toString() ?? '',
-          user: payload is Map ? Map<String, dynamic>.from(payload) : null,
+          user: payload is Map
+              ? UserModel.fromJson(Map<String, dynamic>.from(payload))
+              : null,
         ),
       );
     } catch (error) {

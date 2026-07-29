@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:equatable/equatable.dart';
+import '../../../main_models/user_model.dart';
 
 class UpdateProfileState extends Equatable {
   final String? firstName;
@@ -33,7 +34,7 @@ class UpdateProfileState extends Equatable {
   final String? phoneVerificationMessage;
   final String? phoneVerificationError;
   final String? phoneVerificationPhone;
-  final Map<String, dynamic>? updatedUserPayload;
+  final UserModel? updatedUser;
 
   const UpdateProfileState({
     this.firstName,
@@ -67,7 +68,7 @@ class UpdateProfileState extends Equatable {
     this.phoneVerificationMessage,
     this.phoneVerificationError,
     this.phoneVerificationPhone,
-    this.updatedUserPayload,
+    this.updatedUser,
   });
 
   UpdateProfileState copyWith({
@@ -106,7 +107,7 @@ class UpdateProfileState extends Equatable {
     String? phoneVerificationError,
     String? phoneVerificationPhone,
     bool clearPhoneVerificationFeedback = false,
-    Map<String, dynamic>? updatedUserPayload,
+    UserModel? updatedUser,
   }) {
     return UpdateProfileState(
       firstName: firstName ?? this.firstName,
@@ -152,7 +153,7 @@ class UpdateProfileState extends Equatable {
           : phoneVerificationError ?? this.phoneVerificationError,
       phoneVerificationPhone:
           phoneVerificationPhone ?? this.phoneVerificationPhone,
-      updatedUserPayload: updatedUserPayload ?? this.updatedUserPayload,
+      updatedUser: updatedUser ?? this.updatedUser,
     );
   }
 
@@ -189,6 +190,6 @@ class UpdateProfileState extends Equatable {
         phoneVerificationMessage,
         phoneVerificationError,
         phoneVerificationPhone,
-        updatedUserPayload,
+        updatedUser,
       ];
 }

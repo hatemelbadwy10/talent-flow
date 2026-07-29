@@ -132,9 +132,9 @@ class _EditProfileFormState extends State<EditProfileForm> {
         // Only show success snackbar once
         if (state.isSubmitted && !_lastShownSuccessState) {
           _lastShownSuccessState = true;
-          final payload = state.updatedUserPayload;
-          if (payload != null) {
-            context.read<UserBloc>().add(UserPayloadUpdated(payload));
+          final user = state.updatedUser;
+          if (user != null) {
+            context.read<UserBloc>().add(UserModelUpdated(user));
           }
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

@@ -8,6 +8,7 @@ import 'package:talent_flow/features/setting/bloc/update_profile_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/update_profile_event.dart';
 import 'package:talent_flow/features/setting/model/profile_update_result.dart';
 import 'package:talent_flow/features/setting/repo/profile_repository.dart';
+import 'package:talent_flow/main_models/user_model.dart';
 
 void main() {
   late SharedPreferences preferences;
@@ -44,7 +45,7 @@ void main() {
     bloc.add(SubmitProfile());
 
     final state = await bloc.stream.firstWhere((state) => state.isSubmitted);
-    expect(state.updatedUserPayload, repository.user);
+    expect(state.updatedUser, same(repository.user));
     expect(state.firstName, 'Hatem Updated');
     expect(state.successMessage, 'Profile saved');
     await bloc.close();
@@ -53,10 +54,10 @@ void main() {
 
 class _FakeProfileRepository implements ProfileRepository {
   String? verificationPhone;
-  final user = <String, dynamic>{
-    'first_name': 'Hatem Updated',
-    'skills': [1, 2],
-  };
+  final user = UserModel(
+    firstName: 'Hatem Updated',
+    skills: const [1, 2],
+  );
 
   @override
   Future<Either<ServerFailure, String>> sendPhoneVerificationOtp(

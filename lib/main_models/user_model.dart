@@ -12,7 +12,17 @@ class UserModel extends SingleMapper {
   String? userType;
   String? bio;
   String? specialization;
+  int? specializationId;
+  int? jobTitleId;
   String? country;
+  int? countryId;
+  String? city;
+  int? cityId;
+  String? gender;
+  String? dateOfBirth;
+  String? phoneVerifiedAt;
+  List<int> skills;
+  List<String> skillNames;
   String? identityVerifyStatus;
   bool? addedWorks;
   bool? identityAuthenticated;
@@ -35,7 +45,17 @@ class UserModel extends SingleMapper {
     this.userType,
     this.bio,
     this.specialization,
+    this.specializationId,
+    this.jobTitleId,
     this.country,
+    this.countryId,
+    this.city,
+    this.cityId,
+    this.gender,
+    this.dateOfBirth,
+    this.phoneVerifiedAt,
+    this.skills = const [],
+    this.skillNames = const [],
     this.identityVerifyStatus,
     this.addedWorks,
     this.identityAuthenticated,
@@ -49,7 +69,9 @@ class UserModel extends SingleMapper {
 
   UserModel.fromJson(Map<String, dynamic> json)
       : reviews = const [],
-        projects = const [] {
+        projects = const [],
+        skills = const [],
+        skillNames = const [] {
     id = json['id'];
     final firstName = json['first_name']?.toString().trim();
     final lastName = json['last_name']?.toString().trim();
@@ -70,7 +92,17 @@ class UserModel extends SingleMapper {
     userType = json['user_type']?.toString();
     bio = json['bio']?.toString();
     specialization = json['specialization']?.toString();
+    specializationId = _toInt(json['specialization_id']);
+    jobTitleId = _toInt(json['job_title_id']);
     country = json['country']?.toString();
+    countryId = _toInt(json['country_id']);
+    city = json['city']?.toString();
+    cityId = _toInt(json['city_id']);
+    gender = json['gender']?.toString();
+    dateOfBirth = json['date_of_birth']?.toString();
+    phoneVerifiedAt = json['phone_verified_at']?.toString();
+    skills = _toIntList(json['skills']);
+    skillNames = _toStringList(json['skillsNames'] ?? json['skill_names']);
     identityVerifyStatus = json['identity_verify_status']?.toString();
     addedWorks = _toBool(json['added_works']);
     identityAuthenticated = _toBool(json['identity_authenticated']);
@@ -99,7 +131,17 @@ class UserModel extends SingleMapper {
     data['user_type'] = userType;
     data['bio'] = bio;
     data['specialization'] = specialization;
+    data['specialization_id'] = specializationId;
+    data['job_title_id'] = jobTitleId;
     data['country'] = country;
+    data['country_id'] = countryId;
+    data['city'] = city;
+    data['city_id'] = cityId;
+    data['gender'] = gender;
+    data['date_of_birth'] = dateOfBirth;
+    data['phone_verified_at'] = phoneVerifiedAt;
+    data['skills'] = skills;
+    data['skillsNames'] = skillNames;
     data['identity_verify_status'] = identityVerifyStatus;
     data['added_works'] = addedWorks;
     data['identity_authenticated'] = identityAuthenticated;
@@ -149,4 +191,26 @@ List<Map<String, dynamic>> _toStringKeyedMapList(dynamic value) {
       .whereType<Map>()
       .map((item) => item.map((key, value) => MapEntry(key.toString(), value)))
       .toList();
+}
+
+List<int> _toIntList(Object? value) {
+  if (value is List) {
+    return value.map(_toInt).whereType<int>().toList(growable: false);
+  }
+  if (value is String) {
+    return value
+        .split(',')
+        .map((item) => _toInt(item.trim()))
+        .whereType<int>()
+        .toList(growable: false);
+  }
+  return const [];
+}
+
+List<String> _toStringList(Object? value) {
+  if (value is! List) return const [];
+  return value
+      .map((item) => item?.toString().trim() ?? '')
+      .where((item) => item.isNotEmpty)
+      .toList(growable: false);
 }

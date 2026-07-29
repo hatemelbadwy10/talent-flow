@@ -49,4 +49,30 @@ void main() {
     expect(model.statistics?.inProgressProjects, 5);
     expect(model.totalProjects, 15);
   });
+
+  test('UserModel round-trips editable profile fields', () {
+    final user = UserModel.fromJson({
+      ...profileJson,
+      'specialization_id': '4',
+      'job_title_id': 8,
+      'country_id': '12',
+      'city': 'عدن',
+      'city_id': 18,
+      'gender': 'female',
+      'date_of_birth': '1995-05-20',
+      'phone_verified_at': '2026-07-30T00:00:00Z',
+      'skills': ['1', 2],
+      'skillsNames': ['Design', 'Planning'],
+    });
+    final persisted = user.toJson();
+
+    expect(persisted['specialization_id'], 4);
+    expect(persisted['job_title_id'], 8);
+    expect(persisted['country_id'], 12);
+    expect(persisted['city_id'], 18);
+    expect(persisted['gender'], 'female');
+    expect(persisted['date_of_birth'], '1995-05-20');
+    expect(persisted['skills'], [1, 2]);
+    expect(persisted['skillsNames'], ['Design', 'Planning']);
+  });
 }

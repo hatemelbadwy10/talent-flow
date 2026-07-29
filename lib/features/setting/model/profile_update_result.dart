@@ -1,3 +1,5 @@
+import '../../../main_models/user_model.dart';
+
 class ProfileUpdateResult {
   const ProfileUpdateResult({
     required this.message,
@@ -5,5 +7,5 @@ class ProfileUpdateResult {
   });
 
   final String message;
-  final Map<String, dynamic>? user;
+  final UserModel? user;
 }
