@@ -6,13 +6,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import '../../../app/core/images.dart';
 import '../../../app/core/styles.dart';
-import '../../../data/config/di.dart';
 import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
 
 class UserTypeSelectionScreen extends StatelessWidget {
-  const UserTypeSelectionScreen({super.key, this.arguments});
+  const UserTypeSelectionScreen({
+    super.key,
+    this.arguments,
+    required this.sharedPreferences,
+  });
   final Map<String, dynamic>? arguments;
+  final SharedPreferences sharedPreferences;
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +78,10 @@ class UserTypeSelectionScreen extends StatelessWidget {
                   iconPath: Images.jopSearcher,
                   text: 'user_selection.find_service_card'.tr(),
                   onTap: () {
-                    sl<SharedPreferences>()
-                        .setBool(AppStorageKey.isFreelancer, false);
+                    sharedPreferences.setBool(
+                      AppStorageKey.isFreelancer,
+                      false,
+                    );
                     log('arguments?["from_login"]${arguments?["from_login"]}');
                     if (arguments?["from_login"] == true) {
                       CustomNavigator.push(Routes.register);
@@ -89,8 +95,10 @@ class UserTypeSelectionScreen extends StatelessWidget {
                     iconPath: Images.penIcon,
                     text: 'user_selection.freelancer_card'.tr(),
                     onTap: () {
-                      sl<SharedPreferences>()
-                          .setBool(AppStorageKey.isFreelancer, true);
+                      sharedPreferences.setBool(
+                        AppStorageKey.isFreelancer,
+                        true,
+                      );
                       log('arguments?["from_login"]${arguments?["from_login"]}');
                       if (arguments?["from_login"] == true) {
                         CustomNavigator.push(Routes.register);

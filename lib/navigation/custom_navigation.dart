@@ -67,6 +67,7 @@ import '../features/setting/repo/dashboard_repo.dart';
 import '../features/setting/repo/settings_repo.dart';
 import '../features/setting/repo/update_profile_repo.dart';
 import '../features/auth/data/auth_session_store.dart';
+import '../features/splash/repo/splash_repo.dart';
 import '../main_repos/location_options_repo.dart';
 import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
@@ -106,13 +107,14 @@ abstract class CustomNavigator {
       case Routes.freeLancer:
         return _pageRoute(UserTypeSelectionScreen(
           arguments: settings.arguments as Map<String, dynamic>?,
+          sharedPreferences: sl<SharedPreferences>(),
         ));
       case Routes.navBar:
         return _pageRoute(_navBar());
       case Routes.home:
         return _pageRoute(_homeView());
       case Routes.splash:
-        return _pageRoute(const Splash());
+        return _pageRoute(Splash(repository: sl<SplashRepo>()));
       case Routes.login:
         return _pageRoute(_login());
       case Routes.register:

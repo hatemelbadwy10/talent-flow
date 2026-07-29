@@ -8,12 +8,13 @@ import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
-import '../../../data/config/di.dart';
 import '../bloc/splash_bloc.dart';
-import '../repo/splash_repo.dart';
+import '../repo/splash_repository.dart';
 
 class Splash extends StatefulWidget {
-  const Splash({super.key});
+  const Splash({super.key, required this.repository});
+
+  final SplashRepository repository;
 
   @override
   State<Splash> createState() => _SplashState();
@@ -36,12 +37,12 @@ class _SplashState extends State<Splash> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          SplashBloc(repository: sl<SplashRepo>())..add(const SplashStarted()),
+          SplashBloc(repository: widget.repository)..add(const SplashStarted()),
       child: BlocConsumer<SplashBloc, SplashState>(
         listener: (context, state) {
           if (state case SplashReady(:final destination)) {
             if (destination == SplashDestination.home) {
-              UserBloc.instance.add(const UserRequested());
+              context.read<UserBloc>().add(const UserRequested());
             }
             final route = switch (destination) {
               SplashDestination.onboarding => Routes.onBoarding,
