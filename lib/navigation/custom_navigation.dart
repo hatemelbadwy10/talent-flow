@@ -59,6 +59,7 @@ import '../features/setting/repo/terms_condation_repo.dart';
 import '../features/setting/repo/contracts_repo.dart';
 import '../features/setting/repo/dashboard_repo.dart';
 import '../features/setting/repo/settings_repo.dart';
+import '../features/setting/repo/update_profile_repo.dart';
 import '../main_repos/location_options_repo.dart';
 import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
@@ -283,7 +284,16 @@ abstract class CustomNavigator {
       //   return _pageRoute(Verification(model: settings.arguments as VerificationModel));
       //
       case Routes.editProfile:
-        return _pageRoute(const EditProfileScreen());
+        final preferences = sl<SharedPreferences>();
+        return _pageRoute(
+          EditProfileScreen(
+            sharedPreferences: preferences,
+            profileRepository: sl<UpdateProfileRepo>(),
+            selectionOptionsRepository: sl<SelectionOptionRepo>(),
+            locationOptionsRepository: sl<LocationOptionsRepo>(),
+            initialImageUrl: preferences.getString(AppStorageKey.userImage),
+          ),
+        );
       case Routes.editWork:
         final workId = settings.arguments as int?;
         if (workId == null) {

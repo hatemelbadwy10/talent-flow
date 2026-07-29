@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/setting/bloc/update_profile_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/update_profile_event.dart';
 import 'package:talent_flow/features/setting/bloc/update_profile_state.dart';
@@ -23,30 +21,46 @@ import 'package:talent_flow/features/new_projects/bloc/selection_option_state.da
 import 'package:talent_flow/main_blocs/location_options_bloc.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/navigation/routes.dart';
+import 'package:talent_flow/features/new_projects/repo/selection_options_repository.dart';
+import 'package:talent_flow/main_repos/location_options_repo.dart';
 
 import '../../../helpers/pickers/view/image_picker_helper.dart';
-import '../repo/update_profile_repo.dart';
+import '../repo/profile_repository.dart';
 
 class EditProfileScreen extends StatelessWidget {
-  const EditProfileScreen({super.key});
+  const EditProfileScreen({
+    super.key,
+    required this.sharedPreferences,
+    required this.profileRepository,
+    required this.selectionOptionsRepository,
+    required this.locationOptionsRepository,
+    required this.initialImageUrl,
+  });
+
+  final SharedPreferences sharedPreferences;
+  final ProfileRepository profileRepository;
+  final SelectionOptionsRepository selectionOptionsRepository;
+  final LocationOptionsRepo locationOptionsRepository;
+  final String? initialImageUrl;
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => SelectionOptionBloc(repository: sl())
-            ..add(const SelectionOptionsRequested()),
+          create: (context) =>
+              SelectionOptionBloc(repository: selectionOptionsRepository)
+                ..add(const SelectionOptionsRequested()),
         ),
         BlocProvider(
           create: (context) => UpdateProfileBloc(
-            prefs: sl<SharedPreferences>(),
-            repository: sl<UpdateProfileRepo>(),
+            prefs: sharedPreferences,
+            repository: profileRepository,
           )..add(LoadUserData()),
         ),
         BlocProvider(
-          create: (context) =>
-              LocationOptionsBloc(sl())..add(const LoadCountries()),
+          create: (context) => LocationOptionsBloc(locationOptionsRepository)
+            ..add(const LoadCountries()),
         ),
       ],
       child: Scaffold(
@@ -75,14 +89,16 @@ class EditProfileScreen extends StatelessWidget {
           ],
         ),
         backgroundColor: Colors.white,
-        body: const EditProfileForm(),
+        body: EditProfileForm(initialImageUrl: initialImageUrl),
       ),
     );
   }
 }
 
 class EditProfileForm extends StatefulWidget {
-  const EditProfileForm({super.key});
+  const EditProfileForm({super.key, required this.initialImageUrl});
+
+  final String? initialImageUrl;
 
   @override
   State<EditProfileForm> createState() => _EditProfileFormState();
@@ -229,9 +245,9 @@ class _EditProfileFormState extends State<EditProfileForm> {
                   image: DecorationImage(
                     image: state.image != null
                         ? FileImage(state.image!) as ImageProvider
-                        : NetworkImage(sl<SharedPreferences>()
-                                .getString(AppStorageKey.userImage) ??
-                            Images.appLogo),
+                        : NetworkImage(
+                            widget.initialImageUrl ?? Images.appLogo,
+                          ),
                     fit: BoxFit.cover,
                   ),
                 ),
