@@ -18,6 +18,7 @@ import 'package:talent_flow/features/setting/bloc/create_contract_state.dart';
 import 'package:talent_flow/features/setting/model/contract_model.dart';
 import 'package:talent_flow/features/setting/model/create_contract_page_info_model.dart';
 import 'package:talent_flow/features/setting/model/create_contract_request_model.dart';
+import 'package:talent_flow/features/setting/repo/contracts_repo.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/helpers/date_time_picker.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
@@ -90,7 +91,9 @@ class _CreateContractScreenState extends State<CreateContractScreen> {
   void initState() {
     super.initState();
     _addProjectBloc = AddProjectBloc(repository: sl());
-    _createContractBloc = CreateContractBloc(sl());
+    _createContractBloc = CreateContractBloc(
+      repository: sl<ContractsRepo>(),
+    );
     _hydrateFromInitialContract();
     final projectId = _projectId;
     if (projectId != null) {
@@ -115,6 +118,8 @@ class _CreateContractScreenState extends State<CreateContractScreen> {
   }
 
   void _applyPageInfo(CreateContractPageInfoModel pageInfo) {
+    AppCurrency.cache(pageInfo.currency);
+
     void assignIfEmpty(TextEditingController controller, String? value) {
       if (controller.text.trim().isNotEmpty) {
         return;

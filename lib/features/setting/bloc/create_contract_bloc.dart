@@ -1,20 +1,20 @@
-import 'package:talent_flow/app/core/app_currency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../model/create_contract_page_info_model.dart';
-import '../repo/contracts_repo.dart';
+import '../repo/contracts_repository.dart';
 import 'create_contract_event.dart';
 import 'create_contract_state.dart';
 
 class CreateContractBloc
     extends Bloc<CreateContractEvent, CreateContractState> {
-  CreateContractBloc(this._repo) : super(const CreateContractState()) {
+  CreateContractBloc({required ContractsRepository repository})
+      : _repository = repository,
+        super(const CreateContractState()) {
     on<LoadCreateContractPageInfo>(_onLoadPageInfo);
     on<SubmitCreateContract>(_onSubmit);
     on<ClearCreateContractFeedback>(_onClearFeedback);
   }
 
-  final ContractsRepo _repo;
+  final ContractsRepository _repository;
 
   Future<void> _onLoadPageInfo(
     LoadCreateContractPageInfo event,
@@ -28,7 +28,7 @@ class CreateContractBloc
       ),
     );
 
-    final result = await _repo.getCreateContractPageInfo(event.projectId);
+    final result = await _repository.getCreateContractPageInfo(event.projectId);
     result.fold(
       (failure) {
         emit(
@@ -39,23 +39,7 @@ class CreateContractBloc
           ),
         );
       },
-      (response) {
-        final data = response.data;
-        final payload = data is Map<String, dynamic> ? data['payload'] : null;
-        if (payload is! Map<String, dynamic>) {
-          emit(
-            state.copyWith(
-              isLoadingPageInfo: false,
-              errorMessage: 'Invalid contract page info response',
-              clearSuccess: true,
-            ),
-          );
-          return;
-        }
-
-        final pageInfo = CreateContractPageInfoModel.fromJson(payload);
-        AppCurrency.cache(pageInfo.currency);
-
+      (pageInfo) {
         emit(
           state.copyWith(
             pageInfo: pageInfo,
@@ -81,8 +65,8 @@ class CreateContractBloc
     );
 
     final result = event.contractId == null
-        ? await _repo.createContract(event.request)
-        : await _repo.updateContract(
+        ? await _repository.createContract(event.request)
+        : await _repository.updateContract(
             contractId: event.contractId!,
             request: event.request,
           );
@@ -96,9 +80,9 @@ class CreateContractBloc
           ),
         );
       },
-      (response) {
-        final message = response.data is Map && response.data['message'] != null
-            ? response.data['message'].toString()
+      (serverMessage) {
+        final message = serverMessage.trim().isNotEmpty
+            ? serverMessage
             : event.contractId == null
                 ? 'Contract created successfully'
                 : 'Contract updated successfully';

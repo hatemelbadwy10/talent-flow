@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:dartz/dartz.dart' show Either;
-import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +23,7 @@ import 'package:talent_flow/features/setting/widgets/contract_details/contract_d
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
-typedef ContractActionRequest = Future<Either<ServerFailure, Response>>
+typedef ContractActionRequest = Future<Either<ServerFailure, String>>
     Function();
 
 class ContractDetailsBody extends StatefulWidget {
@@ -245,8 +244,10 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
 
     result.fold(
       (failure) => _showError(failure.error),
-      (response) {
-        final message = _extractMessage(response);
+      (serverMessage) {
+        final message = serverMessage.trim().isNotEmpty
+            ? serverMessage
+            : 'contract_details_screen.common.action_completed'.tr();
         _showSuccess(message);
         widget.onContractUpdated();
         final contractId = _contract.id;
@@ -262,14 +263,6 @@ class _ContractDetailsBodyState extends State<ContractDetailsBody> {
     setState(() {
       _activeActionKey = null;
     });
-  }
-
-  String _extractMessage(Response response) {
-    final data = response.data;
-    if (data is Map && data['message'] != null) {
-      return data['message'].toString();
-    }
-    return 'contract_details_screen.common.action_completed'.tr();
   }
 
   void _showError(String message) {

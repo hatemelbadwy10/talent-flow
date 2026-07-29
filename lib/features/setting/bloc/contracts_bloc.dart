@@ -5,13 +5,13 @@ import 'contracts_event.dart';
 import 'contracts_state.dart';
 
 class ContractsBloc extends Bloc<ContractsEvent, ContractsState> {
-  ContractsBloc({required ContractsRepository repository})
+  ContractsBloc({required ContractsReadRepository repository})
       : _repository = repository,
         super(const ContractsInitial()) {
     on<ContractsRequested>(_onRequested);
   }
 
-  final ContractsRepository _repository;
+  final ContractsReadRepository _repository;
 
   Future<void> _onRequested(
     ContractsRequested event,

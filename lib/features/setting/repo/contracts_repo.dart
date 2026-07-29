@@ -6,6 +6,7 @@ import '../../../data/error/api_error_handler.dart';
 import '../../../data/error/failures.dart';
 import '../model/create_contract_request_model.dart';
 import '../model/contract_model.dart';
+import '../model/create_contract_page_info_model.dart';
 import '../../../main_repos/base_repo.dart';
 import 'contracts_repository.dart';
 
@@ -53,19 +54,20 @@ class ContractsRepo extends BaseRepo implements ContractsRepository {
     }
   }
 
-  Future<Either<ServerFailure, Response>> approveContract(
-      int contractId) async {
+  @override
+  Future<Either<ServerFailure, String>> approveContract(int contractId) async {
     try {
       final response = await dioClient.get(
         uri: EndPoints.contractApprove(contractId),
       );
-      return Right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> rejectContract({
+  @override
+  Future<Either<ServerFailure, String>> rejectContract({
     required int contractId,
     required String reason,
   }) async {
@@ -74,26 +76,28 @@ class ContractsRepo extends BaseRepo implements ContractsRepository {
         uri: EndPoints.contractReject(contractId),
         data: FormData.fromMap({'reason': reason}),
       );
-      return Right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> markWorkCompleted(
+  @override
+  Future<Either<ServerFailure, String>> markWorkCompleted(
     int contractId,
   ) async {
     try {
       final response = await dioClient.get(
         uri: EndPoints.contractComplete(contractId),
       );
-      return Right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> rejectWorkWithNotes({
+  @override
+  Future<Either<ServerFailure, String>> rejectWorkWithNotes({
     required int contractId,
     required String reason,
   }) async {
@@ -102,13 +106,14 @@ class ContractsRepo extends BaseRepo implements ContractsRepository {
         uri: EndPoints.contractRejectWork(contractId),
         data: FormData.fromMap({'reason': reason}),
       );
-      return Right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> submitComplaint({
+  @override
+  Future<Either<ServerFailure, String>> submitComplaint({
     required int contractId,
     required String content,
   }) async {
@@ -117,13 +122,14 @@ class ContractsRepo extends BaseRepo implements ContractsRepository {
         uri: EndPoints.contractComplain(contractId),
         data: FormData.fromMap({'content': content}),
       );
-      return Right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> closeContractAndReview({
+  @override
+  Future<Either<ServerFailure, String>> closeContractAndReview({
     required int contractId,
     required String comment,
     required String rating,
@@ -136,13 +142,14 @@ class ContractsRepo extends BaseRepo implements ContractsRepository {
           'rating': rating,
         }),
       );
-      return Right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> reviewEntrepreneur({
+  @override
+  Future<Either<ServerFailure, String>> reviewEntrepreneur({
     required int contractId,
     required String comment,
     required String rating,
@@ -155,26 +162,38 @@ class ContractsRepo extends BaseRepo implements ContractsRepository {
           'rating': rating,
         }),
       );
-      return Right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> getCreateContractPageInfo(
+  @override
+  Future<Either<ServerFailure, CreateContractPageInfoModel>>
+      getCreateContractPageInfo(
     int projectId,
   ) async {
     try {
       final response = await dioClient.get(
         uri: EndPoints.contractCreatePageInfo(projectId),
       );
-      return Right(response);
+      final data = Map<String, dynamic>.from(response.data as Map);
+      final payload = data['payload'];
+      if (payload is! Map) {
+        return left(ServerFailure('Invalid contract page info response'));
+      }
+      return right(
+        CreateContractPageInfoModel.fromJson(
+          Map<String, dynamic>.from(payload),
+        ),
+      );
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> createContract(
+  @override
+  Future<Either<ServerFailure, String>> createContract(
     CreateContractRequestModel request,
   ) async {
     try {
@@ -182,13 +201,14 @@ class ContractsRepo extends BaseRepo implements ContractsRepository {
         uri: EndPoints.contracts,
         data: await request.toFormData(),
       );
-      return Right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> updateContract({
+  @override
+  Future<Either<ServerFailure, String>> updateContract({
     required int contractId,
     required CreateContractRequestModel request,
   }) async {
@@ -197,9 +217,16 @@ class ContractsRepo extends BaseRepo implements ContractsRepository {
         uri: EndPoints.contractUpdate(contractId),
         data: await request.toFormData(),
       );
-      return Right(response);
+      return right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
+  }
+
+  String _messageFrom(Object? data) {
+    if (data is Map && data['message'] != null) {
+      return data['message'].toString();
+    }
+    return '';
   }
 }
