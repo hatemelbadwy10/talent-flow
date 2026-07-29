@@ -41,6 +41,7 @@ import '../features/nav_bar/page/nav_bar.dart';
 import '../features/new_projects/bloc/new_projects_bloc.dart';
 import '../features/new_projects/page/add_offer_screen.dart';
 import '../features/new_projects/repo/new_projects_repo.dart';
+import '../features/setting/repo/notification_repo.dart';
 import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
 import '../features/projects/page/my_projects.dart';
@@ -225,7 +226,9 @@ abstract class CustomNavigator {
       //
       case Routes.notifications:
         return _pageRoute(BlocProvider(
-          create: (context) => NotificationBloc(sl()),
+          create: (context) => NotificationBloc(
+            repository: sl<NotificationRepo>(),
+          ),
           child: const Notification(),
         ));
       case Routes.dashboard:

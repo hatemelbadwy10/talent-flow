@@ -2,9 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/app_event.dart';
-import 'package:talent_flow/app/core/app_state.dart';
 import 'package:talent_flow/features/setting/bloc/notification_bloc.dart';
-import 'package:talent_flow/features/setting/model/notification_model.dart';
+import 'package:talent_flow/features/setting/bloc/notification_event.dart';
+import 'package:talent_flow/features/setting/bloc/notification_state.dart';
 import 'package:talent_flow/features/setting/widgets/notification_card.dart';
 import 'package:talent_flow/main_blocs/user_bloc.dart';
 
@@ -23,14 +23,14 @@ class _NotificationState extends State<Notification>
   late final TabController _tabController;
 
   final Map<String, String> _types = {
-    "all": "",          // All → request with ""
+    "all": "", // All → request with ""
     "projects": "projects",
     "payments": "payments",
     "freeLancer": "freelancers",
   };
 
-  late final List<String> _tabTitles;   // keys (for UI)
-  late final List<String> _tabValues;   // values (for request)
+  late final List<String> _tabTitles; // keys (for UI)
+  late final List<String> _tabValues; // values (for request)
 
   @override
   void initState() {
@@ -46,14 +46,18 @@ class _NotificationState extends State<Notification>
 
     // send first request when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NotificationBloc>().add(Add(arguments: _tabValues[0]));
+      context.read<NotificationBloc>().add(
+            NotificationsRequested(type: _tabValues[0]),
+          );
     });
 
     // listen for tab changes and send request
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
       final selectedValue = _tabValues[_tabController.index];
-      context.read<NotificationBloc>().add(Add(arguments: selectedValue));
+      context.read<NotificationBloc>().add(
+            NotificationsRequested(type: selectedValue),
+          );
     });
   }
 
@@ -102,19 +106,19 @@ class _NotificationState extends State<Notification>
   }
 
   Widget _buildNotificationList({required String type}) {
-    return BlocBuilder<NotificationBloc, AppState>(
+    return BlocBuilder<NotificationBloc, NotificationState>(
       builder: (context, state) {
-        if (state is Loading) {
+        if (state is NotificationLoading) {
           return _buildShimmerList();
         }
 
-        if (state is Error) {
+        if (state is NotificationFailed) {
           return Center(child: Text("فشل تحميل الإشعارات".tr()));
         }
 
-        if (state is Done) {
-          final notifications = state.list?.cast<NotificationModel>();
-          if (notifications == null || notifications.isEmpty) {
+        if (state is NotificationLoaded) {
+          final notifications = state.notifications;
+          if (notifications.isEmpty) {
             return Center(child: Text("لا توجد إشعارات".tr()));
           }
 
@@ -122,14 +126,13 @@ class _NotificationState extends State<Notification>
             key: PageStorageKey(type),
             data: notifications
                 .map((n) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: NotificationCard(notificationModel: n),
-            ))
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: NotificationCard(notificationModel: n),
+                    ))
                 .toList(),
           );
         }
         return _buildShimmerList();
-
       },
     );
   }
