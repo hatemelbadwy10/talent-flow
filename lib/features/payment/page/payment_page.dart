@@ -6,14 +6,15 @@ import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/components/animated_widget.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
-import '../../../data/config/di.dart';
 import '../bloc/payment_bloc.dart';
 import '../bloc/payment_event.dart';
 import '../bloc/payment_state.dart';
-import '../repo/pay_ment_repo.dart';
+import '../repo/payment_repository.dart';
 
 class PaymentPage extends StatefulWidget {
-  const PaymentPage({super.key});
+  final PaymentRepository repository;
+
+  const PaymentPage({super.key, required this.repository});
 
   @override
   State<PaymentPage> createState() => _PaymentPageState();
@@ -25,7 +26,7 @@ class _PaymentPageState extends State<PaymentPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => PaymentBloc(repository: sl<PaymentRepo>())
+      create: (context) => PaymentBloc(repository: widget.repository)
         ..add(const PaymentMethodsRequested()),
       child: Scaffold(
         backgroundColor: Colors.white,

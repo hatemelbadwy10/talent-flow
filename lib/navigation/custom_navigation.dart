@@ -120,7 +120,7 @@ abstract class CustomNavigator {
                   false,
         ));
       case Routes.payment:
-        return _pageRoute(const PaymentPage());
+        return _pageRoute(PaymentPage(repository: sl<PaymentRepo>()));
       case Routes.about:
         return _pageRoute(const AboutTalentFlowView());
       case Routes.favorites:
