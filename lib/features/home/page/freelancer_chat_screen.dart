@@ -8,21 +8,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/svg_images.dart';
 import 'package:talent_flow/components/custom_images.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/home/bloc/freelancer_chat_bloc.dart';
 import 'package:talent_flow/features/home/widgets/chat_bubble.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 
 class FreelancerChatScreen extends StatefulWidget {
-  const FreelancerChatScreen({super.key, this.arguments});
+  const FreelancerChatScreen({
+    super.key,
+    this.arguments,
+    required this.isFreelancer,
+  });
 
   final Map<String, dynamic>? arguments;
+  final bool isFreelancer;
 
   @override
   State<FreelancerChatScreen> createState() => _FreelancerChatScreenState();
@@ -226,8 +228,7 @@ class _FreelancerChatScreenState extends State<FreelancerChatScreen> {
     final fallbackProjectId = _parseInt(
         widget.arguments?['projectId'] ?? widget.arguments?['project_id']);
     final fallbackHasContract = widget.arguments?['hasContract'] == true;
-    final isFreelancer =
-        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
+    final isFreelancer = widget.isFreelancer;
 
     return Scaffold(
       appBar: AppBar(

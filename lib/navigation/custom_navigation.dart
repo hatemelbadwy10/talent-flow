@@ -223,6 +223,9 @@ abstract class CustomNavigator {
           },
           child: FreelancerChatScreen(
             arguments: settings.arguments as Map<String, dynamic>?,
+            isFreelancer:
+                sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                    false,
           ),
         ));
 
