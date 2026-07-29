@@ -8,6 +8,7 @@ import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/data/realtime/pusher_service.dart';
+import 'package:talent_flow/data/realtime/realtime_chat_service.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 import 'user_subscription_controller.dart';
@@ -100,17 +101,16 @@ class UserChannelRealtimeService implements UserSubscriptionController {
     _subscribedUserId = null;
   }
 
-  void _handleUserChannelEvent(dynamic event) {
-    final dynamic rawEvent = event;
-    final eventName = rawEvent.eventName?.toString() ?? '';
-    final data = rawEvent.data;
+  void _handleUserChannelEvent(RealtimeEvent event) {
+    final eventName = event.eventName;
+    final data = event.data;
 
     if (eventName.startsWith('pusher:')) {
       _logUserChannel(
         'ignore internal pusher event',
         {
           'eventName': eventName,
-          'channelName': rawEvent.channelName?.toString(),
+          'channelName': event.channelName,
         },
       );
       return;
@@ -120,7 +120,7 @@ class UserChannelRealtimeService implements UserSubscriptionController {
     _logUserChannel(
       'user channel event received',
       {
-        'channelName': rawEvent.channelName?.toString(),
+        'channelName': event.channelName,
         'eventName': eventName,
         'dataType': data.runtimeType.toString(),
         'dataPreview': _preview(data),

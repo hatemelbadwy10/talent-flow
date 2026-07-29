@@ -107,7 +107,7 @@ class _FakeRealtimeChatService implements RealtimeChatService {
   @override
   Future<void> subscribe({
     required String channelName,
-    required void Function(dynamic event) onEvent,
+    required void Function(RealtimeEvent event) onEvent,
   }) async {
     subscribedChannel = channelName;
   }

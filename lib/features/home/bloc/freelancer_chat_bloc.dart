@@ -414,13 +414,12 @@ class FreelancerChatBloc
       channelName: channelName,
       onEvent: (event) {
         if (isClosed) return;
-        final dynamic rawEvent = event;
-        final eventName = rawEvent.eventName?.toString() ?? '';
+        final eventName = event.eventName;
         if (eventName.startsWith('pusher:')) {
           _logChatBloc(
             'subscribe callback ignored internal event',
             {
-              'channelName': rawEvent.channelName,
+              'channelName': event.channelName,
               'eventName': eventName,
             },
           );
@@ -429,10 +428,10 @@ class FreelancerChatBloc
         _logChatBloc(
           'subscribe callback event received',
           {
-            'channelName': rawEvent.channelName,
+            'channelName': event.channelName,
             'eventName': eventName,
-            'dataType': rawEvent.data.runtimeType.toString(),
-            'dataPreview': _preview(rawEvent.data),
+            'dataType': event.data.runtimeType.toString(),
+            'dataPreview': _preview(event.data),
           },
         );
         add(RealtimeChatMessageReceived(event.data));

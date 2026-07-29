@@ -115,7 +115,7 @@ class PusherService implements RealtimeChatService {
   @override
   Future<void> subscribe({
     required String channelName,
-    required Function(dynamic event) onEvent,
+    required void Function(RealtimeEvent event) onEvent,
   }) async {
     await connect();
     _logPusher('subscribe start', {'channelName': channelName});
@@ -123,17 +123,21 @@ class PusherService implements RealtimeChatService {
     await _client.subscribe(
       channelName: channelName,
       onEvent: (event) {
-        final dynamic rawEvent = event;
+        final realtimeEvent = RealtimeEvent(
+          channelName: event.channelName ?? channelName,
+          eventName: event.eventName ?? '',
+          data: event.data,
+        );
         _logPusher(
           'event received',
           {
-            'channelName': rawEvent.channelName,
-            'eventName': rawEvent.eventName,
-            'dataType': rawEvent.data.runtimeType.toString(),
-            'dataPreview': _preview(rawEvent.data),
+            'channelName': realtimeEvent.channelName,
+            'eventName': realtimeEvent.eventName,
+            'dataType': realtimeEvent.data.runtimeType.toString(),
+            'dataPreview': _preview(realtimeEvent.data),
           },
         );
-        onEvent(event);
+        onEvent(realtimeEvent);
       },
     );
     _logPusher('subscribe completed', {'channelName': channelName});
