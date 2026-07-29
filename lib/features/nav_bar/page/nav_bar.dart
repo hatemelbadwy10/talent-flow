@@ -11,18 +11,27 @@ import '../../../app/core/styles.dart';
 import '../../home/page/home_view.dart';
 import '../../home/repo/home_dashboard_repository.dart';
 import '../../new_projects/page/new_project.dart';
+import '../../new_projects/repo/new_projects_repository.dart';
+import '../../new_projects/repo/selection_options_repository.dart';
+import '../../projects/repo/projects_repository.dart';
 import '../../setting/repo/favourites_repository.dart';
 import '../bloc/nav_bar_bloc.dart';
 
 class NavBar extends StatelessWidget {
   final HomeDashboardRepository homeRepository;
   final FavouritesRepository favouritesRepository;
+  final ProjectsRepository projectsRepository;
+  final NewProjectsRepository newProjectsRepository;
+  final SelectionOptionsRepository selectionOptionsRepository;
   final bool isFreelancer;
 
   const NavBar({
     super.key,
     required this.homeRepository,
     required this.favouritesRepository,
+    required this.projectsRepository,
+    required this.newProjectsRepository,
+    required this.selectionOptionsRepository,
     required this.isFreelancer,
   });
 
@@ -31,13 +40,17 @@ class NavBar extends StatelessWidget {
     context.locale;
     final List<Widget> widgetOptions = [
       const SettingScreen(),
-      const OwnerProjects(),
+      OwnerProjects(repository: projectsRepository),
       HomeView(
         repository: homeRepository,
         favouritesRepository: favouritesRepository,
         isFreelancer: isFreelancer,
       ),
-      const NewProject(),
+      NewProject(
+        projectsRepository: newProjectsRepository,
+        selectionRepository: selectionOptionsRepository,
+        isFreelancer: isFreelancer,
+      ),
     ];
 
     final List<IconData> unselectedIcons = [

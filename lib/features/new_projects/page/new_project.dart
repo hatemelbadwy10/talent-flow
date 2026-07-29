@@ -3,18 +3,15 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/components/animated_widget.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/new_projects/bloc/new_projects_bloc.dart';
 import 'package:talent_flow/features/new_projects/bloc/new_projects_event.dart';
 import 'package:talent_flow/features/new_projects/bloc/new_projects_state.dart';
 import 'package:talent_flow/features/new_projects/model/selection_option_model.dart';
-import 'package:talent_flow/features/new_projects/repo/new_projects_repo.dart';
-import 'package:talent_flow/features/new_projects/repo/selection_option_repo.dart';
+import 'package:talent_flow/features/new_projects/repo/new_projects_repository.dart';
+import 'package:talent_flow/features/new_projects/repo/selection_options_repository.dart';
 import 'package:talent_flow/features/projects/widgets/projects_shimmer.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/features/setting/widgets/single_select_dialoug.dart';
@@ -24,7 +21,16 @@ import 'package:talent_flow/navigation/routes.dart';
 import '../widgets/project_card.dart';
 
 class NewProject extends StatefulWidget {
-  const NewProject({super.key});
+  final NewProjectsRepository projectsRepository;
+  final SelectionOptionsRepository selectionRepository;
+  final bool isFreelancer;
+
+  const NewProject({
+    super.key,
+    required this.projectsRepository,
+    required this.selectionRepository,
+    required this.isFreelancer,
+  });
 
   @override
   State<NewProject> createState() => _NewProjectState();
@@ -47,9 +53,9 @@ class _NewProjectState extends State<NewProject> {
   @override
   void initState() {
     super.initState();
-    _projectsBloc = NewProjectsBloc(repository: sl<NewProjectsRepo>())
+    _projectsBloc = NewProjectsBloc(repository: widget.projectsRepository)
       ..add(const ProjectFeedRequested());
-    _selectionFuture = sl<SelectionOptionRepo>().getSelectionOptions().then(
+    _selectionFuture = widget.selectionRepository.getSelectionOptions().then(
           (result) => result.fold((failure) => throw failure, (model) => model),
         );
   }
@@ -147,8 +153,7 @@ class _NewProjectState extends State<NewProject> {
           title: 'new_project.title'.tr(),
           showBackButton: false,
           actions: [
-            if (!(sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                false))
+            if (!widget.isFreelancer)
               Padding(
                 padding: const EdgeInsets.only(right: 12),
                 child: CircleAvatar(

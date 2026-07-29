@@ -1,15 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/features/new_projects/widgets/add_offer_widget.dart';
 import 'package:talent_flow/features/new_projects/widgets/project_description.dart';
 
-import '../../../data/config/di.dart';
 import '../../projects/bloc/project_details_bloc.dart';
 import '../../projects/model/single_project_model.dart';
-import '../../projects/repo/projects_repo.dart';
+import '../../projects/repo/projects_repository.dart';
 import '../../projects/widgets/project_files_section.dart';
 import '../widgets/project_details_card.dart';
 import '../../../navigation/custom_navigation.dart';
@@ -17,22 +14,23 @@ import '../../../navigation/routes.dart';
 
 class AddOfferScreen extends StatelessWidget {
   final Map<String, dynamic>? argument;
+  final ProjectsRepository projectRepository;
+  final int? currentUserId;
+  final bool isFreelancer;
 
-  const AddOfferScreen({super.key, this.argument});
-
-  int? _currentUserId() {
-    final rawUserId = sl<SharedPreferences>().getString(AppStorageKey.userId);
-    return int.tryParse(rawUserId ?? '');
-  }
+  const AddOfferScreen({
+    super.key,
+    this.argument,
+    required this.projectRepository,
+    required this.currentUserId,
+    required this.isFreelancer,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isFreelancer =
-        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? true;
-
     return BlocProvider(
       create: (context) => ProjectDetailsBloc(
-        repository: sl<ProjectsRepo>(),
+        repository: projectRepository,
       )..add(ProjectDetailsRequested(argument?['id'] as int)),
       child: Scaffold(
         appBar: PreferredSize(
@@ -123,7 +121,6 @@ class AddOfferScreen extends StatelessWidget {
       return null;
     }
 
-    final currentUserId = _currentUserId();
     for (final proposal in project.proposals) {
       if (proposal.freelancerId == currentUserId) {
         return proposal;

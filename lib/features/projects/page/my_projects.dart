@@ -5,24 +5,29 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/images.dart';
 import '../../../app/core/styles.dart';
-import '../../../data/config/di.dart' show sl;
 import '../bloc/my_projects_bloc.dart';
 import '../bloc/my_projects_event.dart';
 import '../bloc/my_projects_state.dart';
-import '../repo/projects_repo.dart';
+import '../repo/projects_repository.dart';
 import '../widgets/my_projects_card.dart';
 import '../widgets/projects_shimmer.dart';
 
 class OwnerProjects extends StatelessWidget {
   final Map<String, dynamic>? arguments;
-  const OwnerProjects({super.key, this.arguments});
+  final ProjectsRepository repository;
+
+  const OwnerProjects({
+    super.key,
+    this.arguments,
+    required this.repository,
+  });
 
   @override
   Widget build(BuildContext context) {
     final categoryId = arguments?['categoryId'] as int?;
     log('categoryId $categoryId');
     return BlocProvider(
-      create: (context) => MyProjectsBloc(repository: sl<ProjectsRepo>())
+      create: (context) => MyProjectsBloc(repository: repository)
         ..add(MyProjectsRequested(categoryId: categoryId)),
       child: _OwnerProjectsContent(
         categoryId: categoryId,

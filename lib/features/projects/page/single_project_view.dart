@@ -2,13 +2,10 @@ import 'dart:developer';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
-import '../../../app/core/app_storage_keys.dart';
 import '../../../app/core/styles.dart';
-import '../../../data/config/di.dart';
 import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
 import '../../auth/pages/social_media_login/repo/chat_repo.dart';
@@ -16,28 +13,31 @@ import '../../new_projects/widgets/project_description.dart';
 import '../../new_projects/widgets/project_details_card.dart';
 import '../bloc/project_details_bloc.dart';
 import '../model/single_project_model.dart';
-import '../repo/projects_repo.dart';
+import '../repo/projects_repository.dart';
 import '../widgets/project_files_section.dart';
 import '../widgets/single_project_shimmer.dart';
 
 class SingleProjectView extends StatelessWidget {
   final Map<String, dynamic> arguments;
+  final ProjectsRepository projectRepository;
+  final ChatRepo chatRepository;
+  final int? currentUserId;
+  final bool isFreelancer;
 
-  const SingleProjectView({super.key, required this.arguments});
-
-  int? _currentUserId() {
-    final rawUserId = sl<SharedPreferences>().getString(AppStorageKey.userId);
-    return int.tryParse(rawUserId ?? '');
-  }
+  const SingleProjectView({
+    super.key,
+    required this.arguments,
+    required this.projectRepository,
+    required this.chatRepository,
+    required this.currentUserId,
+    required this.isFreelancer,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final bool isFreelancer =
-        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
-
     return BlocProvider(
       create: (context) => ProjectDetailsBloc(
-        repository: sl<ProjectsRepo>(),
+        repository: projectRepository,
       )..add(ProjectDetailsRequested(arguments['id'] as int)),
       child: Scaffold(
         appBar: AppBar(
@@ -54,7 +54,6 @@ class SingleProjectView extends StatelessWidget {
               return Center(child: Text('project_load_failed'.tr()));
             } else if (state is ProjectDetailsLoaded) {
               final project = state.project;
-              final currentUserId = _currentUserId();
               final myProposal = isFreelancer
                   ? project.proposals.cast<ProjectProposal?>().firstWhere(
                         (proposal) => proposal?.freelancerId == currentUserId,
@@ -95,6 +94,7 @@ class SingleProjectView extends StatelessWidget {
                         _ProjectProposalsSection(
                           proposals: project.proposals,
                           projectId: arguments['id'] as int?,
+                          chatRepository: chatRepository,
                         ),
                       const SizedBox(height: 100),
                     ],
@@ -235,10 +235,12 @@ class _ProjectProposalsSection extends StatelessWidget {
   const _ProjectProposalsSection({
     required this.proposals,
     required this.projectId,
+    required this.chatRepository,
   });
 
   final List<ProjectProposal> proposals;
   final int? projectId;
+  final ChatRepo chatRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -269,6 +271,7 @@ class _ProjectProposalsSection extends StatelessWidget {
             return _ProposalCard(
               proposal: proposal,
               projectId: projectId,
+              chatRepository: chatRepository,
             );
           },
         ),
@@ -281,10 +284,12 @@ class _ProposalCard extends StatefulWidget {
   const _ProposalCard({
     required this.proposal,
     required this.projectId,
+    required this.chatRepository,
   });
 
   final ProjectProposal proposal;
   final int? projectId;
+  final ChatRepo chatRepository;
 
   @override
   State<_ProposalCard> createState() => _ProposalCardState();
@@ -303,7 +308,7 @@ class _ProposalCardState extends State<_ProposalCard> {
       _isStartingChat = true;
     });
 
-    final result = await sl<ChatRepo>().startConversation(
+    final result = await widget.chatRepository.startConversation(
       userId: freelancerId,
       projectId: widget.projectId,
     );

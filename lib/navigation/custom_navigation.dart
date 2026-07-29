@@ -49,10 +49,12 @@ import '../features/nav_bar/page/nav_bar.dart';
 import '../features/new_projects/bloc/new_projects_bloc.dart';
 import '../features/new_projects/page/add_offer_screen.dart';
 import '../features/new_projects/repo/new_projects_repo.dart';
+import '../features/new_projects/repo/selection_option_repo.dart';
 import '../features/setting/repo/notification_repo.dart';
 import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
 import '../features/projects/page/my_projects.dart';
+import '../features/projects/repo/projects_repo.dart';
 import '../features/setting/page/about_talent_flow.dart';
 import '../features/setting/page/account_statement_details_screen.dart';
 import '../features/setting/page/account_statement_screen.dart';
@@ -108,6 +110,14 @@ abstract class CustomNavigator {
       case Routes.singleProjectDetails:
         return _pageRoute(SingleProjectView(
           arguments: settings.arguments as Map<String, dynamic>,
+          projectRepository: sl<ProjectsRepo>(),
+          chatRepository: sl<ChatRepo>(),
+          currentUserId: int.tryParse(
+            sl<SharedPreferences>().getString(AppStorageKey.userId) ?? '',
+          ),
+          isFreelancer:
+              sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                  false,
         ));
       case Routes.payment:
         return _pageRoute(const PaymentPage());
@@ -142,6 +152,13 @@ abstract class CustomNavigator {
           ),
           child: AddOfferScreen(
             argument: settings.arguments as Map<String, dynamic>,
+            projectRepository: sl<ProjectsRepo>(),
+            currentUserId: int.tryParse(
+              sl<SharedPreferences>().getString(AppStorageKey.userId) ?? '',
+            ),
+            isFreelancer:
+                sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                    true,
           ),
         ));
       case Routes.addProject:
@@ -187,6 +204,7 @@ abstract class CustomNavigator {
       case Routes.ownerProjects:
         return _pageRoute(OwnerProjects(
           arguments: settings.arguments as Map<String, dynamic>?,
+          repository: sl<ProjectsRepo>(),
         ));
       case Routes.entrepreneur:
         return _pageRoute(EntrepreneurProfileView(
@@ -497,6 +515,9 @@ abstract class CustomNavigator {
   static NavBar _navBar() => NavBar(
         homeRepository: sl<HomeRepo>(),
         favouritesRepository: sl<FavouriteRepo>(),
+        projectsRepository: sl<ProjectsRepo>(),
+        newProjectsRepository: sl<NewProjectsRepo>(),
+        selectionOptionsRepository: sl<SelectionOptionRepo>(),
         isFreelancer:
             sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
                 false,
