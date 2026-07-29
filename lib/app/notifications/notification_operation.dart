@@ -38,15 +38,7 @@ void iOSPermission() {
 }
 
 void handlePath(Map dataMap) {
-  updateUserFunctions(notify: dataMap);
   handlePathByRoute(dataMap);
-}
-
-updateUserFunctions({required notify}) async {
-  // Future.delayed(Duration.zero, () {
-  //   if (UserBloc.instance.isLogin) {
-  //   }
-  // });
 }
 
 Future<void> handlePathByRoute(Map notify) async {

@@ -116,7 +116,6 @@ class FirebaseNotifications {
             json.encode(notify),
           );
         }
-        updateUserFunctions(notify: notify);
       },
     );
 

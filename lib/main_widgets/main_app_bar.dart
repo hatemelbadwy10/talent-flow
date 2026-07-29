@@ -56,11 +56,6 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                 SizedBox(width: 8.w),
                 Expanded(
                     child: InkWell(
-                  // onTap: () {
-                  //   if (UserBloc.instance.isLogin) {
-                  //     CustomNavigator.push(Routes.editProfile);
-                  //   }
-                  // },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

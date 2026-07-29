@@ -56,14 +56,6 @@ class SectionTitle extends StatelessWidget {
                     style: AppTextStyles.w600
                         .copyWith(fontSize: 14, color: Styles.PRIMARY_COLOR),
                   ),
-                  // RotatedBox(
-                  //   quarterTurns: sl<LanguageBloc>().isLtr ? 0 : 2,
-                  //   child: customImageIconSVG(
-                  //       imageName: SvgImages.arrowRight,
-                  //       width: 14,
-                  //       height: 14,
-                  //       color: Styles.PRIMARY_COLOR),
-                  // )
                 ],
               ),
             )
