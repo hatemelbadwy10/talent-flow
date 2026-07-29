@@ -19,8 +19,30 @@ accounts before releasing a refactored feature.
 - Confirm loading controls cannot submit the same request twice.
 - Confirm Firebase messaging, Remote Config, and notification navigation work.
 - Confirm project, contract, payment, profile, and chat entry points still open.
+- Confirm loading, empty, success, offline, and API failure states.
+
+## Account roles
+
+- As a freelancer, browse projects, submit and update an offer, manage works,
+  open chats, and complete identity verification.
+- As an entrepreneur, browse freelancers, create a project, manage proposals,
+  create a contract, add a bank account, and complete a payment.
+- Confirm role-specific actions remain hidden for the other account type.
+
+## Contracts, payments, and realtime
+
+- Open contract lists and details, exercise the available status actions, and
+  download a contract PDF.
+- Request and confirm a contract payment, including validation and API failure.
+- Open chat from the list, a project proposal, and a notification.
+- Send text and voice messages and verify unread counters update.
+- Restart or resume the app and confirm the realtime user subscription is
+  restored without duplicate messages.
 
 ## Baseline
 
 At refactor start (`0b4cb7a`), `flutter analyze` reports 163 issues. Refactor PRs
 must introduce no new issues and must leave every touched Dart file warning-free.
+
+The current controlled baseline is 129 info-only issues with zero warnings and
+zero errors. CI enforces this through `tool/check_analyzer_baseline.sh`.

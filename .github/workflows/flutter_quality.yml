@@ -19,7 +19,5 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter test
-      - name: Analyzer (no errors)
-        # The live baseline contains warning/info debt documented under
-        # docs/refactor. Migrated files are checked warning-free locally.
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - name: Analyzer baseline
+        run: ./tool/check_analyzer_baseline.sh

@@ -1,16 +1,21 @@
-# talent_flow
+# Talent Flow
 
-A new Flutter project.
+Talent Flow is a Flutter marketplace application for freelancers and
+entrepreneurs. The production-safe refactor preserves the live UI and backend
+contracts while introducing typed feature boundaries and constructor
+injection.
 
-## Getting Started
+## Quality checks
 
-This project is a starting point for a Flutter application.
+```sh
+flutter pub get
+flutter test
+./tool/check_analyzer_baseline.sh
+```
 
-A few resources to get you started if this is your first Flutter project:
+## Refactor documentation
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- [Architecture](docs/refactor/architecture.md)
+- [Conventions](docs/refactor/conventions.md)
+- [Contributing](docs/refactor/contributing.md)
+- [Production smoke tests](docs/refactor/production_smoke_tests.md)
