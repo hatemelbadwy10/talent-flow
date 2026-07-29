@@ -42,7 +42,7 @@ class EditProfileScreen extends StatelessWidget {
         BlocProvider(
           create: (context) => UpdateProfileBloc(
             prefs: sl<SharedPreferences>(),
-            repo: sl<UpdateProfileRepo>(),
+            repository: sl<UpdateProfileRepo>(),
           )..add(LoadUserData()),
         ),
         BlocProvider(
@@ -100,7 +100,8 @@ class _EditProfileFormState extends State<EditProfileForm> {
   String? _lastShownErrorMessage;
   bool _lastShownSuccessState = false;
   String? _lastLoadedCitiesCountryId;
-  bool _isSendingPhoneVerification = false;
+  String? _lastPhoneVerificationMessage;
+  String? _lastPhoneVerificationError;
 
   @override
   void dispose() {
@@ -116,6 +117,10 @@ class _EditProfileFormState extends State<EditProfileForm> {
         // Only show success snackbar once
         if (state.isSubmitted && !_lastShownSuccessState) {
           _lastShownSuccessState = true;
+          final payload = state.updatedUserPayload;
+          if (payload != null) {
+            context.read<UserBloc>().add(Update(arguments: payload));
+          }
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -123,8 +128,6 @@ class _EditProfileFormState extends State<EditProfileForm> {
               ),
             ),
           );
-          // Trigger UserBloc update to refresh profile card globally
-          context.read<UserBloc>().add(Click());
           Navigator.of(context).pop();
         }
 
@@ -135,6 +138,33 @@ class _EditProfileFormState extends State<EditProfileForm> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.errorMessage!)),
           );
+        }
+
+        final phoneVerificationError = state.phoneVerificationError;
+        if (phoneVerificationError != null &&
+            phoneVerificationError != _lastPhoneVerificationError) {
+          _lastPhoneVerificationError = phoneVerificationError;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(phoneVerificationError)),
+          );
+        }
+
+        final phoneVerificationMessage = state.phoneVerificationMessage;
+        final requestedPhone = state.phoneVerificationPhone?.trim() ?? '';
+        if (phoneVerificationMessage != null &&
+            phoneVerificationMessage != _lastPhoneVerificationMessage &&
+            requestedPhone.isNotEmpty) {
+          _lastPhoneVerificationMessage = phoneVerificationMessage;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                phoneVerificationMessage.trim().isNotEmpty
+                    ? phoneVerificationMessage
+                    : "edit_profile.phone_verification_sent".tr(),
+              ),
+            ),
+          );
+          _openPhoneVerification(context, requestedPhone);
         }
 
         final countryId = state.countryId;
@@ -337,7 +367,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
               SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isSendingPhoneVerification
+                  onPressed: state.isSendingPhoneVerification
                       ? null
                       : isVerified
                           ? null
@@ -360,7 +390,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: _isSendingPhoneVerification
+                  child: state.isSendingPhoneVerification
                       ? const SizedBox(
                           width: 18,
                           height: 18,
@@ -1052,16 +1082,14 @@ class _EditProfileFormState extends State<EditProfileForm> {
         (state.phoneVerifiedAt?.trim().isNotEmpty ?? false);
   }
 
-  Future<void> _sendPhoneVerification(
+  void _sendPhoneVerification(
     BuildContext context,
     UpdateProfileState state,
   ) async {
     final phone = state.phone?.trim() ?? '';
-    final messenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
     final updateProfileBloc = context.read<UpdateProfileBloc>();
     if (phone.isEmpty) {
-      messenger.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("edit_profile.phone_required_for_verification".tr()),
         ),
@@ -1069,61 +1097,37 @@ class _EditProfileFormState extends State<EditProfileForm> {
       return;
     }
 
-    setState(() => _isSendingPhoneVerification = true);
-    final result = await updateProfileBloc.repo.sendPhoneVerificationOtp(phone);
-    if (!mounted) {
+    updateProfileBloc.add(PhoneVerificationRequested(phone));
+  }
+
+  Future<void> _openPhoneVerification(
+    BuildContext context,
+    String phone,
+  ) async {
+    final routeResult = await Navigator.of(context).pushNamed(
+      Routes.sendCodeScreen,
+      arguments: {
+        'identifier': phone,
+        'isPhoneVerification': true,
+      },
+    );
+    final verificationResult =
+        routeResult is Map<String, dynamic> ? routeResult : null;
+    if (!context.mounted || verificationResult == null) {
       return;
     }
-
-    await result.fold(
-      (failure) async {
-        messenger.showSnackBar(
-          SnackBar(content: Text(failure.error)),
-        );
-      },
-      (response) async {
-        final message = response.data is Map<String, dynamic>
-            ? (response.data['message']?.toString() ??
-                "edit_profile.phone_verification_sent".tr())
-            : "edit_profile.phone_verification_sent".tr();
-        messenger.showSnackBar(
-          SnackBar(content: Text(message)),
-        );
-
-        final routeResult = await navigator.pushNamed(
-          Routes.sendCodeScreen,
-          arguments: {
-            'identifier': phone,
-            'isPhoneVerification': true,
-          },
-        );
-        final verificationResult =
-            routeResult is Map<String, dynamic> ? routeResult : null;
-
-        if (!mounted || verificationResult == null) {
-          return;
-        }
-
-        final verifiedIdentifier =
-            verificationResult['identifier']?.toString().trim() ?? '';
-        final verifiedAt = verificationResult['verifiedAt']?.toString() ??
-            DateTime.now().toIso8601String();
-
-        if (verifiedIdentifier == phone) {
-          updateProfileBloc.add(
+    final verifiedIdentifier =
+        verificationResult['identifier']?.toString().trim() ?? '';
+    final verifiedAt = verificationResult['verifiedAt']?.toString() ??
+        DateTime.now().toIso8601String();
+    if (verifiedIdentifier == phone) {
+      context.read<UpdateProfileBloc>().add(
             MarkPhoneVerified(
               phone: verifiedIdentifier,
               verifiedAt: verifiedAt,
             ),
           );
-        }
-      },
-    );
-
-    if (!mounted) {
-      return;
     }
-    setState(() => _isSendingPhoneVerification = false);
   }
 
   String? _datePart(String? value, int index) {

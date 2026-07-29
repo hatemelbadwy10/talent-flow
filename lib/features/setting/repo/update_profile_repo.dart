@@ -8,13 +8,17 @@ import 'package:talent_flow/main_repos/base_repo.dart';
 
 import '../../../data/error/api_error_handler.dart';
 import '../../../data/error/failures.dart';
+import '../model/profile_update_result.dart';
+import 'profile_repository.dart';
 
-class UpdateProfileRepo extends BaseRepo {
+class UpdateProfileRepo extends BaseRepo implements ProfileRepository {
   UpdateProfileRepo(
       {required super.sharedPreferences, required super.dioClient});
 
-  Future<Either<ServerFailure, Response>> sendPhoneVerificationOtp(
-      String phone) async {
+  @override
+  Future<Either<ServerFailure, String>> sendPhoneVerificationOtp(
+    String phone,
+  ) async {
     try {
       final response = await dioClient.post(
         uri: EndPoints.verifyPhone,
@@ -22,14 +26,15 @@ class UpdateProfileRepo extends BaseRepo {
           'phone': phone,
         }),
       );
-      return Right(response);
+      return Right(_messageFrom(response.data));
     } catch (error) {
       log('sendPhoneVerificationOtp error $error');
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> updateProfile(
+  @override
+  Future<Either<ServerFailure, ProfileUpdateResult>> updateProfile(
       {required String firstName,
       required String email,
       required String lastName,
@@ -94,10 +99,26 @@ class UpdateProfileRepo extends BaseRepo {
         data: formData,
         uri: EndPoints.editProfile,
       );
-      return Right(response);
+      final data = response.data;
+      final responseMap =
+          data is Map ? Map<String, dynamic>.from(data) : <String, dynamic>{};
+      final payload = responseMap['payload'];
+      return Right(
+        ProfileUpdateResult(
+          message: responseMap['message']?.toString() ?? '',
+          user: payload is Map ? Map<String, dynamic>.from(payload) : null,
+        ),
+      );
     } catch (error) {
       log('error $error');
       return left(ApiErrorHandler.getServerFailure(error));
     }
+  }
+
+  String _messageFrom(Object? data) {
+    if (data is Map && data['message'] != null) {
+      return data['message'].toString();
+    }
+    return '';
   }
 }

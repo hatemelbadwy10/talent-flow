@@ -58,6 +58,14 @@ class MarkPhoneVerified extends UpdateProfileEvent {
   List<Object?> get props => [phone, verifiedAt];
 }
 
+class PhoneVerificationRequested extends UpdateProfileEvent {
+  final String phone;
+  const PhoneVerificationRequested(this.phone);
+
+  @override
+  List<Object?> get props => [phone];
+}
+
 class UpdateSpecialization extends UpdateProfileEvent {
   final int id;
   final String name;

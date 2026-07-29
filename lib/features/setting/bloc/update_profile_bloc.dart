@@ -1,20 +1,21 @@
 import 'dart:convert';
-import 'dart:developer';
-import 'package:talent_flow/app/core/app_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
-import 'package:talent_flow/main_blocs/user_bloc.dart';
-import '../repo/update_profile_repo.dart';
+import '../repo/profile_repository.dart';
 import 'update_profile_event.dart';
 import 'update_profile_state.dart';
 
 class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
-  final SharedPreferences prefs;
-  final UpdateProfileRepo repo;
+  final SharedPreferences _prefs;
+  final ProfileRepository _repository;
 
-  UpdateProfileBloc({required this.prefs, required this.repo})
-      : super(const UpdateProfileState()) {
+  UpdateProfileBloc({
+    required SharedPreferences prefs,
+    required ProfileRepository repository,
+  })  : _prefs = prefs,
+        _repository = repository,
+        super(const UpdateProfileState()) {
     // --- Events ---
     on<LoadUserData>(_onLoadUserData);
     on<UpdateFirstName>(
@@ -23,6 +24,7 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
     on<UpdateEmail>((e, emit) => emit(state.copyWith(email: e.email)));
     on<UpdatePhone>(_onUpdatePhone);
     on<MarkPhoneVerified>(_onMarkPhoneVerified);
+    on<PhoneVerificationRequested>(_onPhoneVerificationRequested);
     on<UpdateCountry>(_onUpdateCountry);
     on<UpdateCity>(
       (e, emit) => emit(
@@ -60,11 +62,9 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
 
   Future<void> _onLoadUserData(
       LoadUserData event, Emitter<UpdateProfileState> emit) async {
-    final raw = prefs.getString(AppStorageKey.userData);
+    final raw = _prefs.getString(AppStorageKey.userData);
     if (raw != null) {
-      log('raw: $raw');
       final data = jsonDecode(raw) as Map<String, dynamic>;
-      log("state data: $data");
       List<int> parseSkills(dynamic skillsData) {
         if (skillsData == null) return [];
 
@@ -112,14 +112,6 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
           selectedSkills: List<String>.from(data['skillsNames'] ?? []),
         ),
       );
-
-      log("state from prefs: ${state.firstName}");
-      log("state from prefs: ${state.email}");
-      log("state from prefs: ${state.skills}");
-      log("state from prefs: ${state.specializationName}");
-      log("state from prefs: ${state.specializationId}");
-      log("state from prefs: ${state.image}");
-      log("state from prefs: ${state.bio}");
     }
   }
 
@@ -153,6 +145,36 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
     );
   }
 
+  Future<void> _onPhoneVerificationRequested(
+    PhoneVerificationRequested event,
+    Emitter<UpdateProfileState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        isSendingPhoneVerification: true,
+        phoneVerificationPhone: event.phone,
+        clearPhoneVerificationFeedback: true,
+      ),
+    );
+    final result =
+        await _repository.sendPhoneVerificationOtp(event.phone.trim());
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          isSendingPhoneVerification: false,
+          phoneVerificationError: failure.error,
+        ),
+      ),
+      (message) => emit(
+        state.copyWith(
+          isSendingPhoneVerification: false,
+          phoneVerificationMessage: message,
+          phoneVerificationPhone: event.phone,
+        ),
+      ),
+    );
+  }
+
   void _onUpdateCountry(
     UpdateCountry event,
     Emitter<UpdateProfileState> emit,
@@ -177,7 +199,7 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
       ),
     );
 
-    final result = await repo.updateProfile(
+    final result = await _repository.updateProfile(
       firstName: state.firstName ?? '',
       lastName: state.lastName ?? '',
       email: state.email ?? '',
@@ -195,7 +217,6 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
       image: state.image,
     );
 
-    // Handle result using await for proper async handling
     await result.fold(
       (failure) async {
         emit(state.copyWith(
@@ -204,92 +225,62 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
         ));
       },
       (response) async {
-        String successMessage = 'تم التحديث بنجاح'; // Default message
-
-        try {
-          if (response.data is Map<String, dynamic>) {
-            final responseData = response.data as Map<String, dynamic>;
-
-            // Extract success message
-            if (responseData.containsKey('message')) {
-              successMessage =
-                  responseData['message'] as String? ?? successMessage;
-            }
-
-            // Extract and save updated user payload
-            if (responseData.containsKey('payload')) {
-              final payload = responseData['payload'] as Map<String, dynamic>;
-              UserBloc.instance.add(Update(arguments: payload));
-
-              log('Updated user data saved to SharedPreferences');
-              log('Payload: $payload');
-
-              // Parse skills from response
-              List<int> parseSkillsFromResponse(dynamic skillsData) {
-                if (skillsData == null) return [];
-                if (skillsData is List) {
-                  return skillsData
-                      .map((e) => int.tryParse(e.toString()) ?? 0)
-                      .toList();
-                }
-                if (skillsData is String) {
-                  return skillsData
-                      .split(',')
-                      .map((e) => int.tryParse(e.trim()) ?? 0)
-                      .toList();
-                }
-                return [];
-              }
-
-              // Update state with new data from response
-              emit(state.copyWith(
-                isSubmitting: false,
-                isSubmitted: true,
-                successMessage: successMessage,
-                firstName: payload['first_name'] as String? ?? state.firstName,
-                lastName: payload['last_name'] as String? ?? state.lastName,
-                email: payload['email'] as String? ?? state.email,
-                phone: payload['phone'] as String? ?? state.phone,
-                verifiedPhone:
-                    (payload['phone_verified_at']?.toString().isNotEmpty ??
-                            false)
-                        ? payload['phone']?.toString()
-                        : state.verifiedPhone,
-                phoneVerifiedAt: payload['phone_verified_at']?.toString() ??
-                    state.phoneVerifiedAt,
-                specializationId: payload['specialization_id'] as int? ??
-                    state.specializationId,
-                specializationName: payload['specialization'] as String? ??
-                    state.specializationName,
-                jobTitleId: payload['job_title_id'] as int? ?? state.jobTitleId,
-                jobTitleName:
-                    payload['job_title'] as String? ?? state.jobTitleName,
-                bio: payload['bio'] as String? ?? state.bio,
-                countryId: payload['country_id']?.toString(),
-                countryName: payload['country'] as String?,
-                cityId: payload['city_id']?.toString(),
-                cityName: payload['city'] as String?,
-                gender: payload['gender'] as String?,
-                dateOfBirth: payload['date_of_birth'] as String?,
-                skills: parseSkillsFromResponse(payload['skills']),
-                selectedSkills: payload['skillsNames'] != null
-                    ? List<String>.from(payload['skillsNames'] as List)
-                    : state.selectedSkills,
-              ));
-              return;
-            }
-          }
-        } catch (e) {
-          log('Error processing response: $e');
-        }
-
-        // Fallback: emit success with default message
-        emit(state.copyWith(
-          isSubmitting: false,
-          isSubmitted: true,
-          successMessage: successMessage,
-        ));
+        final payload = response.user;
+        emit(
+          state.copyWith(
+            isSubmitting: false,
+            isSubmitted: true,
+            successMessage: response.message.trim().isNotEmpty
+                ? response.message
+                : 'تم التحديث بنجاح',
+            updatedUserPayload: payload,
+            firstName: payload?['first_name']?.toString() ?? state.firstName,
+            lastName: payload?['last_name']?.toString() ?? state.lastName,
+            email: payload?['email']?.toString() ?? state.email,
+            phone: payload?['phone']?.toString() ?? state.phone,
+            verifiedPhone:
+                (payload?['phone_verified_at']?.toString().isNotEmpty ?? false)
+                    ? (payload?['phone'])?.toString()
+                    : state.verifiedPhone,
+            phoneVerifiedAt: payload?['phone_verified_at']?.toString() ??
+                state.phoneVerifiedAt,
+            specializationId:
+                _toInt(payload?['specialization_id']) ?? state.specializationId,
+            specializationName: payload?['specialization']?.toString() ??
+                state.specializationName,
+            jobTitleId: _toInt(payload?['job_title_id']) ?? state.jobTitleId,
+            jobTitleName:
+                payload?['job_title']?.toString() ?? state.jobTitleName,
+            bio: payload?['bio']?.toString() ?? state.bio,
+            countryId: payload?['country_id']?.toString() ?? state.countryId,
+            countryName: payload?['country']?.toString() ?? state.countryName,
+            cityId: payload?['city_id']?.toString() ?? state.cityId,
+            cityName: payload?['city']?.toString() ?? state.cityName,
+            gender: payload?['gender']?.toString() ?? state.gender,
+            dateOfBirth:
+                payload?['date_of_birth']?.toString() ?? state.dateOfBirth,
+            skills: payload == null
+                ? state.skills
+                : _parseSkills(payload['skills']),
+            selectedSkills: payload?['skillsNames'] is List
+                ? List<String>.from(payload!['skillsNames'] as List)
+                : state.selectedSkills,
+          ),
+        );
       },
     );
+  }
+
+  int? _toInt(Object? value) =>
+      value is int ? value : int.tryParse(value?.toString() ?? '');
+
+  List<int> _parseSkills(Object? value) {
+    if (value is List) {
+      return value.map((item) => _toInt(item) ?? 0).toList();
+    }
+    if (value is String) {
+      return value.split(',').map((item) => _toInt(item.trim()) ?? 0).toList();
+    }
+    return const [];
   }
 }

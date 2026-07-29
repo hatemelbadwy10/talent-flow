@@ -29,6 +29,11 @@ class UpdateProfileState extends Equatable {
   final String? gender;
   final String? dateOfBirth;
   final String? professionalTitle;
+  final bool isSendingPhoneVerification;
+  final String? phoneVerificationMessage;
+  final String? phoneVerificationError;
+  final String? phoneVerificationPhone;
+  final Map<String, dynamic>? updatedUserPayload;
 
   const UpdateProfileState({
     this.firstName,
@@ -58,6 +63,11 @@ class UpdateProfileState extends Equatable {
     this.gender,
     this.dateOfBirth,
     this.professionalTitle,
+    this.isSendingPhoneVerification = false,
+    this.phoneVerificationMessage,
+    this.phoneVerificationError,
+    this.phoneVerificationPhone,
+    this.updatedUserPayload,
   });
 
   UpdateProfileState copyWith({
@@ -91,6 +101,12 @@ class UpdateProfileState extends Equatable {
     bool clearPhoneVerification = false,
     bool clearErrorMessage = false,
     bool clearSuccessMessage = false,
+    bool? isSendingPhoneVerification,
+    String? phoneVerificationMessage,
+    String? phoneVerificationError,
+    String? phoneVerificationPhone,
+    bool clearPhoneVerificationFeedback = false,
+    Map<String, dynamic>? updatedUserPayload,
   }) {
     return UpdateProfileState(
       firstName: firstName ?? this.firstName,
@@ -126,6 +142,17 @@ class UpdateProfileState extends Equatable {
       gender: gender ?? this.gender,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       professionalTitle: professionalTitle ?? this.professionalTitle,
+      isSendingPhoneVerification:
+          isSendingPhoneVerification ?? this.isSendingPhoneVerification,
+      phoneVerificationMessage: clearPhoneVerificationFeedback
+          ? null
+          : phoneVerificationMessage ?? this.phoneVerificationMessage,
+      phoneVerificationError: clearPhoneVerificationFeedback
+          ? null
+          : phoneVerificationError ?? this.phoneVerificationError,
+      phoneVerificationPhone:
+          phoneVerificationPhone ?? this.phoneVerificationPhone,
+      updatedUserPayload: updatedUserPayload ?? this.updatedUserPayload,
     );
   }
 
@@ -158,5 +185,10 @@ class UpdateProfileState extends Equatable {
         gender,
         dateOfBirth,
         professionalTitle,
+        isSendingPhoneVerification,
+        phoneVerificationMessage,
+        phoneVerificationError,
+        phoneVerificationPhone,
+        updatedUserPayload,
       ];
 }
