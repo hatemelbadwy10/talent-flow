@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart' hide Notification;
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/features/auth/pages/register/register.dart';
 import 'package:talent_flow/features/auth/pages/social_media_login/repo/chat_repo.dart';
@@ -57,6 +58,8 @@ import '../features/setting/repo/account_statement_repo.dart';
 import '../features/setting/repo/terms_condation_repo.dart';
 import '../features/setting/repo/contracts_repo.dart';
 import '../features/setting/repo/dashboard_repo.dart';
+import '../features/setting/repo/settings_repo.dart';
+import '../main_repos/location_options_repo.dart';
 import '../features/on_boarding/page/free_lancer_screen.dart';
 import '../features/on_boarding/page/on_boarding_screen.dart';
 import '../features/projects/page/my_projects.dart';
@@ -441,6 +444,10 @@ abstract class CustomNavigator {
         return _pageRoute(
           IdentityVerificationScreen(
             arguments: settings.arguments as Map<String, dynamic>?,
+            settingsRepository: sl<SettingsRepo>(),
+            locationOptionsRepository: sl<LocationOptionsRepo>(),
+            sharedPreferences: sl<SharedPreferences>(),
+            dio: sl<Dio>(),
           ),
         );
       //

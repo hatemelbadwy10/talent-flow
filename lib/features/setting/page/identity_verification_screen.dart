@@ -14,7 +14,6 @@ import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/components/custom_network_image.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/setting/bloc/identity_verification_bloc.dart';
 import 'package:talent_flow/features/setting/bloc/identity_verification_event.dart';
 import 'package:talent_flow/features/setting/bloc/identity_verification_state.dart';
@@ -26,15 +25,27 @@ import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/helpers/date_time_picker.dart';
 import 'package:talent_flow/helpers/pickers/view/image_picker_helper.dart';
 import 'package:talent_flow/main_blocs/location_options_bloc.dart';
+import 'package:talent_flow/main_repos/location_options_repo.dart';
 
 import '../../../components/custom_text_form_field.dart';
 import '../../../navigation/custom_navigation.dart';
 import '../../../navigation/routes.dart';
 
 class IdentityVerificationScreen extends StatefulWidget {
-  const IdentityVerificationScreen({super.key, this.arguments});
+  const IdentityVerificationScreen({
+    super.key,
+    this.arguments,
+    required this.settingsRepository,
+    required this.locationOptionsRepository,
+    required this.sharedPreferences,
+    required this.dio,
+  });
 
   final Map<String, dynamic>? arguments;
+  final SettingsRepo settingsRepository;
+  final LocationOptionsRepo locationOptionsRepository;
+  final SharedPreferences sharedPreferences;
+  final Dio dio;
 
   @override
   State<IdentityVerificationScreen> createState() =>
@@ -56,11 +67,11 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
   void initState() {
     super.initState();
     _identityVerificationBloc = IdentityVerificationBloc(
-      repository: sl<SettingsRepo>(),
+      repository: widget.settingsRepository,
     );
-    _settingsRepo = sl();
-    _dio = sl();
-    _locationOptionsBloc = LocationOptionsBloc(sl())
+    _settingsRepo = widget.settingsRepository;
+    _dio = widget.dio;
+    _locationOptionsBloc = LocationOptionsBloc(widget.locationOptionsRepository)
       ..add(const LoadCountries());
     _isUnderReview = _readIdentityVerifyStatus().toLowerCase() == 'processing';
     _loadExistingIdentityVerification();
@@ -252,7 +263,7 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
 
   String _readIdentityVerifyStatus() {
     final rawUserData =
-        sl<SharedPreferences>().getString(AppStorageKey.userData) ?? '';
+        widget.sharedPreferences.getString(AppStorageKey.userData) ?? '';
     if (rawUserData.isEmpty) {
       return '';
     }
