@@ -53,7 +53,7 @@ Future<void> handlePathByRoute(Map notify) async {
   Future.delayed(
     Duration.zero,
     () {
-      if (!sl<UserBloc>().isLogin) {
+      if (!FirebaseNotifications.isUserLoggedIn) {
         return;
       }
 

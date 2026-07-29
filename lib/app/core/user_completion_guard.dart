@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../components/user_completion_dialog.dart';
-import '../../data/config/di.dart';
-import '../../features/setting/repo/bank_accounts_repo.dart';
-import '../../main_blocs/user_bloc.dart';
+import '../../features/setting/repo/bank_accounts_repository.dart';
 import '../../navigation/custom_navigation.dart';
 import '../../navigation/routes.dart';
 import 'app_storage_keys.dart';
@@ -71,7 +69,19 @@ class UserCompletionStatus {
 }
 
 abstract class UserCompletionGuard {
-  static SharedPreferences get _prefs => sl<SharedPreferences>();
+  static late SharedPreferences _prefs;
+  static late BankAccountsRepository _bankAccountsRepository;
+  static late VoidCallback _refreshUser;
+
+  static void configure({
+    required SharedPreferences sharedPreferences,
+    required BankAccountsRepository bankAccountsRepository,
+    required VoidCallback refreshUser,
+  }) {
+    _prefs = sharedPreferences;
+    _bankAccountsRepository = bankAccountsRepository;
+    _refreshUser = refreshUser;
+  }
 
   static UserCompletionStatus get status {
     final rawUser = _readUserData();
@@ -110,7 +120,7 @@ abstract class UserCompletionGuard {
     }
 
     await _prefs.setString(AppStorageKey.userData, jsonEncode(rawUser));
-    UserBloc.instance.add(const UserRequested());
+    _refreshUser();
   }
 
   static String? get identityVerifyStatus {
@@ -225,7 +235,7 @@ abstract class UserCompletionGuard {
       return currentStatus;
     }
 
-    final result = await sl<BankAccountsRepo>().getBankAccounts();
+    final result = await _bankAccountsRepository.getBankAccounts();
     return result.fold(
       (_) => currentStatus,
       (response) => currentStatus.copyWith(

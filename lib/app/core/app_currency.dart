@@ -1,12 +1,15 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../data/config/di.dart';
 import 'app_storage_keys.dart';
 
 abstract class AppCurrency {
   static const String defaultCurrency = 'USD';
 
-  static SharedPreferences get _prefs => sl<SharedPreferences>();
+  static late SharedPreferences _prefs;
+
+  static void configure(SharedPreferences sharedPreferences) {
+    _prefs = sharedPreferences;
+  }
 
   static String get code {
     final cached = _prefs.getString(AppStorageKey.currency)?.trim();

@@ -7,6 +7,8 @@ import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/data/realtime/user_channel_realtime_service.dart'
     as data_realtime;
 import 'app/core/styles.dart';
+import 'app/core/app_currency.dart';
+import 'app/core/user_completion_guard.dart';
 import 'app/notifications/notification_helper.dart';
 import 'data/config/di.dart' as di;
 import 'data/config/di.dart';
@@ -23,6 +25,16 @@ void main() async {
   await RemoteConfigService.initialize();
   await EasyLocalization.ensureInitialized();
   await di.init();
+  AppCurrency.configure(sl());
+  UserCompletionGuard.configure(
+    sharedPreferences: sl(),
+    bankAccountsRepository: sl(),
+    refreshUser: () => sl<UserBloc>().add(const UserRequested()),
+  );
+  FirebaseNotifications.configure(
+    sharedPreferences: sl(),
+    isUserLoggedIn: () => sl<UserBloc>().isLogin,
+  );
   await sl<LocaleDatabase>().initDatabase();
   await FirebaseNotifications.setUpFirebase();
 

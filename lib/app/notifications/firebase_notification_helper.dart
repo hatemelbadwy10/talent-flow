@@ -19,6 +19,8 @@ class FirebaseNotifications {
   static FirebaseNotifications? _instance;
   static bool _isInitialized = false;
   static const bool _disableFcmOnIos = true;
+  static late SharedPreferences _sharedPreferences;
+  static late bool Function() _isUserLoggedIn;
 
   FirebaseNotifications._internal();
 
@@ -26,6 +28,16 @@ class FirebaseNotifications {
     _instance ??= FirebaseNotifications._internal();
     return _instance!;
   }
+
+  static void configure({
+    required SharedPreferences sharedPreferences,
+    required bool Function() isUserLoggedIn,
+  }) {
+    _sharedPreferences = sharedPreferences;
+    _isUserLoggedIn = isUserLoggedIn;
+  }
+
+  static bool get isUserLoggedIn => _isUserLoggedIn();
 
   static Future<void> setUpFirebase() async {
     if (_isInitialized) {
@@ -78,14 +90,14 @@ class FirebaseNotifications {
   }
 
   static String? get cachedFcmToken =>
-      sl<SharedPreferences>().getString(AppStorageKey.fcmToken);
+      _sharedPreferences.getString(AppStorageKey.fcmToken);
 
   static Future<void> _cacheFcmToken(String? token) async {
     if (token == null || token.isEmpty) {
       log('FCM token is null or empty');
       return;
     }
-    await sl<SharedPreferences>().setString(AppStorageKey.fcmToken, token);
+    await _sharedPreferences.setString(AppStorageKey.fcmToken, token);
     log('FCM token: $token');
   }
 
