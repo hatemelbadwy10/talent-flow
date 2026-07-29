@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/data/config/di.dart' as di;
 import 'package:talent_flow/features/setting/repo/bank_accounts_repo.dart';
 import 'package:talent_flow/features/setting/repo/bank_accounts_repository.dart';
+import 'package:talent_flow/features/setting/repo/acceptance_test_repo.dart';
+import 'package:talent_flow/features/setting/repo/acceptance_test_repository.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +23,10 @@ void main() {
     expect(
       di.sl<BankAccountsRepository>(),
       same(di.sl<BankAccountsRepo>()),
+    );
+    expect(
+      di.sl<AcceptanceTestRepository>(),
+      same(di.sl<AcceptanceTestRepo>()),
     );
   });
 }

@@ -31,7 +31,7 @@ import 'package:talent_flow/features/setting/repo/chats_repo.dart';
 import 'package:talent_flow/features/setting/repo/favourite_repo.dart';
 import 'package:talent_flow/features/setting/repo/bank_accounts_repo.dart';
 import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
-import 'package:talent_flow/features/setting/repo/acceptance_test_repo.dart';
+import 'package:talent_flow/features/setting/repo/acceptance_test_repository.dart';
 import 'package:talent_flow/features/setting/page/add_projects.dart';
 import 'package:talent_flow/features/setting/model/create_contract_route_args.dart';
 import 'package:talent_flow/features/setting/page/add_single_work_screen.dart';
@@ -420,7 +420,7 @@ abstract class CustomNavigator {
         return _pageRoute(
           AcceptanceTestQuestionsScreen(
             arguments: AcceptanceTestRouteArgs.fromRoute(settings.arguments),
-            acceptanceTestRepo: sl<AcceptanceTestRepo>(),
+            acceptanceTestRepository: sl<AcceptanceTestRepository>(),
             workRepository: sl<AddWorkRepo>(),
           ),
         );

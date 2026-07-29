@@ -1,10 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:dartz/dartz.dart' hide State;
 import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/features/setting/bloc/portofilo_form_bloc.dart';
-import 'package:talent_flow/features/setting/repo/acceptance_test_repo.dart';
+import 'package:talent_flow/data/error/failures.dart';
+import 'package:talent_flow/features/setting/model/acceptance_test_content.dart';
+import 'package:talent_flow/features/setting/repo/acceptance_test_repository.dart';
 import 'package:talent_flow/features/setting/repo/add_work_repository.dart';
 import 'package:talent_flow/features/setting/widgets/setting_app_bar.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
@@ -17,12 +20,12 @@ class AcceptanceTestQuestionsScreen extends StatefulWidget {
   const AcceptanceTestQuestionsScreen({
     super.key,
     required this.arguments,
-    required this.acceptanceTestRepo,
+    required this.acceptanceTestRepository,
     required this.workRepository,
   });
 
   final AcceptanceTestRouteArgs arguments;
-  final AcceptanceTestRepo acceptanceTestRepo;
+  final AcceptanceTestRepository acceptanceTestRepository;
   final AddWorkRepository workRepository;
 
   @override
@@ -32,7 +35,7 @@ class AcceptanceTestQuestionsScreen extends StatefulWidget {
 
 class _AcceptanceTestQuestionsScreenState
     extends State<AcceptanceTestQuestionsScreen> {
-  late Future<dynamic> _questionsFuture;
+  late Future<Either<ServerFailure, AcceptanceTestContent>> _questionsFuture;
   final Map<String, String> _selectedAnswers = {};
   bool _isSubmitting = false;
 
@@ -41,7 +44,8 @@ class _AcceptanceTestQuestionsScreenState
   @override
   void initState() {
     super.initState();
-    _questionsFuture = widget.acceptanceTestRepo.getAcceptanceTestQuestions();
+    _questionsFuture =
+        widget.acceptanceTestRepository.getAcceptanceTestQuestions();
   }
 
   @override
@@ -49,7 +53,7 @@ class _AcceptanceTestQuestionsScreenState
     super.dispose();
   }
 
-  Future<void> _submitAnswers(List<_AcceptanceQuestion> questions) async {
+  Future<void> _submitAnswers(List<AcceptanceTestQuestion> questions) async {
     final answers = <String, String>{};
     for (final question in questions) {
       final value = _selectedAnswers[question.fieldKey]?.trim() ?? '';
@@ -126,7 +130,7 @@ class _AcceptanceTestQuestionsScreenState
         centerTitle: true,
       ),
       body: SafeArea(
-        child: FutureBuilder<dynamic>(
+        child: FutureBuilder<Either<ServerFailure, AcceptanceTestContent>>(
           future: _questionsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -139,203 +143,200 @@ class _AcceptanceTestQuestionsScreenState
                 actionLabel: 'retry'.tr(),
                 onTap: () {
                   setState(() {
-                    _questionsFuture =
-                        widget.acceptanceTestRepo.getAcceptanceTestQuestions();
+                    _questionsFuture = widget.acceptanceTestRepository
+                        .getAcceptanceTestQuestions();
                   });
                 },
               );
             }
 
-            final content = _normalizeAcceptancePayload(snapshot.data);
-            final resolvedTitle = _resolveAcceptanceTitle(
-              context,
-              content.title,
-            );
-            if (content.questions.isEmpty &&
-                content.title.isEmpty &&
-                content.description.isEmpty) {
+            final result = snapshot.data;
+            if (result == null) {
               return _StateMessage(
-                title: 'acceptance_test.empty'.tr(),
+                title: 'acceptance_test.load_failed'.tr(),
               );
             }
+            return result.fold(
+              (failure) => _StateMessage(
+                title: failure.error,
+                actionLabel: 'retry'.tr(),
+                onTap: () {
+                  setState(() {
+                    _questionsFuture = widget.acceptanceTestRepository
+                        .getAcceptanceTestQuestions();
+                  });
+                },
+              ),
+              (content) {
+                final resolvedTitle = _resolveAcceptanceTitle(
+                  context,
+                  content.title,
+                );
+                if (content.questions.isEmpty &&
+                    content.title.isEmpty &&
+                    content.description.isEmpty) {
+                  return _StateMessage(
+                    title: 'acceptance_test.empty'.tr(),
+                  );
+                }
 
-            return Column(
-              children: [
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              resolvedTitle,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF111827),
-                              ),
+                return Column(
+                  children: [
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
                             ),
-                            if (content.description.isNotEmpty) ...[
-                              const SizedBox(height: 12),
-                              Text(
-                                content.description,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  height: 1.6,
-                                  color: Color(0xFF4B5563),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      if (content.questions.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        ...content.questions.asMap().entries.map(
-                              (entry) => Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: const Color(0xFFE5E7EB),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  resolvedTitle,
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF111827),
                                   ),
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
+                                if (content.description.isNotEmpty) ...[
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    content.description,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      height: 1.6,
+                                      color: Color(0xFF4B5563),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          if (content.questions.isNotEmpty) ...[
+                            const SizedBox(height: 16),
+                            ...content.questions.asMap().entries.map(
+                                  (entry) => Container(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: const Color(0xFFE5E7EB),
+                                      ),
+                                    ),
+                                    child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Container(
-                                          width: 28,
-                                          height: 28,
-                                          alignment: Alignment.center,
-                                          decoration: const BoxDecoration(
-                                            color: Styles.SMOKED_WHITE_COLOR,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Text(
-                                            '${entry.key + 1}',
-                                            style: const TextStyle(
-                                              color: Styles.PRIMARY_COLOR,
-                                              fontWeight: FontWeight.w700,
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              width: 28,
+                                              height: 28,
+                                              alignment: Alignment.center,
+                                              decoration: const BoxDecoration(
+                                                color:
+                                                    Styles.SMOKED_WHITE_COLOR,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Text(
+                                                '${entry.key + 1}',
+                                                style: const TextStyle(
+                                                  color: Styles.PRIMARY_COLOR,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                entry.value.text,
+                                                style: const TextStyle(
+                                                  fontSize: 15,
+                                                  height: 1.5,
+                                                  color: Color(0xFF111827),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        if (entry.value.choices.isNotEmpty) ...[
+                                          const SizedBox(height: 12),
+                                          ...entry.value.choices.map(
+                                            (choice) => Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 10),
+                                              child: _ChoiceTile(
+                                                label: choice,
+                                                selected: _selectedAnswers[
+                                                        entry.value.fieldKey] ==
+                                                    choice,
+                                                onTap: () {
+                                                  setState(() {
+                                                    _selectedAnswers[entry.value
+                                                        .fieldKey] = choice;
+                                                  });
+                                                },
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Text(
-                                            entry.value.text,
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              height: 1.5,
-                                              color: Color(0xFF111827),
-                                            ),
-                                          ),
-                                        ),
+                                        ],
                                       ],
                                     ),
-                                    if (entry.value.choices.isNotEmpty) ...[
-                                      const SizedBox(height: 12),
-                                      ...entry.value.choices.map(
-                                        (choice) => Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 10),
-                                          child: _ChoiceTile(
-                                            label: choice,
-                                            selected: _selectedAnswers[
-                                                    entry.value.fieldKey] ==
-                                                choice,
-                                            onTap: () {
-                                              setState(() {
-                                                _selectedAnswers[entry
-                                                    .value.fieldKey] = choice;
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
+                                  ),
                                 ),
-                              ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _isSubmitting
+                              ? null
+                              : () => _submitAnswers(content.questions),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Styles.PRIMARY_COLOR,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
                             ),
-                      ],
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isSubmitting
-                          ? null
-                          : () => _submitAnswers(content.questions),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Styles.PRIMARY_COLOR,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: _isSubmitting
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(_pendingWorks.isEmpty
+                                  ? 'continue'.tr()
+                                  : 'submit_all_works'.tr()),
                         ),
                       ),
-                      child: _isSubmitting
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Text(_pendingWorks.isEmpty
-                              ? 'continue'.tr()
-                              : 'submit_all_works'.tr()),
                     ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             );
           },
         ),
       ),
     );
   }
-}
-
-class _AcceptanceContent {
-  const _AcceptanceContent({
-    required this.title,
-    required this.description,
-    required this.questions,
-  });
-
-  final String title;
-  final String description;
-  final List<_AcceptanceQuestion> questions;
-}
-
-class _AcceptanceQuestion {
-  const _AcceptanceQuestion({
-    required this.fieldKey,
-    required this.text,
-    required this.choices,
-  });
-
-  final String fieldKey;
-  final String text;
-  final List<String> choices;
 }
 
 class _ChoiceTile extends StatelessWidget {
@@ -449,37 +450,6 @@ class _StateMessage extends StatelessWidget {
   }
 }
 
-_AcceptanceContent _normalizeAcceptancePayload(dynamic raw) {
-  final map = _asMap(raw);
-  final title = _firstText([
-    map?['title'],
-    map?['name'],
-    map?['header'],
-  ]);
-  final description = _firstText([
-    map?['description'],
-    map?['content'],
-    map?['body'],
-    map?['intro'],
-  ]);
-
-  final questions = <_AcceptanceQuestion>[
-    ..._extractQuestions(map?['questions']),
-    ..._extractQuestions(map?['items']),
-    ..._extractQuestions(map?['data']),
-  ];
-
-  if (questions.isEmpty) {
-    questions.addAll(_extractQuestions(raw));
-  }
-
-  return _AcceptanceContent(
-    title: title,
-    description: description,
-    questions: questions,
-  );
-}
-
 String _resolveAcceptanceTitle(BuildContext context, String rawTitle) {
   final normalized = rawTitle.trim().toLowerCase();
   if (normalized.isEmpty ||
@@ -491,97 +461,4 @@ String _resolveAcceptanceTitle(BuildContext context, String rawTitle) {
   }
 
   return rawTitle;
-}
-
-Map<String, dynamic>? _asMap(dynamic value) {
-  if (value is Map<String, dynamic>) {
-    return value;
-  }
-  if (value is Map) {
-    return value.map((key, val) => MapEntry(key.toString(), val));
-  }
-  return null;
-}
-
-String _firstText(List<dynamic> candidates) {
-  for (final candidate in candidates) {
-    final text = candidate?.toString().trim() ?? '';
-    if (text.isNotEmpty && text.toLowerCase() != 'null') {
-      return text;
-    }
-  }
-  return '';
-}
-
-List<_AcceptanceQuestion> _extractQuestions(dynamic value) {
-  if (value is List) {
-    return value
-        .asMap()
-        .entries
-        .map((entry) {
-          final item = entry.value;
-          if (item is Map) {
-            final fieldKey = _firstText([
-              item['id'],
-              item['key'],
-              item['field'],
-            ]);
-            final text = _firstText([
-              item['question'],
-              item['title'],
-              item['name'],
-              item['text'],
-              item['content'],
-            ]);
-            if (text.isEmpty) {
-              return null;
-            }
-            return _AcceptanceQuestion(
-              fieldKey: fieldKey.isNotEmpty ? fieldKey : '${entry.key + 1}',
-              text: text,
-              choices: _extractChoices(item['choices']),
-            );
-          }
-          final text = item?.toString().trim() ?? '';
-          if (text.isEmpty) {
-            return null;
-          }
-          return _AcceptanceQuestion(
-            fieldKey: '${entry.key + 1}',
-            text: text,
-            choices: const <String>[],
-          );
-        })
-        .whereType<_AcceptanceQuestion>()
-        .toList();
-  }
-
-  if (value is Map) {
-    return value.entries
-        .map((entry) {
-          final text = entry.value?.toString().trim() ?? '';
-          if (text.isEmpty) {
-            return null;
-          }
-          return _AcceptanceQuestion(
-            fieldKey: entry.key.toString(),
-            text: text,
-            choices: const <String>[],
-          );
-        })
-        .whereType<_AcceptanceQuestion>()
-        .toList();
-  }
-
-  return const <_AcceptanceQuestion>[];
-}
-
-List<String> _extractChoices(dynamic value) {
-  if (value is List) {
-    return value
-        .map((item) => item?.toString().trim() ?? '')
-        .where((item) => item.isNotEmpty)
-        .toList();
-  }
-  return const <String>[];
 }

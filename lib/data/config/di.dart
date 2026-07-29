@@ -14,6 +14,7 @@ import 'package:talent_flow/features/payment/repo/pay_ment_repo.dart';
 import 'package:talent_flow/features/projects/repo/projects_repo.dart';
 import 'package:talent_flow/features/setting/repo/about_repo.dart';
 import 'package:talent_flow/features/setting/repo/acceptance_test_repo.dart';
+import 'package:talent_flow/features/setting/repo/acceptance_test_repository.dart';
 import 'package:talent_flow/features/setting/repo/account_statement_repo.dart';
 import 'package:talent_flow/features/setting/repo/add_word_repo.dart';
 import 'package:talent_flow/features/setting/repo/bank_accounts_repo.dart';
@@ -81,6 +82,8 @@ Future<void> init() async {
       () => AboutRepo(sharedPreferences: sl(), dioClient: sl()));
   sl.registerLazySingleton(
       () => AcceptanceTestRepo(sharedPreferences: sl(), dioClient: sl()));
+  sl.registerLazySingleton<AcceptanceTestRepository>(
+      () => sl<AcceptanceTestRepo>());
   sl.registerLazySingleton(
       () => ProjectRepository(dioClient: sl(), sharedPreferences: sl()));
   sl.registerLazySingleton(
