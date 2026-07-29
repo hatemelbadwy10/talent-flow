@@ -24,9 +24,9 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     final chatsBloc = context.read<ChatsBloc>();
-    UserBloc.instance.add(
-      const UserUnreadCountsSynced(messages: 0),
-    );
+    context.read<UserBloc>().add(
+          const UserUnreadCountsSynced(messages: 0),
+        );
     Future.microtask(() {
       chatsBloc.add(const ChatProjectOptionsRequested());
       chatsBloc.add(const ChatsRequested());

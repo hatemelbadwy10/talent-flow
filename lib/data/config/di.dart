@@ -63,6 +63,9 @@ Future<void> init() async {
     () => UserChannelRealtimeService(
       sharedPreferences: sl(),
       pusherService: sl(),
+      onUnreadMessagesChanged: (count) {
+        sl<UserBloc>().add(UserUnreadCountsSynced(messages: count));
+      },
     ),
   );
 

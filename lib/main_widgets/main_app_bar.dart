@@ -23,6 +23,8 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
+        final userBloc = context.read<UserBloc>();
+        final user = state.user;
         return Container(
           padding: EdgeInsets.only(
             left: Dimensions.PADDING_SIZE_DEFAULT.w,
@@ -49,7 +51,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ProfileImageWidget(
                   withEdit: false,
                   radius: 24.w,
-                  image: UserBloc.instance.user?.profileImage,
+                  image: user?.profileImage,
                 ),
                 SizedBox(width: 8.w),
                 Expanded(
@@ -70,7 +72,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                             .copyWith(fontSize: 12, color: Styles.TITLE),
                       ),
                       Text(
-                        UserBloc.instance.user?.name ?? "Guest",
+                        user?.name ?? "Guest",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.w600
@@ -84,7 +86,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                     padding: EdgeInsets.symmetric(horizontal: 8.w),
                     child: customContainerSvgIcon(
                         onTap: () {
-                          if (UserBloc.instance.isLogin) {
+                          if (userBloc.isLogin) {
                             CustomNavigator.push(Routes.notifications);
                           } else {
                             CustomBottomSheet.show(widget: const GuestMode());

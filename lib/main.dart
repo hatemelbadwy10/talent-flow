@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'IBM',
       ),
       builder: (context, child) {
-        final userBloc = UserBloc.instance;
+        final userBloc = sl<UserBloc>();
         return BlocProvider.value(
           value: userBloc,
           child: BlocListener<UserBloc, UserState>(

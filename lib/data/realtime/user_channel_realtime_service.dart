@@ -8,7 +8,6 @@ import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/data/realtime/pusher_service.dart';
-import 'package:talent_flow/main_blocs/user_bloc.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 import 'user_subscription_controller.dart';
@@ -17,11 +16,14 @@ class UserChannelRealtimeService implements UserSubscriptionController {
   UserChannelRealtimeService({
     required SharedPreferences sharedPreferences,
     required PusherService pusherService,
+    required void Function(int count) onUnreadMessagesChanged,
   })  : _sharedPreferences = sharedPreferences,
-        _pusherService = pusherService;
+        _pusherService = pusherService,
+        _onUnreadMessagesChanged = onUnreadMessagesChanged;
 
   final SharedPreferences _sharedPreferences;
   final PusherService _pusherService;
+  final void Function(int count) _onUnreadMessagesChanged;
 
   String? _subscribedChannelName;
   int? _subscribedUserId;
@@ -233,9 +235,7 @@ class UserChannelRealtimeService implements UserSubscriptionController {
         'nextCount': nextCount,
       },
     );
-    UserBloc.instance.add(
-      UserUnreadCountsSynced(messages: nextCount),
-    );
+    _onUnreadMessagesChanged(nextCount);
   }
 
   int _currentUnreadMessagesCount() {

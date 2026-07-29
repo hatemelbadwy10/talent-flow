@@ -39,9 +39,9 @@ class _NotificationState extends State<Notification>
     _tabValues = _types.values.toList();
 
     _tabController = TabController(length: _tabTitles.length, vsync: this);
-    UserBloc.instance.add(
-      const UserUnreadCountsSynced(notifications: 0),
-    );
+    context.read<UserBloc>().add(
+          const UserUnreadCountsSynced(notifications: 0),
+        );
 
     // send first request when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {

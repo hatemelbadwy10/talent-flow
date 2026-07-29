@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../data/config/di.dart';
 import '../data/realtime/user_subscription_controller.dart';
 import '../main_models/user_model.dart';
 import '../main_repos/user_repository.dart';
@@ -79,8 +78,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
   final UserRepository _repository;
   final UserSubscriptionController _subscriptionController;
-
-  static UserBloc get instance => sl<UserBloc>();
 
   bool get isLogin => _repository.isLogIn;
   UserModel? get user => state.user;
