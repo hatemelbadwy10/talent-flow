@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
@@ -15,6 +16,7 @@ import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
 import 'package:talent_flow/features/auth/pages/login/repo/login_repo.dart';
 import 'package:talent_flow/features/auth/data/auth_session_store.dart';
+import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/helpers/social_media_login_helper.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
@@ -23,9 +25,9 @@ import 'package:talent_flow/app/core/text_styles.dart';
 import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/auth/widgets/auth_base.dart';
 
-import '../../../../app/core/app_event.dart';
-import '../../../../app/core/app_state.dart';
 import '../social_media_login/bloc/social_media_bloc.dart';
+import '../social_media_login/bloc/social_media_event.dart';
+import '../social_media_login/bloc/social_media_state.dart';
 import '../social_media_login/repo/social_media_repo.dart';
 import 'bloc/login_bloc.dart';
 import 'bloc/login_event.dart';
@@ -45,7 +47,13 @@ class Login extends StatelessWidget {
           ),
         ),
         BlocProvider(
-          create: (_) => SocialMediaBloc(repo: sl<SocialMediaRepo>()),
+          create: (_) => SocialMediaBloc(
+            repository: sl<SocialMediaRepo>(),
+            sessionStore: sl<AuthSessionStore>(),
+            isFreelancer:
+                sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                    true,
+          ),
         ),
       ],
       child: const LoginView(),
@@ -68,8 +76,15 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocListener<LoginBloc, LoginState>(
-        listener: _onLoginStateChanged,
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<LoginBloc, LoginState>(
+            listener: _onLoginStateChanged,
+          ),
+          BlocListener<SocialMediaBloc, SocialMediaState>(
+            listener: _onSocialMediaStateChanged,
+          ),
+        ],
         child: Stack(
           children: [
             AuthBase(
@@ -89,6 +104,18 @@ class _LoginViewState extends State<LoginView> {
         ),
       ),
     );
+  }
+
+  Future<void> _onSocialMediaStateChanged(
+    BuildContext context,
+    SocialMediaState state,
+  ) async {
+    if (state case SocialMediaFailed(:final message)) {
+      _showLoginMessage(message);
+    }
+    if (state is SocialMediaSucceeded) {
+      await UserCompletionGuard.handlePostAuthNavigation();
+    }
   }
 
   Future<void> _onLoginStateChanged(
@@ -239,7 +266,7 @@ class _LoginViewState extends State<LoginView> {
         SizedBox(height: 16.h),
 
         /// ✅ BlocBuilder للسوشيال لوجين
-        BlocBuilder<SocialMediaBloc, AppState>(
+        BlocBuilder<SocialMediaBloc, SocialMediaState>(
           builder: (context, state) {
             return Column(
               children: [
@@ -247,12 +274,13 @@ class _LoginViewState extends State<LoginView> {
                   text: "login.login_google".tr(),
                   backgroundColor: Colors.white,
                   textColor: Colors.black,
-                  isLoading: state is Loading,
+                  isLoading: state is SocialMediaLoading,
                   lIconWidget: SvgPicture.asset("assets/svgs/google.svg"),
                   onTap: () async {
-                    log('Google login tapped from Login screen');
                     context.read<SocialMediaBloc>().add(
-                          Click(arguments: SocialMediaProvider.google),
+                          const SocialSignInRequested(
+                            SocialMediaProvider.google,
+                          ),
                         );
                   },
                 ),
