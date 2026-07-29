@@ -1,17 +1,20 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:talent_flow/features/auth/pages/send_verification/send_verification_bloc/send_verification_bloc.dart';
-import '../../../../app/core/app_event.dart';
-import '../../../../app/core/app_state.dart';
+import '../../../../app/core/app_core.dart';
+import '../../../../app/core/app_notification.dart';
 import '../../../../app/core/dimensions.dart';
+import '../../../../app/core/styles.dart';
 import '../../../../components/custom_button.dart';
 import '../../../../components/custom_text_form_field.dart';
 import '../../../../data/config/di.dart';
+import '../../../../navigation/custom_navigation.dart';
+import '../../../../navigation/routes.dart';
 import '../../widgets/auth_base.dart';
+import 'send_verification_bloc/send_verification_event.dart';
+import 'send_verification_bloc/send_verification_state.dart';
 import 'send_verification_repo/send_verification_repo.dart';
 
 enum VerificationType { email, whatsapp }
@@ -41,7 +44,7 @@ class _SendVerificationScreenState extends State<SendVerificationScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => SendVerificationBloc(
-        repo: sl<SendVerificationRepo>(),
+        repository: sl<SendVerificationRepo>(),
       ),
       child: AuthBase(
         children: [
@@ -134,29 +137,54 @@ class _SendVerificationScreenState extends State<SendVerificationScreen> {
           const SizedBox(height: 24),
 
           /// -------- BlocConsumer with Button --------
-          BlocConsumer<SendVerificationBloc, AppState>(
+          BlocConsumer<SendVerificationBloc, SendVerificationState>(
             listener: (context, state) {
-              if (state is Done) {
-                // navigation already handled inside bloc
+              if (state case SendVerificationFailed(:final message)) {
+                AppCore.showSnackBar(
+                  notification: AppNotification(
+                    message:
+                        message.isEmpty ? 'something_went_wrong'.tr() : message,
+                    backgroundColor: Styles.IN_ACTIVE,
+                    borderColor: Styles.RED_COLOR,
+                  ),
+                );
+              }
+              if (state
+                  case SendVerificationSucceeded(
+                    :final identifier,
+                    :final message,
+                  )) {
+                AppCore.showSnackBar(
+                  notification: AppNotification(
+                    message: message.isEmpty
+                        ? 'verification_sent_successfully'.tr()
+                        : message,
+                    backgroundColor: Colors.green,
+                    borderColor: Colors.transparent,
+                  ),
+                );
+                CustomNavigator.push(
+                  Routes.sendCodeScreen,
+                  arguments: {
+                    'email': identifier,
+                    'isRegister': false,
+                  },
+                );
               }
             },
             builder: (context, state) {
               return CustomButton(
                 text: "send_verification.send".tr(),
-                isLoading: state is Loading,
+                isLoading: state is SendVerificationLoading,
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
-                    log('clicked');
-                    log('data ${_selectedVerification == VerificationType.email ? {
-                        "identifier": _emailController.text
-                      } : {"identifier": _phoneController.text}}');
-                    final data = _selectedVerification == VerificationType.email
-                        ? {"identifier": _emailController.text}
-                        : {"identifier": _phoneController.text};
-
-                    BlocProvider.of<SendVerificationBloc>(context).add(
-                      Click(arguments: data),
-                    );
+                    final identifier =
+                        _selectedVerification == VerificationType.email
+                            ? _emailController.text
+                            : _phoneController.text;
+                    context.read<SendVerificationBloc>().add(
+                          VerificationRequested(identifier: identifier),
+                        );
                   }
                 },
                 gradient: const LinearGradient(
