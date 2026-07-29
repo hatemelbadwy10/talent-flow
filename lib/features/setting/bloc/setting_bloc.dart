@@ -1,110 +1,64 @@
-import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talent_flow/app/core/app_core.dart';
-import 'package:talent_flow/app/core/app_notification.dart';
-import 'package:talent_flow/app/core/styles.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/features/setting/repo/settings_repo.dart';
 
-import '../../../app/core/app_event.dart';
-import '../../../app/core/app_state.dart';
-import '../../../app/core/app_storage_keys.dart';
-import '../../../data/config/di.dart';
-import '../../../main_blocs/user_bloc.dart';
-import '../../../navigation/custom_navigation.dart';
-import '../../../navigation/routes.dart';
-import '../model/help_model.dart';
+import '../../auth/data/auth_session_store.dart';
+import '../repo/settings_repository.dart';
+import 'settings_event.dart';
+import 'settings_state.dart';
 
-class SettingsBloc extends Bloc<AppEvent, AppState> {
-  final SettingsRepo _settingsRepo;
-
-  SettingsBloc(this._settingsRepo) : super(Start()) {
-    on<Click>(_onHelp);
-    on<Add>(_onLogout);
-    on<Delete>(_onDeleteAccount);
+class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
+  SettingsBloc({
+    required SettingsRepository repository,
+    required AuthSessionStore sessionStore,
+  })  : _repository = repository,
+        _sessionStore = sessionStore,
+        super(const SettingsInitial()) {
+    on<HelpSubmitted>(_onHelp);
+    on<LogoutRequested>(_onLogout);
+    on<AccountDeletionRequested>(_onDeleteAccount);
   }
 
-  Future<void> _onHelp(Click event, Emitter<AppState> emit) async {
-    emit(Loading());
-    try {
-      final result = await _settingsRepo.help(event.arguments as HelpModel);
-      result.fold(
-        (failure) => emit(Error()),
-        (response) {
-          log("Help response: ${response.data}");
-          emit(Done(data: response.data));
-        },
-      );
-    } catch (e) {
-      emit(Error());
-    }
+  final SettingsRepository _repository;
+  final AuthSessionStore _sessionStore;
+
+  Future<void> _onHelp(
+    HelpSubmitted event,
+    Emitter<SettingsState> emit,
+  ) async {
+    emit(const SettingsLoading());
+    final result = await _repository.help(event.request);
+    result.fold(
+      (failure) => emit(SettingsFailed(failure.error)),
+      (message) => emit(HelpSubmissionSucceeded(message)),
+    );
   }
 
-  Future<void> _onLogout(Add event, Emitter<AppState> emit) async {
-    emit(Loading());
-    try {
-      final result = await _settingsRepo.logout();
-      result.fold(
-        (failure) => emit(Error()),
-        (response) {
-          final isFirstTime =
-              sl<SharedPreferences>().getBool(AppStorageKey.notFirstTime);
-          UserBloc.instance.add(Delete());
-          sl<SharedPreferences>().clear();
-          sl<SharedPreferences>()
-              .setBool(AppStorageKey.notFirstTime, isFirstTime ?? true);
-
-          CustomNavigator.push(Routes.login, clean: true); // then navigate
-
-          log("Logout response: ${response.data}");
-          emit(Done(data: response.data));
-        },
-      );
-    } catch (e) {
-      emit(Error());
-    }
+  Future<void> _onLogout(
+    LogoutRequested event,
+    Emitter<SettingsState> emit,
+  ) async {
+    emit(const SettingsLoading());
+    final result = await _repository.logout();
+    await result.fold(
+      (failure) async => emit(SettingsFailed(failure.error)),
+      (message) async {
+        await _sessionStore.clearAuthenticatedSession();
+        emit(LogoutSucceeded(message));
+      },
+    );
   }
 
-  Future<void> _onDeleteAccount(Delete event, Emitter<AppState> emit) async {
-    emit(Loading());
-    try {
-      final result = await _settingsRepo.deleteAccount();
-      await result.fold<Future<void>>(
-        (failure) async {
-          AppCore.showSnackBar(
-            notification: AppNotification(
-              message: failure.error,
-              backgroundColor: Styles.IN_ACTIVE,
-              borderColor: Styles.IN_ACTIVE,
-            ),
-          );
-          if (emit.isDone) return;
-          emit(Error());
-        },
-        (response) async {
-          final isFirstTime =
-              sl<SharedPreferences>().getBool(AppStorageKey.notFirstTime);
-          UserBloc.instance.add(Delete());
-          await sl<SharedPreferences>().clear();
-          await sl<SharedPreferences>()
-              .setBool(AppStorageKey.notFirstTime, isFirstTime ?? true);
-
-          CustomNavigator.push(Routes.login, clean: true);
-
-          log("Delete account response: ${response.data}");
-          if (emit.isDone) return;
-          emit(Done(data: response.data));
-        },
-      );
-    } catch (e) {
-      AppCore.showSnackBar(
-        notification: AppNotification(
-          message: e.toString(),
-          backgroundColor: Styles.IN_ACTIVE,
-          borderColor: Styles.IN_ACTIVE,
-        ),
-      );
-      emit(Error());
-    }
+  Future<void> _onDeleteAccount(
+    AccountDeletionRequested event,
+    Emitter<SettingsState> emit,
+  ) async {
+    emit(const SettingsLoading());
+    final result = await _repository.deleteAccount();
+    await result.fold(
+      (failure) async => emit(SettingsFailed(failure.error)),
+      (message) async {
+        await _sessionStore.clearAuthenticatedSession();
+        emit(AccountDeletionSucceeded(message));
+      },
+    );
   }
 }

@@ -119,6 +119,9 @@ class _FakeAuthSessionStore implements AuthSessionStore {
   bool persistedSession = false;
 
   @override
+  Future<void> clearAuthenticatedSession() async {}
+
+  @override
   Future<void> persistAuthenticatedSession(AuthResponse response) async {
     persistedSession = true;
   }

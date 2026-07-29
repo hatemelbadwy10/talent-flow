@@ -15,6 +15,8 @@ abstract interface class AuthSessionStore {
     required String email,
     required String password,
   });
+
+  Future<void> clearAuthenticatedSession();
 }
 
 final class LocalAuthSessionStore implements AuthSessionStore {
@@ -75,5 +77,17 @@ final class LocalAuthSessionStore implements AuthSessionStore {
         'password': password,
       }),
     );
+  }
+
+  @override
+  Future<void> clearAuthenticatedSession() async {
+    final notFirstTime =
+        _sharedPreferences.getBool(AppStorageKey.notFirstTime) ?? true;
+    await _sharedPreferences.clear();
+    await _sharedPreferences.setBool(
+      AppStorageKey.notFirstTime,
+      notFirstTime,
+    );
+    await _dioClient.updateHeader('');
   }
 }

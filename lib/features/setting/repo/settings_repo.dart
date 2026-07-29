@@ -10,33 +10,37 @@ import 'package:talent_flow/main_repos/base_repo.dart';
 
 import '../../../data/api/end_points.dart';
 import '../../../data/error/api_error_handler.dart';
+import 'settings_repository.dart';
 
-class SettingsRepo extends BaseRepo {
+class SettingsRepo extends BaseRepo implements SettingsRepository {
   SettingsRepo({required super.sharedPreferences, required super.dioClient});
 
-  Future<Either<ServerFailure, Response>> help(HelpModel model) async {
+  @override
+  Future<Either<ServerFailure, String>> help(HelpModel model) async {
     try {
       final response = await dioClient.post(
           uri: EndPoints.help, queryParameters: model.toJson());
-      return Right(response);
+      return Right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> logout() async {
+  @override
+  Future<Either<ServerFailure, String>> logout() async {
     try {
       final response = await dioClient.post(uri: EndPoints.logout);
-      return Right(response);
+      return Right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
   }
 
-  Future<Either<ServerFailure, Response>> deleteAccount() async {
+  @override
+  Future<Either<ServerFailure, String>> deleteAccount() async {
     try {
       final response = await dioClient.delete(uri: EndPoints.deleteAccount);
-      return Right(response);
+      return Right(_messageFrom(response.data));
     } catch (error) {
       return left(ApiErrorHandler.getServerFailure(error));
     }
@@ -94,4 +98,11 @@ class SettingsRepo extends BaseRepo {
   }
 
   String _fileName(File file) => file.path.split(Platform.pathSeparator).last;
+
+  String _messageFrom(Object? data) {
+    if (data is Map && data['message'] != null) {
+      return data['message'].toString();
+    }
+    return '';
+  }
 }
