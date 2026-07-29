@@ -6,12 +6,11 @@ import 'package:talent_flow/app/core/app_notification.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/features/auth/data/auth_session_store.dart';
-import 'package:talent_flow/features/auth/pages/confirm_code/repo/confirm_code_repo.dart';
+import 'package:talent_flow/features/auth/pages/confirm_code/repo/confirm_code_repository.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../app/core/styles.dart';
 import '../../../../components/custom_button.dart';
-import '../../../../data/config/di.dart';
 import '../../../../navigation/custom_navigation.dart';
 import '../../../../navigation/routes.dart';
 import '../../widgets/auth_base.dart';
@@ -22,7 +21,15 @@ import 'model/confirm_code_request.dart';
 
 class ConfirmCodeScreen extends StatefulWidget {
   final Map<String, dynamic> argument;
-  const ConfirmCodeScreen({super.key, required this.argument});
+  final ConfirmCodeRepository repository;
+  final AuthSessionStore sessionStore;
+
+  const ConfirmCodeScreen({
+    super.key,
+    required this.argument,
+    required this.repository,
+    required this.sessionStore,
+  });
 
   @override
   State<ConfirmCodeScreen> createState() => _ConfirmCodeScreenState();
@@ -218,8 +225,8 @@ class _ConfirmCodeScreenState extends State<ConfirmCodeScreen> {
             .toString();
     return BlocProvider(
       create: (_) => ConfirmCodeBloc(
-        repository: sl<ConfirmCodeRepo>(),
-        sessionStore: sl<AuthSessionStore>(),
+        repository: widget.repository,
+        sessionStore: widget.sessionStore,
       ),
       child: BlocListener<ConfirmCodeBloc, ConfirmCodeState>(
         listener: _onConfirmCodeStateChanged,

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:talent_flow/app/core/app_core.dart';
 import 'package:talent_flow/app/core/app_notification.dart';
@@ -14,27 +13,36 @@ import 'package:talent_flow/app/core/remote_config_service.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/components/custom_text_form_field.dart';
-import 'package:talent_flow/features/auth/pages/login/repo/login_repo.dart';
 import 'package:talent_flow/features/auth/data/auth_session_store.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/helpers/social_media_login_helper.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 import 'package:talent_flow/navigation/routes.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/app/core/text_styles.dart';
-import 'package:talent_flow/data/config/di.dart';
 import 'package:talent_flow/features/auth/widgets/auth_base.dart';
 
 import '../social_media_login/bloc/social_media_bloc.dart';
 import '../social_media_login/bloc/social_media_event.dart';
 import '../social_media_login/bloc/social_media_state.dart';
-import '../social_media_login/repo/social_media_repo.dart';
+import '../social_media_login/repo/social_media_repository.dart';
+import 'repo/login_repository.dart';
 import 'bloc/login_bloc.dart';
 import 'bloc/login_event.dart';
 import 'bloc/login_state.dart';
 
 class Login extends StatelessWidget {
-  const Login({super.key});
+  const Login({
+    super.key,
+    required this.repository,
+    required this.socialMediaRepository,
+    required this.sessionStore,
+    required this.isFreelancer,
+  });
+
+  final LoginRepository repository;
+  final SocialMediaRepository socialMediaRepository;
+  final AuthSessionStore sessionStore;
+  final bool isFreelancer;
 
   @override
   Widget build(BuildContext context) {
@@ -42,17 +50,15 @@ class Login extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (_) => LoginBloc(
-            repository: sl<LoginRepo>(),
-            sessionStore: sl<AuthSessionStore>(),
+            repository: repository,
+            sessionStore: sessionStore,
           ),
         ),
         BlocProvider(
           create: (_) => SocialMediaBloc(
-            repository: sl<SocialMediaRepo>(),
-            sessionStore: sl<AuthSessionStore>(),
-            isFreelancer:
-                sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                    true,
+            repository: socialMediaRepository,
+            sessionStore: sessionStore,
+            isFreelancer: isFreelancer,
           ),
         ),
       ],

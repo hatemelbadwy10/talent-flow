@@ -9,18 +9,19 @@ import '../../../../app/core/dimensions.dart';
 import '../../../../app/core/styles.dart';
 import '../../../../components/custom_button.dart';
 import '../../../../components/custom_text_form_field.dart';
-import '../../../../data/config/di.dart';
 import '../../../../navigation/custom_navigation.dart';
 import '../../../../navigation/routes.dart';
 import '../../widgets/auth_base.dart';
 import 'send_verification_bloc/send_verification_event.dart';
 import 'send_verification_bloc/send_verification_state.dart';
-import 'send_verification_repo/send_verification_repo.dart';
+import 'send_verification_repo/send_verification_repository.dart';
 
 enum VerificationType { email, whatsapp }
 
 class SendVerificationScreen extends StatefulWidget {
-  const SendVerificationScreen({super.key});
+  const SendVerificationScreen({super.key, required this.repository});
+
+  final SendVerificationRepository repository;
 
   @override
   State<SendVerificationScreen> createState() => _SendVerificationScreenState();
@@ -44,7 +45,7 @@ class _SendVerificationScreenState extends State<SendVerificationScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => SendVerificationBloc(
-        repository: sl<SendVerificationRepo>(),
+        repository: widget.repository,
       ),
       child: AuthBase(
         children: [

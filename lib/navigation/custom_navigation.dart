@@ -6,6 +6,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/features/auth/pages/register/register.dart';
+import 'package:talent_flow/features/auth/pages/login/repo/login_repo.dart';
+import 'package:talent_flow/features/auth/pages/register/repo/register_repo.dart';
+import 'package:talent_flow/features/auth/pages/social_media_login/repo/social_media_repo.dart';
+import 'package:talent_flow/features/auth/pages/change_password/repo/change_password_repo.dart';
+import 'package:talent_flow/features/auth/pages/confirm_code/repo/confirm_code_repo.dart';
+import 'package:talent_flow/features/auth/pages/send_verification/send_verification_repo/send_verification_repo.dart';
 import 'package:talent_flow/features/auth/pages/social_media_login/repo/chat_repo.dart';
 import 'package:talent_flow/data/realtime/pusher_service.dart';
 import 'package:talent_flow/features/home/bloc/freelancer_chat_bloc.dart';
@@ -108,16 +114,28 @@ abstract class CustomNavigator {
       case Routes.splash:
         return _pageRoute(const Splash());
       case Routes.login:
-        return _pageRoute(const Login());
+        return _pageRoute(_login());
       case Routes.register:
-        return _pageRoute(const Register());
+        return _pageRoute(
+          Register(
+            repository: sl<RegisterRepo>(),
+            socialMediaRepository: sl<SocialMediaRepo>(),
+            sessionStore: sl<AuthSessionStore>(),
+            isFreelancer:
+                sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                    false,
+          ),
+        );
       case Routes.forgetPassword:
         return _pageRoute(ChangePasswordScreen(
           arguments: settings.arguments as Map<String, dynamic>,
+          repository: sl<ChangePasswordRepo>(),
         ));
 
       case Routes.verificationScreen:
-        return _pageRoute(const SendVerificationScreen());
+        return _pageRoute(
+          SendVerificationScreen(repository: sl<SendVerificationRepo>()),
+        );
       case Routes.singleProjectDetails:
         return _pageRoute(SingleProjectView(
           arguments: settings.arguments as Map<String, dynamic>,
@@ -148,6 +166,8 @@ abstract class CustomNavigator {
       case Routes.sendCodeScreen:
         return _pageRoute(ConfirmCodeScreen(
           argument: settings.arguments as Map<String, dynamic>,
+          repository: sl<ConfirmCodeRepo>(),
+          sessionStore: sl<AuthSessionStore>(),
         ));
       case Routes.allCategories:
         return _pageRoute(
@@ -573,6 +593,14 @@ abstract class CustomNavigator {
         isFreelancer:
             sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
                 false,
+      );
+
+  static Login _login() => Login(
+        repository: sl<LoginRepo>(),
+        socialMediaRepository: sl<SocialMediaRepo>(),
+        sessionStore: sl<AuthSessionStore>(),
+        isFreelancer:
+            sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? true,
       );
 
   static NavBar _navBar() => NavBar(

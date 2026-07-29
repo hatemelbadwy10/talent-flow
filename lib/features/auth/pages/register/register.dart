@@ -7,21 +7,16 @@ import 'package:talent_flow/app/core/remote_config_service.dart';
 import 'package:talent_flow/app/core/user_completion_guard.dart';
 import 'package:talent_flow/components/custom_button.dart';
 import 'package:talent_flow/features/auth/data/auth_session_store.dart';
-import 'package:talent_flow/features/auth/pages/register/repo/register_repo.dart';
-import 'package:talent_flow/features/auth/pages/social_media_login/repo/social_media_repo.dart';
 import 'package:talent_flow/features/auth/widgets/auth_base.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../app/core/app_core.dart';
 import '../../../../app/core/app_notification.dart';
-import '../../../../app/core/app_storage_keys.dart';
 import '../../../../app/core/styles.dart';
 import '../../../../app/core/text_styles.dart';
 import '../../../../components/custom_text_form_field.dart';
 import '../../../../helpers/social_media_login_helper.dart';
 import '../../../../navigation/custom_navigation.dart';
 import '../../../../navigation/routes.dart';
-import '../../../../data/config/di.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../social_media_login/bloc/social_media_bloc.dart';
@@ -31,9 +26,22 @@ import 'bloc/register_bloc.dart';
 import 'bloc/register_event.dart';
 import 'bloc/register_state.dart';
 import 'model/register_request.dart';
+import 'repo/register_repository.dart';
+import '../social_media_login/repo/social_media_repository.dart';
 
 class Register extends StatefulWidget {
-  const Register({super.key});
+  const Register({
+    super.key,
+    required this.repository,
+    required this.socialMediaRepository,
+    required this.sessionStore,
+    required this.isFreelancer,
+  });
+
+  final RegisterRepository repository;
+  final SocialMediaRepository socialMediaRepository;
+  final AuthSessionStore sessionStore;
+  final bool isFreelancer;
 
   @override
   State<Register> createState() => _RegisterState();
@@ -57,8 +65,7 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isFreelancer =
-        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
+    final bool isFreelancer = widget.isFreelancer;
     final String userType =
         isFreelancer ? "Freelancer" : "Entrepreneur"; // Determine user type
     final bool showSocialAuth = RemoteConfigService.showSocialAuth;
@@ -71,13 +78,13 @@ class _RegisterState extends State<Register> {
       providers: [
         BlocProvider(
           create: (context) => RegisterBloc(
-            repository: sl<RegisterRepo>(),
+            repository: widget.repository,
           ),
         ),
         BlocProvider(
           create: (context) => SocialMediaBloc(
-            repository: sl<SocialMediaRepo>(),
-            sessionStore: sl<AuthSessionStore>(),
+            repository: widget.socialMediaRepository,
+            sessionStore: widget.sessionStore,
             isFreelancer: isFreelancer,
           ),
         ),

@@ -7,19 +7,24 @@ import '../../../../app/core/app_notification.dart';
 import '../../../../app/core/styles.dart';
 import '../../../../components/custom_button.dart';
 import '../../../../components/custom_text_form_field.dart';
-import '../../../../data/config/di.dart';
 import '../../widgets/auth_base.dart';
 import 'bloc/change_password_bloc.dart';
 import 'bloc/change_password_event.dart';
 import 'bloc/change_password_state.dart';
-import 'repo/change_password_repo.dart';
+import 'repo/change_password_repository.dart';
 import '../../../../navigation/custom_navigation.dart';
 import '../../../../navigation/routes.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   final Map<String, dynamic>? arguments;
 
-  const ChangePasswordScreen({super.key, this.arguments});
+  const ChangePasswordScreen({
+    super.key,
+    this.arguments,
+    required this.repository,
+  });
+
+  final ChangePasswordRepository repository;
 
   @override
   State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
@@ -41,7 +46,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ChangePasswordBloc(
-        repository: sl<ChangePasswordRepo>(),
+        repository: widget.repository,
       ),
       child: BlocListener<ChangePasswordBloc, ChangePasswordState>(
         listener: (context, state) {
