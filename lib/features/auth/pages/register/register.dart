@@ -319,13 +319,6 @@ class _RegisterState extends State<Register> {
                         },
                       ),
                       SizedBox(height: 16.h),
-                      // CustomButton(
-                      //   text: "register.register_facebook".tr(),
-                      //   backgroundColor: Colors.white,
-                      //   textColor: Colors.black,
-                      //   lIconWidget: SvgPicture.asset("assets/svgs/facebook.svg"),
-                      //   onTap: () {},
-                      // ),
                     ],
                   );
                 },

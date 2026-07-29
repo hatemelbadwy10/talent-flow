@@ -50,20 +50,6 @@ class _ContractsScreenState extends State<ContractsScreen> {
         appBar: CustomAppBar(
           title: 'settings_screen.contracts'.tr(),
           centerTitle: true,
-          // actions: [
-          //   IconButton(
-          //     onPressed: () async {
-          //       final result =
-          //           await CustomNavigator.push(Routes.createContract);
-          //       if (!mounted || result != true) {
-          //         return;
-          //       }
-          //       await _refreshContracts();
-          //     },
-          //     icon: const Icon(Icons.add_circle_outline),
-          //     color: Colors.black87,
-          //   ),
-          // ],
         ),
         body: BlocBuilder<ContractsBloc, ContractsState>(
           builder: (context, state) {

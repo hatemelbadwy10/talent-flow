@@ -138,41 +138,4 @@ class ProjectDescription extends StatelessWidget {
         .where((file) => file.isNotEmpty)
         .toList();
   }
-
-  // /// Helper widget to build a single row for an attachment.
-  // Widget _buildAttachmentRow(String fileName, String fileSize) {
-  //   return Row(
-  //     children: [
-  //       Container(
-  //         height: 43,
-  //         width: 43,
-  //         decoration: const BoxDecoration(color: Styles.PRIMARY_COLOR),
-  //         child: Center(
-  //           child: Text(
-  //             fileName.split('.').last.toUpperCase(), // 👈 الامتداد (JPEG, PDF...)
-  //             style: const TextStyle(
-  //               color: Colors.white,
-  //               fontSize: 12,
-  //               fontWeight: FontWeight.w500,
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //       SizedBox(width: 8.w),
-  //       Text(
-  //         fileName,
-  //         style: const TextStyle(
-  //           color: Styles.PRIMARY_COLOR,
-  //           fontSize: 14,
-  //         ),
-  //       ),
-  //       if (fileSize.isNotEmpty) const SizedBox(width: 4.0),
-  //       if (fileSize.isNotEmpty)
-  //         Text(
-  //           '($fileSize)',
-  //           style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-  //         ),
-  //     ],
-  //   );
-  // }
 }

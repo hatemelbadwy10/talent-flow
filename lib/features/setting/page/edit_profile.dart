@@ -1032,16 +1032,6 @@ class _EditProfileFormState extends State<EditProfileForm> {
               .read<UpdateProfileBloc>()
               .add(UpdateConfirmPassword(value)),
         ),
-        // Align(
-        //   alignment: Alignment.centerLeft,
-        //   child: TextButton(
-        //     onPressed: () {},
-        //     child: Text(
-        //       "edit_profile.change_password".tr(),
-        //       style: const TextStyle(color: Color(0xFF00C4A1)),
-        //     ),
-        //   ),
-        // ),
       ],
     );
   }
