@@ -6,9 +6,7 @@ import 'package:talent_flow/app/core/extensions.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
 
 import '../../../app/core/styles.dart';
-import '../../../data/config/di.dart';
 import '../../../navigation/routes.dart';
-import '../../setting/repo/favourite_repo.dart';
 
 class FreelancerListItem extends StatefulWidget {
   final String name;
@@ -19,7 +17,7 @@ class FreelancerListItem extends StatefulWidget {
   final double? cardWidth;
   final bool isInFavorites;
   final bool showFavourite;
-  final VoidCallback? onToggleFavourite;
+  final Future<bool> Function()? onToggleFavourite;
 
   const FreelancerListItem(
       {super.key,
@@ -56,7 +54,9 @@ class _FreelancerListItemState extends State<FreelancerListItem> {
   }
 
   Future<void> _toggleFavourite() async {
-    if (_isFavouriteLoading || widget.id <= 0) {
+    if (_isFavouriteLoading ||
+        widget.id <= 0 ||
+        widget.onToggleFavourite == null) {
       return;
     }
 
@@ -66,28 +66,14 @@ class _FreelancerListItemState extends State<FreelancerListItem> {
       _isInFavorites = !_isInFavorites;
     });
 
-    if (widget.onToggleFavourite != null) {
-      widget.onToggleFavourite!();
-      if (mounted) {
-        setState(() {
-          _isFavouriteLoading = false;
-        });
-      }
-      return;
-    }
-
-    final result =
-        await sl<FavouriteRepo>().toggleFreelancerFavourite(widget.id);
+    final succeeded = await widget.onToggleFavourite!();
     if (!mounted) {
       return;
     }
 
-    result.fold(
-      (_) {
-        _isInFavorites = previous;
-      },
-      (_) {},
-    );
+    if (!succeeded) {
+      _isInFavorites = previous;
+    }
 
     setState(() {
       _isFavouriteLoading = false;

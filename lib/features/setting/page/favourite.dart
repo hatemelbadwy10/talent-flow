@@ -1,32 +1,34 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import 'package:talent_flow/features/home/widgets/freelancer_listview_item.dart';
 import 'package:talent_flow/features/new_projects/widgets/project_card.dart';
 import 'package:talent_flow/features/projects/model/my_projects_model.dart';
 import 'package:talent_flow/features/projects/widgets/projects_shimmer.dart';
 
-import '../../../data/config/di.dart';
 import '../../home/model/freelancers_model.dart';
 import '../bloc/fav_bloc.dart';
 import '../bloc/fav_event.dart';
 import '../bloc/fav_state.dart';
 import '../model/favourite_model.dart';
-import '../repo/favourite_repo.dart';
+import '../repo/favourites_repository.dart';
 import '../widgets/favourite_work_card.dart';
 import '../widgets/setting_app_bar.dart';
 
 class Favourite extends StatelessWidget {
-  const Favourite({super.key});
+  final FavouritesRepository repository;
+  final bool isFreelancer;
+
+  const Favourite({
+    super.key,
+    required this.repository,
+    required this.isFreelancer,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isFreelancer =
-        sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ?? false;
     final tabs = isFreelancer
         ? [
             SizedBox(
@@ -50,8 +52,8 @@ class Favourite extends StatelessWidget {
           ];
 
     return BlocProvider(
-      create: (context) => FavBloc(repository: sl<FavouriteRepo>())
-        ..add(const FavouritesRequested()),
+      create: (context) =>
+          FavBloc(repository: repository)..add(const FavouritesRequested()),
       child: DefaultTabController(
         length: tabs.length,
         child: Scaffold(
@@ -190,13 +192,14 @@ class Favourite extends StatelessWidget {
           cardWidth: double.infinity,
           isInFavorites: true,
           onToggleFavourite: canToggleFavourite && freelancer.id != null
-              ? () {
+              ? () async {
                   blocContext.read<FavBloc>().add(
                         FavouriteToggled(
                           type: FavouriteType.freelancer,
                           id: freelancer.id!,
                         ),
                       );
+                  return true;
                 }
               : null,
         );

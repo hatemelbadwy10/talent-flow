@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
 import 'package:talent_flow/app/core/styles.dart';
 import '../../../app/core/images.dart';
-import '../../../data/config/di.dart';
 import '../../setting/widgets/setting_app_bar.dart';
 import '../bloc/categories_bloc.dart';
 import '../bloc/categories_event.dart';
@@ -14,14 +13,25 @@ import '../bloc/categories_state.dart';
 import '../bloc/freelancers_bloc.dart';
 import '../bloc/freelancers_event.dart';
 import '../bloc/freelancers_state.dart';
-import '../repo/home_repo.dart';
+import '../repo/categories_repository.dart';
+import '../repo/freelancers_repository.dart';
 import '../model/home_model.dart' hide Card;
 import '../widgets/freelancer_listview_item.dart';
+import '../../setting/repo/favourites_repository.dart';
 
 class AllFreelancersView extends StatefulWidget {
   final Map<String, dynamic>? arguments;
+  final CategoriesRepository categoriesRepository;
+  final FreelancersRepository freelancersRepository;
+  final FavouritesRepository favouritesRepository;
 
-  const AllFreelancersView({super.key, this.arguments});
+  const AllFreelancersView({
+    super.key,
+    this.arguments,
+    required this.categoriesRepository,
+    required this.freelancersRepository,
+    required this.favouritesRepository,
+  });
 
   @override
   State<AllFreelancersView> createState() => _AllFreelancersViewState();
@@ -38,8 +48,9 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
   @override
   void initState() {
     super.initState();
-    _categoriesBloc = CategoriesBloc(repository: sl<HomeRepo>());
-    _freelancersBloc = FreelancersBloc(repository: sl<HomeRepo>());
+    _categoriesBloc = CategoriesBloc(repository: widget.categoriesRepository);
+    _freelancersBloc =
+        FreelancersBloc(repository: widget.freelancersRepository);
 
     final categoryId = widget.arguments?["categoryId"] as int?;
     if (categoryId != null) {
@@ -609,6 +620,16 @@ class _AllFreelancersViewState extends State<AllFreelancersView> {
                               imageUrl: freelancer.image,
                               cardWidth: double.infinity,
                               isInFavorites: freelancer.isInFavorites ?? false,
+                              onToggleFavourite: freelancer.id == null
+                                  ? null
+                                  : () async {
+                                      final result = await widget
+                                          .favouritesRepository
+                                          .toggleFreelancerFavourite(
+                                        freelancer.id!,
+                                      );
+                                      return result.isRight();
+                                    },
                             );
                           },
                         );

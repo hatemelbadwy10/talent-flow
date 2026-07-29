@@ -9,11 +9,22 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../../../app/core/styles.dart';
 import '../../home/page/home_view.dart';
+import '../../home/repo/home_dashboard_repository.dart';
 import '../../new_projects/page/new_project.dart';
+import '../../setting/repo/favourites_repository.dart';
 import '../bloc/nav_bar_bloc.dart';
 
 class NavBar extends StatelessWidget {
-  const NavBar({super.key});
+  final HomeDashboardRepository homeRepository;
+  final FavouritesRepository favouritesRepository;
+  final bool isFreelancer;
+
+  const NavBar({
+    super.key,
+    required this.homeRepository,
+    required this.favouritesRepository,
+    required this.isFreelancer,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +32,11 @@ class NavBar extends StatelessWidget {
     final List<Widget> widgetOptions = [
       const SettingScreen(),
       const OwnerProjects(),
-      const HomeView(),
+      HomeView(
+        repository: homeRepository,
+        favouritesRepository: favouritesRepository,
+        isFreelancer: isFreelancer,
+      ),
       const NewProject(),
     ];
 

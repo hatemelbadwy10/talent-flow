@@ -89,9 +89,9 @@ abstract class CustomNavigator {
           arguments: settings.arguments as Map<String, dynamic>?,
         ));
       case Routes.navBar:
-        return _pageRoute(const NavBar());
+        return _pageRoute(_navBar());
       case Routes.home:
-        return _pageRoute(const HomeView());
+        return _pageRoute(_homeView());
       case Routes.splash:
         return _pageRoute(const Splash());
       case Routes.login:
@@ -114,7 +114,14 @@ abstract class CustomNavigator {
       case Routes.about:
         return _pageRoute(const AboutTalentFlowView());
       case Routes.favorites:
-        return _pageRoute(const Favourite());
+        return _pageRoute(
+          Favourite(
+            repository: sl<FavouriteRepo>(),
+            isFreelancer:
+                sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                    false,
+          ),
+        );
       case Routes.sendCodeScreen:
         return _pageRoute(ConfirmCodeScreen(
           argument: settings.arguments as Map<String, dynamic>,
@@ -162,8 +169,14 @@ abstract class CustomNavigator {
           ),
         );
       case Routes.freelancers:
-        return _pageRoute(AllFreelancersView(
-            arguments: settings.arguments as Map<String, dynamic>?));
+        return _pageRoute(
+          AllFreelancersView(
+            arguments: settings.arguments as Map<String, dynamic>?,
+            categoriesRepository: sl<HomeRepo>(),
+            freelancersRepository: sl<HomeRepo>(),
+            favouritesRepository: sl<FavouriteRepo>(),
+          ),
+        );
       case Routes.ownerProjects:
         return _pageRoute(OwnerProjects(
           arguments: settings.arguments as Map<String, dynamic>?,
@@ -228,7 +241,7 @@ abstract class CustomNavigator {
       case Routes.editWork:
         final workId = settings.arguments as int?;
         if (workId == null) {
-          return _pageRoute(const HomeView());
+          return _pageRoute(_homeView());
         }
         return _pageRoute(EditWorkScreen(workId: workId));
 
@@ -277,7 +290,7 @@ abstract class CustomNavigator {
                 : null;
         final canEdit = mapArgument?['canEdit'] == true;
         if (workId == null) {
-          return _pageRoute(const HomeView());
+          return _pageRoute(_homeView());
         }
         return _pageRoute(WorkScreen(
           workId: workId,
@@ -449,6 +462,22 @@ abstract class CustomNavigator {
         return MaterialPageRoute(builder: (_) => const MyApp());
     }
   }
+
+  static HomeView _homeView() => HomeView(
+        repository: sl<HomeRepo>(),
+        favouritesRepository: sl<FavouriteRepo>(),
+        isFreelancer:
+            sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                false,
+      );
+
+  static NavBar _navBar() => NavBar(
+        homeRepository: sl<HomeRepo>(),
+        favouritesRepository: sl<FavouriteRepo>(),
+        isFreelancer:
+            sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
+                false,
+      );
 
   static _pageRoute(Widget child) => Platform.isIOS
       ? CupertinoPageRoute(builder: (_) => child)

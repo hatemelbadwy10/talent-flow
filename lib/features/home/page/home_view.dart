@@ -2,13 +2,10 @@ import 'dart:developer';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talent_flow/app/core/app_storage_keys.dart';
 import 'package:talent_flow/app/core/dimensions.dart';
-import 'package:talent_flow/features/home/repo/home_repo.dart';
+import 'package:talent_flow/features/home/repo/home_dashboard_repository.dart';
 import 'package:talent_flow/features/home/widgets/new_list_item.dart';
 import 'package:talent_flow/navigation/custom_navigation.dart';
-import '../../../data/config/di.dart';
 import '../../../navigation/routes.dart';
 import '../bloc/home_dashboard_bloc.dart';
 import '../bloc/home_dashboard_event.dart';
@@ -20,9 +17,19 @@ import '../widgets/home_section_header.dart';
 import '../widgets/partners_section.dart';
 import '../widgets/service_category_grid.dart';
 import '../widgets/home_view_sections.dart';
+import '../../setting/repo/favourites_repository.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+  final HomeDashboardRepository repository;
+  final FavouritesRepository favouritesRepository;
+  final bool isFreelancer;
+
+  const HomeView({
+    super.key,
+    required this.repository,
+    required this.favouritesRepository,
+    required this.isFreelancer,
+  });
 
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -33,16 +40,14 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => HomeDashboardBloc(
-        repository: sl<HomeRepo>(),
+        repository: widget.repository,
       )..add(const HomeDashboardRequested()),
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
           child: BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
             builder: (context, state) {
-              final isFreelancer =
-                  sl<SharedPreferences>().getBool(AppStorageKey.isFreelancer) ??
-                      false;
+              final isFreelancer = widget.isFreelancer;
 
               if (state is HomeDashboardLoading) {
                 log('Showing loading state');
@@ -176,6 +181,14 @@ class _HomeViewState extends State<HomeView> {
                                                                 item['is_fav'])
                                                             ?.toString() ==
                                                         '1',
+                                            onToggleFavourite: () async {
+                                              final result = await widget
+                                                  .favouritesRepository
+                                                  .toggleFreelancerFavourite(
+                                                item['id'],
+                                              );
+                                              return result.isRight();
+                                            },
                                           ),
                                   );
                                 },
