@@ -28,7 +28,9 @@ Current gate result:
 
 - `flutter test`: 110 passed.
 - analyzer: 127 info-only issues, zero warnings, zero errors.
-- iOS simulator: application startup and English/Arabic login rendering passed.
+- iOS simulator: application startup, English/Arabic rendering, locale restore
+  after relaunch, password-recovery navigation, role selection, and freelancer
+  registration navigation passed.
 
 ## Account-backed smoke evidence
 

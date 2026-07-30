@@ -56,6 +56,10 @@ iPhone 16 Pro iOS 26.0 simulator:
 - The login screen rendered in English.
 - The in-app language control switched the same screen to Arabic with RTL
   layout and persisted locale `ar`.
+- Relaunching the installed app restored the Arabic locale.
+- Password-recovery navigation opened the email/WhatsApp verification screen.
+- Registration navigation opened role selection and then the Arabic freelancer
+  registration form.
 - The final automated suite passed 110 tests, including loading, empty,
   success, failure, offline authentication, session restoration, route
   compatibility, model parsing, and realtime boundaries.
