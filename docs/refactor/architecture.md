@@ -41,3 +41,8 @@ Authentication, home/discovery, projects/offers, contracts/payments,
 profiles/settings, chat/realtime, splash, and onboarding now use typed Bloc and
 repository boundaries. Generic event/state infrastructure has been removed.
 GetIt access is restricted to the composition roots listed above.
+
+Route arguments are parsed into feature models at the navigation boundary.
+Realtime SDK events are converted into `RealtimeEvent` before reaching feature
+Blocs. Production models provide safe parsing and serialization instead of
+exposing unimplemented or dynamic feature fields.

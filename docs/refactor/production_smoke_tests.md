@@ -44,5 +44,22 @@ accounts before releasing a refactored feature.
 At refactor start (`0b4cb7a`), `flutter analyze` reports 163 issues. Refactor PRs
 must introduce no new issues and must leave every touched Dart file warning-free.
 
-The current controlled baseline is 129 info-only issues with zero warnings and
+The current controlled baseline is 127 info-only issues with zero warnings and
 zero errors. CI enforces this through `tool/check_analyzer_baseline.sh`.
+
+## Latest local smoke evidence
+
+On 2026-07-30, commit `f6d1636` and later changes were built and launched on an
+iPhone 16 Pro iOS 26.0 simulator:
+
+- Firebase and Easy Localization initialized without a startup exception.
+- The login screen rendered in English.
+- The in-app language control switched the same screen to Arabic with RTL
+  layout and persisted locale `ar`.
+- The final automated suite passed 110 tests, including loading, empty,
+  success, failure, offline authentication, session restoration, route
+  compatibility, model parsing, and realtime boundaries.
+
+Authenticated freelancer and entrepreneur scenarios still require dedicated
+test-account credentials and a reachable production-compatible backend. Record
+those results in `acceptance_evidence.md` before a production merge.

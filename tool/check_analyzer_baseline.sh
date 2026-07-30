@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly MAX_ANALYZER_ISSUES=129
+readonly MAX_ANALYZER_ISSUES=127
 readonly OUTPUT_FILE="${TMPDIR:-/tmp}/talent_flow_analyzer_output.txt"
 
 if ! flutter analyze --no-fatal-infos 2>&1 | tee "$OUTPUT_FILE"; then

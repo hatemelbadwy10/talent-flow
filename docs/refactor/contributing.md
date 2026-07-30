@@ -26,7 +26,8 @@ flutter test
 ```
 
 Then manually execute the relevant entries in
-`docs/refactor/production_smoke_tests.md` in Arabic and English.
+`docs/refactor/production_smoke_tests.md` in Arabic and English, and record
+account-backed results in `docs/refactor/acceptance_evidence.md`.
 
 ## Commit and release
 
